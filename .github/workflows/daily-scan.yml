@@ -38,8 +38,8 @@ jobs:
         env:
           VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
         run: |
-          python backend/run_daily.py --min-score 5 --limit 200
-        timeout-minutes: 30
+          python backend/run_daily.py --min-score 5 --limit 150
+        timeout-minutes: 45
 
       - name: Upload Excel artifact
         uses: actions/upload-artifact@v4

@@ -11,8 +11,12 @@ Migration notes (vnstock 4.x):
 
 API Key (vnstock 4.x):
   Anonymous users have STRICT rate limits (few req/min). Register a free
-  API key at https://vnstocks.com/login to get 5x rate limit.
+  API key at https://vnstocks.com/login to get 60 req/min (Community).
   Set the env variable VNSTOCK_API_KEY before fetching.
+
+Rate limit handling:
+  vnstock calls sys.exit() when rate limit hit — we MONKEY-PATCH sys.exit
+  to raise RateLimitError instead, so we can catch and retry.
 
 Primary source: vnstock 4.x (wraps VCI/TCBS/MSN public APIs)
 Cache: parquet files per ticker in `backend/data/cache/`.
@@ -20,6 +24,7 @@ Daily increment: only fetch missing dates.
 """
 from __future__ import annotations
 import os
+import sys
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -32,6 +37,39 @@ log = logging.getLogger(__name__)
 
 CACHE_DIR = Path(__file__).resolve().parent.parent / 'data' / 'cache'
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────
+# Monkey-patch sys.exit so vnstock's rate-limit doesn't kill the process
+# ─────────────────────────────────────────────────────────────────────────
+class RateLimitError(Exception):
+    """Raised when vnstock tries to sys.exit() due to rate limit."""
+    pass
+
+
+_original_sys_exit = sys.exit
+_patched = False
+
+
+def _patched_sys_exit(code=0):
+    """Override sys.exit — convert to RateLimitError if called from vnstock."""
+    # Check if call came from vnstock/vnai code
+    import traceback
+    stack = traceback.extract_stack()
+    in_vnstock = any('vnstock' in (frame.filename or '') or 'vnai' in (frame.filename or '')
+                     for frame in stack)
+    if in_vnstock:
+        raise RateLimitError(f"vnstock rate-limit triggered sys.exit({code})")
+    # Otherwise behave normally
+    _original_sys_exit(code)
+
+
+def patch_sys_exit():
+    """Apply the monkey patch. Idempotent."""
+    global _patched
+    if not _patched:
+        sys.exit = _patched_sys_exit
+        _patched = True
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -48,6 +86,9 @@ def setup_api_key(api_key: Optional[str] = None) -> bool:
     global _api_key_initialized
     if _api_key_initialized:
         return True
+
+    # Patch sys.exit BEFORE any vnstock import/call
+    patch_sys_exit()
 
     if api_key is None:
         api_key = os.environ.get('VNSTOCK_API_KEY')
@@ -183,15 +224,19 @@ def fetch_ohlcv(ticker: str, start: str, end: str,
             df['Date'] = pd.to_datetime(df['Date'])
             df = df[required].sort_values('Date')
             return df.reset_index(drop=True)
+        except RateLimitError as e:
+            # vnstock called sys.exit() due to rate limit; wait full 60s
+            log.warning(f"  {ticker} rate-limit hit, waiting 65s for reset...")
+            time.sleep(65)
         except SystemExit as e:
-            # vnstock 4.x raises SystemExit when rate limit hit — catch it!
-            log.warning(f"  {ticker} rate-limited (SystemExit), waiting 60s...")
-            time.sleep(60)
+            # Backup: if monkey-patch didn't catch it
+            log.warning(f"  {ticker} SystemExit raised, waiting 65s...")
+            time.sleep(65)
         except BaseException as e:
             err_str = str(e).lower()
             if 'rate' in err_str or 'limit' in err_str or '429' in err_str:
-                wait = 30 + attempt * 30
-                log.warning(f"  {ticker} rate-limited, waiting {wait}s...")
+                wait = 60
+                log.warning(f"  {ticker} rate-limited (msg), waiting {wait}s...")
                 time.sleep(wait)
             else:
                 log.warning(f"  {ticker} attempt {attempt+1}: {type(e).__name__}: {str(e)[:150]}")
@@ -245,15 +290,16 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
 
 
 def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
-                   max_workers: int = 1, delay: float = 1.5) -> pd.DataFrame:
+                   max_workers: int = 1, delay: float = 2.0) -> pd.DataFrame:
     """
     Fetch OHLCV for entire universe. Single-threaded with delay
     to respect vnstock 4.x free-tier rate limit (60 req/min Community).
-    Each ticker fetch may use 1-3 internal API calls.
+    Each ticker fetch may use 2 internal API calls (metadata + history),
+    so we use 2.0s delay = 30 req/min = 60 internal calls/min, safe under 60/min.
 
     Args:
         max_workers: 1 = sequential (safer for rate limit)
-        delay: seconds between requests — 1.5s gives ~40 req/min buffer
+        delay: seconds between requests
     """
     from concurrent.futures import ThreadPoolExecutor, as_completed
     all_frames = []
