@@ -1,0 +1,64 @@
+name: Daily Scan
+
+on:
+  schedule:
+    # 16:00 ICT = 09:00 UTC, mỗi ngày làm việc T2-T6
+    - cron: '0 9 * * 1-5'
+  workflow_dispatch:  # Cho phép chạy thủ công từ UI
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Cần để commit web/data/latest.json
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Cache OHLCV parquet
+        uses: actions/cache@v4
+        with:
+          path: backend/data/cache
+          key: ohlcv-cache-${{ github.run_id }}
+          restore-keys: |
+            ohlcv-cache-
+
+      - name: Run daily scan
+        run: |
+          python backend/run_daily.py --min-score 5
+        timeout-minutes: 15
+
+      - name: Upload Excel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: signals-${{ github.run_id }}
+          path: backend/data/results/*.xlsx
+          retention-days: 30
+
+      - name: Commit latest.json
+        run: |
+          git config user.name "VN Scanner Bot"
+          git config user.email "bot@vn-scanner.local"
+          git add web/data/latest.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update signals $(date +%Y-%m-%d)"
+            git push
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Daily scan failed. Check logs above."

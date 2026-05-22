@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VN Breakout Scanner — Pre-Breakout Signals</title>
+  <meta name="description" content="Bộ lọc cổ phiếu Việt Nam phát hiện tín hiệu tăng giá trước nhịp break 2-5 ngày. HOSE, HNX, UPCOM.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Top status bar -->
+  <header class="status-bar">
+    <div class="status-left">
+      <span class="ticker-symbol">VN-BREAKOUT</span>
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">CONNECTING</span>
+    </div>
+    <div class="status-center">
+      <span class="market-time" id="market-time"></span>
+      <span class="market-status" id="market-status"></span>
+    </div>
+    <div class="status-right">
+      <span id="last-scan-time">—</span>
+    </div>
+  </header>
+
+  <!-- Demo data warning banner (only shown when metadata.demo === true) -->
+  <div id="demo-banner" class="demo-banner" style="display: none;">
+    <strong>⚠ DỮ LIỆU DEMO</strong>
+    <span>Giá và tín hiệu trên trang này là <strong>dữ liệu mẫu</strong> để minh họa giao diện — không phải giá thực. Chạy <code>python backend/run_daily.py</code> để lấy dữ liệu thật từ HOSE/HNX/UPCOM qua vnstock.</span>
+    <a href="https://github.com/your-org/vn-breakout-scanner/blob/main/docs/USER_GUIDE.md">Hướng dẫn →</a>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <div class="eyebrow">Pre-Breakout Signal Scanner</div>
+        <h1 class="hero-title">
+          <span class="title-line-1">Bắt sóng</span>
+          <span class="title-line-2"><em>trước</em> khi giá break</span>
+        </h1>
+        <p class="hero-sub">
+          Phát hiện các cổ phiếu trên <strong>HOSE</strong>, <strong>HNX</strong>, <strong>UPCOM</strong>
+          đang trong giai đoạn tích lũy âm thầm — nơi dòng tiền thông minh thường để lại dấu vết
+          <strong>2 đến 5 phiên</strong> trước nhịp bứt phá thực sự.
+        </p>
+        <div class="hero-stats">
+          <div class="stat">
+            <div class="stat-num" id="stat-total">—</div>
+            <div class="stat-label">Tín hiệu hôm nay</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num" id="stat-aplus">—</div>
+            <div class="stat-label">Hạng A+</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num" id="stat-scanned">—</div>
+            <div class="stat-label">Mã đã quét</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="rating-card">
+          <div class="rating-card-head">PHÂN LOẠI TÍN HIỆU</div>
+          <div class="rating-row aplus">
+            <span class="rating-badge">A+</span>
+            <span class="rating-desc">Rất mạnh — 8/10 đến 10/10</span>
+          </div>
+          <div class="rating-row a">
+            <span class="rating-badge">A</span>
+            <span class="rating-desc">Mạnh — 6/10 đến 7/10</span>
+          </div>
+          <div class="rating-row b">
+            <span class="rating-badge">B</span>
+            <span class="rating-desc">Trung bình — 4/10 đến 5/10</span>
+          </div>
+          <div class="rating-row c">
+            <span class="rating-badge">C</span>
+            <span class="rating-desc">Yếu — bị loại</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="filters">
+    <div class="filter-group">
+      <label class="filter-label">NGÀY PHÂN TÍCH</label>
+      <div class="date-picker">
+        <button class="date-nav" id="date-prev" title="Ngày trước">‹</button>
+        <select id="date-select" class="date-select"></select>
+        <button class="date-nav" id="date-next" title="Ngày sau">›</button>
+        <button class="date-latest" id="date-latest" title="Về phiên mới nhất">↺ Mới nhất</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">SÀN</label>
+      <div class="chip-group" data-filter="exchange">
+        <button class="chip active" data-value="">Tất cả</button>
+        <button class="chip" data-value="HOSE">HOSE</button>
+        <button class="chip" data-value="HNX">HNX</button>
+        <button class="chip" data-value="UPCOM">UPCOM</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">XẾP LOẠI</label>
+      <div class="chip-group" data-filter="rating">
+        <button class="chip active" data-value="">Tất cả</button>
+        <button class="chip" data-value="A+">A+</button>
+        <button class="chip" data-value="A">A</button>
+        <button class="chip" data-value="B">B</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">TÌM MÃ</label>
+      <input type="text" id="search" class="search-input" placeholder="vd: FPT" maxlength="10">
+    </div>
+    <div class="filter-actions">
+      <button class="btn-export" id="export-csv">↓ CSV</button>
+    </div>
+  </section>
+
+  <!-- Results table -->
+  <main class="results">
+    <!-- Date context banner — shows which date is being viewed -->
+    <div class="date-context" id="date-context"></div>
+
+    <div class="table-head">
+      <div class="result-count">
+        <span id="result-count">0</span> tín hiệu khớp bộ lọc
+        <span class="result-meta" id="result-meta"></span>
+      </div>
+      <div class="legend">
+        <span class="legend-item"><i class="dot dot-1"></i>Nén</span>
+        <span class="legend-item"><i class="dot dot-2"></i>Dòng tiền</span>
+        <span class="legend-item"><i class="dot dot-3"></i>Trend</span>
+        <span class="legend-item"><i class="dot dot-event"></i>Sự kiện</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="signal-table" id="signal-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>MÃ</th>
+            <th>SÀN</th>
+            <th class="num">GIÁ</th>
+            <th class="num">±5D</th>
+            <th class="num">VOL×</th>
+            <th class="num">RSI</th>
+            <th class="num">→ĐỈNH</th>
+            <th>TIÊU CHÍ</th>
+            <th class="num">ĐIỂM</th>
+            <th>HẠNG</th>
+          </tr>
+        </thead>
+        <tbody id="signal-rows">
+          <tr><td colspan="11" class="loading">Đang tải dữ liệu…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Detail drawer (hidden by default) -->
+  <aside class="detail-drawer" id="detail-drawer">
+    <div class="drawer-head">
+      <h2 id="drawer-ticker"></h2>
+      <button class="drawer-close" onclick="closeDrawer()">×</button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+  </aside>
+  <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-cols">
+      <div>
+        <h4>Phương pháp</h4>
+        <p>10 tiêu chí kỹ thuật: ATR Squeeze, Bollinger Squeeze, OBV stealth accumulation, Pocket Pivot, MA alignment, RSI zone, upper-half close, volume surge, gap-down filter, near 20D high.</p>
+      </div>
+      <div>
+        <h4>Nguồn dữ liệu</h4>
+        <p>vnstock → VCI/TCBS public API · Cập nhật mỗi phiên sau 15:00 ICT · Cache parquet incremental.</p>
+      </div>
+      <div>
+        <h4>Tài liệu</h4>
+        <p>
+          <a href="https://github.com/your-org/vn-breakout-scanner/blob/main/docs/CRITERIA.md">10 tiêu chí</a> ·
+          <a href="https://github.com/your-org/vn-breakout-scanner/blob/main/docs/BACKTEST.md">Backtest</a> ·
+          <a href="https://github.com/your-org/vn-breakout-scanner/blob/main/docs/API.md">API</a>
+        </p>
+      </div>
+      <div>
+        <h4>Lưu ý</h4>
+        <p class="disclaimer">Đây là công cụ phân tích kỹ thuật, <strong>không phải lời khuyên đầu tư</strong>. Tín hiệu chỉ ra xác suất, không chắc chắn. Luôn quản trị rủi ro.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>VN Breakout Scanner · MIT License</span>
+      <span>v0.1.0</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

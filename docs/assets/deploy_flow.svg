@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <style>
+      .bg { fill: #0a0e14; }
+      .card { fill: #0f141c; stroke: #2a3340; stroke-width: 1; }
+      .card-active { fill: #161c26; stroke: #ffb547; stroke-width: 1.5; }
+      .title { fill: #e8eaed; font-size: 16px; font-weight: 700; }
+      .subtitle { fill: #9aa0a6; font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+      .body { fill: #e8eaed; font-size: 13px; }
+      .meta { fill: #5f6368; font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+      .accent { fill: #ffb547; font-weight: 600; }
+      .green { fill: #00d68f; }
+      .step-num { fill: #ffb547; font-size: 28px; font-weight: 800; font-family: Georgia, serif; }
+      .label { fill: #5f6368; font-size: 10px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.15em; }
+      .arrow { stroke: #5f6368; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+      .arrow-accent { stroke: #ffb547; stroke-width: 2; fill: none; marker-end: url(#arrowhead-accent); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#5f6368"/>
+    </marker>
+    <marker id="arrowhead-accent" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#ffb547"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect class="bg" width="1200" height="800"/>
+
+  <!-- Title -->
+  <text x="60" y="50" class="title" font-size="28" font-family="Georgia, serif">Quy trình Deploy GitHub + Vercel</text>
+  <text x="60" y="78" class="subtitle">Từ file ZIP đến URL public, ~30 phút, hoàn toàn miễn phí</text>
+
+  <!-- Step 1 -->
+  <g transform="translate(60, 130)">
+    <text x="0" y="0" class="step-num">1</text>
+    <text x="50" y="-2" class="label">CHUẨN BỊ · 5 PHÚT</text>
+    <rect class="card" x="0" y="20" width="280" height="160" rx="6"/>
+    <text x="20" y="50" class="title">Tài khoản</text>
+    <text x="20" y="80" class="body">✓ GitHub (github.com)</text>
+    <text x="20" y="100" class="body">✓ Vercel (đăng nhập qua GitHub)</text>
+    <text x="20" y="135" class="meta">Cả hai đều free</text>
+    <text x="20" y="155" class="meta">Không cần thẻ tín dụng</text>
+  </g>
+
+  <!-- Step 2 -->
+  <g transform="translate(380, 130)">
+    <text x="0" y="0" class="step-num">2</text>
+    <text x="50" y="-2" class="label">UPLOAD CODE · 10 PHÚT</text>
+    <rect class="card" x="0" y="20" width="280" height="160" rx="6"/>
+    <text x="20" y="50" class="title">GitHub Repository</text>
+    <text x="20" y="80" class="body">→ Create new repo</text>
+    <text x="20" y="100" class="body">→ Drag &amp; drop từ ZIP</text>
+    <text x="20" y="120" class="body">→ Commit</text>
+    <text x="20" y="155" class="meta">⚠ Public repo = free Actions</text>
+  </g>
+
+  <!-- Step 3 -->
+  <g transform="translate(700, 130)">
+    <text x="0" y="0" class="step-num">3</text>
+    <text x="50" y="-2" class="label">VERCEL DEPLOY · 5 PHÚT</text>
+    <rect class="card-active" x="0" y="20" width="280" height="160" rx="6"/>
+    <text x="20" y="50" class="title">Web public ✨</text>
+    <text x="20" y="80" class="body">→ Import GitHub repo</text>
+    <text x="20" y="100" class="body">→ Root: <tspan class="accent">web</tspan></text>
+    <text x="20" y="120" class="body">→ Framework: <tspan class="accent">Other</tspan></text>
+    <text x="20" y="155" class="meta">URL: xxx.vercel.app</text>
+  </g>
+
+  <!-- Step 4 -->
+  <g transform="translate(60, 350)">
+    <text x="0" y="0" class="step-num">4</text>
+    <text x="50" y="-2" class="label">BẬT GITHUB ACTIONS · 5 PHÚT</text>
+    <rect class="card" x="0" y="20" width="280" height="160" rx="6"/>
+    <text x="20" y="50" class="title">Cron tự động</text>
+    <text x="20" y="80" class="body">→ Tab Actions → Enable</text>
+    <text x="20" y="100" class="body">→ Settings → Read/Write</text>
+    <text x="20" y="120" class="body">→ Run workflow (thử)</text>
+    <text x="20" y="155" class="meta">Chạy 16:00 ICT mỗi T2-T6</text>
+  </g>
+
+  <!-- Step 5 -->
+  <g transform="translate(380, 350)">
+    <text x="0" y="0" class="step-num">5</text>
+    <text x="50" y="-2" class="label">FETCH DATA · 15 PHÚT</text>
+    <rect class="card" x="0" y="20" width="280" height="160" rx="6"/>
+    <text x="20" y="50" class="title">vnstock → JSON</text>
+    <text x="20" y="80" class="body">→ Fetch 1,600 mã</text>
+    <text x="20" y="100" class="body">→ Score 10 tiêu chí</text>
+    <text x="20" y="120" class="body">→ Commit latest.json</text>
+    <text x="20" y="155" class="meta">Lần đầu lâu, sau ~3 phút</text>
+  </g>
+
+  <!-- Step 6 -->
+  <g transform="translate(700, 350)">
+    <text x="0" y="0" class="step-num">6</text>
+    <text x="50" y="-2" class="label">AUTO REBUILD · TỰ ĐỘNG</text>
+    <rect class="card-active" x="0" y="20" width="280" height="160" rx="6"/>
+    <text x="20" y="50" class="title green">HOẠT ĐỘNG! ✓</text>
+    <text x="20" y="80" class="body">Vercel detect commit mới</text>
+    <text x="20" y="100" class="body">→ Auto rebuild ~10s</text>
+    <text x="20" y="120" class="body">→ Banner DEMO biến mất</text>
+    <text x="20" y="155" class="meta accent">→ Có URL public, tự update!</text>
+  </g>
+
+  <!-- Flow arrows -->
+  <path class="arrow" d="M 340 200 L 380 200"/>
+  <path class="arrow" d="M 660 200 L 700 200"/>
+  <path class="arrow-accent" d="M 840 200 L 840 280 L 200 280 L 200 350"/>
+  <path class="arrow" d="M 340 420 L 380 420"/>
+  <path class="arrow" d="M 660 420 L 700 420"/>
+
+  <!-- Cycle arrow back -->
+  <path class="arrow-accent" stroke-dasharray="4 4" d="M 840 530 Q 1100 530 1100 200 L 980 200"/>
+  <text x="1015" y="370" class="meta accent" font-size="10">Mỗi ngày 16:00</text>
+  <text x="1015" y="385" class="meta accent" font-size="10">tự động lặp lại</text>
+
+  <!-- Bottom summary -->
+  <g transform="translate(60, 600)">
+    <rect class="card" x="0" y="0" width="1080" height="160" rx="6"/>
+
+    <text x="30" y="35" class="title" font-size="18">Sau khi hoàn tất bạn có:</text>
+
+    <g transform="translate(30, 60)">
+      <text x="0" y="20" class="accent" font-size="14">✓ URL public</text>
+      <text x="0" y="42" class="meta">https://your-app.vercel.app</text>
+      <text x="0" y="58" class="meta">Truy cập từ mọi nơi</text>
+    </g>
+
+    <g transform="translate(290, 60)">
+      <text x="0" y="20" class="accent" font-size="14">✓ Tự cập nhật</text>
+      <text x="0" y="42" class="meta">16:00 ICT mỗi T2-T6</text>
+      <text x="0" y="58" class="meta">Không can thiệp thủ công</text>
+    </g>
+
+    <g transform="translate(550, 60)">
+      <text x="0" y="20" class="accent" font-size="14">✓ Lịch sử ngày</text>
+      <text x="0" y="42" class="meta">Date picker xem ngày trước</text>
+      <text x="0" y="58" class="meta">Archive trong /web/data/</text>
+    </g>
+
+    <g transform="translate(810, 60)">
+      <text x="0" y="20" class="accent" font-size="14">✓ Chi phí: $0</text>
+      <text x="0" y="42" class="meta">Trong free tier GH + Vercel</text>
+      <text x="0" y="58" class="meta">Domain custom: $10/năm</text>
+    </g>
+
+    <text x="30" y="142" class="meta">📖 Chi tiết từng bước: docs/GITHUB_DEPLOY.md</text>
+  </g>
+</svg>

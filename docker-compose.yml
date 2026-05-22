@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  scanner:
+    build: .
+    container_name: vn-breakout-scanner
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/data:/app/backend/data
+      - ./web:/app/web
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    restart: unless-stopped
+
+  # Optional: nginx for serving static + reverse proxy
+  web:
+    image: nginx:alpine
+    container_name: vn-scanner-web
+    ports:
+      - "80:80"
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - scanner
