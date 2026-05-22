@@ -510,6 +510,44 @@ body {
   white-space: nowrap;
 }
 .signal-table th.num { text-align: right; }
+
+/* Sortable column headers */
+.signal-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s, background 0.15s;
+  position: relative;
+}
+.signal-table th.sortable:hover {
+  color: var(--text);
+  background: var(--bg-elev-3);
+}
+.signal-table th.sortable.active {
+  color: var(--accent);
+  background: var(--bg-elev-3);
+}
+.sort-ind {
+  display: inline-block;
+  width: 10px;
+  margin-left: 4px;
+  color: var(--text-mute);
+  font-size: 9px;
+}
+.signal-table th.sortable.active .sort-ind {
+  color: var(--accent);
+}
+.signal-table th.sortable .sort-ind::before {
+  content: '↕';
+  opacity: 0.4;
+}
+.signal-table th.sortable.active.asc .sort-ind::before {
+  content: '▲';
+  opacity: 1;
+}
+.signal-table th.sortable.active.desc .sort-ind::before {
+  content: '▼';
+  opacity: 1;
+}
 .signal-table td {
   padding: 12px 10px;
   border-bottom: 1px solid var(--border);

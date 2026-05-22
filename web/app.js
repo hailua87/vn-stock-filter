@@ -30,6 +30,7 @@ let state = {
   raw: [],
   filtered: [],
   filters: { exchange: '', rating: '', search: '' },
+  sort: { column: null, direction: null },  // null = default (by score)
   availableDates: [],
   latestDate: null,
   currentDate: null,
@@ -42,12 +43,45 @@ async function init() {
   setInterval(updateClock, 1000);
   bindFilters();
   bindDatePicker();
+  bindSortHandlers();
   // Load latest.json FIRST to know the actual latest date
   await loadLatestFirst();
   // Then load archive index for the date picker
   await loadDateIndex();
   renderDateOptions();
   updateDateNavButtons();
+}
+
+// ──────────── Sort handlers ────────────
+function bindSortHandlers() {
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.sort;
+      cycleSort(col);
+    });
+  });
+}
+
+function cycleSort(column) {
+  if (state.sort.column !== column) {
+    // Click new column → start with descending (more intuitive for numbers)
+    state.sort = { column, direction: 'desc' };
+  } else if (state.sort.direction === 'desc') {
+    state.sort.direction = 'asc';
+  } else if (state.sort.direction === 'asc') {
+    state.sort = { column: null, direction: null };  // back to default
+  }
+  updateSortIndicators();
+  render();
+}
+
+function updateSortIndicators() {
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.classList.remove('active', 'asc', 'desc');
+    if (th.dataset.sort === state.sort.column) {
+      th.classList.add('active', state.sort.direction);
+    }
+  });
 }
 
 // ──────────── Load latest.json first ────────────
@@ -243,12 +277,37 @@ function bindFilters() {
 
 function applyFilters() {
   const { exchange, rating, search } = state.filters;
-  return state.raw.filter(s => {
+  let result = state.raw.filter(s => {
     if (exchange && s.exchange !== exchange) return false;
     if (rating && s.rating !== rating) return false;
     if (search && !s.ticker.includes(search)) return false;
     return true;
   });
+
+  // Apply custom sort if active
+  if (state.sort.column) {
+    const col = state.sort.column;
+    const dir = state.sort.direction === 'asc' ? 1 : -1;
+    result = [...result].sort((a, b) => {
+      let va, vb;
+      if (col === '_gtgd') {
+        // GTGD = close * 1000 * volume
+        va = (a.close || 0) * (a.volume || 0);
+        vb = (b.close || 0) * (b.volume || 0);
+      } else {
+        va = a[col];
+        vb = b[col];
+      }
+      // Handle nulls
+      if (va == null) va = -Infinity;
+      if (vb == null) vb = -Infinity;
+      if (va < vb) return -1 * dir;
+      if (va > vb) return 1 * dir;
+      return 0;
+    });
+  }
+
+  return result;
 }
 
 // ──────────── Render ────────────
