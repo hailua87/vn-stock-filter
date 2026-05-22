@@ -391,5 +391,5 @@ Note: thêm tiêu chí thứ 11 → max score = 11, rating thresholds cần upda
 
 ## Vẫn còn câu hỏi?
 
-- GitHub Issues: https://github.com/your-org/vn-breakout-scanner/issues
+- GitHub Issues: https://github.com/hailua87/vn-stock-filter/issues
 - Đọc thêm: [ARCHITECTURE.md](ARCHITECTURE.md), [CRITERIA.md](CRITERIA.md), [DATA_SOURCES.md](DATA_SOURCES.md)
