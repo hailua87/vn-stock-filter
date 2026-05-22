@@ -35,9 +35,11 @@ jobs:
             ohlcv-cache-
 
       - name: Run daily scan
+        env:
+          VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
         run: |
-          python backend/run_daily.py --min-score 5
-        timeout-minutes: 15
+          python backend/run_daily.py --min-score 5 --limit 500
+        timeout-minutes: 45
 
       - name: Upload Excel artifact
         uses: actions/upload-artifact@v4

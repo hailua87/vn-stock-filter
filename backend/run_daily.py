@@ -34,6 +34,8 @@ def main():
                         help='Comma-separated exchanges')
     parser.add_argument('--lookback', type=int, default=180,
                         help='Days of history to fetch')
+    parser.add_argument('--limit', type=int, default=None,
+                        help='Max number of tickers to scan (for rate limit)')
     parser.add_argument('--output-dir', type=str, default='backend/data/results',
                         help='Where to write output files')
     parser.add_argument('--web-data-dir', type=str, default='web/data',
@@ -49,10 +51,21 @@ def main():
     today = datetime.now().strftime('%Y-%m-%d')
 
     log.info(f"🇻🇳 VN Breakout Scanner — Daily Run {today}")
-    log.info(f"Exchanges: {exchanges}, min_score={args.min_score}")
+    log.info(f"Exchanges: {exchanges}, min_score={args.min_score}, limit={args.limit}")
+
+    # Manually setup universe + scan to allow --limit
+    from scanner.data_fetcher import get_ticker_universe, fetch_universe
+
+    universe = get_ticker_universe(exchanges, limit=args.limit)
+    log.info(f"  Universe: {len(universe)} tickers")
+
+    df_all_raw = fetch_universe(universe, lookback_days=args.lookback)
+    if df_all_raw.empty:
+        log.error("No data fetched from vnstock")
+        sys.exit(1)
 
     scanner = BreakoutScanner(exchanges=exchanges)
-    df_all = scanner.scan_live(lookback_days=args.lookback)
+    df_all = scanner.scan_from_dataframe(df_all_raw)
 
     if df_all.empty:
         log.error("No signals detected (or fetch failed)")
