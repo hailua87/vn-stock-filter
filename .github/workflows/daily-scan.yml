@@ -48,11 +48,11 @@ jobs:
           path: backend/data/results/*.xlsx
           retention-days: 30
 
-      - name: Commit latest.json
+      - name: Commit latest.json + archive
         run: |
           git config user.name "VN Scanner Bot"
           git config user.email "bot@vn-scanner.local"
-          git add web/data/latest.json
+          git add web/data/latest.json web/data/archive/
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else

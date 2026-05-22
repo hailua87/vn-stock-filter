@@ -42,28 +42,75 @@ async function init() {
   setInterval(updateClock, 1000);
   bindFilters();
   bindDatePicker();
+  // Load latest.json FIRST to know the actual latest date
+  await loadLatestFirst();
+  // Then load archive index for the date picker
   await loadDateIndex();
-  await loadDataForDate(state.latestDate);
+  renderDateOptions();
+  updateDateNavButtons();
+}
+
+// ──────────── Load latest.json first ────────────
+async function loadLatestFirst() {
+  setStatus('connecting', 'LOADING');
+  try {
+    const res = await fetch(`${DATA_DIR}/latest.json?_=${Date.now()}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    state.currentData = data;
+    state.raw = (data.signals || []).sort((a, b) => b.total_score - a.total_score);
+
+    // Determine the actual latest date from the data, not from index.json
+    const firstSignal = state.raw[0];
+    if (firstSignal && firstSignal.date) {
+      // Strip time component if present
+      state.latestDate = firstSignal.date.split('T')[0];
+    } else if (data.generated_at) {
+      state.latestDate = data.generated_at.split('T')[0];
+    }
+    state.currentDate = state.latestDate;
+
+    // Show demo banner if data is marked as demo
+    const demoBanner = document.getElementById('demo-banner');
+    if (data.metadata?.demo === true) {
+      demoBanner.style.display = 'flex';
+    } else {
+      demoBanner.style.display = 'none';
+    }
+
+    document.getElementById('last-scan-time').textContent =
+      data.generated_at ? formatTime(new Date(data.generated_at)) : '—';
+    document.getElementById('stat-scanned').textContent =
+      (data.metadata?.total_scanned || state.raw.length).toLocaleString('vi-VN');
+
+    setStatus('live', 'LIVE');
+    render();
+  } catch (err) {
+    console.error(err);
+    setStatus('error', 'OFFLINE');
+    renderEmpty(`Không tải được dữ liệu mới nhất.\n${err.message}`);
+  }
 }
 
 // ──────────── Date index ────────────
 async function loadDateIndex() {
   try {
-    const res = await fetch(`${ARCHIVE_DIR}/index.json`);
+    const res = await fetch(`${ARCHIVE_DIR}/index.json?_=${Date.now()}`);
     if (res.ok) {
       const idx = await res.json();
       state.availableDates = idx.dates || [];
-      state.latestDate = idx.latest || (state.availableDates[0] || null);
+      // Add latestDate if not in list (in case archive index is outdated)
+      if (state.latestDate && !state.availableDates.includes(state.latestDate)) {
+        state.availableDates = [state.latestDate, ...state.availableDates];
+      }
     } else {
-      state.availableDates = [];
-      state.latestDate = null;
+      // No archive index — only latest available
+      state.availableDates = state.latestDate ? [state.latestDate] : [];
     }
   } catch (err) {
     console.warn('No archive index found');
-    state.availableDates = [];
-    state.latestDate = null;
+    state.availableDates = state.latestDate ? [state.latestDate] : [];
   }
-  renderDateOptions();
 }
 
 function renderDateOptions() {
@@ -92,13 +139,16 @@ function formatDateLabel(isoDate) {
 
 // ──────────── Data loading ────────────
 async function loadDataForDate(dateStr) {
+  // Normalize date: strip time component if present
+  if (dateStr) dateStr = dateStr.split('T')[0];
+
   setStatus('connecting', 'LOADING');
   try {
     let url;
     if (!dateStr || dateStr === state.latestDate) {
-      url = `${DATA_DIR}/latest.json`;
+      url = `${DATA_DIR}/latest.json?_=${Date.now()}`;
     } else {
-      url = `${ARCHIVE_DIR}/${dateStr}.json`;
+      url = `${ARCHIVE_DIR}/${dateStr}.json?_=${Date.now()}`;
     }
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
