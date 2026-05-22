@@ -114,7 +114,8 @@ def setup_api_key(api_key: Optional[str] = None) -> bool:
 # Universe — list of tickers on each exchange
 # ─────────────────────────────────────────────────────────────────────────
 def get_ticker_universe(exchanges: tuple = ('HOSE', 'HNX', 'UPCOM'),
-                        limit: Optional[int] = None) -> pd.DataFrame:
+                        limit: Optional[int] = None,
+                        use_liquidity_sort: bool = True) -> pd.DataFrame:
     """
     Return a DataFrame with columns: ticker, exchange.
     Uses vnstock 4.x Listing API.
@@ -122,8 +123,26 @@ def get_ticker_universe(exchanges: tuple = ('HOSE', 'HNX', 'UPCOM'),
     Args:
         exchanges: which exchanges to include
         limit: max tickers to return (for free-tier rate limit). If None, all.
+        use_liquidity_sort: if True and limit is set, sort by liquidity (cached
+            average turnover) before applying limit. Falls back to curated
+            top-liquid list if no cache exists.
     """
     setup_api_key()
+
+    # Always load full universe from vnstock first
+    full_universe = _fetch_full_universe(exchanges)
+
+    if limit is None or not use_liquidity_sort:
+        if limit:
+            return full_universe.head(limit).reset_index(drop=True)
+        return full_universe
+
+    # Sort by cached liquidity score (highest first)
+    return _sort_by_liquidity(full_universe, limit)
+
+
+def _fetch_full_universe(exchanges: tuple) -> pd.DataFrame:
+    """Fetch full ticker list from vnstock API."""
     try:
         from vnstock.api.listing import Listing
         listing = Listing()
@@ -155,14 +174,64 @@ def get_ticker_universe(exchanges: tuple = ('HOSE', 'HNX', 'UPCOM'),
 
         result = result.drop_duplicates('ticker').reset_index(drop=True)
         result = result[result['ticker'].str.len().between(3, 5)]
-
-        if limit:
-            result = result.head(limit)
-        log.info(f"  Universe loaded: {len(result)} tickers from {exchanges}")
+        log.info(f"  Full universe: {len(result)} tickers from {exchanges}")
         return result.reset_index(drop=True)
     except Exception as e:
-        log.warning(f"vnstock listing failed ({e}), falling back to static universe")
+        log.warning(f"vnstock listing failed ({e}), falling back to curated list")
         return _load_fallback_universe(exchanges)
+
+
+def _sort_by_liquidity(universe: pd.DataFrame, limit: int) -> pd.DataFrame:
+    """
+    Sort universe by liquidity (avg turnover) and return top N.
+
+    Strategy:
+      1. Read existing parquet cache files — each contains historical OHLCV.
+         Compute avg(Close * Volume) over last 20 days = avg turnover (VND).
+      2. For tickers without cache, use the curated TOP_LIQUID list as proxy
+         (these are known liquid stocks).
+      3. Combine: cached liquidity scores + curated list = ranked universe.
+    """
+    from .top_liquid import get_top_liquid_tickers
+
+    # Step 1: compute liquidity from cache
+    liquidity = {}  # ticker → avg turnover
+    for cache_file in CACHE_DIR.glob('*_adj.parquet'):
+        ticker = cache_file.stem.replace('_adj', '')
+        try:
+            df = pd.read_parquet(cache_file)
+            if len(df) < 5:
+                continue
+            recent = df.tail(20)
+            avg_turnover = (recent['Close'] * recent['Volume']).mean()
+            if pd.notna(avg_turnover) and avg_turnover > 0:
+                liquidity[ticker] = avg_turnover
+        except Exception:
+            continue
+
+    log.info(f"  Liquidity cache: {len(liquidity)} tickers with historical data")
+
+    # Step 2: rank universe
+    # Tickers with cache: use actual liquidity
+    # Tickers without cache: use position in TOP_LIQUID curated list (higher = better)
+    curated = get_top_liquid_tickers()
+    curated_score = {tk: (len(curated) - i) * 1e9
+                     for i, (tk, _) in enumerate(curated)}
+    # Note: curated_score is in same units as liquidity (VND) so they're comparable.
+    # 1e9 multiplier ensures even unknown stocks are ranked sensibly.
+
+    def score(row):
+        if row['ticker'] in liquidity:
+            return liquidity[row['ticker']]
+        return curated_score.get(row['ticker'], 0)
+
+    universe = universe.copy()
+    universe['liquidity'] = universe.apply(score, axis=1)
+    universe = universe.sort_values('liquidity', ascending=False)
+    top_n = universe.head(limit)[['ticker', 'exchange']].reset_index(drop=True)
+
+    log.info(f"  Selected top {len(top_n)} by liquidity (limit={limit})")
+    return top_n
 
 
 def _load_fallback_universe(exchanges: tuple) -> pd.DataFrame:
