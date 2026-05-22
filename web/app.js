@@ -353,6 +353,8 @@ function renderRow(s, idx) {
     <td><span class="exchange-cell">${s.exchange}</span></td>
     <td class="num">${fmtPrice(s.close)}</td>
     <td class="num ${changeClass}">${sign}${change.toFixed(2)}%</td>
+    <td class="num">${fmtVolume(s.volume)}</td>
+    <td class="num">${fmtValue(s.close, s.volume)}</td>
     <td class="num">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
     <td class="num">${(s.m_rsi14 || 0).toFixed(0)}</td>
     <td class="num">${(s.m_dist_to_high20_pct || 0).toFixed(2)}%</td>
@@ -364,7 +366,7 @@ function renderRow(s, idx) {
 
 function renderEmpty(msg) {
   document.getElementById('signal-rows').innerHTML =
-    `<tr><td colspan="11" class="empty" style="white-space: pre-line;">${msg}</td></tr>`;
+    `<tr><td colspan="13" class="empty" style="white-space: pre-line;">${msg}</td></tr>`;
 }
 
 // ──────────── Drawer ────────────
@@ -409,7 +411,7 @@ function openDrawer(s) {
     ${eventSection}
 
     <div class="drawer-section">
-      <div class="drawer-section-title">Thông tin giá · ${s.date}</div>
+      <div class="drawer-section-title">Thông tin giá · ${formatDate(s.date)}</div>
       <div class="drawer-metric-grid">
         <div class="drawer-metric">
           <div class="drawer-metric-label">Giá đóng cửa</div>
@@ -422,6 +424,18 @@ function openDrawer(s) {
           </div>
         </div>
         <div class="drawer-metric">
+          <div class="drawer-metric-label">Khối lượng GD</div>
+          <div class="drawer-metric-value">${fmtVolume(s.volume)}</div>
+        </div>
+        <div class="drawer-metric">
+          <div class="drawer-metric-label">Giá trị GD</div>
+          <div class="drawer-metric-value">${fmtValue(s.close, s.volume)}</div>
+        </div>
+        <div class="drawer-metric">
+          <div class="drawer-metric-label">Vol / MA20</div>
+          <div class="drawer-metric-value">${(s.m_vol_ratio || 0).toFixed(2)}×</div>
+        </div>
+        <div class="drawer-metric">
           <div class="drawer-metric-label">Đỉnh 20 phiên</div>
           <div class="drawer-metric-value">${fmtPrice(s.m_high20)}</div>
         </div>
@@ -432,10 +446,6 @@ function openDrawer(s) {
         <div class="drawer-metric">
           <div class="drawer-metric-label">RSI(14)</div>
           <div class="drawer-metric-value">${(s.m_rsi14 || 0).toFixed(1)}</div>
-        </div>
-        <div class="drawer-metric">
-          <div class="drawer-metric-label">Vol / MA20</div>
-          <div class="drawer-metric-value">${(s.m_vol_ratio || 0).toFixed(2)}×</div>
         </div>
       </div>
     </div>
@@ -511,6 +521,32 @@ function fmtPrice(p) {
   return p.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function formatDate(dateStr) {
+  // "2026-05-22T00:00:00" → "22/05/2026"
+  if (!dateStr) return '—';
+  const datePart = dateStr.split('T')[0];
+  const [y, m, d] = datePart.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function fmtVolume(v) {
+  if (v == null || v === 0) return '—';
+  // Format with thousand separator. K/M/B for compactness on small screens.
+  if (v >= 1_000_000) return (v / 1_000_000).toFixed(2) + 'M';
+  if (v >= 1_000) return (v / 1_000).toFixed(1) + 'K';
+  return v.toLocaleString('vi-VN');
+}
+
+function fmtValue(price, volume) {
+  // Total turnover in VND. Price is in 1000s VND, so:
+  // GTGD = close * 1000 * volume
+  if (price == null || volume == null) return '—';
+  const totalVND = price * 1000 * volume;
+  if (totalVND >= 1_000_000_000) return (totalVND / 1_000_000_000).toFixed(2) + ' tỷ';
+  if (totalVND >= 1_000_000) return (totalVND / 1_000_000).toFixed(0) + ' tr';
+  return Math.round(totalVND).toLocaleString('vi-VN');
+}
+
 function formatTime(date) {
   return date.toLocaleString('vi-VN', {
     timeZone: 'Asia/Ho_Chi_Minh',
@@ -521,12 +557,15 @@ function formatTime(date) {
 
 function exportCSV() {
   if (state.filtered.length === 0) return;
-  const headers = ['Ticker', 'Exchange', 'Date', 'Close', 'Change5D%', 'VolRatio',
+  const headers = ['Ticker', 'Exchange', 'Date', 'Close', 'Change5D%',
+                   'Volume', 'ValueVND', 'VolRatio',
                    'RSI', 'DistHigh20%', 'Score', 'Rating',
                    ...CRITERIA.map(c => c.name),
                    'UpcomingEvent'];
   const rows = state.filtered.map(s => [
-    s.ticker, s.exchange, s.date, s.close, s.m_change_5d_pct,
+    s.ticker, s.exchange, (s.date || '').split('T')[0],
+    s.close, s.m_change_5d_pct,
+    s.volume, Math.round((s.close || 0) * 1000 * (s.volume || 0)),
     s.m_vol_ratio, s.m_rsi14, s.m_dist_to_high20_pct,
     s.total_score, s.rating,
     ...CRITERIA.map(c => s[c.key]),
