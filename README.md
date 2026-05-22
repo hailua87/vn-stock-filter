@@ -3,7 +3,7 @@
 > Bộ lọc cổ phiếu Việt Nam phát hiện tín hiệu tăng giá **trước nhịp break 2-5 ngày**
 > Áp dụng cho HOSE / HNX / UPCOM — chạy hằng ngày, deploy lên web cho người dùng
 
-[![CI](https://github.com/your-org/vn-breakout-scanner/actions/workflows/daily-scan.yml/badge.svg)](https://github.com/your-org/vn-breakout-scanner/actions)
+[![CI](https://github.com/hailua87/vn-stock-filter/actions/workflows/daily-scan.yml/badge.svg)](https://github.com/hailua87/vn-stock-filter/actions)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10+-green.svg)](https://python.org)
 
@@ -66,7 +66,7 @@ vn-breakout-scanner/
 
 ```bash
 # 1. Clone & cài đặt
-git clone https://github.com/your-org/vn-breakout-scanner.git
+git clone https://github.com/hailua87/vn-stock-filter.git
 cd vn-breakout-scanner
 bash scripts/setup.sh
 
