@@ -29,8 +29,8 @@ const EVENT_TYPE_LABELS = {
 let state = {
   raw: [],
   filtered: [],
-  filters: { exchange: '', rating: '', search: '' },
-  sort: { column: null, direction: null },  // null = default (by score)
+  filters: { exchange: '', rating: '', volMin: null, volMax: null, search: '' },
+  sort: { column: null, direction: null },
   availableDates: [],
   latestDate: null,
   currentDate: null,
@@ -272,15 +272,58 @@ function bindFilters() {
     render();
   });
 
+  // Volume range inputs
+  const volMinInput = document.getElementById('vol-min');
+  const volMaxInput = document.getElementById('vol-max');
+  const volClear = document.getElementById('vol-clear');
+
+  function updateVolFilter() {
+    state.filters.volMin = parseVolumeInput(volMinInput.value);
+    state.filters.volMax = parseVolumeInput(volMaxInput.value);
+    volMinInput.classList.toggle('active', state.filters.volMin != null);
+    volMaxInput.classList.toggle('active', state.filters.volMax != null);
+    render();
+  }
+
+  volMinInput.addEventListener('input', updateVolFilter);
+  volMaxInput.addEventListener('input', updateVolFilter);
+  volClear.addEventListener('click', () => {
+    volMinInput.value = '';
+    volMaxInput.value = '';
+    updateVolFilter();
+  });
+
   document.getElementById('export-csv').addEventListener('click', exportCSV);
 }
 
+// Parse "500K", "1M", "1.5M", "100000" → number
+function parseVolumeInput(str) {
+  if (!str) return null;
+  str = String(str).trim().toUpperCase().replace(/[,\s]/g, '');
+  if (!str) return null;
+  const match = str.match(/^([0-9.]+)\s*([KMB]?)$/);
+  if (!match) return null;
+  let num = parseFloat(match[1]);
+  if (isNaN(num)) return null;
+  const suffix = match[2];
+  if (suffix === 'K') num *= 1_000;
+  else if (suffix === 'M') num *= 1_000_000;
+  else if (suffix === 'B') num *= 1_000_000_000;
+  return num;
+}
+
 function applyFilters() {
-  const { exchange, rating, search } = state.filters;
+  const { exchange, rating, volMin, volMax, search } = state.filters;
   let result = state.raw.filter(s => {
     if (exchange && s.exchange !== exchange) return false;
     if (rating && s.rating !== rating) return false;
     if (search && !s.ticker.includes(search)) return false;
+
+    // Volume range filter
+    const vol = s.volume || 0;
+    if (volMin != null && vol < volMin) return false;
+    if (volMax != null && vol > volMax) return false;
+
     return true;
   });
 
@@ -291,14 +334,12 @@ function applyFilters() {
     result = [...result].sort((a, b) => {
       let va, vb;
       if (col === '_gtgd') {
-        // GTGD = close * 1000 * volume
         va = (a.close || 0) * (a.volume || 0);
         vb = (b.close || 0) * (b.volume || 0);
       } else {
         va = a[col];
         vb = b[col];
       }
-      // Handle nulls
       if (va == null) va = -Infinity;
       if (vb == null) vb = -Infinity;
       if (va < vb) return -1 * dir;

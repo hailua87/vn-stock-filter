@@ -331,6 +331,52 @@ body {
 }
 .search-input:focus { border-color: var(--accent); }
 
+/* Volume range filter */
+.volume-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.volume-input {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 8px 10px;
+  background: var(--bg-elev-1);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  width: 100px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.volume-input::placeholder {
+  color: var(--text-mute);
+  font-size: 11px;
+}
+.volume-input:focus { border-color: var(--accent); }
+.volume-input.active { border-color: var(--accent); color: var(--accent); }
+.volume-sep {
+  color: var(--text-mute);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+.volume-clear {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-mute);
+  width: 28px;
+  height: 34px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: var(--font-mono);
+  transition: all 0.15s;
+}
+.volume-clear:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+
 /* Date picker */
 .date-picker {
   display: flex;
