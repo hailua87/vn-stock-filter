@@ -183,11 +183,14 @@ def fetch_ohlcv(ticker: str, start: str, end: str,
             df['Date'] = pd.to_datetime(df['Date'])
             df = df[required].sort_values('Date')
             return df.reset_index(drop=True)
-        except Exception as e:
+        except SystemExit as e:
+            # vnstock 4.x raises SystemExit when rate limit hit — catch it!
+            log.warning(f"  {ticker} rate-limited (SystemExit), waiting 60s...")
+            time.sleep(60)
+        except BaseException as e:
             err_str = str(e).lower()
-            # If rate-limited, back off more aggressively
             if 'rate' in err_str or 'limit' in err_str or '429' in err_str:
-                wait = 5 + attempt * 10
+                wait = 30 + attempt * 30
                 log.warning(f"  {ticker} rate-limited, waiting {wait}s...")
                 time.sleep(wait)
             else:
@@ -242,14 +245,15 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
 
 
 def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
-                   max_workers: int = 1, delay: float = 2.5) -> pd.DataFrame:
+                   max_workers: int = 1, delay: float = 1.5) -> pd.DataFrame:
     """
-    Fetch OHLCV for entire universe. Single-threaded with 2.5s delay
-    to respect vnstock 4.x free-tier rate limit (~25 req/min).
+    Fetch OHLCV for entire universe. Single-threaded with delay
+    to respect vnstock 4.x free-tier rate limit (60 req/min Community).
+    Each ticker fetch may use 1-3 internal API calls.
 
     Args:
         max_workers: 1 = sequential (safer for rate limit)
-        delay: seconds between requests
+        delay: seconds between requests — 1.5s gives ~40 req/min buffer
     """
     from concurrent.futures import ThreadPoolExecutor, as_completed
     all_frames = []
