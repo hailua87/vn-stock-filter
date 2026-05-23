@@ -1,236 +1,236 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VN Breakout Scanner — Pre-Breakout Signals</title>
-  <meta name="description" content="Bộ lọc cổ phiếu Việt Nam phát hiện tín hiệu tăng giá trước nhịp break 2-5 ngày. HOSE, HNX, UPCOM.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VN Stock Scanner — Trading Dashboard</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Top status bar -->
-  <header class="status-bar">
-    <div class="status-left">
-      <span class="ticker-symbol">VN-BREAKOUT</span>
-      <span class="status-dot" id="status-dot"></span>
-      <span id="status-text">CONNECTING</span>
-    </div>
-    <div class="status-center">
-      <span class="market-time" id="market-time"></span>
-      <span class="market-status" id="market-status"></span>
-    </div>
-    <div class="status-right">
-      <span id="last-scan-time">—</span>
-    </div>
-  </header>
 
-  <!-- Demo data warning banner (only shown when metadata.demo === true) -->
-  <div id="demo-banner" class="demo-banner" style="display: none;">
-    <strong>⚠ DỮ LIỆU DEMO</strong>
-    <span>Giá và tín hiệu trên trang này là <strong>dữ liệu mẫu</strong> để minh họa giao diện — không phải giá thực. Chạy <code>python backend/run_daily.py</code> để lấy dữ liệu thật từ HOSE/HNX/UPCOM qua vnstock.</span>
-    <a href="https://github.com/hailua87/vn-stock-filter/blob/main/docs/USER_GUIDE.md">Hướng dẫn →</a>
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="brand">
+      <span class="brand-mark">●</span>
+      <span class="brand-name">VN-SCANNER</span>
+    </div>
+    <div class="status-live">
+      <span class="live-dot" id="live-dot"></span>
+      <span id="live-text">LIVE</span>
+    </div>
   </div>
 
-  <!-- LEAN TOP STRIP: Q1 answered in 2 seconds -->
-  <section class="lean-strip">
-    <div class="lean-stats">
-      <div class="lean-stat-primary">
-        <span class="lean-num" id="stat-total">—</span>
-        <span class="lean-label">tín hiệu</span>
-        <span class="lean-date" id="stat-date">hôm nay</span>
-      </div>
-      <div class="lean-stat">
-        <span class="lean-num lean-aplus" id="stat-aplus">—</span>
-        <span class="lean-label">A+</span>
-      </div>
-      <div class="lean-stat">
-        <span class="lean-num lean-dim" id="stat-scanned">—</span>
-        <span class="lean-label">mã quét</span>
-      </div>
+  <div class="topbar-center">
+    <div class="stat-inline">
+      <span class="stat-num" id="stat-total">—</span>
+      <span class="stat-lbl">tín hiệu</span>
+      <span class="stat-date" id="stat-date">—</span>
     </div>
+    <span class="stat-sep">·</span>
+    <div class="stat-inline">
+      <span class="stat-num stat-aplus" id="stat-aplus">—</span>
+      <span class="stat-lbl">A+</span>
+    </div>
+    <span class="stat-sep">·</span>
+    <div class="stat-inline">
+      <span class="stat-num stat-dim" id="stat-scanned">—</span>
+      <span class="stat-lbl">mã quét</span>
+    </div>
+  </div>
 
-    <!-- Strategy tabs — inline horizontal compact -->
-    <nav class="lean-tabs" aria-label="Chiến lược">
-      <button class="lean-tab active" data-strategy="pre_breakout" title="10 tiêu chí · sắp break giá">Pre-Breakout</button>
-      <button class="lean-tab" data-strategy="golden_cross_long" title="MA50 × MA200 · position trade">GC dài hạn</button>
-      <button class="lean-tab" data-strategy="golden_cross_short" title="MA10 × MA20 · swing 2-4 tuần">GC ngắn hạn</button>
-      <button class="lean-tab" data-strategy="ichimoku" title="Cloud + TK · trend confirm">Ichimoku</button>
-    </nav>
+  <nav class="strategy-tabs">
+    <button class="strat-tab active" data-strategy="pre_breakout">Pre-Breakout</button>
+    <button class="strat-tab" data-strategy="golden_cross_long">GC dài hạn</button>
+    <button class="strat-tab" data-strategy="golden_cross_short">GC ngắn hạn</button>
+    <button class="strat-tab" data-strategy="ichimoku">Ichimoku</button>
+  </nav>
 
-    <button class="hero-toggle" id="hero-toggle" title="Mở phần giới thiệu">ℹ Giới thiệu</button>
-  </section>
+  <div class="topbar-right">
+    <button class="icon-btn" id="help-btn" title="Hướng dẫn">?</button>
+    <span class="market-state">
+      <span class="market-dot"></span>
+      <span id="market-text">MARKET CLOSED</span>
+    </span>
+    <span class="time" id="clock">—</span>
+  </div>
+</header>
 
-  <!-- Optional collapsed hero — hidden by default, click "ℹ" to expand -->
-  <section class="hero hero-collapsed" id="hero-section" style="display: none;">
-    <div class="hero-grid">
-      <div class="hero-left">
-        <div class="eyebrow">Pre-Breakout Signal Scanner</div>
-        <h1 class="hero-title">
-          <span class="title-line-1">Bắt sóng</span>
-          <span class="title-line-2"><em>trước</em> khi giá break</span>
-        </h1>
-        <p class="hero-sub">
-          Phát hiện các cổ phiếu trên <strong>HOSE</strong>, <strong>HNX</strong>, <strong>UPCOM</strong>
-          đang trong giai đoạn tích lũy âm thầm — nơi dòng tiền thông minh thường để lại dấu vết
-          <strong>2 đến 5 phiên</strong> trước nhịp bứt phá thực sự.
-        </p>
+<div id="demo-banner" class="demo-banner" style="display: none;">
+  ⚠ DỮ LIỆU DEMO — giao diện minh họa, chưa phải data thật.
+  <a href="https://github.com/hailua87/vn-stock-filter">Chạy workflow để có data thật →</a>
+</div>
+
+<main class="dashboard" id="dashboard">
+
+  <aside class="col col-filters" id="col-filters">
+    <div class="col-head">
+      <span class="col-title">BỘ LỌC</span>
+      <button class="collapse-btn" id="collapse-filters" title="Thu gọn">‹</button>
+    </div>
+    <div class="col-body">
+      <div class="fg">
+        <label class="fg-label">Ngày phân tích</label>
+        <div class="date-picker">
+          <button class="dp-nav" id="date-prev">‹</button>
+          <select id="date-select" class="dp-select"></select>
+          <button class="dp-nav" id="date-next">›</button>
+        </div>
+        <button class="link-btn" id="date-latest">↺ Về phiên mới nhất</button>
       </div>
-      <div class="hero-right">
-        <div class="rating-card">
-          <div class="rating-card-head">PHÂN LOẠI TÍN HIỆU</div>
-          <div class="rating-row aplus">
-            <span class="rating-badge">A+</span>
-            <span class="rating-desc">Rất mạnh — 8/10 đến 10/10</span>
-          </div>
-          <div class="rating-row a">
-            <span class="rating-badge">A</span>
-            <span class="rating-desc">Mạnh — 6/10 đến 7/10</span>
-          </div>
-          <div class="rating-row b">
-            <span class="rating-badge">B</span>
-            <span class="rating-desc">Trung bình — 4/10 đến 5/10</span>
-          </div>
-          <div class="rating-row c">
-            <span class="rating-badge">C</span>
-            <span class="rating-desc">Yếu — bị loại</span>
-          </div>
+      <div class="fg">
+        <label class="fg-label">Sàn giao dịch</label>
+        <div class="chip-row" data-filter="exchange">
+          <button class="chip active" data-value="">Tất cả</button>
+          <button class="chip" data-value="HOSE">HOSE</button>
+          <button class="chip" data-value="HNX">HNX</button>
+          <button class="chip" data-value="UPCOM">UPCOM</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fg-label">Xếp loại</label>
+        <div class="chip-row" data-filter="rating">
+          <button class="chip active" data-value="">Tất cả</button>
+          <button class="chip" data-value="A+">A+</button>
+          <button class="chip" data-value="A">A</button>
+          <button class="chip" data-value="B">B</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fg-label">Khối lượng GD</label>
+        <div class="vol-range">
+          <input type="text" id="vol-min" class="vol-input" placeholder="Từ" maxlength="10">
+          <span class="vol-sep">–</span>
+          <input type="text" id="vol-max" class="vol-input" placeholder="Đến" maxlength="10">
+          <button class="vol-clear" id="vol-clear">×</button>
+        </div>
+        <div class="fg-hint">vd: 100K · 1M · 5M</div>
+      </div>
+      <div class="fg">
+        <label class="fg-label">Tìm mã</label>
+        <input type="text" id="search" class="search-input" placeholder="VD: FPT, VPB" maxlength="10">
+      </div>
+      <div class="fg-divider"></div>
+      <div class="fg">
+        <label class="fg-label">Trạng thái dữ liệu</label>
+        <div class="data-flags">
+          <span class="flag">✓ Giá điều chỉnh</span>
+          <span class="flag">✓ Lọc corporate actions</span>
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- Lean filter bar — single compact row -->
-  <section class="lean-filters">
-    <div class="lf-group lf-date">
-      <button class="date-nav" id="date-prev" title="Ngày trước">‹</button>
-      <select id="date-select" class="date-select"></select>
-      <button class="date-nav" id="date-next" title="Ngày sau">›</button>
-      <button class="date-latest" id="date-latest" title="Về phiên mới nhất">↺</button>
+    <div class="col-foot">
+      <button class="btn-ghost" id="reset-filters">Reset bộ lọc</button>
     </div>
+  </aside>
 
-    <div class="lf-divider"></div>
-
-    <div class="chip-group lf-chips" data-filter="exchange" aria-label="Sàn giao dịch">
-      <button class="chip active" data-value="" title="Tất cả sàn">Sàn</button>
-      <button class="chip" data-value="HOSE">HOSE</button>
-      <button class="chip" data-value="HNX">HNX</button>
-      <button class="chip" data-value="UPCOM">UPCOM</button>
-    </div>
-
-    <div class="chip-group lf-chips" data-filter="rating" aria-label="Xếp loại">
-      <button class="chip active" data-value="" title="Tất cả xếp loại">Hạng</button>
-      <button class="chip" data-value="A+">A+</button>
-      <button class="chip" data-value="A">A</button>
-      <button class="chip" data-value="B">B</button>
-    </div>
-
-    <div class="lf-divider"></div>
-
-    <div class="lf-group">
-      <span class="lf-mini-label">KLGD</span>
-      <input type="text" id="vol-min" class="volume-input" placeholder="từ" maxlength="10">
-      <span class="volume-sep">–</span>
-      <input type="text" id="vol-max" class="volume-input" placeholder="đến" maxlength="10">
-      <button class="volume-clear" id="vol-clear" title="Xóa">×</button>
-    </div>
-
-    <div class="lf-group lf-search">
-      <input type="text" id="search" class="search-input" placeholder="🔍 Tìm mã (vd: FPT)" maxlength="10">
-    </div>
-
-    <div class="lf-spacer"></div>
-
-    <button class="btn-export" id="export-csv" title="Xuất CSV">↓ CSV</button>
-  </section>
-
-  <!-- Results table -->
-  <main class="results">
-    <!-- Date context banner — shows which date is being viewed -->
-    <div class="date-context" id="date-context"></div>
-
-    <div class="table-head">
-      <div class="result-count">
-        <span id="result-count">0</span> tín hiệu khớp bộ lọc
-        <span class="result-meta" id="result-meta"></span>
+  <section class="col col-list">
+    <div class="list-head">
+      <div class="list-head-left">
+        <span class="result-count"><span id="result-count">—</span> tín hiệu</span>
+        <span class="event-warn" id="event-warn" style="display:none">
+          ⚑ <span id="event-count">0</span> mã có sự kiện
+        </span>
       </div>
-      <div class="legend">
-        <span class="legend-item"><i class="dot dot-1"></i>Nén</span>
-        <span class="legend-item"><i class="dot dot-2"></i>Dòng tiền</span>
-        <span class="legend-item"><i class="dot dot-3"></i>Trend</span>
-        <span class="legend-item"><i class="dot dot-event"></i>Sự kiện</span>
+      <div class="list-head-right">
+        <div class="legend-inline">
+          <span class="lg-dot" style="background: var(--cat-squeeze)"></span> Nén
+          <span class="lg-dot" style="background: var(--cat-flow)"></span> Dòng tiền
+          <span class="lg-dot" style="background: var(--cat-trend)"></span> Trend
+          <span class="lg-dot" style="background: var(--cat-event)"></span> Sự kiện
+        </div>
+        <button class="btn-ghost" id="export-csv">↓ CSV</button>
       </div>
     </div>
-
     <div class="table-wrap">
       <table class="signal-table" id="signal-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>MÃ</th>
-            <th>SÀN</th>
+            <th class="th-idx">#</th>
+            <th class="th-ticker">MÃ</th>
+            <th class="th-exch">SÀN</th>
             <th class="num sortable" data-sort="close">GIÁ <span class="sort-ind"></span></th>
             <th class="num sortable" data-sort="m_change_5d_pct">±5D <span class="sort-ind"></span></th>
             <th class="num sortable" data-sort="volume">KLGD <span class="sort-ind"></span></th>
             <th class="num sortable" data-sort="_gtgd">GTGD <span class="sort-ind"></span></th>
             <th class="num sortable" data-sort="m_vol_ratio">VOL× <span class="sort-ind"></span></th>
             <th class="num sortable" data-sort="m_rsi14">RSI <span class="sort-ind"></span></th>
-            <th class="num" title="Hỗ trợ gần nhất">HỖ TRỢ</th>
-            <th class="num" title="Kháng cự gần nhất">KHÁNG CỰ</th>
-            <th>TIÊU CHÍ</th>
+            <th class="num" title="Hỗ trợ Fibo">S</th>
+            <th class="num" title="Kháng cự Fibo">R</th>
+            <th class="th-criteria">TIÊU CHÍ</th>
             <th class="num sortable" data-sort="total_score">ĐIỂM <span class="sort-ind"></span></th>
-            <th>HẠNG</th>
+            <th class="th-rating">HẠNG</th>
           </tr>
         </thead>
         <tbody id="signal-rows">
-          <tr><td colspan="13" class="loading">Đang tải dữ liệu…</td></tr>
+          <tr><td colspan="14" class="empty">Đang tải...</td></tr>
         </tbody>
       </table>
     </div>
-  </main>
+  </section>
 
-  <!-- Detail drawer (hidden by default) -->
-  <aside class="detail-drawer" id="detail-drawer">
-    <div class="drawer-head">
-      <h2 id="drawer-ticker"></h2>
-      <button class="drawer-close" onclick="closeDrawer()">×</button>
+  <aside class="col col-detail" id="col-detail">
+    <div class="detail-empty" id="detail-empty">
+      <div class="empty-icon">→</div>
+      <div class="empty-title">Chọn 1 mã để xem chi tiết</div>
+      <div class="empty-sub">Click vào hàng trong bảng tín hiệu để xem gợi ý vào lệnh, Fibonacci, và tiêu chí đạt được.</div>
     </div>
-    <div class="drawer-body" id="drawer-body"></div>
+    <div class="detail-panel" id="detail-panel" style="display: none;">
+      <div class="detail-head">
+        <div>
+          <div class="detail-ticker" id="detail-ticker">—</div>
+          <div class="detail-meta" id="detail-meta">—</div>
+        </div>
+        <button class="icon-btn" id="detail-close" title="Đóng">×</button>
+      </div>
+      <div class="detail-body" id="detail-body"></div>
+      <div class="detail-foot">
+        <a id="tv-link" class="btn-primary" target="_blank" rel="noopener">Mở TradingView →</a>
+      </div>
+    </div>
   </aside>
-  <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-cols">
-      <div>
-        <h4>Phương pháp</h4>
-        <p>10 tiêu chí kỹ thuật: ATR Squeeze, Bollinger Squeeze, OBV stealth accumulation, Pocket Pivot, MA alignment, RSI zone, upper-half close, volume surge, gap-down filter, near 20D high.</p>
-      </div>
-      <div>
-        <h4>Nguồn dữ liệu</h4>
-        <p>vnstock → VCI/TCBS public API · Cập nhật mỗi phiên sau 15:00 ICT · Cache parquet incremental.</p>
-      </div>
-      <div>
-        <h4>Tài liệu</h4>
-        <p>
-          <a href="https://github.com/hailua87/vn-stock-filter/blob/main/docs/CRITERIA.md">10 tiêu chí</a> ·
-          <a href="https://github.com/hailua87/vn-stock-filter/blob/main/docs/BACKTEST.md">Backtest</a> ·
-          <a href="https://github.com/hailua87/vn-stock-filter/blob/main/docs/API.md">API</a>
-        </p>
-      </div>
-      <div>
-        <h4>Lưu ý</h4>
-        <p class="disclaimer">Đây là công cụ phân tích kỹ thuật, <strong>không phải lời khuyên đầu tư</strong>. Tín hiệu chỉ ra xác suất, không chắc chắn. Luôn quản trị rủi ro.</p>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>VN Breakout Scanner · MIT License</span>
-      <span>v0.1.0</span>
-    </div>
-  </footer>
+</main>
 
-  <script src="app.js"></script>
+<div class="modal-overlay" id="help-modal" style="display: none;">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Hướng dẫn sử dụng</h3>
+      <button class="icon-btn" id="help-close">×</button>
+    </div>
+    <div class="modal-body">
+      <h4>3 câu hỏi của trader trong &lt;10 giây</h4>
+      <ol>
+        <li><strong>Hôm nay có tín hiệu gì?</strong> — Top bar: số tín hiệu + LIVE date + A+ count</li>
+        <li><strong>Mã nào mạnh nhất?</strong> — Bảng sort theo điểm. Row 1 là mã mạnh nhất.</li>
+        <li><strong>Có điểm vào lệnh đẹp không?</strong> — Click row → cột phải hiện gợi ý</li>
+      </ol>
+      <h4>4 chiến lược</h4>
+      <ul>
+        <li><strong>Pre-Breakout</strong> — 10 tiêu chí phát hiện mã sắp break giá</li>
+        <li><strong>GC dài hạn</strong> — MA50 × MA200, position trade 3-12 tháng</li>
+        <li><strong>GC ngắn hạn</strong> — MA10 × MA20, swing trade 2-4 tuần</li>
+        <li><strong>Ichimoku</strong> — Cloud + TK cross, trend confirmation</li>
+      </ul>
+      <h4>Xếp loại</h4>
+      <div class="rating-legend">
+        <div><span class="rating-tag aplus">A+</span> Rất mạnh — 8+/10</div>
+        <div><span class="rating-tag a">A</span> Mạnh — 6-7/10</div>
+        <div><span class="rating-tag b">B</span> Trung bình — 4-5/10</div>
+        <div><span class="rating-tag c">C</span> Yếu — bị loại</div>
+      </div>
+      <h4>Phím tắt</h4>
+      <table class="kbd-table">
+        <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>Di chuyển giữa các mã</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>Đóng panel chi tiết</td></tr>
+        <tr><td><kbd>/</kbd></td><td>Focus vào ô tìm mã</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
