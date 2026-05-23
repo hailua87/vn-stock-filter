@@ -49,12 +49,13 @@ const STRATEGIES = {
   ichimoku: {
     name: 'Ichimoku',
     dataDir: './data/ichimoku',
-    maxScore: 4,
+    maxScore: 5,
     criteria: [
-      { key: 'ich_tk_bullish',        name: 'Tenkan > Kijun',         cat: 'trend' },
-      { key: 'ich_price_above_cloud', name: 'Giá trên Cloud',         cat: 'trend' },
-      { key: 'ich_cloud_bullish',     name: 'Cloud bullish (A>B)',    cat: 'trend' },
-      { key: 'ich_chikou_free',       name: 'Chikou thoát kháng cự',  cat: 'flow' },
+      { key: 'ich_tk_bullish',        name: 'Tenkan > Kijun (TK bullish)',  cat: 'trend' },
+      { key: 'ich_recent_tk_cross',   name: 'TK vừa cắt lên (≤5 phiên) ⭐', cat: 'squeeze' },
+      { key: 'ich_price_above_cloud', name: 'Giá trên Cloud',               cat: 'trend' },
+      { key: 'ich_cloud_bullish',     name: 'Cloud bullish (A > B)',        cat: 'trend' },
+      { key: 'ich_chikou_free',       name: 'Chikou thoát kháng cự',        cat: 'flow' },
     ],
   },
 };
@@ -73,7 +74,7 @@ const state = {
   availableDates: [],
   selectedTicker: null,
   sort: { column: null, direction: null },
-  filters: { exchange: '', rating: '', search: '', volMin: null, volMax: null },
+  filters: { exchange: '', rating: '', search: '', volMin: null, volMax: null, ich_special: '' },
 };
 
 // ──────────── Init ────────────
@@ -86,11 +87,44 @@ window.addEventListener('DOMContentLoaded', async () => {
   bindHelp();
   bindCollapseFilters();
   bindDetailClose();
+  bindMobileDrawers();
 
   await loadLatestFirst();
   await loadDateIndex();
   renderDateOptions();
 });
+
+// ──────────── Mobile drawer handling ────────────
+function bindMobileDrawers() {
+  const filterBtn = document.getElementById('mobile-filter-btn');
+  const filterCol = document.getElementById('col-filters');
+  const detailCol = document.getElementById('col-detail');
+  const backdrop  = document.getElementById('mobile-backdrop');
+
+  if (!filterBtn || !backdrop) return;
+
+  const closeDrawers = () => {
+    filterCol?.classList.remove('mobile-open');
+    detailCol?.classList.remove('mobile-open');
+    backdrop.classList.remove('show');
+  };
+
+  filterBtn.addEventListener('click', () => {
+    filterCol.classList.add('mobile-open');
+    backdrop.classList.add('show');
+  });
+
+  backdrop.addEventListener('click', closeDrawers);
+
+  // When row is clicked on mobile, open detail drawer
+  // (works because openDetail() adds .mobile-open via this listener)
+  document.addEventListener('detail-opened', () => {
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      detailCol.classList.add('mobile-open');
+      backdrop.classList.add('show');
+    }
+  });
+}
 
 // ──────────── Clock & Market State ────────────
 function startClock() {
@@ -142,8 +176,18 @@ async function switchStrategy(strategy) {
   });
   state.sort = { column: null, direction: null };
   state.selectedTicker = null;
+  state.filters.ich_special = '';
   closeDetail();
   updateSortIndicators();
+
+  // Show ichimoku-specific filter only on Ichimoku tab
+  const ichFilter = document.getElementById('fg-ichimoku');
+  if (ichFilter) {
+    ichFilter.style.display = strategy === 'ichimoku' ? '' : 'none';
+    // Reset chip to "Tất cả"
+    ichFilter.querySelectorAll('.chip').forEach((c, i) => c.classList.toggle('active', i === 0));
+  }
+
   await loadLatestFirst();
   await loadDateIndex();
   renderDateOptions();
@@ -276,7 +320,7 @@ function bindFilters() {
   });
 
   document.getElementById('reset-filters').addEventListener('click', () => {
-    state.filters = { exchange: '', rating: '', search: '', volMin: null, volMax: null };
+    state.filters = { exchange: '', rating: '', search: '', volMin: null, volMax: null, ich_special: '' };
     document.querySelectorAll('.chip-row').forEach(group => {
       group.querySelectorAll('.chip').forEach((c, i) => c.classList.toggle('active', i === 0));
     });
@@ -422,6 +466,11 @@ function applyFilters() {
   if (state.filters.volMax != null)
     arr = arr.filter(s => s.volume <= state.filters.volMax);
 
+  // Ichimoku special filter: "Vừa cắt TK"
+  if (state.filters.ich_special === 'recent_cross') {
+    arr = arr.filter(s => s.ich_recent_tk_cross === 1);
+  }
+
   // Sort: default by total_score desc; custom sort if state.sort.column
   if (state.sort.column) {
     arr.sort((a, b) => {
@@ -482,6 +531,11 @@ function renderRow(s, idx) {
     return `<span class="criteria-pill ${on ? 'on' : ''} cat-${c.cat}"></span>`;
   }).join('');
 
+  // TK cross indicator (only for Ichimoku tab)
+  const tkCrossFlag = (activeStrategy === 'ichimoku' && s.ich_recent_tk_cross === 1)
+    ? `<span class="tk-cross-flag" title="Tenkan vừa cắt lên Kijun (${s.m_tk_cross_days_ago ?? '?'} phiên trước)">⭐</span>`
+    : '';
+
   // Event flag
   const eventFlag = s.m_upcoming_event ? `<span class="event-flag" title="Sự kiện: ${s.m_upcoming_event.type} ${s.m_upcoming_event.ex_date}">⚑</span>` : '';
 
@@ -495,7 +549,7 @@ function renderRow(s, idx) {
 
   return `<tr data-ticker="${s.ticker}" class="${selectedClass}">
     <td class="th-idx">${idx}</td>
-    <td><span class="ticker-cell">${s.ticker}</span>${eventFlag}</td>
+    <td><span class="ticker-cell">${s.ticker}</span>${tkCrossFlag}${eventFlag}</td>
     <td><span class="exchange-cell">${s.exchange}</span></td>
     <td class="num">${fmtPrice(s.close)}</td>
     <td class="num ${changeClass}">${sign}${change.toFixed(2)}%</td>
@@ -538,6 +592,9 @@ function openDetail(s) {
   // Hide empty state, show panel
   document.getElementById('detail-empty').style.display = 'none';
   document.getElementById('detail-panel').style.display = 'flex';
+  
+  // Dispatch event for mobile drawer
+  document.dispatchEvent(new CustomEvent('detail-opened', { detail: { ticker: s.ticker } }));
 
   // Header
   document.getElementById('detail-ticker').textContent = s.ticker;
@@ -557,8 +614,32 @@ function openDetail(s) {
     ? `<div class="event-callout">⚑ Sự kiện sắp đến: <strong>${s.m_upcoming_event.type}</strong> · ngày ${s.m_upcoming_event.ex_date}${s.m_upcoming_event.ratio ? ' · tỷ lệ ' + s.m_upcoming_event.ratio : ''}. Giá có thể điều chỉnh.</div>`
     : '';
 
+  // TK cross callout for Ichimoku
+  let tkCrossCallout = '';
+  if (activeStrategy === 'ichimoku' && s.ich_recent_tk_cross === 1) {
+    const daysAgo = s.m_tk_cross_days_ago;
+    const dayText = daysAgo === 0 ? 'hôm nay'
+                  : daysAgo === 1 ? 'hôm qua'
+                  : daysAgo != null ? `${daysAgo} phiên trước` : 'gần đây';
+    tkCrossCallout = `
+      <div class="tk-cross-callout">
+        <div class="tk-cross-title">⭐ Tenkan vừa cắt lên Kijun</div>
+        <div class="tk-cross-detail">
+          Tenkan-sen (xanh) đã cắt lên Kijun-sen (đỏ) <strong>${dayText}</strong> — đây là tín hiệu mạnh nhất của Ichimoku.
+          Entry sớm trước khi xu hướng lớn xuất hiện.
+        </div>
+        <div class="tk-cross-values">
+          <span>Tenkan: <strong>${fmtPrice(s.m_tenkan)}</strong></span>
+          <span>Kijun: <strong>${fmtPrice(s.m_kijun)}</strong></span>
+          <span>Chênh lệch: <strong>+${(((s.m_tenkan - s.m_kijun) / s.m_kijun) * 100).toFixed(2)}%</strong></span>
+        </div>
+      </div>
+    `;
+  }
+
   document.getElementById('detail-body').innerHTML = `
     ${entryHint}
+    ${tkCrossCallout}
     ${eventCallout}
 
     <div class="dt-section">
@@ -593,6 +674,8 @@ function openDetail(s) {
 
     ${renderFiboSection(s)}
 
+    ${renderIchimokuSection(s)}
+
     <div class="dt-section">
       <div class="dt-section-title">Tiêu chí đạt được (${passed}/${total})</div>
       <ul class="crit-list">
@@ -613,6 +696,9 @@ function closeDetail() {
   document.querySelectorAll('tr[data-ticker]').forEach(tr => tr.classList.remove('selected'));
   document.getElementById('detail-empty').style.display = 'flex';
   document.getElementById('detail-panel').style.display = 'none';
+  // Close mobile drawer if open
+  document.getElementById('col-detail')?.classList.remove('mobile-open');
+  document.getElementById('mobile-backdrop')?.classList.remove('show');
 }
 
 function bindDetailClose() {
@@ -710,6 +796,61 @@ function computeEntryHint(s) {
       </div>
       <div class="entry-hint-detail">${detail}</div>
       ${levelsHtml}
+    </div>
+  `;
+}
+
+// ──────────── Ichimoku section in detail ────────────
+function renderIchimokuSection(s) {
+  // Only render if we're in Ichimoku strategy
+  if (activeStrategy !== 'ichimoku') return '';
+  if (s.m_tenkan == null || s.m_kijun == null) return '';
+
+  const tkBullish = s.m_tenkan > s.m_kijun;
+  const priceAboveCloud = s.close > s.m_cloud_top;
+  const cloudBullish = s.m_senkou_a > s.m_senkou_b;
+
+  return `
+    <div class="dt-section">
+      <div class="dt-section-title">Ichimoku Components</div>
+      <table class="ich-table">
+        <tr>
+          <td class="ich-label">Tenkan-sen <span class="ich-color-dot" style="background: var(--up)"></span></td>
+          <td class="ich-val">${fmtPrice(s.m_tenkan)}</td>
+        </tr>
+        <tr>
+          <td class="ich-label">Kijun-sen <span class="ich-color-dot" style="background: var(--down)"></span></td>
+          <td class="ich-val">${fmtPrice(s.m_kijun)}</td>
+        </tr>
+        <tr>
+          <td class="ich-label">TK Cross</td>
+          <td class="ich-val ${tkBullish ? 'up' : 'down'}">
+            ${tkBullish ? '▲ Tenkan > Kijun' : '▼ Tenkan < Kijun'}
+            <span class="ich-sub">+${(((s.m_tenkan - s.m_kijun) / s.m_kijun) * 100).toFixed(2)}%</span>
+          </td>
+        </tr>
+        <tr class="ich-sep">
+          <td class="ich-label">Cloud trên (Span A)</td>
+          <td class="ich-val">${fmtPrice(s.m_senkou_a)}</td>
+        </tr>
+        <tr>
+          <td class="ich-label">Cloud dưới (Span B)</td>
+          <td class="ich-val">${fmtPrice(s.m_senkou_b)}</td>
+        </tr>
+        <tr>
+          <td class="ich-label">Giá vs Cloud</td>
+          <td class="ich-val ${priceAboveCloud ? 'up' : 'down'}">
+            ${priceAboveCloud ? '▲ Trên Cloud' : '▼ Dưới Cloud'}
+            <span class="ich-sub">${(s.m_cloud_distance_pct || 0).toFixed(2)}%</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="ich-label">Trạng thái Cloud</td>
+          <td class="ich-val ${cloudBullish ? 'up' : 'down'}">
+            ${cloudBullish ? '▲ Bullish (A > B)' : '▼ Bearish (A < B)'}
+          </td>
+        </tr>
+      </table>
     </div>
   `;
 }

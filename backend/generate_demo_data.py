@@ -239,15 +239,30 @@ def make_gc_signal(ticker, exchange, base_price, scan_date):
 
 def make_ich_signal(ticker, exchange, base_price, scan_date):
     """Generate an Ichimoku signal (flexible mode: score >= 3)."""
-    keys = ['tk_bullish', 'price_above_cloud', 'cloud_bullish', 'chikou_free']
-    scores = {k: 1 if random.random() < 0.7 else 0 for k in keys}
-    # Filter: flexible mode requires at least 3/4 to be in results
+    # 5 criteria now (recent_tk_cross added as the 5th)
+    keys = ['tk_bullish', 'recent_tk_cross', 'price_above_cloud', 'cloud_bullish', 'chikou_free']
+    # If tk_bullish is on, recent_tk_cross has higher chance of being on too
+    scores = {}
+    scores['tk_bullish'] = 1 if random.random() < 0.80 else 0
+    # recent_tk_cross only valid if tk_bullish=1; lower prob to make it special
+    scores['recent_tk_cross'] = 1 if (scores['tk_bullish'] and random.random() < 0.35) else 0
+    scores['price_above_cloud'] = 1 if random.random() < 0.7 else 0
+    scores['cloud_bullish'] = 1 if random.random() < 0.7 else 0
+    scores['chikou_free'] = 1 if random.random() < 0.7 else 0
+
+    # Filter: flexible mode requires at least 3 to be in results
     while sum(scores.values()) < 3:
-        zeros = [k for k, v in scores.items() if v == 0]
+        zeros = [k for k, v in scores.items() if v == 0 and k != 'recent_tk_cross']
         if not zeros: break
         scores[random.choice(zeros)] = 1
     total = sum(scores.values())
-    rating = 'A+' if total == 4 else 'A' if total == 3 else 'C'
+    rating = 'A+' if total >= 4 else 'A' if total == 3 else 'C'
+
+    # If recent_tk_cross is on, days_ago is 0-5; otherwise older or None
+    if scores['recent_tk_cross']:
+        tk_cross_days_ago = random.randint(0, 5)
+    else:
+        tk_cross_days_ago = random.randint(8, 30) if random.random() < 0.5 else None
 
     cloud_top = round(base_price * random.uniform(0.92, 0.99), 2)
     cloud_bottom = round(cloud_top * random.uniform(0.95, 0.99), 2)
@@ -281,7 +296,7 @@ def make_ich_signal(ticker, exchange, base_price, scan_date):
         'm_cloud_top': cloud_top,
         'm_cloud_bottom': cloud_bottom,
         'm_cloud_distance_pct': round((base_price - cloud_top) / cloud_top * 100, 2),
-        'm_tk_cross_days_ago': random.randint(0, 8) if random.random() < 0.6 else None,
+        'm_tk_cross_days_ago': tk_cross_days_ago,
         'm_change_5d_pct': round(random.uniform(0.5, 5), 2),
         'm_vol_ratio': round(random.uniform(1.0, 2.5), 2),
         'm_rsi14': round(random.uniform(50, 70), 1),

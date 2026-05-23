@@ -137,14 +137,46 @@ def test_result_to_dict_has_expected_keys():
 
 
 def test_rating_scale():
-    """Score 4 → A+, 3 → A (only these two possible with flexible filter)."""
+    """Score 4-5 → A+, 3 → A (only these possible with flexible filter)."""
     df = make_strong_uptrend_df()
     res = ichimoku.evaluate(df, 'TEST')
     if res:
-        if res.total_score == 4:
+        if res.total_score >= 4:
             assert res.rating == 'A+'
         elif res.total_score == 3:
             assert res.rating == 'A'
+
+
+def test_recent_tk_cross_in_scores():
+    """The 'recent_tk_cross' criterion must appear in scores dict."""
+    df = make_strong_uptrend_df()
+    res = ichimoku.evaluate(df, 'TEST')
+    if res:
+        assert 'recent_tk_cross' in res.scores
+        # Value must be 0 or 1
+        assert res.scores['recent_tk_cross'] in (0, 1)
+
+
+def test_5_criteria_total():
+    """Ichimoku now has exactly 5 criteria."""
+    df = make_strong_uptrend_df()
+    res = ichimoku.evaluate(df, 'TEST')
+    if res:
+        expected_keys = {
+            'tk_bullish', 'recent_tk_cross', 'price_above_cloud',
+            'cloud_bullish', 'chikou_free'
+        }
+        assert set(res.scores.keys()) == expected_keys
+
+
+def test_result_dict_exposes_recent_tk_cross():
+    """to_dict() must expose ich_recent_tk_cross field for frontend filtering."""
+    df = make_strong_uptrend_df()
+    res = ichimoku.evaluate(df, 'TEST')
+    if res:
+        d = res.to_dict()
+        assert 'ich_recent_tk_cross' in d
+        assert 'm_tk_cross_days_ago' in d
 
 
 if __name__ == '__main__':

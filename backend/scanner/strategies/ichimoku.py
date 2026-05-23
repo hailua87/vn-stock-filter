@@ -13,10 +13,12 @@ Theory:
     - Kumo (Cloud): area between Senkou A and B — primary support/resistance
     - Chikou Span (Lagging): current close plotted 26 bars BEHIND
 
-Strategy criteria (4 bullish signals, score 0-4):
+Strategy criteria (5 bullish signals, score 0-5):
 
-  1. TK_CROSS_UP: Tenkan > Kijun (short-term momentum bullish)
-       Strongest if cross happened recently (within last 5 bars).
+  1. TK_BULLISH: Tenkan > Kijun (short-term momentum bullish, current state).
+
+  1b. RECENT_TK_CROSS: Tenkan VỪA cắt lên Kijun trong 5 phiên gần nhất.
+       Đây là tín hiệu MẠNH NHẤT — entry sớm trước khi trend lớn xuất hiện.
 
   2. PRICE_ABOVE_CLOUD: Close > max(Senkou A, Senkou B)
        Price is above the cloud → bullish bias.
@@ -28,10 +30,9 @@ Strategy criteria (4 bullish signals, score 0-4):
        Momentum confirmed — no resistance from past price.
 
 Ratings:
-  - A+ : 4/4 — full bullish setup (rare)
-  - A  : 3/4 — strong bullish
-  - B  : 2/4 — mixed, watch closely
-  - C  : <2 — not bullish
+  - A+ : 4-5/5 — strong bullish setup (rare with recent cross = entry điểm)
+  - A  : 3/5 — bullish
+  - C  : <3 — filtered out (not bullish enough)
 """
 from __future__ import annotations
 import logging
@@ -70,11 +71,12 @@ class IchimokuResult:
 
     @property
     def rating(self) -> str:
-        # Flexible mode: only signals with score >= 3 pass
+        # 5 criteria total. Recent TK cross is bonus.
         s = self.total_score
-        if s == 4: return 'A+'
-        if s == 3: return 'A'
-        return 'C'  # should not happen due to filter
+        if s >= 5: return 'A+'    # 5/5 — full setup + just crossed
+        if s == 4: return 'A+'    # 4/5 — strong
+        if s == 3: return 'A'     # 3/5 — bullish
+        return 'C'  # filtered out
 
     def to_dict(self) -> dict:
         return {
@@ -153,11 +155,13 @@ def evaluate(df: pd.DataFrame, ticker: str,
 
     scores = {}
 
-    # 1. Tenkan > Kijun (TK cross bullish)
+    # 1. Tenkan > Kijun (current TK state bullish)
     scores['tk_bullish'] = int(last_tenkan > last_kijun)
 
-    # Was the TK cross recent (within lookback)?
+    # 1b. RECENT TK CROSS — Tenkan vừa cắt lên Kijun trong N phiên gần nhất.
+    # Đây là tín hiệu mạnh nhất trong Ichimoku — entry sớm.
     tk_cross = detect_recent_cross_up(tenkan, kijun, lookback=cfg['tk_cross_lookback'])
+    scores['recent_tk_cross'] = int(tk_cross['crossed'])
 
     # 2. Price above cloud (both Senkou A and B)
     cloud_top = max(last_senkou_a, last_senkou_b)
@@ -167,16 +171,14 @@ def evaluate(df: pd.DataFrame, ticker: str,
     # 3. Cloud bullish (Senkou A > Senkou B)
     scores['cloud_bullish'] = int(last_senkou_a > last_senkou_b)
 
-    # 4. Chikou span free (close 26 bars ago < current close)
-    # Chikou is current close shifted back 26 — comparing means: is current price
-    # above where it was 26 bars ago? (= positive 26-day momentum)
+    # 4. Chikou span free — current close > price 26 bars ago (positive momentum)
     if len(df) >= 27:
         price_26_ago = float(df['Close'].iloc[-27])
         scores['chikou_free'] = int(last_close > price_26_ago)
     else:
         scores['chikou_free'] = 0
 
-    # Filter (flexible mode): must have at least 3 of 4 bullish signals
+    # Filter: must have at least 3 of 5 bullish signals (flexible mode)
     if sum(scores.values()) < 3:
         return None
 

@@ -63,6 +63,13 @@
   <a href="https://github.com/hailua87/vn-stock-filter">Chạy workflow để có data thật →</a>
 </div>
 
+<div class="mobile-bar">
+  <button id="mobile-filter-btn">☰ Bộ lọc</button>
+  <button id="mobile-stats-btn">— tín hiệu</button>
+</div>
+
+<div class="mobile-backdrop" id="mobile-backdrop"></div>
+
 <main class="dashboard" id="dashboard">
 
   <aside class="col col-filters" id="col-filters">
@@ -112,6 +119,17 @@
         <label class="fg-label">Tìm mã</label>
         <input type="text" id="search" class="search-input" placeholder="VD: FPT, VPB" maxlength="10">
       </div>
+      <div class="fg" id="fg-ichimoku" style="display: none;">
+        <label class="fg-label">Tín hiệu Ichimoku</label>
+        <div class="chip-row" data-filter="ich_special">
+          <button class="chip active" data-value="">Tất cả</button>
+          <button class="chip" data-value="recent_cross" title="Tenkan vừa cắt lên Kijun trong 5 phiên — entry sớm">
+            ⭐ Vừa cắt TK
+          </button>
+        </div>
+        <div class="fg-hint">Lọc mã có Tenkan-sen vừa cắt lên Kijun-sen</div>
+      </div>
+
       <div class="fg-divider"></div>
       <div class="fg">
         <label class="fg-label">Trạng thái dữ liệu</label>

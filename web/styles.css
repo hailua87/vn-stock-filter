@@ -1055,6 +1055,96 @@ input { font-family: inherit; }
   margin-bottom: 12px;
 }
 
+/* TK Cross callout — special Ichimoku highlight */
+.tk-cross-callout {
+  background: linear-gradient(135deg, rgba(255, 167, 38, 0.12), rgba(38, 166, 154, 0.08));
+  border: 1px solid rgba(255, 167, 38, 0.3);
+  border-left: 3px solid var(--warning);
+  border-radius: 2px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.tk-cross-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--warning);
+  margin-bottom: 6px;
+}
+.tk-cross-detail {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+.tk-cross-detail strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.tk-cross-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 167, 38, 0.15);
+}
+.tk-cross-values strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* TK cross flag in ticker cell */
+.tk-cross-flag {
+  display: inline-block;
+  margin-left: 4px;
+  color: var(--warning);
+  font-size: 11px;
+  cursor: help;
+}
+
+/* Ichimoku table in detail */
+.ich-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+.ich-table td {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+.ich-table tr:last-child td { border-bottom: none; }
+.ich-table tr.ich-sep td { padding-top: 8px; }
+.ich-label {
+  color: var(--text-dim);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+.ich-val {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.ich-val.up { color: var(--up); }
+.ich-val.down { color: var(--down); }
+.ich-sub {
+  font-weight: 400;
+  color: var(--text-mute);
+  font-size: 9px;
+  margin-left: 4px;
+}
+.ich-color-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
 /* ═══════════════════════════════════════════════════
    HELP MODAL
    ═══════════════════════════════════════════════════ */
@@ -1164,3 +1254,92 @@ kbd {
   }
   .strat-tab { padding: 6px 8px; font-size: 10px; }
 }
+
+/* ─── Mobile: single-column with overlay drawers ─── */
+@media (max-width: 768px) {
+  html, body { overflow: auto; }
+  
+  .topbar {
+    flex-wrap: wrap;
+    padding: 6px 8px;
+    height: auto;
+    min-height: 48px;
+    gap: 6px;
+  }
+  .topbar-center { display: none; }   /* hide stats on mobile */
+  .strategy-tabs {
+    order: 10;
+    flex-basis: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .strat-tab { padding: 5px 10px; font-size: 11px; white-space: nowrap; }
+  
+  .dashboard { display: block; height: auto; }
+  
+  /* Filters as left drawer overlay */
+  .col-filters {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 80%;
+    max-width: 320px;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+  }
+  .col-filters.mobile-open { transform: translateX(0); }
+  
+  /* Detail as right drawer overlay */
+  .col-detail {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 100%;
+    max-width: 420px;
+    z-index: 50;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.4);
+  }
+  .col-detail.mobile-open { transform: translateX(0); }
+  
+  .col-list { width: 100%; }
+  
+  /* Mobile bar with filter trigger */
+  .mobile-bar {
+    display: flex !important;
+    padding: 8px;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-base);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+  .mobile-bar button {
+    flex: 1;
+    padding: 8px;
+    background: var(--bg-elev-1);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 12px;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  
+  .demo-banner { font-size: 10px; padding: 6px; }
+  
+  /* Mobile backdrop */
+  .mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 40;
+  }
+}
+
+/* Mobile-only elements hidden on desktop */
+.mobile-bar { display: none; }
+.mobile-backdrop { display: none; }
+.mobile-backdrop.show { display: block; }
