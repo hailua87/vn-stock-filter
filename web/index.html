@@ -31,11 +31,40 @@
   <div id="demo-banner" class="demo-banner" style="display: none;">
     <strong>⚠ DỮ LIỆU DEMO</strong>
     <span>Giá và tín hiệu trên trang này là <strong>dữ liệu mẫu</strong> để minh họa giao diện — không phải giá thực. Chạy <code>python backend/run_daily.py</code> để lấy dữ liệu thật từ HOSE/HNX/UPCOM qua vnstock.</span>
-    <a href="https://github.com/your-org/vn-breakout-scanner/blob/main/docs/USER_GUIDE.md">Hướng dẫn →</a>
+    <a href="https://github.com/hailua87/vn-stock-filter/blob/main/docs/USER_GUIDE.md">Hướng dẫn →</a>
   </div>
 
-  <!-- Hero -->
-  <section class="hero">
+  <!-- LEAN TOP STRIP: Q1 answered in 2 seconds -->
+  <section class="lean-strip">
+    <div class="lean-stats">
+      <div class="lean-stat-primary">
+        <span class="lean-num" id="stat-total">—</span>
+        <span class="lean-label">tín hiệu</span>
+        <span class="lean-date" id="stat-date">hôm nay</span>
+      </div>
+      <div class="lean-stat">
+        <span class="lean-num lean-aplus" id="stat-aplus">—</span>
+        <span class="lean-label">A+</span>
+      </div>
+      <div class="lean-stat">
+        <span class="lean-num lean-dim" id="stat-scanned">—</span>
+        <span class="lean-label">mã quét</span>
+      </div>
+    </div>
+
+    <!-- Strategy tabs — inline horizontal compact -->
+    <nav class="lean-tabs" aria-label="Chiến lược">
+      <button class="lean-tab active" data-strategy="pre_breakout" title="10 tiêu chí · sắp break giá">Pre-Breakout</button>
+      <button class="lean-tab" data-strategy="golden_cross_long" title="MA50 × MA200 · position trade">GC dài hạn</button>
+      <button class="lean-tab" data-strategy="golden_cross_short" title="MA10 × MA20 · swing 2-4 tuần">GC ngắn hạn</button>
+      <button class="lean-tab" data-strategy="ichimoku" title="Cloud + TK · trend confirm">Ichimoku</button>
+    </nav>
+
+    <button class="hero-toggle" id="hero-toggle" title="Mở phần giới thiệu">ℹ Giới thiệu</button>
+  </section>
+
+  <!-- Optional collapsed hero — hidden by default, click "ℹ" to expand -->
+  <section class="hero hero-collapsed" id="hero-section" style="display: none;">
     <div class="hero-grid">
       <div class="hero-left">
         <div class="eyebrow">Pre-Breakout Signal Scanner</div>
@@ -48,20 +77,6 @@
           đang trong giai đoạn tích lũy âm thầm — nơi dòng tiền thông minh thường để lại dấu vết
           <strong>2 đến 5 phiên</strong> trước nhịp bứt phá thực sự.
         </p>
-        <div class="hero-stats">
-          <div class="stat">
-            <div class="stat-num" id="stat-total">—</div>
-            <div class="stat-label">Tín hiệu hôm nay</div>
-          </div>
-          <div class="stat">
-            <div class="stat-num" id="stat-aplus">—</div>
-            <div class="stat-label">Hạng A+</div>
-          </div>
-          <div class="stat">
-            <div class="stat-num" id="stat-scanned">—</div>
-            <div class="stat-label">Mã đã quét</div>
-          </div>
-        </div>
       </div>
       <div class="hero-right">
         <div class="rating-card">
@@ -87,51 +102,48 @@
     </div>
   </section>
 
-  <!-- Filters -->
-  <section class="filters">
-    <div class="filter-group">
-      <label class="filter-label">NGÀY PHÂN TÍCH</label>
-      <div class="date-picker">
-        <button class="date-nav" id="date-prev" title="Ngày trước">‹</button>
-        <select id="date-select" class="date-select"></select>
-        <button class="date-nav" id="date-next" title="Ngày sau">›</button>
-        <button class="date-latest" id="date-latest" title="Về phiên mới nhất">↺ Mới nhất</button>
-      </div>
+  <!-- Lean filter bar — single compact row -->
+  <section class="lean-filters">
+    <div class="lf-group lf-date">
+      <button class="date-nav" id="date-prev" title="Ngày trước">‹</button>
+      <select id="date-select" class="date-select"></select>
+      <button class="date-nav" id="date-next" title="Ngày sau">›</button>
+      <button class="date-latest" id="date-latest" title="Về phiên mới nhất">↺</button>
     </div>
-    <div class="filter-group">
-      <label class="filter-label">SÀN</label>
-      <div class="chip-group" data-filter="exchange">
-        <button class="chip active" data-value="">Tất cả</button>
-        <button class="chip" data-value="HOSE">HOSE</button>
-        <button class="chip" data-value="HNX">HNX</button>
-        <button class="chip" data-value="UPCOM">UPCOM</button>
-      </div>
+
+    <div class="lf-divider"></div>
+
+    <div class="chip-group lf-chips" data-filter="exchange" aria-label="Sàn giao dịch">
+      <button class="chip active" data-value="" title="Tất cả sàn">Sàn</button>
+      <button class="chip" data-value="HOSE">HOSE</button>
+      <button class="chip" data-value="HNX">HNX</button>
+      <button class="chip" data-value="UPCOM">UPCOM</button>
     </div>
-    <div class="filter-group">
-      <label class="filter-label">XẾP LOẠI</label>
-      <div class="chip-group" data-filter="rating">
-        <button class="chip active" data-value="">Tất cả</button>
-        <button class="chip" data-value="A+">A+</button>
-        <button class="chip" data-value="A">A</button>
-        <button class="chip" data-value="B">B</button>
-      </div>
+
+    <div class="chip-group lf-chips" data-filter="rating" aria-label="Xếp loại">
+      <button class="chip active" data-value="" title="Tất cả xếp loại">Hạng</button>
+      <button class="chip" data-value="A+">A+</button>
+      <button class="chip" data-value="A">A</button>
+      <button class="chip" data-value="B">B</button>
     </div>
-    <div class="filter-group">
-      <label class="filter-label">KHỐI LƯỢNG (KLGD)</label>
-      <div class="volume-range">
-        <input type="text" id="vol-min" class="volume-input" placeholder="Từ (vd: 100K)" maxlength="10">
-        <span class="volume-sep">–</span>
-        <input type="text" id="vol-max" class="volume-input" placeholder="Đến (vd: 5M)" maxlength="10">
-        <button class="volume-clear" id="vol-clear" title="Xóa">×</button>
-      </div>
+
+    <div class="lf-divider"></div>
+
+    <div class="lf-group">
+      <span class="lf-mini-label">KLGD</span>
+      <input type="text" id="vol-min" class="volume-input" placeholder="từ" maxlength="10">
+      <span class="volume-sep">–</span>
+      <input type="text" id="vol-max" class="volume-input" placeholder="đến" maxlength="10">
+      <button class="volume-clear" id="vol-clear" title="Xóa">×</button>
     </div>
-    <div class="filter-group">
-      <label class="filter-label">TÌM MÃ</label>
-      <input type="text" id="search" class="search-input" placeholder="vd: FPT" maxlength="10">
+
+    <div class="lf-group lf-search">
+      <input type="text" id="search" class="search-input" placeholder="🔍 Tìm mã (vd: FPT)" maxlength="10">
     </div>
-    <div class="filter-actions">
-      <button class="btn-export" id="export-csv">↓ CSV</button>
-    </div>
+
+    <div class="lf-spacer"></div>
+
+    <button class="btn-export" id="export-csv" title="Xuất CSV">↓ CSV</button>
   </section>
 
   <!-- Results table -->
@@ -165,7 +177,8 @@
             <th class="num sortable" data-sort="_gtgd">GTGD <span class="sort-ind"></span></th>
             <th class="num sortable" data-sort="m_vol_ratio">VOL× <span class="sort-ind"></span></th>
             <th class="num sortable" data-sort="m_rsi14">RSI <span class="sort-ind"></span></th>
-            <th class="num sortable" data-sort="m_dist_to_high20_pct">→ĐỈNH <span class="sort-ind"></span></th>
+            <th class="num" title="Hỗ trợ gần nhất">HỖ TRỢ</th>
+            <th class="num" title="Kháng cự gần nhất">KHÁNG CỰ</th>
             <th>TIÊU CHÍ</th>
             <th class="num sortable" data-sort="total_score">ĐIỂM <span class="sort-ind"></span></th>
             <th>HẠNG</th>
@@ -202,9 +215,9 @@
       <div>
         <h4>Tài liệu</h4>
         <p>
-          <a href="https://github.com/your-org/vn-breakout-scanner/blob/main/docs/CRITERIA.md">10 tiêu chí</a> ·
-          <a href="https://github.com/your-org/vn-breakout-scanner/blob/main/docs/BACKTEST.md">Backtest</a> ·
-          <a href="https://github.com/your-org/vn-breakout-scanner/blob/main/docs/API.md">API</a>
+          <a href="https://github.com/hailua87/vn-stock-filter/blob/main/docs/CRITERIA.md">10 tiêu chí</a> ·
+          <a href="https://github.com/hailua87/vn-stock-filter/blob/main/docs/BACKTEST.md">Backtest</a> ·
+          <a href="https://github.com/hailua87/vn-stock-filter/blob/main/docs/API.md">API</a>
         </p>
       </div>
       <div>

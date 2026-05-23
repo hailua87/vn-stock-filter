@@ -1,22 +1,77 @@
 // ────────────────────────────────────────────────────────────
-// VN Breakout Scanner — Dashboard logic
+// VN Multi-Strategy Scanner — Dashboard logic
 // ────────────────────────────────────────────────────────────
 
-const DATA_DIR = './data';
-const ARCHIVE_DIR = './data/archive';
+// ============================
+//  STRATEGIES CONFIG
+// ============================
+const STRATEGIES = {
+  pre_breakout: {
+    name: 'Pre-Breakout',
+    dataDir: './data',
+    maxScore: 10,
+    criteria: [
+      { key: 'c1_atr_squeeze',  name: 'ATR Squeeze',         group: 1 },
+      { key: 'c2_bb_squeeze',   name: 'Bollinger Squeeze',   group: 1 },
+      { key: 'c3_near_high20',  name: 'Gần đỉnh 20 phiên',   group: 1 },
+      { key: 'c4_stealth_accum',name: 'Stealth Accumulation',group: 2 },
+      { key: 'c5_vol_surge',    name: 'Volume Surge',        group: 2 },
+      { key: 'c6_upper_close',  name: 'Đóng cửa nửa trên',   group: 2 },
+      { key: 'c9_pocket_pivot', name: 'Pocket Pivot',        group: 2 },
+      { key: 'c7_ma_align',     name: 'MA10 > MA20',         group: 3 },
+      { key: 'c8_rsi_zone',     name: 'RSI 50-65',           group: 3 },
+      { key: 'c10_no_gap_down', name: 'Không gap down',      group: 3 },
+    ],
+  },
+  golden_cross_long: {
+    name: 'Golden Cross dài hạn',
+    dataDir: './data/golden_cross_long',
+    maxScore: 5,
+    criteria: [
+      { key: 'gc_recent_cross',    name: 'MA50 vừa cắt lên MA200',  group: 1 },
+      { key: 'gc_price_above_fast',name: 'Giá > MA50',              group: 3 },
+      { key: 'gc_ma_stacking',     name: 'MA10 > MA20 > MA50',      group: 3 },
+      { key: 'gc_slow_rising',     name: 'MA200 đang hướng lên',    group: 3 },
+      { key: 'gc_volume_confirm',  name: 'Volume xác nhận cross',   group: 2 },
+    ],
+  },
+  golden_cross_short: {
+    name: 'Golden Cross ngắn hạn',
+    dataDir: './data/golden_cross_short',
+    maxScore: 5,
+    criteria: [
+      { key: 'gc_recent_cross',    name: 'MA10 vừa cắt lên MA20',   group: 1 },
+      { key: 'gc_price_above_fast',name: 'Giá > MA10',              group: 3 },
+      { key: 'gc_ma_stacking',     name: 'MA5 > MA10 > MA20',       group: 3 },
+      { key: 'gc_slow_rising',     name: 'MA20 đang hướng lên',     group: 3 },
+      { key: 'gc_volume_confirm',  name: 'Volume xác nhận cross',   group: 2 },
+    ],
+  },
+  ichimoku: {
+    name: 'Ichimoku',
+    dataDir: './data/ichimoku',
+    maxScore: 4,
+    criteria: [
+      { key: 'ich_tk_bullish',        name: 'Tenkan > Kijun',        group: 3 },
+      { key: 'ich_price_above_cloud', name: 'Giá trên Cloud (Kumo)', group: 3 },
+      { key: 'ich_cloud_bullish',     name: 'Cloud bullish (A > B)', group: 3 },
+      { key: 'ich_chikou_free',       name: 'Chikou thoát kháng cự', group: 2 },
+    ],
+  },
+};
 
-const CRITERIA = [
-  { key: 'c1_atr_squeeze',  name: 'ATR Squeeze',        group: 1 },
-  { key: 'c2_bb_squeeze',   name: 'Bollinger Squeeze',  group: 1 },
-  { key: 'c3_near_high20',  name: 'Gần đỉnh 20 phiên',  group: 1 },
-  { key: 'c4_stealth_accum',name: 'Stealth Accumulation',group: 2 },
-  { key: 'c5_vol_surge',    name: 'Volume Surge',       group: 2 },
-  { key: 'c6_upper_close',  name: 'Đóng cửa nửa trên',  group: 2 },
-  { key: 'c9_pocket_pivot', name: 'Pocket Pivot',       group: 2 },
-  { key: 'c7_ma_align',     name: 'MA10 > MA20',        group: 3 },
-  { key: 'c8_rsi_zone',     name: 'RSI 50-65',          group: 3 },
-  { key: 'c10_no_gap_down', name: 'Không gap down',     group: 3 },
-];
+let activeStrategy = 'pre_breakout';
+
+function currentConfig() { return STRATEGIES[activeStrategy]; }
+function currentDataDir() { return currentConfig().dataDir; }
+function currentArchiveDir() { return `${currentDataDir()}/archive`; }
+function currentCriteria() { return currentConfig().criteria; }
+function currentMaxScore() { return currentConfig().maxScore; }
+
+// Legacy aliases (for backward compatibility in code below)
+const DATA_DIR = './data';  // overridden dynamically per strategy
+const ARCHIVE_DIR = './data/archive';
+const CRITERIA = STRATEGIES.pre_breakout.criteria;  // default; render() uses currentCriteria()
 
 const EVENT_TYPE_LABELS = {
   cash_dividend: 'Cổ tức tiền',
@@ -44,6 +99,7 @@ async function init() {
   bindFilters();
   bindDatePicker();
   bindSortHandlers();
+  bindStrategyTabs();
   // Load latest.json FIRST to know the actual latest date
   await loadLatestFirst();
   // Then load archive index for the date picker
@@ -84,11 +140,54 @@ function updateSortIndicators() {
   });
 }
 
+// ──────────── Strategy tabs ────────────
+function bindStrategyTabs() {
+  // Support both .lean-tab (new) and .strategy-tab (legacy)
+  document.querySelectorAll('.lean-tab, .strategy-tab').forEach(tab => {
+    tab.addEventListener('click', async () => {
+      const strategy = tab.dataset.strategy;
+      if (strategy === activeStrategy) return;
+      await switchStrategy(strategy);
+    });
+  });
+
+  // Hero toggle (collapse/expand intro)
+  const heroToggle = document.getElementById('hero-toggle');
+  const heroSection = document.getElementById('hero-section');
+  if (heroToggle && heroSection) {
+    heroToggle.addEventListener('click', () => {
+      const isHidden = heroSection.style.display === 'none';
+      heroSection.style.display = isHidden ? 'block' : 'none';
+      heroToggle.textContent = isHidden ? '× Đóng' : 'ℹ Giới thiệu';
+    });
+  }
+}
+
+async function switchStrategy(strategy) {
+  if (!STRATEGIES[strategy]) return;
+  activeStrategy = strategy;
+
+  // Update tab UI (both lean-tab and strategy-tab)
+  document.querySelectorAll('.lean-tab, .strategy-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.strategy === strategy);
+  });
+
+  // Reset sort and filters when switching strategies (criteria differ)
+  state.sort = { column: null, direction: null };
+  updateSortIndicators();
+
+  // Reload data for the new strategy
+  await loadLatestFirst();
+  await loadDateIndex();
+  renderDateOptions();
+  updateDateNavButtons();
+}
+
 // ──────────── Load latest.json first ────────────
 async function loadLatestFirst() {
   setStatus('connecting', 'LOADING');
   try {
-    const res = await fetch(`${DATA_DIR}/latest.json?_=${Date.now()}`);
+    const res = await fetch(`${currentDataDir()}/latest.json?_=${Date.now()}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     state.currentData = data;
@@ -129,7 +228,7 @@ async function loadLatestFirst() {
 // ──────────── Date index ────────────
 async function loadDateIndex() {
   try {
-    const res = await fetch(`${ARCHIVE_DIR}/index.json?_=${Date.now()}`);
+    const res = await fetch(`${currentArchiveDir()}/index.json?_=${Date.now()}`);
     if (res.ok) {
       const idx = await res.json();
       state.availableDates = idx.dates || [];
@@ -180,9 +279,9 @@ async function loadDataForDate(dateStr) {
   try {
     let url;
     if (!dateStr || dateStr === state.latestDate) {
-      url = `${DATA_DIR}/latest.json?_=${Date.now()}`;
+      url = `${currentDataDir()}/latest.json?_=${Date.now()}`;
     } else {
-      url = `${ARCHIVE_DIR}/${dateStr}.json?_=${Date.now()}`;
+      url = `${currentArchiveDir()}/${dateStr}.json?_=${Date.now()}`;
     }
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -359,6 +458,17 @@ function render() {
   document.getElementById('stat-aplus').textContent =
     state.raw.filter(s => s.rating === 'A+').length;
 
+  // Update date label in lean strip
+  const statDate = document.getElementById('stat-date');
+  if (statDate && state.currentDate) {
+    const d = state.currentDate.split('T')[0];
+    const [y, m, day] = d.split('-');
+    const dateStr = `${day}/${m}`;
+    const isLatest = state.currentDate === state.latestDate;
+    statDate.textContent = isLatest ? `· LIVE ${dateStr}` : `· ${dateStr}`;
+    statDate.style.color = isLatest ? 'var(--green)' : 'var(--text-mute)';
+  }
+
   renderDateContext();
 
   const eventCount = state.filtered.filter(s => s.m_upcoming_event).length;
@@ -419,7 +529,7 @@ function renderRow(s, idx) {
   const changeClass = change >= 0 ? 'change-pos' : 'change-neg';
   const sign = change >= 0 ? '+' : '';
 
-  const pills = CRITERIA.map(c => {
+  const pills = currentCriteria().map(c => {
     const on = s[c.key] === 1;
     return `<span class="pill ${on ? 'on-' + c.group : 'off'}" title="${c.name}: ${on ? '✓' : '✗'}"></span>`;
   }).join('');
@@ -442,6 +552,16 @@ function renderRow(s, idx) {
     eventFlag = `<span class="event-flag ${urgentClass}" title="${label} · Ngày GDKHQ: ${ev.ex_date} (sau ${daysToEx} ngày) · Tỷ lệ: ${ratioText}">⚑</span>`;
   }
 
+  // Format Fibonacci support/resistance — show nearest only
+  const supports = s.m_supports || [];
+  const resistances = s.m_resistances || [];
+  const nearestSupport = supports.length > 0
+    ? renderFibCell(supports[0], 'support')
+    : '<span style="color: var(--text-mute)">—</span>';
+  const nearestResistance = resistances.length > 0
+    ? renderFibCell(resistances[0], 'resistance')
+    : '<span style="color: var(--text-mute)">—</span>';
+
   return `<tr data-idx="${idx - 1}">
     <td style="color: var(--text-mute)">${idx}</td>
     <td>
@@ -457,23 +577,242 @@ function renderRow(s, idx) {
     <td class="num">${fmtValue(s.close, s.volume)}</td>
     <td class="num">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
     <td class="num">${(s.m_rsi14 || 0).toFixed(0)}</td>
-    <td class="num">${(s.m_dist_to_high20_pct || 0).toFixed(2)}%</td>
+    <td class="num">${nearestSupport}</td>
+    <td class="num">${nearestResistance}</td>
     <td><div class="criteria-pills">${pills}</div></td>
-    <td class="num score-cell ${scoreClass}">${s.total_score}/10</td>
+    <td class="num score-cell ${scoreClass}">${s.total_score}/${currentMaxScore()}</td>
     <td><span class="rating-tag ${ratingClass}">${s.rating}</span></td>
   </tr>`;
 }
 
+// Render a single Fibo level cell (support or resistance)
+function renderFibCell(level, kind) {
+  if (!level) return '<span style="color: var(--text-mute)">—</span>';
+  const isGolden = level.is_golden;
+  const goldenClass = isGolden ? ' golden' : '';
+  const sign = kind === 'support' ? '-' : '+';
+  const tooltip = `Mức Fibonacci ${level.label} · giá ${level.price}${isGolden ? ' · GOLDEN RATIO ⭐' : ''}`;
+  return `<span class="fib-cell fib-${kind}${goldenClass}" title="${tooltip}">
+    <span class="fib-price">${fmtPrice(level.price)}</span>
+    <span class="fib-label">${level.label}${isGolden ? ' ⭐' : ''}</span>
+    <span class="fib-dist">${sign}${level.distance_pct}%</span>
+  </span>`;
+}
+
+// Render Fibonacci section in drawer with visual ladder
+function renderFiboSection(s) {
+  const swing = s.m_fibo_swing;
+  const supports = s.m_supports || [];
+  const resistances = s.m_resistances || [];
+  if (!swing || (supports.length === 0 && resistances.length === 0)) {
+    return '';
+  }
+
+  const currentPrice = s.close;
+  const directionLabel = swing.direction === 'up' ? 'Uptrend' : 'Downtrend';
+  const directionColor = swing.direction === 'up' ? 'var(--green)' : 'var(--red)';
+
+  // Combine all levels for visual ladder (top = high, bottom = low)
+  const allLevels = [
+    ...resistances.map(r => ({ ...r, kind: 'resistance' })),
+    { price: currentPrice, kind: 'current', label: 'GIÁ HIỆN TẠI' },
+    ...supports.map(s => ({ ...s, kind: 'support' })),
+  ];
+
+  return `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Fibonacci Retracement</div>
+
+      <div class="fibo-swing-info">
+        <div class="fibo-swing-meta">
+          <span class="fibo-direction" style="color: ${directionColor}">▲ ${directionLabel}</span>
+          <span class="fibo-swing-range">
+            Swing: <span style="color: var(--red)">${fmtPrice(swing.low)}</span>
+            <span style="color: var(--text-mute)"> ${swing.low_date} </span>
+            →
+            <span style="color: var(--green)">${fmtPrice(swing.high)}</span>
+            <span style="color: var(--text-mute)"> ${swing.high_date} </span>
+          </span>
+          <span class="fibo-swing-pct">
+            Biên độ: <span style="color: var(--accent)">${((swing.range/swing.low)*100).toFixed(1)}%</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="fibo-ladder">
+        ${allLevels.map(lv => {
+          if (lv.kind === 'current') {
+            return `
+              <div class="fibo-row fibo-current">
+                <span class="fibo-label-cell">${lv.label}</span>
+                <span class="fibo-price-cell">${fmtPrice(lv.price)}</span>
+                <span class="fibo-dist-cell">←</span>
+              </div>
+            `;
+          }
+          const isGolden = lv.is_golden ? ' golden' : '';
+          const kindClass = lv.kind === 'support' ? 'fibo-support' : 'fibo-resistance';
+          const sign = lv.kind === 'support' ? '-' : '+';
+          return `
+            <div class="fibo-row ${kindClass}${isGolden}">
+              <span class="fibo-label-cell">
+                ${lv.kind === 'support' ? 'Hỗ trợ' : 'Kháng cự'} ${lv.label}
+                ${lv.is_golden ? '<span class="fibo-golden-tag">⭐ GOLDEN</span>' : ''}
+              </span>
+              <span class="fibo-price-cell">${fmtPrice(lv.price)}</span>
+              <span class="fibo-dist-cell">${sign}${lv.distance_pct}%</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="fibo-explainer">
+        <strong style="color: var(--accent)">⭐ 61.8%</strong> là mức "Golden Ratio" — quan trọng nhất trong Fibo, thường là điểm vào lệnh tốt khi giá pullback về.
+      </div>
+    </div>
+  `;
+}
+
 function renderEmpty(msg) {
   document.getElementById('signal-rows').innerHTML =
-    `<tr><td colspan="13" class="empty" style="white-space: pre-line;">${msg}</td></tr>`;
+    `<tr><td colspan="14" class="empty" style="white-space: pre-line;">${msg}</td></tr>`;
 }
 
 // ──────────── Drawer ────────────
+// ──────────── Entry Hint logic ────────────
+// Answers Q3: "Đồ thị có điểm vào lệnh đẹp không?" in 5 seconds.
+//
+// Heuristic:
+//   1. STRONG BUY:  RSI < 60 AND price near golden support (61.8%, distance < 3%)
+//                   AND rating A+ → "Mua gần. Điểm vào: golden price, stop: dưới 78.6%"
+//   2. WATCH:       RSI ok AND price between MA20 and resistance → "Theo dõi"
+//   3. EXTENDED:    RSI > 65 OR price far from supports → "Đã chạy. Đợi pullback"
+//   4. WEAK:        Score < threshold OR rating C → "Không đề xuất"
+function computeEntryHint(s) {
+  const supports = s.m_supports || [];
+  const resistances = s.m_resistances || [];
+  const rsi = s.m_rsi14 || 50;
+  const close = s.close;
+
+  // Find golden support if any
+  const goldenSupport = supports.find(x => x.is_golden);
+  const nearestSupport = supports[0];
+  const nearestResistance = resistances[0];
+
+  let signal = 'NEUTRAL';   // STRONG_BUY | BUY | WATCH | EXTENDED | NEUTRAL
+  let title = 'Theo dõi';
+  let detail = '';
+  let entry = null;
+  let stop = null;
+  let target = null;
+  let color = 'var(--text-dim)';
+  let bg = 'var(--bg-elev-2)';
+
+  // Best case: A+ rating + golden support nearby + RSI not overbought
+  if (s.rating === 'A+' && goldenSupport && goldenSupport.distance_pct < 4 && rsi < 65) {
+    signal = 'STRONG_BUY';
+    title = 'Vùng vào lệnh đẹp';
+    detail = 'Tín hiệu mạnh + giá đang gần mức Golden Ratio 61.8% — vùng pullback lý tưởng để mua.';
+    entry = goldenSupport.price;
+    stop = supports.find(x => x.label === '78.6%')?.price || supports[supports.length - 1]?.price;
+    target = nearestResistance?.price;
+    color = 'var(--green)';
+    bg = 'rgba(0, 214, 143, 0.08)';
+  }
+  // Decent case: A+/A rating with RSI in healthy zone, near a support
+  else if ((s.rating === 'A+' || s.rating === 'A') && nearestSupport &&
+           nearestSupport.distance_pct < 3 && rsi >= 45 && rsi <= 65) {
+    signal = 'BUY';
+    title = 'Có thể vào lệnh';
+    detail = `Giá gần hỗ trợ ${nearestSupport.label} — entry hợp lý nếu volume xác nhận.`;
+    entry = nearestSupport.price;
+    stop = supports[1]?.price || (close * 0.95);
+    target = nearestResistance?.price;
+    color = 'var(--accent)';
+    bg = 'rgba(255, 181, 71, 0.08)';
+  }
+  // Extended: RSI overbought or price too far from supports
+  else if (rsi > 70 || (nearestSupport && nearestSupport.distance_pct > 8)) {
+    signal = 'EXTENDED';
+    title = 'Đã chạy — đợi pullback';
+    detail = rsi > 70
+      ? `RSI ${rsi.toFixed(0)} đã ở vùng quá mua. Đợi RSI về <65 hoặc pullback về hỗ trợ trước khi vào.`
+      : `Giá đã cách hỗ trợ gần nhất ${nearestSupport.distance_pct.toFixed(1)}%. Rủi ro reward kém — đợi pullback.`;
+    color = 'var(--red)';
+    bg = 'rgba(255, 71, 87, 0.06)';
+  }
+  // Weak signal
+  else if (s.rating === 'C' || s.total_score < currentMaxScore() * 0.5) {
+    signal = 'WEAK';
+    title = 'Tín hiệu yếu — không đề xuất';
+    detail = 'Số tiêu chí đạt thấp. Theo dõi nhưng không nên vào lệnh ở mức này.';
+    color = 'var(--text-mute)';
+    bg = 'var(--bg-elev-2)';
+  }
+  // Default: watch
+  else {
+    signal = 'WATCH';
+    title = 'Theo dõi';
+    detail = `RSI ${rsi.toFixed(0)} · ${s.rating}. Tín hiệu hợp lệ nhưng vùng vào không lý tưởng — theo dõi pullback.`;
+    color = 'var(--accent)';
+    bg = 'var(--bg-elev-2)';
+  }
+
+  // Build the levels grid if entry exists
+  let levelsHtml = '';
+  if (entry != null) {
+    const rrRatio = (target && stop)
+      ? ((target - entry) / (entry - stop)).toFixed(1)
+      : null;
+    levelsHtml = `
+      <div class="entry-levels">
+        <div class="entry-level entry-level-buy">
+          <div class="entry-level-label">VÀO LỆNH</div>
+          <div class="entry-level-price">${fmtPrice(entry)}</div>
+        </div>
+        ${stop ? `
+        <div class="entry-level entry-level-stop">
+          <div class="entry-level-label">CẮT LỖ</div>
+          <div class="entry-level-price">${fmtPrice(stop)}</div>
+          <div class="entry-level-sub">${(((entry - stop) / entry) * 100).toFixed(1)}%</div>
+        </div>
+        ` : ''}
+        ${target ? `
+        <div class="entry-level entry-level-target">
+          <div class="entry-level-label">CHỐT LÃI</div>
+          <div class="entry-level-price">${fmtPrice(target)}</div>
+          <div class="entry-level-sub">+${(((target - entry) / entry) * 100).toFixed(1)}%</div>
+        </div>
+        ` : ''}
+        ${rrRatio ? `
+        <div class="entry-level entry-level-rr">
+          <div class="entry-level-label">R:R</div>
+          <div class="entry-level-price">1:${rrRatio}</div>
+        </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="entry-hint" style="background: ${bg}; border-left: 3px solid ${color};">
+      <div class="entry-hint-head">
+        <span class="entry-hint-signal" style="color: ${color};">${title}</span>
+        <span class="entry-hint-tag">GỢI Ý NHANH</span>
+      </div>
+      <div class="entry-hint-detail">${detail}</div>
+      ${levelsHtml}
+    </div>
+  `;
+}
+
 function openDrawer(s) {
   document.getElementById('drawer-ticker').textContent = `${s.ticker} · ${s.exchange}`;
-  const passed = CRITERIA.filter(c => s[c.key] === 1).length;
+  const passed = currentCriteria().filter(c => s[c.key] === 1).length;
   const body = document.getElementById('drawer-body');
+
+  // === ENTRY HINT — answers Q3 in 5 seconds ===
+  const entryHint = computeEntryHint(s);
 
   let eventSection = '';
   if (s.m_upcoming_event) {
@@ -508,6 +847,7 @@ function openDrawer(s) {
   }
 
   body.innerHTML = `
+    ${entryHint}
     ${eventSection}
 
     <div class="drawer-section">
@@ -550,10 +890,12 @@ function openDrawer(s) {
       </div>
     </div>
 
+    ${renderFiboSection(s)}
+
     <div class="drawer-section">
-      <div class="drawer-section-title">Tiêu chí đạt được (${passed}/10)</div>
+      <div class="drawer-section-title">Tiêu chí đạt được (${passed}/${currentMaxScore()})</div>
       <ul class="criteria-detail-list">
-        ${CRITERIA.map(c => {
+        ${currentCriteria().map(c => {
           const on = s[c.key] === 1;
           return `<li>
             <div class="criteria-check ${on ? 'on' : 'off'}">${on ? '✓' : '·'}</div>
@@ -660,7 +1002,7 @@ function exportCSV() {
   const headers = ['Ticker', 'Exchange', 'Date', 'Close', 'Change5D%',
                    'Volume', 'ValueVND', 'VolRatio',
                    'RSI', 'DistHigh20%', 'Score', 'Rating',
-                   ...CRITERIA.map(c => c.name),
+                   ...currentCriteria().map(c => c.name),
                    'UpcomingEvent'];
   const rows = state.filtered.map(s => [
     s.ticker, s.exchange, (s.date || '').split('T')[0],
@@ -668,7 +1010,7 @@ function exportCSV() {
     s.volume, Math.round((s.close || 0) * 1000 * (s.volume || 0)),
     s.m_vol_ratio, s.m_rsi14, s.m_dist_to_high20_pct,
     s.total_score, s.rating,
-    ...CRITERIA.map(c => s[c.key]),
+    ...currentCriteria().map(c => s[c.key]),
     s.m_upcoming_event ? `${s.m_upcoming_event.type}@${s.m_upcoming_event.ex_date}` : '',
   ]);
   const csv = [headers, ...rows].map(r => r.join(',')).join('\n');

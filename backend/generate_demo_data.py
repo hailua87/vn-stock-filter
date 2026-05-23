@@ -78,6 +78,47 @@ def make_signal(ticker, exchange, base_price, target_score, scan_date):
             'ratio': ev['ratio'],
         }
 
+    # Mock Fibo swing: simulate that low was 90% of current, high was 110%
+    swing_low = round(base_price * random.uniform(0.85, 0.92), 2)
+    swing_high = round(base_price * random.uniform(1.05, 1.15), 2)
+    swing_range = swing_high - swing_low
+    swing = {
+        'high': swing_high,
+        'low': swing_low,
+        'range': round(swing_range, 2),
+        'direction': 'up',
+        'high_date': (scan_date - timedelta(days=random.randint(5, 25))).isoformat(),
+        'low_date': (scan_date - timedelta(days=random.randint(30, 55))).isoformat(),
+    }
+
+    # Compute Fibo levels
+    fibo_ratios = [0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0]
+    fibo_labels = {0.0: '0%', 0.236: '23.6%', 0.382: '38.2%', 0.5: '50%',
+                   0.618: '61.8%', 0.786: '78.6%', 1.0: '100%'}
+    all_fibo = []
+    for ratio in fibo_ratios:
+        price = round(swing_high - swing_range * ratio, 2)
+        all_fibo.append({
+            'ratio': ratio,
+            'label': fibo_labels[ratio],
+            'price': price,
+            'is_golden': ratio == 0.618,
+        })
+
+    # Classify as support/resistance
+    supports = []
+    resistances = []
+    for lv in all_fibo:
+        enriched = {**lv, 'type': 'fibo'}
+        if lv['price'] < base_price:
+            enriched['distance_pct'] = round((base_price - lv['price']) / base_price * 100, 2)
+            supports.append(enriched)
+        elif lv['price'] > base_price:
+            enriched['distance_pct'] = round((lv['price'] - base_price) / base_price * 100, 2)
+            resistances.append(enriched)
+    supports.sort(key=lambda x: -x['price'])
+    resistances.sort(key=lambda x: x['price'])
+
     return {
         'ticker': ticker, 'exchange': exchange,
         'date': scan_date.isoformat(),
@@ -95,6 +136,9 @@ def make_signal(ticker, exchange, base_price, target_score, scan_date):
         'm_ma20': round(base_price * 0.96, 2),
         'm_suspicious_data': False,
         'm_upcoming_event': upcoming_event,
+        'm_supports': supports[:3],
+        'm_resistances': resistances[:3],
+        'm_fibo_swing': swing,
     }
 
 
@@ -135,6 +179,159 @@ def is_business_day(d: date) -> bool:
     return d.weekday() < 5
 
 
+def make_gc_signal(ticker, exchange, base_price, scan_date):
+    """Generate a Golden Cross signal (works for both long and short presets)."""
+    keys = ['recent_cross', 'price_above_fast', 'ma_stacking', 'slow_rising', 'volume_confirm']
+    # Must have recent_cross = 1
+    scores = {'recent_cross': 1}
+    for k in keys[1:]:
+        scores[k] = 1 if random.random() < 0.65 else 0
+    # Need at least 3/5 to pass filter
+    while sum(scores.values()) < 3:
+        zeros = [k for k, v in scores.items() if v == 0]
+        if not zeros: break
+        scores[random.choice(zeros)] = 1
+    total = sum(scores.values())
+    rating = 'A+' if total == 5 else 'A' if total == 4 else 'B' if total == 3 else 'C'
+
+    # Fibo levels (simplified)
+    swing_low = round(base_price * random.uniform(0.80, 0.88), 2)
+    swing_high = round(base_price * random.uniform(1.05, 1.15), 2)
+    swing_range = swing_high - swing_low
+    fibo_levels = []
+    for ratio in [0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0]:
+        p = round(swing_high - swing_range * ratio, 2)
+        fibo_levels.append({'price': p, 'label': f'{ratio*100:.1f}%' if ratio else '0%',
+                            'ratio': ratio, 'is_golden': ratio == 0.618, 'type': 'fibo'})
+    supports = sorted([{**lv, 'distance_pct': round((base_price - lv['price'])/base_price*100, 2)}
+                       for lv in fibo_levels if lv['price'] < base_price],
+                      key=lambda x: -x['price'])[:3]
+    resistances = sorted([{**lv, 'distance_pct': round((lv['price']-base_price)/base_price*100, 2)}
+                          for lv in fibo_levels if lv['price'] > base_price],
+                         key=lambda x: x['price'])[:3]
+
+    return {
+        'ticker': ticker, 'exchange': exchange,
+        'date': scan_date.isoformat(),
+        'close': round(base_price, 2),
+        'volume': random.randint(500_000, 5_000_000),
+        'total_score': total, 'rating': rating,
+        **{f'gc_{k}': v for k, v in scores.items()},
+        'm_cross_days_ago': random.randint(0, 4),
+        'm_fast_ma': round(base_price * 0.99, 2),
+        'm_slow_ma': round(base_price * 0.93, 2),
+        'm_slow_spread_pct': round(random.uniform(2, 12), 2),
+        'm_change_5d_pct': round(random.uniform(0.5, 5), 2),
+        'm_vol_ratio': round(random.uniform(1.0, 2.5), 2),
+        'm_rsi14': round(random.uniform(55, 70), 1),
+        'm_supports': supports,
+        'm_resistances': resistances,
+        'm_fibo_swing': {
+            'high': swing_high, 'low': swing_low, 'range': swing_range,
+            'direction': 'up',
+            'high_date': (scan_date - timedelta(days=random.randint(5, 20))).isoformat(),
+            'low_date': (scan_date - timedelta(days=random.randint(30, 60))).isoformat(),
+        },
+        'm_suspicious_data': False,
+        'm_upcoming_event': None,
+    }
+
+
+def make_ich_signal(ticker, exchange, base_price, scan_date):
+    """Generate an Ichimoku signal (flexible mode: score >= 3)."""
+    keys = ['tk_bullish', 'price_above_cloud', 'cloud_bullish', 'chikou_free']
+    scores = {k: 1 if random.random() < 0.7 else 0 for k in keys}
+    # Filter: flexible mode requires at least 3/4 to be in results
+    while sum(scores.values()) < 3:
+        zeros = [k for k, v in scores.items() if v == 0]
+        if not zeros: break
+        scores[random.choice(zeros)] = 1
+    total = sum(scores.values())
+    rating = 'A+' if total == 4 else 'A' if total == 3 else 'C'
+
+    cloud_top = round(base_price * random.uniform(0.92, 0.99), 2)
+    cloud_bottom = round(cloud_top * random.uniform(0.95, 0.99), 2)
+
+    swing_low = round(base_price * random.uniform(0.80, 0.88), 2)
+    swing_high = round(base_price * random.uniform(1.05, 1.15), 2)
+    swing_range = swing_high - swing_low
+    fibo_levels = []
+    for ratio in [0.0, 0.236, 0.382, 0.5, 0.618, 0.786, 1.0]:
+        p = round(swing_high - swing_range * ratio, 2)
+        fibo_levels.append({'price': p, 'label': f'{ratio*100:.1f}%' if ratio else '0%',
+                            'ratio': ratio, 'is_golden': ratio == 0.618, 'type': 'fibo'})
+    supports = sorted([{**lv, 'distance_pct': round((base_price - lv['price'])/base_price*100, 2)}
+                       for lv in fibo_levels if lv['price'] < base_price],
+                      key=lambda x: -x['price'])[:3]
+    resistances = sorted([{**lv, 'distance_pct': round((lv['price']-base_price)/base_price*100, 2)}
+                          for lv in fibo_levels if lv['price'] > base_price],
+                         key=lambda x: x['price'])[:3]
+
+    return {
+        'ticker': ticker, 'exchange': exchange,
+        'date': scan_date.isoformat(),
+        'close': round(base_price, 2),
+        'volume': random.randint(500_000, 5_000_000),
+        'total_score': total, 'rating': rating,
+        **{f'ich_{k}': v for k, v in scores.items()},
+        'm_tenkan': round(base_price * 0.99, 2),
+        'm_kijun': round(base_price * 0.97, 2),
+        'm_senkou_a': cloud_top,
+        'm_senkou_b': cloud_bottom,
+        'm_cloud_top': cloud_top,
+        'm_cloud_bottom': cloud_bottom,
+        'm_cloud_distance_pct': round((base_price - cloud_top) / cloud_top * 100, 2),
+        'm_tk_cross_days_ago': random.randint(0, 8) if random.random() < 0.6 else None,
+        'm_change_5d_pct': round(random.uniform(0.5, 5), 2),
+        'm_vol_ratio': round(random.uniform(1.0, 2.5), 2),
+        'm_rsi14': round(random.uniform(50, 70), 1),
+        'm_supports': supports,
+        'm_resistances': resistances,
+        'm_fibo_swing': {
+            'high': swing_high, 'low': swing_low, 'range': swing_range,
+            'direction': 'up',
+            'high_date': (scan_date - timedelta(days=random.randint(5, 20))).isoformat(),
+            'low_date': (scan_date - timedelta(days=random.randint(30, 60))).isoformat(),
+        },
+        'm_suspicious_data': False,
+        'm_upcoming_event': None,
+    }
+
+
+def generate_strategy_for_date(scan_date, n_signals, signal_maker, strategy_label):
+    """Generic generator for any strategy."""
+    sample_tickers = [
+        ('VCB','HOSE'), ('FPT','HOSE'), ('HPG','HOSE'), ('MWG','HOSE'), ('VHM','HOSE'),
+        ('VIC','HOSE'), ('VPB','HOSE'), ('TCB','HOSE'), ('CTG','HOSE'), ('MBB','HOSE'),
+        ('NKG','HOSE'), ('PHR','HOSE'), ('SSI','HOSE'), ('SAB','HOSE'), ('VND','HOSE'),
+        ('VRE','HOSE'), ('REE','HOSE'), ('PNJ','HOSE'), ('DGC','HOSE'), ('GMD','HOSE'),
+        ('SHS','HNX'), ('CEO','HNX'), ('IDC','HNX'), ('PVS','HNX'), ('MBS','HNX'),
+        ('TNG','HNX'), ('PVI','HNX'), ('VC3','HNX'), ('LAS','HNX'),
+        ('ACV','UPCOM'), ('BSR','UPCOM'), ('VEA','UPCOM'), ('QNS','UPCOM'), ('VTP','UPCOM'),
+        ('OIL','UPCOM'), ('MCH','UPCOM'), ('VGI','UPCOM'),
+    ]
+    random.seed(hash(f"{strategy_label}-{scan_date}"))
+    chosen = random.sample(sample_tickers, min(n_signals, len(sample_tickers)))
+    signals = []
+    for ticker, exchange in chosen:
+        price = random.uniform(20, 130)
+        signals.append(signal_maker(ticker, exchange, price, scan_date))
+    signals.sort(key=lambda s: -s['total_score'])
+
+    return {
+        'generated_at': datetime.combine(scan_date, datetime.min.time()).replace(hour=16, minute=5).isoformat(),
+        'strategy': strategy_label,
+        'total': len(signals),
+        'metadata': {
+            'min_score': 2,
+            'exchanges': ['HOSE', 'HNX', 'UPCOM'],
+            'total_scanned': 1533,
+            'demo': True,
+        },
+        'signals': signals,
+    }
+
+
 def main():
     out_root = Path(__file__).resolve().parent.parent / 'web' / 'data'
     out_root.mkdir(parents=True, exist_ok=True)
@@ -171,7 +368,43 @@ def main():
     with open(archive / 'index.json', 'w') as f:
         json.dump(index, f, indent=2)
 
-    print(f"\n✓ Generated {len(days)} days of demo data")
+    print(f"\n✓ Generated {len(days)} days of pre-breakout demo data")
+
+    # Generate Golden Cross demo (both LONG and SHORT presets)
+    # and Ichimoku demo
+    strategy_configs = [
+        ('golden_cross_long', make_gc_signal, (8, 18)),
+        ('golden_cross_short', make_gc_signal, (12, 25)),  # short is more common
+        ('ichimoku', make_ich_signal, (15, 30)),
+    ]
+
+    for strategy_label, signal_maker, (lo, hi) in strategy_configs:
+        strat_dir = out_root / strategy_label
+        strat_dir.mkdir(exist_ok=True)
+        strat_archive = strat_dir / 'archive'
+        strat_archive.mkdir(exist_ok=True)
+
+        for scan_date in days:
+            n = random.randint(lo, hi)
+            data = generate_strategy_for_date(scan_date, n, signal_maker, strategy_label)
+            with open(strat_archive / f'{scan_date.isoformat()}.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+
+        # latest.json = first day
+        with open(strat_archive / f'{days[0].isoformat()}.json') as f:
+            latest_data = json.load(f)
+        with open(strat_dir / 'latest.json', 'w', encoding='utf-8') as f:
+            json.dump(latest_data, f, ensure_ascii=False, indent=2)
+
+        # index.json
+        with open(strat_archive / 'index.json', 'w') as f:
+            json.dump({
+                'latest': days[0].isoformat(),
+                'dates': [d.isoformat() for d in days],
+                'count': len(days),
+            }, f, indent=2)
+
+        print(f"✓ Generated {len(days)} days of {strategy_label} demo data")
 
 
 if __name__ == '__main__':

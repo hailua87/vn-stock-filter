@@ -52,7 +52,9 @@ jobs:
         run: |
           git config user.name "VN Scanner Bot"
           git config user.email "bot@vn-scanner.local"
-          git add web/data/latest.json web/data/archive/
+          git add web/data/latest.json web/data/archive/ \
+                  web/data/golden_cross_long/ web/data/golden_cross_short/ \
+                  web/data/ichimoku/
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else

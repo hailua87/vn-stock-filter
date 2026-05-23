@@ -197,6 +197,15 @@ def evaluate(df: pd.DataFrame, ticker: str,
             break
     scores['no_gap_down'] = int(no_gap)
 
+    # Calculate Fibonacci-based support/resistance levels
+    try:
+        from .support_resistance import get_fibo_support_resistance
+        sr = get_fibo_support_resistance(df, current_price=float(last['Close']),
+                                         lookback=60, n_levels=3)
+    except Exception as e:
+        log.warning(f"  {ticker}: Fibo SR calculation failed: {e}")
+        sr = {'supports': [], 'resistances': [], 'swing': None}
+
     metrics = {
         'change_5d_pct': round((close.iloc[-1] / close.iloc[-6] - 1) * 100, 2),
         'vol_ratio': round(last['Volume'] / last['VolMA20'], 2) if last['VolMA20'] > 0 else 0,
@@ -207,7 +216,10 @@ def evaluate(df: pd.DataFrame, ticker: str,
         'ma10': round(last['MA10'], 2),
         'ma20': round(last['MA20'], 2),
         'suspicious_data': suspicious_data,
-        'upcoming_event': event_warning,  # None or {type, ex_date, ratio}
+        'upcoming_event': event_warning,
+        'supports': sr['supports'],          # Fibo levels below current
+        'resistances': sr['resistances'],    # Fibo levels above current
+        'fibo_swing': sr.get('swing'),       # {high, low, direction, range, dates}
     }
 
     return CriteriaResult(
