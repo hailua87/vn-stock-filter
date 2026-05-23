@@ -58,6 +58,22 @@ const STRATEGIES = {
       { key: 'ich_chikou_free',       name: 'Chikou thoát kháng cự',        cat: 'flow' },
     ],
   },
+  combined: {
+    name: 'Tổng hợp',
+    dataDir: null,                 // multi-source; merged client-side
+    maxScore: 4,                   // up to 4 strategies passed
+    isCombined: true,
+    sources: ['pre_breakout', 'golden_cross_long', 'golden_cross_short', 'ichimoku'],
+    criteria: [],                  // built dynamically per source
+  },
+};
+
+// Short codes for strategy badges
+const STRATEGY_BADGES = {
+  pre_breakout:       { code: 'PB',  label: 'Pre-Breakout',  hint: 'Tín hiệu sắp break giá' },
+  golden_cross_long:  { code: 'GCL', label: 'GC dài hạn',    hint: 'Golden Cross MA50×MA200' },
+  golden_cross_short: { code: 'GCS', label: 'GC ngắn hạn',   hint: 'Golden Cross MA10×MA20' },
+  ichimoku:           { code: 'ICH', label: 'Ichimoku',      hint: 'Tenkan/Kijun + Cloud' },
 };
 
 let activeStrategy = 'pre_breakout';
@@ -75,6 +91,12 @@ const state = {
   selectedTicker: null,
   sort: { column: null, direction: null },
   filters: { exchange: '', rating: '', search: '', volMin: null, volMax: null, ich_special: '' },
+  // ─── Combined mode ───
+  combined: {
+    enabledStrategies: { pre_breakout: true, golden_cross_long: true, golden_cross_short: true, ichimoku: true },
+    logic: 'AND',                  // 'AND' or 'OR'
+    sourceData: {},                // strategy → { signals, metadata }
+  },
 };
 
 // ──────────── Init ────────────
@@ -184,13 +206,100 @@ async function switchStrategy(strategy) {
   const ichFilter = document.getElementById('fg-ichimoku');
   if (ichFilter) {
     ichFilter.style.display = strategy === 'ichimoku' ? '' : 'none';
-    // Reset chip to "Tất cả"
     ichFilter.querySelectorAll('.chip').forEach((c, i) => c.classList.toggle('active', i === 0));
   }
 
-  await loadLatestFirst();
-  await loadDateIndex();
-  renderDateOptions();
+  // Show combined filter only on Combined tab
+  const combFilter = document.getElementById('fg-combined');
+  if (combFilter) {
+    combFilter.style.display = strategy === 'combined' ? '' : 'none';
+  }
+
+  if (strategy === 'combined') {
+    await loadCombinedData();
+  } else {
+    await loadLatestFirst();
+    await loadDateIndex();
+    renderDateOptions();
+  }
+}
+
+// ──────────── COMBINED MODE: Load all 4 strategies & merge ────────────
+async function loadCombinedData() {
+  const sources = STRATEGIES.combined.sources;
+  state.combined.sourceData = {};
+
+  // Load all source latest.json in parallel
+  const loadOne = async (key) => {
+    try {
+      const dir = STRATEGIES[key].dataDir;
+      const r = await fetch(`${dir}/latest.json?_=${Date.now()}`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const d = await r.json();
+      return { key, signals: d.signals || [], metadata: d.metadata || {} };
+    } catch (e) {
+      console.warn(`Combined: failed to load ${key}:`, e.message);
+      return { key, signals: [], metadata: {} };
+    }
+  };
+
+  const results = await Promise.all(sources.map(loadOne));
+
+  // Index signals by ticker per strategy
+  const byTicker = {};      // ticker -> { strategies: Set, data: best signal record }
+  let universeSize = 0;
+  let demoFlag = false;
+  let scanDate = null;
+
+  for (const { key, signals, metadata } of results) {
+    state.combined.sourceData[key] = { signals, metadata };
+    if (metadata.universe_size && metadata.universe_size > universeSize) universeSize = metadata.universe_size;
+    if (metadata.demo) demoFlag = true;
+    if (metadata.scan_date) scanDate = metadata.scan_date;
+    // Update count in filter UI
+    const cntEl = document.getElementById(`cnt-${key}`);
+    if (cntEl) cntEl.textContent = signals.length;
+
+    for (const s of signals) {
+      if (!byTicker[s.ticker]) {
+        byTicker[s.ticker] = {
+          ticker: s.ticker,
+          strategies: new Set(),
+          perStrategyScore: {},
+          best: s,         // pick first; will replace with highest-scoring later
+        };
+      }
+      byTicker[s.ticker].strategies.add(key);
+      byTicker[s.ticker].perStrategyScore[key] = s.total_score;
+      // Keep the signal from the strategy with highest score (for displaying base data)
+      if (s.total_score > (byTicker[s.ticker].best.total_score || 0)) {
+        byTicker[s.ticker].best = s;
+      }
+    }
+  }
+
+  // Flatten: each ticker becomes a "combined signal"
+  state.raw = Object.values(byTicker).map(entry => ({
+    ...entry.best,
+    _strategies: Array.from(entry.strategies),
+    _perStrategyScore: entry.perStrategyScore,
+    _passCount: entry.strategies.size,
+  }));
+
+  // Update metadata
+  state.currentDate = scanDate;
+  state.latestDate = scanDate;
+  document.getElementById('stat-scanned').textContent = universeSize.toLocaleString();
+  const demoBanner = document.getElementById('demo-banner');
+  if (demoFlag) {
+    demoBanner.style.display = 'block';
+    document.getElementById('dashboard').classList.add('has-banner');
+  } else {
+    demoBanner.style.display = 'none';
+    document.getElementById('dashboard').classList.remove('has-banner');
+  }
+
+  render();
 }
 
 // ──────────── Load data ────────────
@@ -333,6 +442,29 @@ function bindFilters() {
   });
 
   document.getElementById('export-csv').addEventListener('click', exportCSV);
+
+  // ─── Combined strategy filter binds ───
+  document.querySelectorAll('.combined-strat-check').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const key = cb.dataset.strategy;
+      state.combined.enabledStrategies[key] = cb.checked;
+      render();
+    });
+  });
+  document.querySelectorAll('.combined-logic-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.combined-logic-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.combined.logic = btn.dataset.logic;
+      const hint = document.getElementById('combined-hint');
+      if (hint) {
+        hint.textContent = btn.dataset.logic === 'AND'
+          ? 'AND: mã thỏa MỌI chiến lược tick'
+          : 'OR: mã thỏa BẤT KỲ chiến lược nào tick';
+      }
+      render();
+    });
+  });
 }
 
 function parseVolumeInput(s) {
@@ -450,6 +582,23 @@ function render() {
     eventWarn.style.display = 'none';
   }
 
+  // Update table headers based on mode
+  const criteriaLabel = document.getElementById('th-criteria-label');
+  const scoreLabel = document.getElementById('th-score-label');
+  if (criteriaLabel && scoreLabel) {
+    if (activeStrategy === 'combined') {
+      // Hide TIÊU CHÍ column in combined (badges live in MÃ cell)
+      criteriaLabel.style.display = 'none';
+      scoreLabel.innerHTML = 'PASS <span class="sort-ind"></span>';
+      scoreLabel.dataset.sort = '_passCount';
+    } else {
+      criteriaLabel.style.display = '';
+      criteriaLabel.textContent = 'TIÊU CHÍ';
+      scoreLabel.innerHTML = 'ĐIỂM <span class="sort-ind"></span>';
+      scoreLabel.dataset.sort = 'total_score';
+    }
+  }
+
   renderRows();
 }
 
@@ -471,7 +620,24 @@ function applyFilters() {
     arr = arr.filter(s => s.ich_recent_tk_cross === 1);
   }
 
-  // Sort: default by total_score desc; custom sort if state.sort.column
+  // ─── COMBINED MODE FILTER ───
+  if (activeStrategy === 'combined') {
+    const enabled = Object.entries(state.combined.enabledStrategies)
+      .filter(([, on]) => on)
+      .map(([k]) => k);
+
+    if (enabled.length === 0) {
+      arr = [];
+    } else if (state.combined.logic === 'AND') {
+      // Mã phải có trong MỌI strategy được tick
+      arr = arr.filter(s => enabled.every(k => s._strategies?.includes(k)));
+    } else {
+      // OR: mã có trong BẤT KỲ strategy nào tick
+      arr = arr.filter(s => enabled.some(k => s._strategies?.includes(k)));
+    }
+  }
+
+  // Sort: default by total_score desc; for combined default by _passCount desc, then total_score
   if (state.sort.column) {
     arr.sort((a, b) => {
       let av, bv;
@@ -484,6 +650,12 @@ function applyFilters() {
       }
       const cmp = (av < bv) ? -1 : (av > bv) ? 1 : 0;
       return state.sort.direction === 'asc' ? cmp : -cmp;
+    });
+  } else if (activeStrategy === 'combined') {
+    arr.sort((a, b) => {
+      const dp = (b._passCount || 0) - (a._passCount || 0);
+      if (dp !== 0) return dp;
+      return (b.total_score || 0) - (a.total_score || 0);
     });
   } else {
     arr.sort((a, b) => (b.total_score || 0) - (a.total_score || 0));
@@ -514,27 +686,11 @@ function renderRow(s, idx) {
   const changeClass = change > 0 ? 'up' : change < 0 ? 'down' : 'flat';
   const sign = change > 0 ? '+' : '';
 
-  let scoreClass = '';
-  const ratio = s.total_score / currentMaxScore();
-  if (ratio >= 0.8) scoreClass = 'high';
-  else if (ratio >= 0.6) scoreClass = 'mid';
-
   let ratingClass = '';
   if (s.rating === 'A+') ratingClass = 'aplus';
   else if (s.rating === 'A') ratingClass = 'a';
   else if (s.rating === 'B') ratingClass = 'b';
   else ratingClass = 'c';
-
-  // Criteria pills
-  const pills = currentCriteria().map(c => {
-    const on = s[c.key] === 1;
-    return `<span class="criteria-pill ${on ? 'on' : ''} cat-${c.cat}"></span>`;
-  }).join('');
-
-  // TK cross indicator (only for Ichimoku tab)
-  const tkCrossFlag = (activeStrategy === 'ichimoku' && s.ich_recent_tk_cross === 1)
-    ? `<span class="tk-cross-flag" title="Tenkan vừa cắt lên Kijun (${s.m_tk_cross_days_ago ?? '?'} phiên trước)">⭐</span>`
-    : '';
 
   // Event flag
   const eventFlag = s.m_upcoming_event ? `<span class="event-flag" title="Sự kiện: ${s.m_upcoming_event.type} ${s.m_upcoming_event.ex_date}">⚑</span>` : '';
@@ -546,6 +702,56 @@ function renderRow(s, idx) {
   const resCell = resistances.length ? renderFibCell(resistances[0], 'resistance') : '<span class="dim">—</span>';
 
   const selectedClass = s.ticker === state.selectedTicker ? 'selected' : '';
+
+  // ── Combined mode: badges INLINE trong cell MÃ ──
+  if (activeStrategy === 'combined') {
+    const passedStrats = s._strategies || [];
+    const passCount = s._passCount || 0;
+    const totalStrats = STRATEGIES.combined.sources.length;
+
+    // Chỉ badge những strategy mã PASS (đỡ noise)
+    const badgesInline = passedStrats.map(key => {
+      const b = STRATEGY_BADGES[key];
+      const shortCls = key === 'pre_breakout' ? 'pb'
+                     : key === 'golden_cross_long' ? 'gcl'
+                     : key === 'golden_cross_short' ? 'gcs' : 'ich';
+      return `<span class="strat-badge strat-badge-${shortCls}" title="${b.label}: PASS">${b.code}</span>`;
+    }).join('');
+
+    const passCls = passCount === totalStrats ? 'full' : passCount >= 2 ? 'high' : 'low';
+
+    return `<tr data-ticker="${s.ticker}" class="${selectedClass}">
+      <td class="th-idx">${idx}</td>
+      <td class="ticker-with-badges"><span class="ticker-cell">${s.ticker}</span>${eventFlag}<span class="ticker-badges">${badgesInline}</span></td>
+      <td><span class="exchange-cell">${s.exchange}</span></td>
+      <td class="num">${fmtPrice(s.close)}</td>
+      <td class="num ${changeClass}">${sign}${change.toFixed(2)}%</td>
+      <td class="num">${fmtVolume(s.volume)}</td>
+      <td class="num">${fmtValue(s.close, s.volume)}</td>
+      <td class="num">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
+      <td class="num">${(s.m_rsi14 || 0).toFixed(0)}</td>
+      <td class="num">${supCell}</td>
+      <td class="num">${resCell}</td>
+      <td class="combined-criteria-cell" style="display:none;"></td>
+      <td class="num"><span class="combined-pass ${passCls}">${passCount}/${totalStrats}</span></td>
+      <td><span class="rating-tag ${ratingClass}">${s.rating}</span></td>
+    </tr>`;
+  }
+
+  // ── Default (single-strategy) row ──
+  let scoreClass = '';
+  const ratio = s.total_score / currentMaxScore();
+  if (ratio >= 0.8) scoreClass = 'high';
+  else if (ratio >= 0.6) scoreClass = 'mid';
+
+  const pills = currentCriteria().map(c => {
+    const on = s[c.key] === 1;
+    return `<span class="criteria-pill ${on ? 'on' : ''} cat-${c.cat}"></span>`;
+  }).join('');
+
+  const tkCrossFlag = (activeStrategy === 'ichimoku' && s.ich_recent_tk_cross === 1)
+    ? `<span class="tk-cross-flag" title="Tenkan vừa cắt lên Kijun (${s.m_tk_cross_days_ago ?? '?'} phiên trước)">⭐</span>`
+    : '';
 
   return `<tr data-ticker="${s.ticker}" class="${selectedClass}">
     <td class="th-idx">${idx}</td>

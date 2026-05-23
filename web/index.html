@@ -46,6 +46,7 @@
     <button class="strat-tab" data-strategy="golden_cross_long">GC dài hạn</button>
     <button class="strat-tab" data-strategy="golden_cross_short">GC ngắn hạn</button>
     <button class="strat-tab" data-strategy="ichimoku">Ichimoku</button>
+    <button class="strat-tab strat-tab-combined" data-strategy="combined" title="Lọc mã thỏa nhiều chiến lược cùng lúc">⚡ Tổng hợp</button>
   </nav>
 
   <div class="topbar-right">
@@ -130,6 +131,42 @@
         <div class="fg-hint">Lọc mã có Tenkan-sen vừa cắt lên Kijun-sen</div>
       </div>
 
+      <!-- ───── COMBINED MODE: Strategy selector ───── -->
+      <div class="fg fg-combined" id="fg-combined" style="display: none;">
+        <label class="fg-label">Yêu cầu chiến lược</label>
+        <div class="combined-toggle">
+          <button class="combined-logic-btn active" data-logic="AND" title="Mã phải thỏa MỌI chiến lược tick">AND</button>
+          <button class="combined-logic-btn" data-logic="OR" title="Mã thỏa BẤT KỲ chiến lược nào tick">OR</button>
+        </div>
+        <div class="combined-strats">
+          <label class="combined-strat-row">
+            <input type="checkbox" class="combined-strat-check" data-strategy="pre_breakout" checked>
+            <span class="strat-badge strat-badge-pb">PB</span>
+            <span class="combined-strat-label">Pre-Breakout</span>
+            <span class="combined-strat-count" id="cnt-pre_breakout">—</span>
+          </label>
+          <label class="combined-strat-row">
+            <input type="checkbox" class="combined-strat-check" data-strategy="golden_cross_long" checked>
+            <span class="strat-badge strat-badge-gcl">GCL</span>
+            <span class="combined-strat-label">GC dài hạn</span>
+            <span class="combined-strat-count" id="cnt-golden_cross_long">—</span>
+          </label>
+          <label class="combined-strat-row">
+            <input type="checkbox" class="combined-strat-check" data-strategy="golden_cross_short" checked>
+            <span class="strat-badge strat-badge-gcs">GCS</span>
+            <span class="combined-strat-label">GC ngắn hạn</span>
+            <span class="combined-strat-count" id="cnt-golden_cross_short">—</span>
+          </label>
+          <label class="combined-strat-row">
+            <input type="checkbox" class="combined-strat-check" data-strategy="ichimoku" checked>
+            <span class="strat-badge strat-badge-ich">ICH</span>
+            <span class="combined-strat-label">Ichimoku</span>
+            <span class="combined-strat-count" id="cnt-ichimoku">—</span>
+          </label>
+        </div>
+        <div class="fg-hint" id="combined-hint">AND: mã thỏa MỌI chiến lược tick</div>
+      </div>
+
       <div class="fg-divider"></div>
       <div class="fg">
         <label class="fg-label">Trạng thái dữ liệu</label>
@@ -177,8 +214,8 @@
             <th class="num sortable" data-sort="m_rsi14">RSI <span class="sort-ind"></span></th>
             <th class="num" title="Hỗ trợ Fibo">S</th>
             <th class="num" title="Kháng cự Fibo">R</th>
-            <th class="th-criteria">TIÊU CHÍ</th>
-            <th class="num sortable" data-sort="total_score">ĐIỂM <span class="sort-ind"></span></th>
+            <th class="th-criteria" id="th-criteria-label">TIÊU CHÍ</th>
+            <th class="num sortable" data-sort="total_score" id="th-score-label">ĐIỂM <span class="sort-ind"></span></th>
             <th class="th-rating">HẠNG</th>
           </tr>
         </thead>

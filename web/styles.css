@@ -4,15 +4,17 @@
    ════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ─── Base (Dark Charcoal, NOT pure black) ─── */
-  --bg-base:    #161a25;       /* main background — Dark Charcoal */
-  --bg-elev-1:  #1c2030;       /* cards, panels */
-  --bg-elev-2:  #252a3d;       /* hover, active cell */
-  --bg-elev-3:  #2d3548;       /* selected row */
+  /* ─── Base (Material Design Dark Charcoal #121212) ─── */
+  --bg-base:    #121212;       /* main background — TABLE area */
+  --bg-elev-1:  #1c1f27;       /* SIDE PANELS (filters + detail) — lighter for separation */
+  --bg-elev-2:  #262a35;       /* hover, panels, table header */
+  --bg-elev-3:  #2f3441;       /* active/selected row */
+  --bg-elev-4:  #383d4b;       /* deepest elevation (modals) */
 
   /* ─── Borders ─── */
-  --border:        rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.12);
+  --border:        rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-accent: rgba(79, 195, 247, 0.4);   /* highlight for selected/focus */
 
   /* ─── Text ─── */
   --text:       #eceff1;       /* primary — soft white-gray */
@@ -25,23 +27,23 @@
   --down:       #ef5350;       /* red — trading down */
   --down-soft:  rgba(239, 83, 80, 0.12);
 
-  /* ─── System colors (NEUTRAL, NOT red/green) ─── */
+  /* ─── System colors (NEUTRAL ONLY — no amber/gold) ─── */
   --system:        #78909c;    /* neutral blue-gray for buttons */
-  --system-active: #b0bec5;    /* active state */
-  --focus:         #4fc3f7;    /* focus highlight (cool blue) */
-  --warning:       #ffa726;    /* events/corporate actions only */
+  --system-active: #b0bec5;    /* active state (light gray) */
+  --focus:         #4fc3f7;    /* focus highlight (cool blue, info) */
+  --warning:       #b0bec5;    /* events — NEUTRAL gray (was amber #ffa726) */
 
   /* ─── Criteria pill colors (for legend) ─── */
   --cat-squeeze: #ec407a;      /* pink — Nén */
   --cat-flow:    #5c6bc0;      /* indigo — Dòng tiền */
-  --cat-trend:   #66bb6a;      /* green-trend — but as category not as up/down */
-  --cat-event:   #ffa726;      /* amber — Sự kiện */
+  --cat-trend:   #66bb6a;      /* green-trend — category not price */
+  --cat-event:   #b0bec5;      /* NEUTRAL gray (was amber) — Sự kiện */
 
-  /* ─── Rating tags ─── */
-  --rating-aplus: #26a69a;
-  --rating-a:     #66bb6a;
-  --rating-b:     #ffa726;
-  --rating-c:     #546e7a;
+  /* ─── Rating tags (neutral, no amber) ─── */
+  --rating-aplus: #26a69a;     /* teal — strongest */
+  --rating-a:     #66bb6a;     /* light green */
+  --rating-b:     #b0bec5;     /* neutral gray (was amber) */
+  --rating-c:     #546e7a;     /* dim */
 
   /* ─── Typography ─── */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
@@ -87,7 +89,8 @@ input { font-family: inherit; }
 .topbar {
   height: var(--topbar-h);
   background: var(--bg-elev-1);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-strong);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   display: flex;
   align-items: center;
   padding: 0 16px;
@@ -196,6 +199,16 @@ input { font-family: inherit; }
   color: var(--bg-base);
   font-weight: 600;
 }
+/* Tab Combined — separated visually */
+.strat-tab-combined {
+  margin-left: 6px;
+  border-left: 1px solid var(--border-strong);
+  padding-left: 16px;
+}
+.strat-tab-combined.active {
+  background: var(--focus);
+  color: var(--bg-base);
+}
 
 /* Right side: time + market state */
 .topbar-right {
@@ -288,6 +301,8 @@ input { font-family: inherit; }
 /* ─── COL 1: FILTERS ─── */
 .col-filters {
   background: var(--bg-elev-1);
+  box-shadow: inset -1px 0 0 var(--border-strong);
+  position: relative;
 }
 .dashboard.filters-collapsed .col-filters .col-body,
 .dashboard.filters-collapsed .col-filters .col-foot {
@@ -550,12 +565,13 @@ input { font-family: inherit; }
 }
 
 .list-head {
-  height: 36px;
+  height: 40px;
   padding: 0 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--border);
+  background: var(--bg-elev-2);
+  border-bottom: 1px solid var(--border-strong);
   flex-shrink: 0;
 }
 .result-count {
@@ -615,15 +631,17 @@ input { font-family: inherit; }
   position: sticky;
   top: 0;
   z-index: 5;
-  background: var(--bg-elev-1);
+  background: var(--bg-elev-2);
+  box-shadow: 0 1px 0 var(--border-strong), 0 2px 8px rgba(0,0,0,0.3);
 }
 .signal-table thead th {
-  padding: 8px 8px;
+  padding: 10px 8px;
   text-align: left;
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  color: var(--text-mute);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
   border-bottom: 1px solid var(--border-strong);
   white-space: nowrap;
 }
@@ -646,12 +664,12 @@ input { font-family: inherit; }
 .signal-table tbody tr {
   border-bottom: 1px solid var(--border);
   cursor: pointer;
-  transition: background 0.08s;
+  transition: background 0.08s, box-shadow 0.08s;
 }
-.signal-table tbody tr:hover { background: var(--bg-elev-2); }
+.signal-table tbody tr:hover { background: rgba(255,255,255,0.025); }
 .signal-table tbody tr.selected {
   background: var(--bg-elev-3);
-  box-shadow: inset 3px 0 0 var(--focus);
+  box-shadow: inset 4px 0 0 var(--focus), 0 0 0 1px rgba(79,195,247,0.15);
 }
 .signal-table tbody td {
   padding: 7px 8px;
@@ -716,7 +734,7 @@ input { font-family: inherit; }
 }
 .rating-tag.aplus { background: rgba(38, 166, 154, 0.2); color: var(--rating-aplus); }
 .rating-tag.a     { background: rgba(102, 187, 106, 0.2); color: var(--rating-a); }
-.rating-tag.b     { background: rgba(255, 167, 38, 0.2); color: var(--rating-b); }
+.rating-tag.b     { background: rgba(176, 190, 197, 0.15); color: var(--rating-b); }
 .rating-tag.c     { background: rgba(84, 110, 122, 0.2); color: var(--rating-c); }
 
 /* Criteria pills */
@@ -770,8 +788,9 @@ input { font-family: inherit; }
 /* ─── COL 3: DETAIL ─── */
 .col-detail {
   background: var(--bg-elev-1);
-  border-left: 1px solid var(--border);
+  border-left: 1px solid var(--border-strong);
   border-right: none;
+  box-shadow: inset 1px 0 0 var(--border-strong), -2px 0 8px rgba(0,0,0,0.2);
 }
 
 .detail-empty {
@@ -1343,3 +1362,157 @@ kbd {
 .mobile-bar { display: none; }
 .mobile-backdrop { display: none; }
 .mobile-backdrop.show { display: block; }
+
+/* ═══════════════════════════════════════════════════
+   COMBINED MODE — Multi-strategy filter section
+   ═══════════════════════════════════════════════════ */
+.fg-combined {
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.fg-combined .fg-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--focus);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.combined-toggle {
+  display: flex;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px;
+  margin-bottom: 10px;
+}
+.combined-logic-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 5px;
+  border-radius: 2px;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  transition: all 0.12s;
+}
+.combined-logic-btn:hover {
+  color: var(--text);
+}
+.combined-logic-btn.active {
+  background: var(--focus);
+  color: var(--bg-base);
+}
+
+.combined-strats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.combined-strat-row {
+  display: grid;
+  grid-template-columns: 16px auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+.combined-strat-row:hover {
+  background: var(--bg-elev-3);
+  border-color: var(--border-strong);
+}
+.combined-strat-row:has(input:checked) {
+  background: rgba(79, 195, 247, 0.06);
+  border-color: rgba(79, 195, 247, 0.3);
+}
+.combined-strat-check {
+  margin: 0;
+  accent-color: var(--focus);
+  cursor: pointer;
+}
+.combined-strat-label {
+  color: var(--text);
+  font-weight: 500;
+}
+.combined-strat-row:not(:has(input:checked)) .combined-strat-label {
+  color: var(--text-mute);
+}
+.combined-strat-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  padding: 1px 6px;
+  background: var(--bg-elev-3);
+  border-radius: 2px;
+}
+
+/* ───── Strategy badges (in MA cell and detail panel) ───── */
+.strat-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 16px;
+  min-width: 26px;
+  padding: 0 5px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.strat-badge-pb  { background: rgba(236, 64, 122, 0.18);   color: #f48fb1; border: 1px solid rgba(236, 64, 122, 0.4); }
+.strat-badge-gcl { background: rgba(102, 187, 106, 0.18);  color: #a5d6a7; border: 1px solid rgba(102, 187, 106, 0.4); }
+.strat-badge-gcs { background: rgba(38, 166, 154, 0.18);   color: #80cbc4; border: 1px solid rgba(38, 166, 154, 0.4); }
+.strat-badge-ich { background: rgba(92, 107, 192, 0.18);   color: #9fa8da; border: 1px solid rgba(92, 107, 192, 0.4); }
+
+/* Combined view: STRATEGY column */
+.col-strategies {
+  display: inline-flex;
+  gap: 3px;
+  flex-wrap: nowrap;
+}
+
+/* Combined view: PASS column - score badge */
+.combined-pass {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 11px;
+}
+.combined-pass.full {  color: var(--up); }
+.combined-pass.high {  color: var(--system-active); }
+.combined-pass.low  {  color: var(--text-mute); }
+
+/* ─── Ticker cell with strategy badges (combined mode) ─── */
+.ticker-with-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.ticker-badges {
+  display: inline-flex;
+  gap: 3px;
+  margin-left: 4px;
+}
+.ticker-badges .strat-badge {
+  height: 14px;
+  min-width: 22px;
+  font-size: 8px;
+  padding: 0 4px;
+}
