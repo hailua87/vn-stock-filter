@@ -203,30 +203,30 @@ def evaluate(df: pd.DataFrame, ticker: str,
         cloud_distance_pct = (last_close - cloud_bottom) / cloud_bottom * 100
 
     # ════════════════════════════════════════════════════
-    # TURNAROUND SIGNAL DETECTION (đảo chiều sớm)
+    # TURNAROUND SIGNAL DETECTION (đảo chiều sớm — STRICT MODE)
     # ════════════════════════════════════════════════════
     # Đặc trưng: TK vừa cắt KJ + giá đang break từ DƯỚI/TRONG cloud lên
-    # + volume xác nhận. Đây là vùng entry sớm trước khi xu hướng lớn rõ.
+    # + volume mạnh + đà tăng rõ. Setup early-reversal cao cấp.
     #
-    # Điều kiện:
-    #   1. TK cross đã xảy ra trong ≤5 phiên (medium strictness)
-    #   2. Vị trí giá: đang ở dưới/trong cloud hoặc vừa break lên không xa
-    #      → close < cloud_top * 1.03 (chưa vượt cloud quá 3%)
-    #   3. Nến gần đây tăng mạnh: change_3d ≥ 1.5% (đang đảo chiều)
-    #   4. Volume ratio ≥ 1.2× (xác nhận có dòng tiền)
+    # Điều kiện CHẶT (high quality, ít tín hiệu):
+    #   1. TK cross trong ≤3 phiên (very recent)
+    #   2. Giá CHUẨN BỊ break cloud: dưới hoặc vừa vượt nhẹ
+    #      → close < cloud_top * 1.01 (chỉ 1% trên cloud_top)
+    #   3. Đà tăng 3 phiên ≥ 2.5% (rõ ràng đảo chiều)
+    #   4. Volume ratio ≥ 1.5× MA20 (xác nhận dòng tiền lớn)
     is_turnaround = False
     turnaround_reasons = []
-    if tk_cross['crossed'] and tk_cross['days_ago'] is not None and tk_cross['days_ago'] <= 5:
+    if tk_cross['crossed'] and tk_cross['days_ago'] is not None and tk_cross['days_ago'] <= 3:
         turnaround_reasons.append(f"TK cross {tk_cross['days_ago']} phiên trước")
-        # Check position vs cloud
-        if last_close < cloud_top * 1.03:
-            turnaround_reasons.append('Giá đang break cloud (chưa xa)')
-            # 3-day momentum
+        # Check position vs cloud (chuẩn bị break)
+        if last_close < cloud_top * 1.01:
+            turnaround_reasons.append('Giá chuẩn bị break cloud')
+            # 3-day momentum (≥ 2.5%)
             if len(df) >= 4:
                 change_3d_pct = (last_close / float(df['Close'].iloc[-4]) - 1) * 100
-                if change_3d_pct >= 1.5:
+                if change_3d_pct >= 2.5:
                     turnaround_reasons.append(f'Nến tăng {change_3d_pct:.1f}% trong 3 phiên')
-                    if vol_ratio >= 1.2:
+                    if vol_ratio >= 1.5:
                         turnaround_reasons.append(f'Volume {vol_ratio:.1f}× MA20')
                         is_turnaround = True
 

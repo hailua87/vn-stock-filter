@@ -264,19 +264,23 @@ def make_ich_signal(ticker, exchange, base_price, scan_date):
     else:
         tk_cross_days_ago = random.randint(8, 30) if random.random() < 0.5 else None
 
-    # Turnaround: TK cross + giá break cloud + vol confirm + nến tăng mạnh
-    # ~60% of recent_tk_cross signals are turnarounds (demo)
+    # Turnaround STRICT: TK ≤3 ngày + giá gần cloud_top + vol ≥1.5× + change ≥2.5%
+    # ~25% of recent_tk_cross signals (chặt hơn → ít signals hơn)
     is_turnaround = (
         scores['recent_tk_cross'] == 1
-        and random.random() < 0.60
+        and tk_cross_days_ago is not None
+        and tk_cross_days_ago <= 3
+        and random.random() < 0.40
     )
     turnaround_reasons = []
     if is_turnaround:
+        change_3d = random.uniform(2.5, 5.0)
+        vol_r = random.uniform(1.5, 2.8)
         turnaround_reasons = [
             f'TK cross {tk_cross_days_ago} phiên trước',
-            'Giá đang break cloud (chưa xa)',
-            f'Nến tăng {random.uniform(1.5, 4.0):.1f}% trong 3 phiên',
-            f'Volume {random.uniform(1.2, 2.5):.1f}× MA20',
+            'Giá chuẩn bị break cloud',
+            f'Nến tăng {change_3d:.1f}% trong 3 phiên',
+            f'Volume {vol_r:.1f}× MA20',
         ]
 
     cloud_top = round(base_price * random.uniform(0.92, 0.99), 2)

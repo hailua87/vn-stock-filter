@@ -447,7 +447,7 @@ function bindFilters() {
             const map = {
               '': 'Lọc tín hiệu Ichimoku theo loại',
               'recent_cross': 'Lọc mã có Tenkan vừa cắt lên Kijun (≤5 phiên)',
-              'turnaround': 'Đảo chiều sớm: TK cross + đang break cloud + volume xác nhận',
+              'turnaround': 'Đảo chiều sớm (CHẶT): TK ≤3 phiên + giá break cloud + vol ≥1.5× + tăng ≥2.5%',
             };
             hint.textContent = map[chip.dataset.value] || map[''];
           }
