@@ -66,6 +66,13 @@ const STRATEGIES = {
     sources: ['pre_breakout', 'golden_cross_long', 'golden_cross_short', 'ichimoku'],
     criteria: [],                  // built dynamically per source
   },
+  analyzer: {
+    name: 'Phân tích mã',
+    dataDir: null,
+    isAnalyzer: true,
+    sources: ['pre_breakout', 'golden_cross_long', 'golden_cross_short', 'ichimoku'],
+    criteria: [],
+  },
 };
 
 // Short codes for strategy badges
@@ -97,6 +104,12 @@ const state = {
     logic: 'AND',                  // 'AND' or 'OR'
     sourceData: {},                // strategy → { signals, metadata }
   },
+  // ─── Analyzer mode ───
+  analyzer: {
+    ticker: null,                  // currently analyzed ticker
+    sourceData: {},                // shared with combined when both loaded
+    universe: [],                  // list of all known tickers (for suggestions)
+  },
 };
 
 // ──────────── Init ────────────
@@ -110,6 +123,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   bindCollapseFilters();
   bindDetailClose();
   bindMobileDrawers();
+  bindAnalyzerEvents();
 
   await loadLatestFirst();
   await loadDateIndex();
@@ -202,6 +216,33 @@ async function switchStrategy(strategy) {
   closeDetail();
   updateSortIndicators();
 
+  const dashboard = document.getElementById('dashboard');
+  const analyzerView = document.getElementById('analyzer-view');
+
+  // Toggle layout mode
+  if (strategy === 'analyzer') {
+    dashboard.classList.add('analyzer-mode');
+    if (analyzerView) analyzerView.style.display = '';
+    // Load source data for analyzer (reuse if combined was loaded)
+    if (Object.keys(state.combined.sourceData).length === 0) {
+      await loadCombinedData(true);   // silent load (don't render combined table)
+    }
+    state.analyzer.sourceData = state.combined.sourceData;
+    buildUniverseFromSourceData();
+    // Focus search input
+    setTimeout(() => document.getElementById('analyzer-search')?.focus(), 100);
+    // Render last analyzed ticker, or empty
+    if (state.analyzer.ticker) {
+      analyzeTicker(state.analyzer.ticker);
+    } else {
+      showAnalyzerEmpty();
+    }
+    return;
+  }
+  // Leaving analyzer
+  dashboard.classList.remove('analyzer-mode');
+  if (analyzerView) analyzerView.style.display = 'none';
+
   // Show ichimoku-specific filter only on Ichimoku tab
   const ichFilter = document.getElementById('fg-ichimoku');
   if (ichFilter) {
@@ -225,7 +266,7 @@ async function switchStrategy(strategy) {
 }
 
 // ──────────── COMBINED MODE: Load all 4 strategies & merge ────────────
-async function loadCombinedData() {
+async function loadCombinedData(silent = false) {
   const sources = STRATEGIES.combined.sources;
   state.combined.sourceData = {};
 
@@ -289,17 +330,18 @@ async function loadCombinedData() {
   // Update metadata
   state.currentDate = scanDate;
   state.latestDate = scanDate;
-  document.getElementById('stat-scanned').textContent = universeSize.toLocaleString();
-  const demoBanner = document.getElementById('demo-banner');
-  if (demoFlag) {
-    demoBanner.style.display = 'block';
-    document.getElementById('dashboard').classList.add('has-banner');
-  } else {
-    demoBanner.style.display = 'none';
-    document.getElementById('dashboard').classList.remove('has-banner');
+  if (!silent) {
+    document.getElementById('stat-scanned').textContent = universeSize.toLocaleString();
+    const demoBanner = document.getElementById('demo-banner');
+    if (demoFlag) {
+      demoBanner.style.display = 'block';
+      document.getElementById('dashboard').classList.add('has-banner');
+    } else {
+      demoBanner.style.display = 'none';
+      document.getElementById('dashboard').classList.remove('has-banner');
+    }
+    render();
   }
-
-  render();
 }
 
 // ──────────── Load data ────────────
@@ -1160,4 +1202,478 @@ function formatDateLong(d) {
   const mm = String(date.getMonth() + 1).padStart(2, '0');
   const yyyy = date.getFullYear();
   return `${day} · ${dd}/${mm}/${yyyy}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TAB 6: TICKER ANALYZER — multi-strategy analysis for any ticker
+// ═══════════════════════════════════════════════════════════════
+
+const STRATEGY_INFO = {
+  pre_breakout: {
+    name: 'Pre-Breakout',
+    icon: '🚀',
+    desc: 'Phát hiện mã sắp break giá (10 tiêu chí)',
+    badge: 'PB',
+    color: 'pb',
+    maxScore: 10,
+  },
+  golden_cross_long: {
+    name: 'GC dài hạn (MA50×MA200)',
+    icon: '📈',
+    desc: 'Position trade dài hạn, đảo chiều trend',
+    badge: 'GCL',
+    color: 'gcl',
+    maxScore: 5,
+  },
+  golden_cross_short: {
+    name: 'GC ngắn hạn (MA10×MA20)',
+    icon: '⚡',
+    desc: 'Swing trade 2-4 tuần',
+    badge: 'GCS',
+    color: 'gcs',
+    maxScore: 5,
+  },
+  ichimoku: {
+    name: 'Ichimoku',
+    icon: '☁',
+    desc: 'Tenkan/Kijun + Cloud, xác nhận trend',
+    badge: 'ICH',
+    color: 'ich',
+    maxScore: 5,
+  },
+};
+
+// Build universe of all known tickers (from loaded source data)
+function buildUniverseFromSourceData() {
+  const tickers = new Set();
+  for (const key of Object.keys(state.analyzer.sourceData)) {
+    for (const s of (state.analyzer.sourceData[key]?.signals || [])) {
+      tickers.add(s.ticker);
+    }
+  }
+  // Also add hardcoded popular tickers in case they're not in any signal
+  const popular = ['FPT','VNM','VCB','VIC','VHM','HPG','MWG','MSN','GAS','POW','BID','CTG','TCB','VPB','MBB','ACB','VRE','SAB','PNJ','SSI','VND','HCM','SHB','STB','TPB','HDB','OCB','EIB','LPB','VIB','GVR','PLX','BCM','REE','BMP','DGC','DHG','HSG','NKG','NLG','PDR','KDH','DXG','VCG','CEO','IDC','PVS','PVD','VEA','FRT','PNS','DGW','SAM','TLG','DBC','NTL','HAH','PHR','PVB','SIP','TNG','SHS','HUT','VNN','BMI'];
+  popular.forEach(t => tickers.add(t));
+  state.analyzer.universe = Array.from(tickers).sort();
+}
+
+// Search universe for matches
+function searchTickerUniverse(query) {
+  if (!query) return [];
+  const q = query.toUpperCase();
+  const matches = state.analyzer.universe.filter(t => t.startsWith(q));
+  // Add tickers containing query (lower priority)
+  if (matches.length < 8) {
+    const contains = state.analyzer.universe.filter(t => !t.startsWith(q) && t.includes(q));
+    matches.push(...contains);
+  }
+  return matches.slice(0, 8);
+}
+
+// Show suggestion dropdown
+function renderAnalyzerSuggestions(query) {
+  const box = document.getElementById('analyzer-suggestions');
+  if (!box) return;
+  const matches = searchTickerUniverse(query);
+  if (!matches.length || !query) {
+    box.classList.remove('show');
+    box.innerHTML = '';
+    return;
+  }
+  box.innerHTML = matches.map(t => {
+    // Count strategies this ticker appears in
+    let count = 0;
+    for (const key of Object.keys(state.analyzer.sourceData)) {
+      if ((state.analyzer.sourceData[key]?.signals || []).some(s => s.ticker === t)) count++;
+    }
+    const meta = count > 0 ? `${count}/4 chiến lược pass` : 'Không có tín hiệu';
+    return `<div class="analyzer-suggestion" data-ticker="${t}">
+      <span class="analyzer-suggestion-ticker">${t}</span>
+      <span class="analyzer-suggestion-meta">${meta}</span>
+    </div>`;
+  }).join('');
+  box.classList.add('show');
+  // Bind clicks
+  box.querySelectorAll('.analyzer-suggestion').forEach(el => {
+    el.addEventListener('click', () => {
+      const t = el.dataset.ticker;
+      document.getElementById('analyzer-search').value = t;
+      box.classList.remove('show');
+      if (activeStrategy !== 'analyzer') {
+        switchStrategy('analyzer');
+      } else {
+        analyzeTicker(t);
+      }
+    });
+  });
+}
+
+// ── Recommendation engine ──
+function buildRecommendation(passCount, hasAplus, primarySignal) {
+  let cls, stars, title, desc, position;
+  const rsi = primarySignal?.m_rsi14 || 50;
+  const supports = primarySignal?.m_supports || [];
+  const nearestSup = supports[0];
+
+  // Modifiers
+  let warnings = [];
+  if (rsi > 75) warnings.push(`RSI ${rsi.toFixed(0)} — quá mua, cẩn trọng vào lệnh full size hoặc đợi pullback`);
+  else if (rsi > 70) warnings.push(`RSI ${rsi.toFixed(0)} — gần quá mua, vào lệnh từ tốn`);
+  if (rsi < 30) warnings.push(`RSI ${rsi.toFixed(0)} — quá bán, có thể có rebound nhưng risk cao`);
+  if (nearestSup && nearestSup.distance_pct > 8) {
+    warnings.push(`Cách hỗ trợ gần nhất ${nearestSup.distance_pct.toFixed(1)}% — R:R kém, đợi pullback về hỗ trợ`);
+  }
+  if (primarySignal?.m_upcoming_event) {
+    const ev = primarySignal.m_upcoming_event;
+    warnings.push(`Sự kiện sắp tới: ${ev.type} ${ev.ratio || ''} (ex-date ${ev.ex_date}) — giá có thể adjust`);
+  }
+
+  // Decision matrix
+  if (passCount === 4 && hasAplus >= 2) {
+    cls = 'rec-strong-buy';
+    stars = '⭐⭐⭐⭐';
+    title = 'MUA MẠNH';
+    desc = 'Mã pass đồng thời cả 4 chiến lược với nhiều A+. Đây là tín hiệu hiếm và rất đáng tin cậy. Có thể tham gia vị thế lớn nếu phù hợp khẩu vị rủi ro.';
+    position = '8-12% NAV';
+  } else if (passCount === 4) {
+    cls = 'rec-strong-buy';
+    stars = '⭐⭐⭐⭐';
+    title = 'MUA MẠNH';
+    desc = 'Mã pass đồng thời cả 4 chiến lược. Đây là tín hiệu rất mạnh, đa nguồn xác nhận.';
+    position = '6-10% NAV';
+  } else if (passCount === 3 && hasAplus >= 1) {
+    cls = 'rec-buy';
+    stars = '⭐⭐⭐';
+    title = 'MUA';
+    desc = `Mã pass 3/4 chiến lược với ít nhất 1 A+. Tín hiệu mạnh, có thể tham gia với vị thế trung bình.`;
+    position = '5-8% NAV';
+  } else if (passCount === 3) {
+    cls = 'rec-buy';
+    stars = '⭐⭐⭐';
+    title = 'MUA';
+    desc = 'Mã pass 3/4 chiến lược. Tín hiệu khá tốt, đa số chiến lược xác nhận.';
+    position = '4-6% NAV';
+  } else if (passCount === 2) {
+    cls = 'rec-watch';
+    stars = '⭐⭐';
+    title = 'THEO DÕI';
+    desc = 'Mã pass 2/4 chiến lược. Tín hiệu trung bình — nên theo dõi thêm, chờ confirm từ chiến lược khác hoặc đợi pullback.';
+    position = '3-5% NAV (nếu vào lệnh, ở mức thận trọng)';
+  } else if (passCount === 1) {
+    cls = 'rec-weak';
+    stars = '⭐';
+    title = 'YẾU';
+    desc = 'Chỉ pass 1/4 chiến lược. Tín hiệu yếu, không khuyến nghị mở vị thế mới.';
+    position = 'Không khuyến nghị';
+  } else {
+    cls = 'rec-avoid';
+    stars = '—';
+    title = 'KHÔNG CÓ TÍN HIỆU';
+    desc = 'Mã không xuất hiện trong bất kỳ chiến lược nào. Có thể đang trong giai đoạn không có cấu hình kỹ thuật rõ ràng, hoặc thanh khoản thấp.';
+    position = 'Tránh';
+  }
+
+  // Apply warning modifiers
+  if (rsi > 75 && (passCount === 4 || passCount === 3)) {
+    desc += ' Tuy nhiên RSI rất cao — đợi pullback hoặc vào với size nhỏ hơn.';
+    position = position.replace(/(\d+)-(\d+)% NAV/, (_, a, b) => `${Math.max(1, +a - 2)}-${Math.max(2, +b - 3)}% NAV`);
+  }
+
+  return { cls, stars, title, desc, position, warnings };
+}
+
+// Compute entry levels for analyzer (similar to existing detail panel)
+function computeAnalyzerLevels(s) {
+  if (!s) return null;
+  const supports = s.m_supports || [];
+  const resistances = s.m_resistances || [];
+  if (!supports.length) return null;
+
+  // Prefer Golden Ratio support for entry
+  const golden = supports.find(x => x.is_golden);
+  const nearestSup = supports[0];
+  const nearestRes = resistances[0];
+
+  const entry = golden ? golden.price : nearestSup.price;
+  // Stop = deepest support, but must be < entry. Fallback: 7% below entry.
+  let stop;
+  if (supports.length > 1) {
+    const deepest = supports[supports.length - 1].price;
+    stop = deepest < entry * 0.99 ? deepest : entry * 0.93;
+  } else {
+    stop = entry * 0.93;
+  }
+  const target = nearestRes && nearestRes.price > entry * 1.01 ? nearestRes.price : entry * 1.08;
+  const riskPct = ((entry - stop) / entry * 100);
+  const gainPct = ((target - entry) / entry * 100);
+  const rr = riskPct > 0.1 ? gainPct / riskPct : 0;
+
+  return { entry, stop, target, riskPct, gainPct, rr };
+}
+
+// ── Main analyzer entry point ──
+function analyzeTicker(ticker) {
+  ticker = ticker.toUpperCase().trim();
+  if (!ticker) {
+    showAnalyzerEmpty();
+    return;
+  }
+  state.analyzer.ticker = ticker;
+  document.getElementById('analyzer-empty').style.display = 'none';
+  const content = document.getElementById('analyzer-content');
+  content.style.display = 'block';
+
+  // Gather signals from each strategy
+  const perStrategy = {};
+  let primarySignal = null;        // most "complete" signal (most fields)
+  let passCount = 0;
+  let hasAplus = 0;
+
+  for (const key of STRATEGIES.analyzer.sources) {
+    const signals = state.analyzer.sourceData[key]?.signals || [];
+    const found = signals.find(s => s.ticker === ticker);
+    perStrategy[key] = found || null;
+    if (found) {
+      passCount++;
+      if (found.rating === 'A+') hasAplus++;
+      // Pick signal with most metric fields as primary
+      if (!primarySignal || Object.keys(found).length > Object.keys(primarySignal).length) {
+        primarySignal = found;
+      }
+    }
+  }
+
+  // If ticker not found anywhere
+  if (passCount === 0) {
+    content.innerHTML = renderAnalyzerNotFound(ticker);
+    return;
+  }
+
+  // Build recommendation
+  const rec = buildRecommendation(passCount, hasAplus, primarySignal);
+  const levels = computeAnalyzerLevels(primarySignal);
+
+  content.innerHTML = renderAnalyzer(ticker, primarySignal, perStrategy, passCount, rec, levels);
+}
+
+function showAnalyzerEmpty() {
+  document.getElementById('analyzer-empty').style.display = '';
+  document.getElementById('analyzer-content').style.display = 'none';
+}
+
+function renderAnalyzerNotFound(ticker) {
+  return `<div class="analyzer-not-found">
+    <div class="analyzer-not-found-icon">❓</div>
+    <div class="analyzer-not-found-title">Không tìm thấy <strong>${ticker}</strong> trong bất kỳ chiến lược nào</div>
+    <div class="analyzer-not-found-desc">
+      Mã này có thể:<br>
+      • Không nằm trong top 623 mã liquid được scan<br>
+      • Đang không có cấu hình kỹ thuật đáp ứng tiêu chí nào<br>
+      • Mã chưa tồn tại hoặc gõ sai
+    </div>
+  </div>`;
+}
+
+function renderAnalyzer(ticker, signal, perStrategy, passCount, rec, levels) {
+  const change = signal.m_change_5d_pct || 0;
+  const changeCls = change > 0 ? 'up' : change < 0 ? 'down' : '';
+  const sign = change > 0 ? '+' : '';
+
+  const passClass = passCount === 4 ? 'full' : passCount === 3 ? 'high' : '';
+
+  // Strategy breakdown cards
+  const cards = STRATEGIES.analyzer.sources.map(key => {
+    const info = STRATEGY_INFO[key];
+    const s = perStrategy[key];
+    const passed = !!s;
+    const cls = passed ? 'pass' : '';
+    const status = passed ? '✓ PASS' : '✗ KHÔNG ĐẠT';
+    let body;
+    if (passed) {
+      // Show passed criteria
+      const criteriaKeys = Object.keys(s).filter(k => k.startsWith('c') && /^c\d+/.test(k));
+      const criteriaTags = criteriaKeys
+        .filter(k => s[k] === 1)
+        .map(k => `<span class="criteria-tag passed">${k.toUpperCase().replace(/_/g, ' ')}</span>`)
+        .join('');
+      body = `
+        <div class="strategy-card-body">
+          ${s.rating ? `<strong style="color:var(--text)">Hạng: ${s.rating}</strong> · ` : ''}
+          <span class="strategy-card-score">Điểm: <span class="score-num">${s.total_score || 0}</span>/${info.maxScore}</span>
+        </div>
+        ${criteriaTags ? `<div class="strategy-card-criteria">${criteriaTags}</div>` : ''}
+      `;
+    } else {
+      let reason = '';
+      if (key === 'golden_cross_long') reason = 'MA50 chưa cắt lên MA200 trong 5 phiên gần đây';
+      else if (key === 'golden_cross_short') reason = 'MA10 chưa cắt lên MA20 trong 5 phiên gần đây';
+      else if (key === 'ichimoku') reason = 'Không đủ điều kiện Cloud + TK cross';
+      else reason = 'Không pass đủ tiêu chí của chiến lược';
+      body = `<div class="strategy-card-body">${reason}</div>`;
+    }
+    return `<div class="strategy-card ${cls}">
+      <div class="strategy-card-head">
+        <div class="strategy-card-name"><span>${info.icon}</span> ${info.name}</div>
+        <div class="strategy-card-status">${status}</div>
+      </div>
+      ${body}
+    </div>`;
+  }).join('');
+
+  // Entry levels
+  let levelsHtml = '';
+  if (levels && passCount >= 2) {
+    levelsHtml = `<div class="rec-levels">
+      <div class="rec-level rec-level-entry">
+        <div class="rec-level-label">VÀO LỆNH</div>
+        <div class="rec-level-value">${levels.entry.toFixed(2).replace('.',',')}</div>
+        <div class="rec-level-sub">${levels.entry < signal.close ? '↓ Đợi pullback' : '≈ Giá hiện tại'}</div>
+      </div>
+      <div class="rec-level rec-level-stop">
+        <div class="rec-level-label">CẮT LỖ</div>
+        <div class="rec-level-value">${levels.stop.toFixed(2).replace('.',',')}</div>
+        <div class="rec-level-sub">−${levels.riskPct.toFixed(1)}%</div>
+      </div>
+      <div class="rec-level rec-level-target">
+        <div class="rec-level-label">CHỐT LÃI</div>
+        <div class="rec-level-value">${levels.target.toFixed(2).replace('.',',')}</div>
+        <div class="rec-level-sub">+${levels.gainPct.toFixed(1)}%</div>
+      </div>
+      <div class="rec-level rec-level-rr">
+        <div class="rec-level-label">R:R</div>
+        <div class="rec-level-value">1 : ${levels.rr.toFixed(1)}</div>
+        <div class="rec-level-sub">${levels.rr >= 2 ? 'Tốt' : levels.rr >= 1.5 ? 'Khá' : 'Trung bình'}</div>
+      </div>
+    </div>`;
+  }
+
+  // Warnings
+  let warningsHtml = '';
+  if (rec.warnings.length) {
+    warningsHtml = `<div class="warning-list">
+      <div class="analyzer-section-title"><span class="section-icon">⚠️</span> Cảnh báo</div>
+      <ul>${rec.warnings.map(w => `<li>${w}</li>`).join('')}</ul>
+    </div>`;
+  }
+
+  // Fibonacci
+  let fiboHtml = '';
+  const fiboSwing = signal.m_fibo_swing;
+  if (fiboSwing) {
+    const supports = signal.m_supports || [];
+    const resistances = signal.m_resistances || [];
+    const supRows = supports.map(s => {
+      const goldenTag = s.is_golden ? ` <span class="fibo-golden-tag" title="Mức 61.8% — vùng pullback lý tưởng">GOLDEN</span>` : '';
+      return `<div class="fibo-row">
+        <span class="fibo-pct">${s.label}${goldenTag}</span>
+        <span class="fibo-price">${s.price.toFixed(2).replace('.',',')}</span>
+        <span class="fibo-dist down">${s.distance_pct > 0 ? '-' : ''}${Math.abs(s.distance_pct).toFixed(2)}%</span>
+      </div>`;
+    }).join('');
+    const resRows = resistances.map(r => `<div class="fibo-row">
+      <span class="fibo-pct">${r.label}</span>
+      <span class="fibo-price">${r.price.toFixed(2).replace('.',',')}</span>
+      <span class="fibo-dist up">+${r.distance_pct.toFixed(2)}%</span>
+    </div>`).join('');
+
+    fiboHtml = `<div class="analyzer-fibo">
+      <div class="analyzer-section-title"><span class="section-icon">📈</span> Fibonacci Retracement</div>
+      <div class="fibo-swing-info">${fiboSwing.direction === 'up' ? '↑ Uptrend' : '↓ Downtrend'} · Swing ${fiboSwing.low.toFixed(2).replace('.',',')} → ${fiboSwing.high.toFixed(2).replace('.',',')}</div>
+      ${resRows ? `<div style="margin-top:8px"><strong style="color:var(--text-dim);font-size:11px">KHÁNG CỰ</strong>${resRows}</div>` : ''}
+      <div class="fibo-row fibo-current" style="margin-top:6px;padding:8px;background:var(--bg-elev-2);border-radius:3px">
+        <span class="fibo-pct" style="color:var(--text)">GIÁ HIỆN TẠI</span>
+        <span class="fibo-price" style="color:var(--text);font-weight:700">${signal.close.toFixed(2).replace('.',',')}</span>
+        <span></span>
+      </div>
+      ${supRows ? `<div style="margin-top:6px"><strong style="color:var(--text-dim);font-size:11px">HỖ TRỢ</strong>${supRows}</div>` : ''}
+    </div>`;
+  }
+
+  return `
+    <div class="analyzer-header">
+      <div class="analyzer-h-left">
+        <div class="analyzer-h-ticker">${ticker}</div>
+        <div class="analyzer-h-meta">${signal.exchange || ''} · Cập nhật ${state.currentDate || '—'}</div>
+      </div>
+      <div>
+        <span class="analyzer-h-price">${signal.close.toFixed(2).replace('.',',')}</span>
+        <span class="analyzer-h-change ${changeCls}">${sign}${change.toFixed(2)}%</span>
+      </div>
+    </div>
+
+    <div class="recommendation ${rec.cls}">
+      <div class="rec-stars">${rec.stars}</div>
+      <div class="rec-body">
+        <div class="rec-title">
+          ${rec.title}
+          <span class="rec-pass-badge ${passClass}">Pass ${passCount}/4 chiến lược</span>
+        </div>
+        <div class="rec-desc">${rec.desc}</div>
+        <div class="rec-position">
+          <span class="rec-position-label">VỊ THẾ ĐỀ XUẤT:</span>
+          <span class="rec-position-pct">${rec.position}</span>
+        </div>
+      </div>
+      ${levelsHtml}
+    </div>
+
+    ${warningsHtml}
+
+    <div class="analyzer-section-title"><span class="section-icon">🎯</span> Chi tiết từng chiến lược</div>
+    <div class="strategy-cards">${cards}</div>
+
+    ${fiboHtml}
+
+    <div style="text-align:center;margin-top:24px">
+      <a class="btn-primary" href="https://www.tradingview.com/chart/?symbol=${signal.exchange || 'HOSE'}:${ticker}" target="_blank" rel="noopener">Mở TradingView ↗</a>
+    </div>
+  `;
+}
+
+// Bind analyzer events
+function bindAnalyzerEvents() {
+  const input = document.getElementById('analyzer-search');
+  const box = document.getElementById('analyzer-suggestions');
+  if (!input) return;
+
+  input.addEventListener('input', () => {
+    renderAnalyzerSuggestions(input.value);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const val = input.value.toUpperCase().trim();
+      if (val) {
+        box.classList.remove('show');
+        if (activeStrategy !== 'analyzer') {
+          switchStrategy('analyzer').then(() => analyzeTicker(val));
+        } else {
+          analyzeTicker(val);
+        }
+      }
+    } else if (e.key === 'Escape') {
+      box.classList.remove('show');
+      input.blur();
+    }
+  });
+
+  input.addEventListener('focus', () => {
+    if (input.value) renderAnalyzerSuggestions(input.value);
+  });
+
+  // Click outside to close suggestions
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.topbar-analyzer')) {
+      box.classList.remove('show');
+    }
+  });
+
+  // Quick buttons
+  document.querySelectorAll('.analyzer-quick-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const t = btn.dataset.ticker;
+      input.value = t;
+      analyzeTicker(t);
+    });
+  });
 }

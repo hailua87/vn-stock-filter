@@ -41,6 +41,43 @@ jobs:
           python backend/run_daily.py --min-score 5 --limit 500
         timeout-minutes: 60
 
+      - name: Verify scan results
+        run: |
+          echo "═══════════════════════════════════════════════════"
+          echo "📊 SCAN RESULT VERIFICATION"
+          echo "═══════════════════════════════════════════════════"
+          for f in web/data/latest.json \
+                   web/data/golden_cross_long/latest.json \
+                   web/data/golden_cross_short/latest.json \
+                   web/data/ichimoku/latest.json; do
+            if [ -f "$f" ]; then
+              echo ""
+              echo "── $f ──"
+              python -c "
+          import json, sys
+          with open('$f') as fp:
+              d = json.load(fp)
+          meta = d.get('metadata', {})
+          print(f'  generated_at:   {d.get(\"generated_at\", \"?\")}')
+          print(f'  total signals:  {d.get(\"total\", len(d.get(\"signals\", [])))}')
+          print(f'  total_scanned:  {meta.get(\"total_scanned\", \"?\")}')
+          print(f'  is_demo:        {meta.get(\"demo\", False)}')
+          if d.get('signals'):
+              tickers = [s.get('ticker', '?') for s in d['signals'][:5]]
+              print(f'  top 5 tickers:  {\", \".join(tickers)}')
+          "
+            else
+              echo "  ❌ MISSING: $f"
+            fi
+          done
+          echo ""
+          echo "═══════════════════════════════════════════════════"
+          echo "Cache directory size:"
+          du -sh backend/data/cache 2>/dev/null || echo "  (no cache dir)"
+          echo "Cached parquet files:"
+          find backend/data/cache -name "*.parquet" 2>/dev/null | wc -l
+          echo "═══════════════════════════════════════════════════"
+
       - name: Upload Excel artifact
         uses: actions/upload-artifact@v4
         with:

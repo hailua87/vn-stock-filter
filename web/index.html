@@ -47,7 +47,15 @@
     <button class="strat-tab" data-strategy="golden_cross_short">GC ngắn hạn</button>
     <button class="strat-tab" data-strategy="ichimoku">Ichimoku</button>
     <button class="strat-tab strat-tab-combined" data-strategy="combined" title="Lọc mã thỏa nhiều chiến lược cùng lúc">⚡ Tổng hợp</button>
+    <button class="strat-tab strat-tab-analyzer" data-strategy="analyzer" title="Phân tích chi tiết 1 mã qua mọi chiến lược">🔍 Phân tích mã</button>
   </nav>
+
+  <div class="topbar-analyzer">
+    <input type="text" id="analyzer-search" class="analyzer-input"
+           placeholder="🔍 Nhập mã để phân tích (vd: FPT, VNM, HPG)..."
+           maxlength="10" autocomplete="off">
+    <div class="analyzer-suggestions" id="analyzer-suggestions"></div>
+  </div>
 
   <div class="topbar-right">
     <button class="icon-btn" id="help-btn" title="Hướng dẫn">?</button>
@@ -246,6 +254,30 @@
       </div>
     </div>
   </aside>
+
+  <!-- ════════════════════════════════════════════════════════════
+       TAB 6: TICKER ANALYZER (full-width takeover)
+       ════════════════════════════════════════════════════════════ -->
+  <section class="analyzer-view" id="analyzer-view" style="display: none;">
+    <div class="analyzer-empty" id="analyzer-empty">
+      <div class="analyzer-empty-icon">🔍</div>
+      <div class="analyzer-empty-title">Phân tích đa chiều theo mã</div>
+      <div class="analyzer-empty-desc">
+        Nhập mã chứng khoán vào ô tìm kiếm phía trên (hoặc click 1 mã trong các tab chiến lược) để xem phân tích chi tiết qua TẤT CẢ 4 chiến lược + khuyến nghị tổng hợp.
+      </div>
+      <div class="analyzer-hint-row">
+        <span class="analyzer-hint-label">Thử ngay:</span>
+        <button class="analyzer-quick-btn" data-ticker="FPT">FPT</button>
+        <button class="analyzer-quick-btn" data-ticker="VNM">VNM</button>
+        <button class="analyzer-quick-btn" data-ticker="HPG">HPG</button>
+        <button class="analyzer-quick-btn" data-ticker="MWG">MWG</button>
+        <button class="analyzer-quick-btn" data-ticker="VCB">VCB</button>
+      </div>
+    </div>
+    <div class="analyzer-content" id="analyzer-content" style="display: none;">
+      <!-- Populated dynamically by renderAnalyzer() -->
+    </div>
+  </section>
 
 </main>
 
