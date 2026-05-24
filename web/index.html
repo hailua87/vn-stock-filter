@@ -130,13 +130,16 @@
       </div>
       <div class="fg" id="fg-ichimoku" style="display: none;">
         <label class="fg-label">Tín hiệu Ichimoku</label>
-        <div class="chip-row" data-filter="ich_special">
+        <div class="chip-row chip-row-vertical" data-filter="ich_special">
           <button class="chip active" data-value="">Tất cả</button>
           <button class="chip" data-value="recent_cross" title="Tenkan vừa cắt lên Kijun trong 5 phiên — entry sớm">
             ⭐ Vừa cắt TK
           </button>
+          <button class="chip chip-turnaround" data-value="turnaround" title="TK cross + giá đang break cloud + volume xác nhận — vùng đảo chiều sớm">
+            🎯 Đảo chiều sớm
+          </button>
         </div>
-        <div class="fg-hint">Lọc mã có Tenkan-sen vừa cắt lên Kijun-sen</div>
+        <div class="fg-hint" id="ich-filter-hint">Lọc tín hiệu Ichimoku theo loại</div>
       </div>
 
       <!-- ───── COMBINED MODE: Strategy selector ───── -->

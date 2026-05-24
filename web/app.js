@@ -440,6 +440,18 @@ function bindFilters() {
         group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         state.filters[filter] = chip.dataset.value;
+        // Update Ichimoku filter hint dynamically
+        if (filter === 'ich_special') {
+          const hint = document.getElementById('ich-filter-hint');
+          if (hint) {
+            const map = {
+              '': 'Lọc tín hiệu Ichimoku theo loại',
+              'recent_cross': 'Lọc mã có Tenkan vừa cắt lên Kijun (≤5 phiên)',
+              'turnaround': 'Đảo chiều sớm: TK cross + đang break cloud + volume xác nhận',
+            };
+            hint.textContent = map[chip.dataset.value] || map[''];
+          }
+        }
         render();
       });
     });
@@ -657,9 +669,11 @@ function applyFilters() {
   if (state.filters.volMax != null)
     arr = arr.filter(s => s.volume <= state.filters.volMax);
 
-  // Ichimoku special filter: "Vừa cắt TK"
+  // Ichimoku special filter: "Vừa cắt TK" / "Đảo chiều sớm"
   if (state.filters.ich_special === 'recent_cross') {
     arr = arr.filter(s => s.ich_recent_tk_cross === 1);
+  } else if (state.filters.ich_special === 'turnaround') {
+    arr = arr.filter(s => s.m_is_turnaround === true);
   }
 
   // ─── COMBINED MODE FILTER ───
@@ -795,9 +809,13 @@ function renderRow(s, idx) {
     ? `<span class="tk-cross-flag" title="Tenkan vừa cắt lên Kijun (${s.m_tk_cross_days_ago ?? '?'} phiên trước)">⭐</span>`
     : '';
 
+  const turnaroundFlag = (activeStrategy === 'ichimoku' && s.m_is_turnaround === true)
+    ? `<span class="tk-turnaround-flag" title="${(s.m_turnaround_reasons||[]).join(' · ')}">🎯 TURN</span>`
+    : '';
+
   return `<tr data-ticker="${s.ticker}" class="${selectedClass}">
     <td class="th-idx">${idx}</td>
-    <td><span class="ticker-cell">${s.ticker}</span>${tkCrossFlag}${eventFlag}</td>
+    <td><span class="ticker-cell">${s.ticker}</span>${tkCrossFlag}${turnaroundFlag}${eventFlag}</td>
     <td><span class="exchange-cell">${s.exchange}</span></td>
     <td class="num">${fmtPrice(s.close)}</td>
     <td class="num ${changeClass}">${sign}${change.toFixed(2)}%</td>
@@ -885,8 +903,27 @@ function openDetail(s) {
     `;
   }
 
+  // Turnaround callout — early reversal signal
+  let turnaroundCallout = '';
+  if (activeStrategy === 'ichimoku' && s.m_is_turnaround === true) {
+    const reasons = s.m_turnaround_reasons || [];
+    turnaroundCallout = `
+      <div class="turnaround-callout">
+        <div class="turnaround-title">🎯 Tín hiệu đảo chiều sớm</div>
+        <div class="turnaround-detail">
+          Đây là setup vàng của Ichimoku: TK cross + giá đang break cloud + volume xác nhận.
+          Vùng entry sớm với R:R thường rất tốt vì stop loss gần (đáy gần nhất) và target xa (kháng cự cloud trên / Fibo).
+        </div>
+        <ul class="turnaround-reasons">
+          ${reasons.map(r => `<li>✓ ${r}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+  }
+
   document.getElementById('detail-body').innerHTML = `
     ${entryHint}
+    ${turnaroundCallout}
     ${tkCrossCallout}
     ${eventCallout}
 

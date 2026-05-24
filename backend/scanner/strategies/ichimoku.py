@@ -202,6 +202,34 @@ def evaluate(df: pd.DataFrame, ticker: str,
     elif last_close < cloud_bottom:
         cloud_distance_pct = (last_close - cloud_bottom) / cloud_bottom * 100
 
+    # ════════════════════════════════════════════════════
+    # TURNAROUND SIGNAL DETECTION (đảo chiều sớm)
+    # ════════════════════════════════════════════════════
+    # Đặc trưng: TK vừa cắt KJ + giá đang break từ DƯỚI/TRONG cloud lên
+    # + volume xác nhận. Đây là vùng entry sớm trước khi xu hướng lớn rõ.
+    #
+    # Điều kiện:
+    #   1. TK cross đã xảy ra trong ≤5 phiên (medium strictness)
+    #   2. Vị trí giá: đang ở dưới/trong cloud hoặc vừa break lên không xa
+    #      → close < cloud_top * 1.03 (chưa vượt cloud quá 3%)
+    #   3. Nến gần đây tăng mạnh: change_3d ≥ 1.5% (đang đảo chiều)
+    #   4. Volume ratio ≥ 1.2× (xác nhận có dòng tiền)
+    is_turnaround = False
+    turnaround_reasons = []
+    if tk_cross['crossed'] and tk_cross['days_ago'] is not None and tk_cross['days_ago'] <= 5:
+        turnaround_reasons.append(f"TK cross {tk_cross['days_ago']} phiên trước")
+        # Check position vs cloud
+        if last_close < cloud_top * 1.03:
+            turnaround_reasons.append('Giá đang break cloud (chưa xa)')
+            # 3-day momentum
+            if len(df) >= 4:
+                change_3d_pct = (last_close / float(df['Close'].iloc[-4]) - 1) * 100
+                if change_3d_pct >= 1.5:
+                    turnaround_reasons.append(f'Nến tăng {change_3d_pct:.1f}% trong 3 phiên')
+                    if vol_ratio >= 1.2:
+                        turnaround_reasons.append(f'Volume {vol_ratio:.1f}× MA20')
+                        is_turnaround = True
+
     metrics = {
         'tenkan': round(last_tenkan, 2),
         'kijun': round(last_kijun, 2),
@@ -211,6 +239,8 @@ def evaluate(df: pd.DataFrame, ticker: str,
         'cloud_bottom': round(cloud_bottom, 2),
         'cloud_distance_pct': round(cloud_distance_pct, 2),
         'tk_cross_days_ago': tk_cross['days_ago'],
+        'is_turnaround': bool(is_turnaround),
+        'turnaround_reasons': turnaround_reasons,
         'change_5d_pct': round((df['Close'].iloc[-1] / df['Close'].iloc[-6] - 1) * 100, 2),
         'vol_ratio': round(vol_ratio, 2),
         'rsi14': round(rsi14_val, 1),
