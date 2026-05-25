@@ -209,14 +209,14 @@ def evaluate(df: pd.DataFrame, ticker: str,
     # + volume mạnh + đà tăng rõ. Setup early-reversal cao cấp.
     #
     # Điều kiện CHẶT (high quality, ít tín hiệu):
-    #   1. TK cross trong ≤3 phiên (very recent)
+    #   1. TK cross trong ≤2 phiên (very recent, T-1 hoặc T-2)
     #   2. Giá CHUẨN BỊ break cloud: dưới hoặc vừa vượt nhẹ
     #      → close < cloud_top * 1.01 (chỉ 1% trên cloud_top)
     #   3. Đà tăng 3 phiên ≥ 2.5% (rõ ràng đảo chiều)
     #   4. Volume ratio ≥ 1.5× MA20 (xác nhận dòng tiền lớn)
     is_turnaround = False
     turnaround_reasons = []
-    if tk_cross['crossed'] and tk_cross['days_ago'] is not None and tk_cross['days_ago'] <= 3:
+    if tk_cross['crossed'] and tk_cross['days_ago'] is not None and tk_cross['days_ago'] <= 2:
         turnaround_reasons.append(f"TK cross {tk_cross['days_ago']} phiên trước")
         # Check position vs cloud (chuẩn bị break)
         if last_close < cloud_top * 1.01:

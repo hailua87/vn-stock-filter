@@ -264,12 +264,12 @@ def make_ich_signal(ticker, exchange, base_price, scan_date):
     else:
         tk_cross_days_ago = random.randint(8, 30) if random.random() < 0.5 else None
 
-    # Turnaround STRICT: TK ≤3 ngày + giá gần cloud_top + vol ≥1.5× + change ≥2.5%
+    # Turnaround STRICT: TK ≤2 ngày + giá gần cloud_top + vol ≥1.5× + change ≥2.5%
     # ~25% of recent_tk_cross signals (chặt hơn → ít signals hơn)
     is_turnaround = (
         scores['recent_tk_cross'] == 1
         and tk_cross_days_ago is not None
-        and tk_cross_days_ago <= 3
+        and tk_cross_days_ago <= 2
         and random.random() < 0.40
     )
     turnaround_reasons = []
