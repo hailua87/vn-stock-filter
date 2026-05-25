@@ -172,6 +172,26 @@ def _fetch_full_universe(exchanges: tuple) -> pd.DataFrame:
             else:
                 return _load_fallback_universe(exchanges)
 
+        # Override exchange using top_liquid.py (source of truth for curated list).
+        # vnstock listing sometimes returns duplicate ticker rows with different
+        # exchanges (e.g. DVN appears on both HOSE and UPCOM historical records).
+        # Our curated top_liquid lists reflect the CURRENT trading venue.
+        try:
+            from .top_liquid import get_top_liquid_tickers
+            override_map = dict(get_top_liquid_tickers())  # {ticker: exchange}
+            corrections = 0
+            for idx, row in result.iterrows():
+                tk = row['ticker']
+                if tk in override_map and row['exchange'] != override_map[tk]:
+                    log.info(f"  Exchange override: {tk} {row['exchange']} → {override_map[tk]}")
+                    result.at[idx, 'exchange'] = override_map[tk]
+                    corrections += 1
+            if corrections:
+                log.info(f"  Applied {corrections} exchange corrections from top_liquid")
+        except Exception as e:
+            log.warning(f"  Exchange override skipped: {e}")
+
+        # Drop duplicates AFTER override (keeps the corrected row)
         result = result.drop_duplicates('ticker').reset_index(drop=True)
         result = result[result['ticker'].str.len().between(3, 5)]
         log.info(f"  Full universe: {len(result)} tickers from {exchanges}")

@@ -83,6 +83,24 @@ const STRATEGY_BADGES = {
   ichimoku:           { code: 'ICH', label: 'Ichimoku',      hint: 'Tenkan/Kijun + Cloud' },
 };
 
+// Exchange override map — fixes vnstock listing bugs where ticker is reported
+// on wrong exchange (e.g. DVN appears as HOSE but actually trades on UPCOM).
+// This is a frontend safety net; the backend also corrects via top_liquid.py.
+// Source: VN stock listing as of 2026, ticker → correct exchange.
+const EXCHANGE_OVERRIDES = {
+  // UPCOM tickers commonly misreported
+  'DVN': 'UPCOM',
+  'ACV': 'UPCOM', 'BSR': 'UPCOM', 'VEA': 'UPCOM', 'VGI': 'UPCOM',
+  'OIL': 'UPCOM', 'QNS': 'UPCOM', 'VTP': 'UPCOM', 'MCH': 'UPCOM',
+  'MSR': 'UPCOM', 'SIP': 'UPCOM', 'VGT': 'UPCOM', 'LTG': 'UPCOM',
+  'FOX': 'UPCOM', 'MFS': 'UPCOM', 'BVB': 'UPCOM', 'AAS': 'UPCOM',
+  'VAB': 'UPCOM', 'SBS': 'UPCOM', 'NAB': 'UPCOM',
+};
+
+function correctExchange(ticker, originalExchange) {
+  return EXCHANGE_OVERRIDES[ticker] || originalExchange;
+}
+
 let activeStrategy = 'pre_breakout';
 function currentConfig()   { return STRATEGIES[activeStrategy]; }
 function currentCriteria() { return currentConfig().criteria; }
@@ -277,7 +295,7 @@ async function loadCombinedData(silent = false) {
       const r = await fetch(`${dir}/latest.json?_=${Date.now()}`);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const d = await r.json();
-      return { key, signals: d.signals || [], metadata: d.metadata || {} };
+      return { key, signals: applyExchangeOverrides(d.signals || []), metadata: d.metadata || {} };
     } catch (e) {
       console.warn(`Combined: failed to load ${key}:`, e.message);
       return { key, signals: [], metadata: {} };
@@ -344,6 +362,20 @@ async function loadCombinedData(silent = false) {
   }
 }
 
+// Helper: apply EXCHANGE_OVERRIDES to a list of signals (mutates exchange field)
+function applyExchangeOverrides(signals) {
+  if (!Array.isArray(signals)) return signals;
+  for (const s of signals) {
+    if (s && s.ticker && EXCHANGE_OVERRIDES[s.ticker]) {
+      const corrected = EXCHANGE_OVERRIDES[s.ticker];
+      if (s.exchange !== corrected) {
+        s.exchange = corrected;
+      }
+    }
+  }
+  return signals;
+}
+
 // ──────────── Load data ────────────
 async function loadLatestFirst() {
   try {
@@ -351,7 +383,7 @@ async function loadLatestFirst() {
     const r = await fetch(url);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
-    state.raw = data.signals || [];
+    state.raw = applyExchangeOverrides(data.signals || []);
     state.currentDate = data.metadata?.scan_date || null;
     state.latestDate = state.currentDate;
 
@@ -396,7 +428,7 @@ async function loadDateData(date) {
     const r = await fetch(url);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
-    state.raw = data.signals || [];
+    state.raw = applyExchangeOverrides(data.signals || []);
     state.currentDate = data.metadata?.scan_date || date;
     document.getElementById('stat-scanned').textContent =
       (data.metadata?.universe_size || 0).toLocaleString();
