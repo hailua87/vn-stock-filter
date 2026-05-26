@@ -399,18 +399,24 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
     Fetch OHLCV using local parquet cache. Only pulls incremental data
     since last cached date.
 
-    FIX (2026-05-26): adjusted=True mặc định (đi đôi với source='VCI' trong
+    FIX (2026-05-26): adjusted=True mặc định (đi đôi với source='vci' trong
     fetch_ohlcv). Cache file dùng suffix '_adj.parquet'. Cache cũ '_raw.parquet'
     (do TCBS-fail-fallback ghi) là dữ liệu rác — workflow cần purge trước
     lần chạy đầu sau fix (đã bump cache key v1 → v2 trong daily-scan.yml).
 
-    FIX: Trước đây dùng `last_date >= end - timedelta(days=1)` — bug nghiêm trọng
-    vì end = today (datetime.now().date()), nên cache được coi là tươi nếu chỉ cũ
-    1 ngày, BẤT KỂ phiên đó có phải phiên giao dịch hợp lệ không. Hệ quả: chạy
-    scan vào sáng Thứ Hai có thể dùng dữ liệu Thứ Sáu mà không refetch ra phiên
-    Thứ Hai mới nhất.
+    FIX: kiểm tra cache có chứa đúng phiên giao dịch gần nhất theo lịch không.
+    Trước đây: last_date >= end - 1 day (sai trên thứ Hai + sau nghỉ lễ).
+    Bây giờ: last_date >= _last_trading_session(end).
 
-    Sửa: kiểm tra cache có chứa đúng phiên giao dịch gần nhất theo lịch không.
+    FIX (2026-05-26 evening): STRICT SESSION VALIDATION ở cuối function.
+    Triệu chứng: ACB hiển thị giá 24.30 / KL 22M trong khi SSI báo 24.80 / 58.82M
+    cùng phiên 26/05/2026. KL chênh 62% → vnstock VCI trả data PARTIAL (có data
+    nhưng thiếu phiên 26/05). Code cũ ghi vào cache và return bình thường, không
+    flag StaleCache → strategy không reject → output sai data dưới ngày đúng.
+
+    Fix: bất kể đường nào dẫn đến df (cache fresh / refetch / fresh fetch), CUỐI
+    function check `df['Date'].max().date() >= last_session`. Nếu KHÔNG → đánh dấu
+    StaleCache=True → strategy evaluate() reject mã đó.
     """
     suffix = '_adj' if adjusted else '_raw'
     cache_file = CACHE_DIR / f'{ticker}{suffix}.parquet'
@@ -418,66 +424,71 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
     start = end - timedelta(days=lookback_days)
     last_session = _last_trading_session(end)
 
+    df: Optional[pd.DataFrame] = None
+    refetch_explicit_failed = False  # True nếu refetch trả None/empty
+
     if cache_file.exists() and not force_refresh:
         try:
             cached = pd.read_parquet(cache_file)
             cached['Date'] = pd.to_datetime(cached['Date'])
             last_date = cached['Date'].max().date()
-            # FIX: cache chỉ tươi nếu chứa đúng phiên giao dịch gần nhất.
-            # Trước đây: last_date >= end - 1 day (sai trên thứ Hai + sau nghỉ lễ)
             if last_date >= last_session:
-                df = cached[cached['Date'] >= pd.Timestamp(start)]
+                # Cache đã chứa phiên gần nhất — dùng luôn
+                df = cached[cached['Date'] >= pd.Timestamp(start)].copy()
             else:
-                # Incremental fetch — refresh last 30 days too (in case of late corp actions)
+                # Cache cũ — refetch incremental (refresh 30 ngày cuối phòng late corp actions)
                 refetch_start = (last_date - timedelta(days=30))
                 new = fetch_ohlcv(ticker, str(refetch_start), str(end), adjusted=adjusted)
                 if new is not None and not new.empty:
                     cached_old = cached[cached['Date'] < pd.Timestamp(refetch_start)]
                     df = pd.concat([cached_old, new]).drop_duplicates('Date').sort_values('Date')
-                    df.to_parquet(cache_file, index=False)
+                    # Chỉ ghi cache nếu refetch trả về data tới phiên gần nhất.
+                    # Tránh trường hợp partial data (có data nhưng thiếu last_session)
+                    # ghi đè cache cũ với cùng vấn đề. Việc check StaleCache ở dưới
+                    # sẽ flag df, không cần stop early.
+                    new_last_date = pd.to_datetime(new['Date']).max().date()
+                    if new_last_date >= last_session:
+                        df.to_parquet(cache_file, index=False)
                 else:
-                    # Refetch thất bại → vẫn dùng cache cũ NHƯNG đánh dấu stale
-                    # để caller có thể loại bỏ trong sanity check.
+                    # Refetch fail rõ ràng → dùng cache cũ, sẽ flag StaleCache ở cuối
                     df = cached.copy()
-                    df.attrs['stale_cache'] = True
-                    df.attrs['stale_last_date'] = str(last_date)
-                    df.attrs['expected_session'] = str(last_session)
+                    refetch_explicit_failed = True
                     log.warning(
-                        f"  {ticker}: refetch FAILED, using stale cache "
+                        f"  {ticker}: refetch FAILED (empty), using stale cache "
                         f"(last={last_date}, expected={last_session})"
                     )
-            df['Exchange'] = exchange
-            df['Ticker'] = ticker
-            # FIX: chuyển stale flag từ df.attrs (mất khi concat/slice) sang cột
-            # để các hàm evaluate downstream có thể đọc qua df['StaleCache'].any()
-            if df.attrs.get('stale_cache'):
-                df['StaleCache'] = True
-            else:
-                df['StaleCache'] = False
-            return df.reset_index(drop=True)
         except Exception as e:
-            log.warning(f"  cache read failed for {ticker}: {e}, refetching")
+            log.warning(f"  cache read failed for {ticker}: {e}, refetching from scratch")
+            df = None
 
-    df = fetch_ohlcv(ticker, str(start), str(end), adjusted=adjusted)
-    if df is None or df.empty:
-        return None
+    if df is None:
+        # Không có cache hoặc cache read fail → fetch from scratch
+        df = fetch_ohlcv(ticker, str(start), str(end), adjusted=adjusted)
+        if df is None or df.empty:
+            return None
+        try:
+            df.to_parquet(cache_file, index=False)
+        except Exception as e:
+            log.warning(f"  cache write failed for {ticker}: {e}")
 
-    # Sanity check: phiên cuối có khớp phiên giao dịch gần nhất không?
-    df_last_date = pd.to_datetime(df['Date']).max().date()
-    if df_last_date < last_session:
+    # ──────────── STRICT SESSION VALIDATION ────────────
+    # Bất kể df đến từ đâu (cache fresh / merged / fresh fetch), check phiên cuối.
+    # Nếu thiếu phiên gần nhất → flag StaleCache để strategy reject.
+    df['Date'] = pd.to_datetime(df['Date'])
+    df_last_date = df['Date'].max().date()
+    is_stale = (df_last_date < last_session) or refetch_explicit_failed
+
+    if is_stale:
         log.warning(
-            f"  {ticker}: fresh fetch returned last={df_last_date} "
-            f"but expected_session={last_session} — vnstock có thể chưa cập nhật"
+            f"  {ticker}: STALE — df.last={df_last_date}, expected={last_session} "
+            f"({'refetch failed' if refetch_explicit_failed else 'vnstock chưa cập nhật'})"
         )
 
-    try:
-        df.to_parquet(cache_file, index=False)
-    except Exception as e:
-        log.warning(f"  cache write failed for {ticker}: {e}")
+    df = df.copy()
     df['Exchange'] = exchange
     df['Ticker'] = ticker
-    df['StaleCache'] = False
-    return df
+    df['StaleCache'] = is_stale
+    return df.reset_index(drop=True)
 
 
 def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,

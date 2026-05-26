@@ -1,7 +1,8 @@
 # CHANGELOG — 2026-05-26
 
 Bản update này fix một loạt bug phát hiện trong session 25-26/05/2026 khi user
-nhận thấy giá VND trên VN-SCANNER (17.90) không khớp với CafeF (17.60).
+nhận thấy giá VND trên VN-SCANNER (17.90) không khớp với CafeF (17.60), và
+sau đó giá ACB (24.30) không khớp với SSI iBoard (24.80).
 
 Quá trình điều tra phát hiện ra **nhiều bug chồng chéo**, chứ không phải chỉ 1
 bug duy nhất như `PUSH_GUIDE.md` cũ giả định. Document này thay thế cho
@@ -9,7 +10,35 @@ bug duy nhất như `PUSH_GUIDE.md` cũ giả định. Document này thay thế 
 
 ---
 
-## Vấn đề ban đầu
+## Vấn đề 2 (2026-05-26 evening) — ACB partial data
+
+User phát hiện sau khi đã apply tất cả fix v3: ACB hiển thị giá 24.30 / KL 22M
+trên VN-SCANNER, trong khi SSI iBoard báo 24.80 / 58.82M cùng phiên 26/05/2026.
+
+**Diagnosis:** vnstock VCI trả về data PARTIAL (có data lịch sử nhưng thiếu
+phiên 26/05). Code v3 chỉ check `df is None or df.empty` → data partial vượt
+qua check, được ghi vào cache, return df bình thường (StaleCache=False) →
+strategy `evaluate()` không reject → output sai data dưới ngày đúng.
+
+**Fix v4 (data_fetcher.py):**
+
+Refactor toàn bộ `fetch_with_cache` để có **STRICT SESSION VALIDATION** ở
+cuối function. Bất kể df đến từ đâu (cache fresh / merged / fresh fetch),
+luôn check `df['Date'].max().date() >= last_session`. Nếu KHÔNG → flag
+`StaleCache=True` → strategy reject.
+
+Thêm guard: chỉ ghi cache mới khi refetch trả data tới phiên gần nhất —
+tránh "infinite partial cache" (cache cũ partial → refetch partial → ghi
+đè cache vẫn partial → lần sau vẫn miss).
+
+3 smoke tests reproduce chính xác bug ACB và verify fix:
+1. vnstock trả partial → StaleCache=True ✓
+2. vnstock trả full → StaleCache=False ✓
+3. Cache cũ partial + refetch partial → StaleCache=True (defense in depth) ✓
+
+---
+
+## Vấn đề 1 (2026-05-25) — VND phantom session
 
 User báo cáo giá VND trên VN-SCANNER ngày 25/05/2026 không khớp với CafeF:
 - CafeF: 17.60 (+0.86%), KL 19.43M
