@@ -2,8 +2,9 @@ name: Daily Scan
 
 on:
   schedule:
-    # 16:00 ICT = 09:00 UTC, mỗi ngày làm việc T2-T6
-    - cron: '0 9 * * 1-5'
+    # 17:00 ICT = 10:00 UTC, mỗi ngày làm việc T2-T6
+    # Đẩy muộn hơn 1h (so với 16:00) để vnstock TCBS chắc chắn đã cập nhật phiên T
+    - cron: '0 10 * * 1-5'
   workflow_dispatch:  # Cho phép chạy thủ công từ UI
 
 jobs:
@@ -27,12 +28,17 @@ jobs:
           pip install -r backend/requirements.txt
 
       - name: Cache OHLCV parquet
+        # FIX (2026-05-25): bumped prefix v1 → v2 to invalidate cache containing
+        # stale-session data from the "phantom session" bug. Cache key bao gồm
+        # github.run_id để mỗi run đều save cache mới; restore-keys khớp prefix
+        # 'ohlcv-cache-v2-' để restore cache mới nhất. Cache cũ (prefix khác) sẽ
+        # bị GitHub tự dọn sau 7 ngày không dùng.
         uses: actions/cache@v4
         with:
           path: backend/data/cache
-          key: ohlcv-cache-${{ github.run_id }}
+          key: ohlcv-cache-v2-${{ github.run_id }}
           restore-keys: |
-            ohlcv-cache-
+            ohlcv-cache-v2-
 
       - name: Run daily scan
         env:
