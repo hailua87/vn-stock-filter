@@ -1,124 +1,121 @@
-# VN Breakout Scanner 🇻🇳📈
+# VN-SCANNER
 
-> Bộ lọc cổ phiếu Việt Nam phát hiện tín hiệu tăng giá **trước nhịp break 2-5 ngày**
-> Áp dụng cho HOSE / HNX / UPCOM — chạy hằng ngày, deploy lên web cho người dùng
+Multi-strategy scanner cho thị trường chứng khoán Việt Nam (HOSE/HNX/UPCOM).
 
-[![CI](https://github.com/hailua87/vn-stock-filter/actions/workflows/daily-scan.yml/badge.svg)](https://github.com/hailua87/vn-stock-filter/actions)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.10+-green.svg)](https://python.org)
+Quét tự động hàng ngày, phát hiện tín hiệu theo 4 chiến lược:
+- **Pre-Breakout** (sắp phá vỡ kháng cự)
+- **Golden Cross Long** (MA50 cắt MA200)
+- **Golden Cross Short** (MA20 cắt MA50)
+- **Ichimoku Kinko Hyo** (hệ thống tín hiệu Nhật)
 
-## 🎯 Mục tiêu
-
-Phát hiện các cổ phiếu đang trong giai đoạn **"tích lũy âm thầm"** — nơi smart money đang gom hàng nhưng giá chưa thực sự bứt phá. Tín hiệu thường xuất hiện 2-5 phiên trước khi giá break qua vùng kháng cự.
-
-## 🚀 Tính năng
-
-- ✅ Thu thập dữ liệu **tự động hằng ngày** từ HOSE/HNX/UPCOM (qua vnstock + VCI/TCBS)
-- ✅ Quét **toàn bộ ~1,600 mã** trong < 5 phút
-- ✅ **10 tiêu chí kỹ thuật** đa chiều (giá, volume, momentum, volatility)
-- ✅ Chấm điểm 0-10, xếp loại A+/A/B/C
-- ✅ Xuất Excel + JSON + Web Dashboard
-- ✅ Backtest framework để kiểm tra hit rate
-- ✅ Deploy được lên Vercel/Netlify (frontend) + Railway/Render (backend)
-- ✅ GitHub Actions chạy tự động lúc 16h00 mỗi phiên
-
-## 📁 Cấu trúc project
+## Kiến trúc
 
 ```
-vn-breakout-scanner/
-├── backend/                      # Python backend
-│   ├── scanner/
-│   │   ├── __init__.py
-│   │   ├── indicators.py         # ATR, RSI, OBV, Bollinger...
-│   │   ├── criteria.py           # 10 tiêu chí pre-breakout
-│   │   ├── data_fetcher.py       # Lấy dữ liệu vnstock
-│   │   ├── scanner.py            # Engine quét chính
-│   │   ├── backtest.py           # Kiểm tra hit rate
-│   │   └── exporter.py           # Excel/JSON/HTML
-│   ├── data/                     # Cache dữ liệu (gitignored)
-│   ├── tests/                    # Unit tests
-│   ├── api.py                    # FastAPI server
-│   ├── run_daily.py              # Script chạy hằng ngày
-│   └── requirements.txt
-├── web/                          # Frontend (React/HTML)
-│   ├── index.html                # Dashboard
-│   ├── app.js
-│   └── styles.css
-├── docs/                         # Tài liệu kỹ thuật
-│   ├── ARCHITECTURE.md           # Kiến trúc hệ thống
-│   ├── DATA_SOURCES.md           # Nguồn & cách lấy dữ liệu
-│   ├── CRITERIA.md               # Chi tiết 10 tiêu chí
-│   ├── DEPLOYMENT.md             # Triển khai lên web
-│   ├── BACKTEST.md               # Hướng dẫn backtest
-│   └── API.md                    # API documentation
-├── scripts/
-│   ├── setup.sh                  # Cài đặt môi trường
-│   ├── run_local.sh              # Chạy local
-│   └── deploy.sh                 # Deploy
-├── .github/workflows/
-│   └── daily-scan.yml            # Chạy tự động hằng ngày
-├── docker-compose.yml
-├── Dockerfile
-└── README.md
+GitHub Actions (2 lần/ngày)
+        ↓
+backend/run_daily.py
+   ├── data_fetcher.py     ← vnstock 4.x (source='vci', adjusted)
+   ├── strategies/         ← 4 chiến lược scan
+   └── output JSON         ← commit lên repo
+        ↓
+Vercel deploy
+        ↓
+web/                       ← static site đọc JSON
 ```
 
-## ⚡ Quick Start
+**Quan trọng:** Web KHÔNG gọi API. Web chỉ đọc JSON tĩnh được commit. JSON
+được cập nhật khi workflow chạy.
+
+## Schedule
+
+- **12:00 ICT (sau phiên sáng)**: intraday update — badge cam `INTRADAY HH:MM`
+- **17:00 ICT (sau đóng cửa)**: EOD update — badge teal `EOD HH:MM`
+
+Chỉ chạy T2-T6 (không cuối tuần).
+
+## Setup local
 
 ```bash
-# 1. Clone & cài đặt
-git clone https://github.com/hailua87/vn-stock-filter.git
-cd vn-breakout-scanner
-bash scripts/setup.sh
+# Backend
+cd backend
+pip install -r requirements.txt
+export VNSTOCK_API_KEY=your_key_here   # đăng ký free tại vnstocks.com
+python run_daily.py --min-score 5 --limit 500
 
-# 2. Chạy quét hôm nay
-python backend/run_daily.py
-
-# 3. Khởi động web dashboard
-python backend/api.py  # backend tại http://localhost:8000
-cd web && python -m http.server 3000  # frontend tại http://localhost:3000
+# Frontend (static, serve bằng bất kỳ HTTP server nào)
+cd web
+python -m http.server 8000
+# → http://localhost:8000
 ```
 
-## 📚 Tài liệu
+## Cài đặt API key
 
-**👉 Bắt đầu tại: [docs/README.md](docs/README.md)** — index điều hướng theo mục tiêu
+vnstock 4.x giới hạn anonymous mode rất chặt (vài req/phút). Đăng ký free tại
+https://vnstocks.com/login để có 60 req/phút.
 
-### Theo level
+Trong GitHub Actions: Settings → Secrets → New repository secret:
+- Name: `VNSTOCK_API_KEY`
+- Value: API key của bạn
 
-**🟢 Người mới / Non-technical:**
-- [USER_GUIDE.md](docs/USER_GUIDE.md) — Hướng dẫn cho người không-kỹ-thuật (deploy web, dùng dashboard)
-- [FAQ.md](docs/FAQ.md) — Câu hỏi thường gặp + troubleshooting
+## Tests
 
-**🟡 Developer:**
-- [QUICKSTART.md](QUICKSTART.md) — Setup nhanh trong 5 phút
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md) — Kiến trúc hệ thống & data flow
-- [DATA_SOURCES.md](docs/DATA_SOURCES.md) — Nguồn dữ liệu, API endpoints, rate limit
-- [CRITERIA.md](docs/CRITERIA.md) — Chi tiết 10 tiêu chí + công thức toán
-- [CORPORATE_ACTIONS.md](docs/CORPORATE_ACTIONS.md) — Xử lý chia tách/cổ tức/phát hành
+```bash
+cd backend
+pip install pytest
+pytest tests/ -v
+```
 
-**🔴 Production / DevOps:**
-- **[GITHUB_DEPLOY.md](docs/GITHUB_DEPLOY.md)** ⭐ Hướng dẫn deploy GitHub + Vercel (từng bước, 30 phút)
-- [DEPLOYMENT.md](docs/DEPLOYMENT.md) — Các phương án deploy khác (Railway, Docker)
-- [BACKTEST.md](docs/BACKTEST.md) — Backtest framework + REST API docs
+39 tests, cover các strategy chính.
 
-## 🌐 Web App
+## Cấu trúc thư mục
 
-Production: **https://vn-breakout-scanner.vercel.app** *(ví dụ)*
+```
+.github/workflows/
+    daily-scan.yml       — CI/CD workflow
 
-- Bảng xếp hạng tín hiệu cập nhật hằng ngày
-- Filter theo sàn (HOSE/HNX/UPCOM), điểm số, ngành
-- Biểu đồ giá + đánh dấu các tiêu chí đạt
-- Xuất Excel/CSV
-- Lịch sử tín hiệu (xem mã nào break thành công sau khi xuất hiện)
+backend/
+    run_daily.py         — Pipeline chính
+    generate_demo_data.py — Tạo demo data nếu vnstock fail
+    scanner/
+        data_fetcher.py  — Fetch OHLCV từ vnstock
+        criteria.py      — Tiêu chí lọc cơ bản
+        top_liquid.py    — Curated list mã liquid
+        support_resistance.py — Fibonacci levels
+        strategies/
+            golden_cross.py
+            ichimoku.py
+            indicators_ext.py — Bollinger, ATR, ADX, etc.
+    tests/
 
-## ⚠️ Disclaimer
+web/
+    index.html
+    app.js
+    styles.css
+```
 
-Đây là công cụ **hỗ trợ phân tích kỹ thuật**, KHÔNG phải lời khuyên đầu tư. Tín hiệu chỉ ra *xác suất* break, không đảm bảo. Luôn kết hợp:
-- Phân tích cơ bản
-- Bối cảnh thị trường chung (VN-Index)
-- Quản trị rủi ro (stop-loss, position sizing)
+## Lưu ý quan trọng
 
-Tác giả không chịu trách nhiệm cho thiệt hại tài chính khi sử dụng.
+### Giá adjusted
 
-## 📄 License
+Code dùng `source='vci'` của vnstock 4.x trả về **adjusted price** (đã trừ
+cổ tức quá khứ). Hệ quả: giá có thể KHÁC CafeF/SSI cho mã có cổ tức gần đây.
 
-MIT License - xem [LICENSE](LICENSE)
+Ví dụ VND chia 500đ ngày 15/07/2025:
+- CafeF: 17.60 (raw, hiện tại)
+- VN-SCANNER: 17.10 (= 17.60 - 0.50)
+
+Đây là **đúng theo thiết kế** — adjusted price chính xác hơn cho phân tích kỹ
+thuật. UI có badge `Giá điều chỉnh` để user hiểu.
+
+### Intraday timing divergence
+
+Khi xem data INTRADAY (12:00 run), giá có thể chênh 0.5-2% so với SSI/CafeF
+vì vnstock và các nguồn này snapshot ở thời điểm khác nhau trong cùng phiên.
+**Không phải bug.**
+
+Sau 17:00 (EOD run), data dùng giá đóng cửa chính thức → khớp ~99% với
+CafeF/SSI.
+
+## Changelog
+
+Xem `CHANGELOG.md` để biết history các fix và cải tiến.
