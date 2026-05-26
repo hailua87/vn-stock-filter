@@ -1,11 +1,31 @@
 name: Daily Scan
 
+# Lịch chạy:
+#   - 12:00 ICT (05:00 UTC) — INTRADAY: sau phiên sáng close (11:30 ICT + 30p buffer)
+#   - 17:00 ICT (10:00 UTC) — EOD: sau phiên chiều close (14:45 ICT + ~2h buffer)
+# Chỉ chạy T2-T6 (không cuối tuần).
+#
+# Phân biệt intraday vs EOD:
+#   - Workflow tự detect dựa trên giờ chạy (UTC < 9 → intraday, ≥9 → eod)
+#   - Commit message và metadata trong JSON output đều có tag để frontend phân biệt
+#
+# Manual trigger:
+#   - Có thể chọn loại run từ UI nếu cần override (vd test khi đang code)
 on:
   schedule:
-    # 17:00 ICT = 10:00 UTC, mỗi ngày làm việc T2-T6
-    # Đẩy muộn hơn 1h (so với 16:00) để vnstock TCBS chắc chắn đã cập nhật phiên T
-    - cron: '0 10 * * 1-5'
-  workflow_dispatch:  # Cho phép chạy thủ công từ UI
+    - cron: '0 5 * * 1-5'    # 12:00 ICT — INTRADAY
+    - cron: '0 10 * * 1-5'   # 17:00 ICT — EOD
+  workflow_dispatch:
+    inputs:
+      run_type:
+        description: 'Loại run (auto = tự detect theo giờ)'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - intraday
+          - eod
 
 jobs:
   scan:
@@ -13,8 +33,42 @@ jobs:
     permissions:
       contents: write  # Cần để commit web/data/latest.json
 
+    # FIX: concurrency group ngăn 2 lần chạy chồng nhau. Nếu intraday đang chạy
+    # mà EOD trigger → EOD đợi (cancel-in-progress: false) → tránh conflict commit.
+    concurrency:
+      group: daily-scan
+      cancel-in-progress: false
+
     steps:
       - uses: actions/checkout@v4
+
+      # FIX (2026-05-26): xác định loại run intraday/eod để tag metadata và commit.
+      # Logic:
+      #   - workflow_dispatch + run_type=intraday|eod → dùng giá trị chọn
+      #   - workflow_dispatch + run_type=auto → detect theo giờ UTC
+      #   - schedule → detect theo giờ UTC (UTC<9 = intraday, ≥9 = eod)
+      - name: Determine run type (intraday vs EOD)
+        id: runtype
+        run: |
+          INPUT_TYPE="${{ github.event.inputs.run_type }}"
+          UTC_HOUR=$(date -u +%H)
+          if [ "$INPUT_TYPE" = "intraday" ] || [ "$INPUT_TYPE" = "eod" ]; then
+            RUN_TYPE="$INPUT_TYPE"
+            REASON="manual override"
+          elif [ "$UTC_HOUR" -lt 9 ]; then
+            RUN_TYPE="intraday"
+            REASON="auto-detected (UTC hour $UTC_HOUR < 9)"
+          else
+            RUN_TYPE="eod"
+            REASON="auto-detected (UTC hour $UTC_HOUR >= 9)"
+          fi
+          echo "run_type=$RUN_TYPE" >> $GITHUB_OUTPUT
+          echo "reason=$REASON" >> $GITHUB_OUTPUT
+          echo "═══════════════════════════════════════════════════"
+          echo "🏷️  Run type: $RUN_TYPE ($REASON)"
+          echo "   UTC hour now: $UTC_HOUR"
+          echo "   ICT hour now: $(TZ=Asia/Ho_Chi_Minh date +%H:%M)"
+          echo "═══════════════════════════════════════════════════"
 
       - uses: actions/setup-python@v5
         with:
@@ -43,6 +97,7 @@ jobs:
       - name: Run daily scan
         env:
           VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
+          SCAN_RUN_TYPE: ${{ steps.runtype.outputs.run_type }}
         run: |
           python backend/run_daily.py --min-score 5 --limit 500
         timeout-minutes: 60
@@ -50,7 +105,7 @@ jobs:
       - name: Verify scan results
         run: |
           echo "═══════════════════════════════════════════════════"
-          echo "📊 SCAN RESULT VERIFICATION"
+          echo "📊 SCAN RESULT VERIFICATION (${{ steps.runtype.outputs.run_type }})"
           echo "═══════════════════════════════════════════════════"
           for f in web/data/latest.json \
                    web/data/golden_cross_long/latest.json \
@@ -84,7 +139,29 @@ jobs:
           find backend/data/cache -name "*.parquet" 2>/dev/null | wc -l
           echo "═══════════════════════════════════════════════════"
 
+      # FIX (2026-05-26): Tag JSON output với run_type và run_time để frontend
+      # có thể hiển thị badge "Intraday 12:00" hoặc "EOD 17:00" cho user biết
+      # độ tươi của data. Patch nhẹ bằng jq để không phải sửa Python.
+      - name: Tag JSON outputs with run metadata
+        run: |
+          RUN_TYPE="${{ steps.runtype.outputs.run_type }}"
+          RUN_TIME_ICT=$(TZ=Asia/Ho_Chi_Minh date '+%H:%M')
+          RUN_DATE_ICT=$(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')
+          echo "Tagging JSONs with run_type=$RUN_TYPE, time_ict=$RUN_TIME_ICT"
+          for f in web/data/latest.json \
+                   web/data/golden_cross_long/latest.json \
+                   web/data/golden_cross_short/latest.json \
+                   web/data/ichimoku/latest.json; do
+            if [ -f "$f" ]; then
+              jq --arg rt "$RUN_TYPE" --arg time "$RUN_TIME_ICT" --arg date "$RUN_DATE_ICT" \
+                '.metadata += {run_type: $rt, run_time_ict: $time, run_date_ict: $date}' \
+                "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+            fi
+          done
+
       - name: Upload Excel artifact
+        # EOD only — intraday không tạo Excel để tiết kiệm storage
+        if: steps.runtype.outputs.run_type == 'eod'
         uses: actions/upload-artifact@v4
         with:
           name: signals-${{ github.run_id }}
@@ -95,17 +172,41 @@ jobs:
         run: |
           git config user.name "VN Scanner Bot"
           git config user.email "bot@vn-scanner.local"
+
+          # FIX: pull --rebase trước khi commit để tránh conflict khi 2 lần
+          # chạy/ngày. Nếu intraday đã commit, EOD pull rebase rồi commit đè.
+          git pull --rebase origin ${{ github.ref_name }} || echo "Pull rebase failed, continuing"
+
           git add web/data/latest.json web/data/archive/ \
                   web/data/golden_cross_long/ web/data/golden_cross_short/ \
                   web/data/ichimoku/
           if git diff --staged --quiet; then
-            echo "No changes to commit"
+            echo "ℹ️  No changes to commit (signals unchanged from last run)"
           else
-            git commit -m "chore: update signals $(date +%Y-%m-%d)"
-            git push
+            RUN_TYPE="${{ steps.runtype.outputs.run_type }}"
+            RUN_TIME_ICT=$(TZ=Asia/Ho_Chi_Minh date '+%H:%M')
+            DATE_ICT=$(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')
+            # Commit message phân biệt intraday/eod để dễ đọc history
+            if [ "$RUN_TYPE" = "intraday" ]; then
+              MSG="chore: update signals $DATE_ICT [intraday $RUN_TIME_ICT]"
+            else
+              MSG="chore: update signals $DATE_ICT [EOD $RUN_TIME_ICT]"
+            fi
+            git commit -m "$MSG"
+            # Push với retry — đôi khi remote update giữa rebase và push
+            for i in 1 2 3; do
+              if git push; then
+                echo "✓ Pushed on attempt $i"
+                break
+              else
+                echo "Push attempt $i failed, pulling and retrying..."
+                git pull --rebase origin ${{ github.ref_name }} || true
+                sleep 2
+              fi
+            done
           fi
 
       - name: Notify on failure
         if: failure()
         run: |
-          echo "::error::Daily scan failed. Check logs above."
+          echo "::error::Daily scan failed (${{ steps.runtype.outputs.run_type }}). Check logs above."

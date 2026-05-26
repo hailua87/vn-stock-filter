@@ -114,6 +114,10 @@ const state = {
   latestDate: null,
   availableDates: [],
   selectedTicker: null,
+  // FIX (2026-05-26): metadata về lần chạy gần nhất của workflow (intraday vs EOD).
+  // Đọc từ JSON metadata fields: run_type, run_time_ict, run_date_ict.
+  // Dùng để hiển thị badge "INTRADAY 12:00" / "EOD 17:00" cho user biết độ tươi data.
+  runMetadata: { runType: null, runTimeIct: null, runDateIct: null },
   sort: { column: null, direction: null },
   filters: { exchange: '', rating: '', search: '', volMin: null, volMax: null, ich_special: '' },
   // ─── Combined mode ───
@@ -337,6 +341,20 @@ async function loadCombinedData(silent = false) {
     }
   }
 
+  // FIX (2026-05-26): pick run metadata từ nguồn có run_time_ict mới nhất.
+  // 4 strategy bình thường chạy cùng workflow → metadata giống nhau, nhưng phòng
+  // trường hợp 1 nguồn fail và còn data cũ → ưu tiên nguồn có timestamp mới hơn.
+  let bestRunMeta = { runType: null, runTimeIct: null, runDateIct: null };
+  for (const { metadata } of results) {
+    const m = extractRunMetadata({ metadata });
+    if (!m.runDateIct) continue;
+    const isNewer = !bestRunMeta.runDateIct
+      || m.runDateIct > bestRunMeta.runDateIct
+      || (m.runDateIct === bestRunMeta.runDateIct && (m.runTimeIct || '') > (bestRunMeta.runTimeIct || ''));
+    if (isNewer) bestRunMeta = m;
+  }
+  state.runMetadata = bestRunMeta;
+
   // Flatten: each ticker becomes a "combined signal"
   state.raw = Object.values(byTicker).map(entry => ({
     ...entry.best,
@@ -377,6 +395,19 @@ function applyExchangeOverrides(signals) {
 }
 
 // ──────────── Load data ────────────
+
+// FIX (2026-05-26): trích run metadata (intraday vs EOD) từ JSON.
+// Workflow tag JSON với 3 fields: run_type, run_time_ict, run_date_ict.
+// Data cũ (chưa có tag) → trả null cho các field → badge không hiển thị.
+function extractRunMetadata(data) {
+  const m = data?.metadata || {};
+  return {
+    runType: m.run_type || null,          // 'intraday' | 'eod' | null
+    runTimeIct: m.run_time_ict || null,    // 'HH:MM' | null
+    runDateIct: m.run_date_ict || null,    // 'YYYY-MM-DD' | null
+  };
+}
+
 async function loadLatestFirst() {
   try {
     const url = `${currentDataDir()}/latest.json?_=${Date.now()}`;
@@ -386,6 +417,7 @@ async function loadLatestFirst() {
     state.raw = applyExchangeOverrides(data.signals || []);
     state.currentDate = data.metadata?.scan_date || null;
     state.latestDate = state.currentDate;
+    state.runMetadata = extractRunMetadata(data);
 
     document.getElementById('stat-scanned').textContent =
       (data.metadata?.universe_size || 0).toLocaleString();
@@ -430,6 +462,7 @@ async function loadDateData(date) {
     const data = await r.json();
     state.raw = applyExchangeOverrides(data.signals || []);
     state.currentDate = data.metadata?.scan_date || date;
+    state.runMetadata = extractRunMetadata(data);
     document.getElementById('stat-scanned').textContent =
       (data.metadata?.universe_size || 0).toLocaleString();
     render();
@@ -641,6 +674,39 @@ function bindCollapseFilters() {
   });
 }
 
+// FIX (2026-05-26): Render badge "INTRADAY 12:00" hoặc "EOD 17:00" ở topbar.
+// Cho user biết data từ run giữa ngày (giá chưa final) hay sau đóng cửa (chốt phiên).
+// Đọc state.runMetadata được set bởi loadLatestFirst / loadDateData / loadCombinedData.
+function renderRunBadge() {
+  const badge = document.getElementById('run-badge');
+  if (!badge) return;
+
+  const meta = state.runMetadata || {};
+  if (!meta.runType || !meta.runTimeIct) {
+    // Không có metadata → ẩn badge (data cũ trước khi workflow tag, hoặc tải thất bại)
+    badge.hidden = true;
+    return;
+  }
+
+  // Set class, text, tooltip
+  badge.hidden = false;
+  badge.className = `run-badge ${meta.runType}`;
+  if (meta.runType === 'intraday') {
+    badge.textContent = `INTRADAY ${meta.runTimeIct}`;
+    badge.title = `Cập nhật lúc ${meta.runTimeIct} ICT (giữa phiên). `
+                + `Giá khớp tại thời điểm scan — chưa phải giá đóng cửa cuối ngày. `
+                + `Lần update tiếp theo: 17:00 ICT (EOD).`;
+  } else if (meta.runType === 'eod') {
+    badge.textContent = `EOD ${meta.runTimeIct}`;
+    badge.title = `Cập nhật lúc ${meta.runTimeIct} ICT (sau đóng cửa). `
+                + `Đây là giá đóng cửa chính thức của phiên ${meta.runDateIct || ''}.`;
+  } else {
+    // Unknown run_type — hiển thị neutral
+    badge.textContent = meta.runTimeIct;
+    badge.title = `Cập nhật lúc ${meta.runTimeIct} ICT`;
+  }
+}
+
 // ──────────── Render table ────────────
 function render() {
   state.filtered = applyFilters();
@@ -657,6 +723,10 @@ function render() {
     statDate.textContent = isLatest ? `· LIVE ${day}/${m}` : `· ${day}/${m}`;
     statDate.style.color = isLatest ? 'var(--up)' : 'var(--text-mute)';
   }
+
+  // FIX (2026-05-26): render badge intraday/eod theo runMetadata.
+  // Ẩn nếu data không có metadata (data cũ trước khi workflow tag).
+  renderRunBadge();
 
   // Event warning count
   const eventCount = state.raw.filter(s => s.m_upcoming_event).length;
