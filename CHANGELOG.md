@@ -1,19 +1,12 @@
 # CHANGELOG — 2026-05-26
 
-Bản update này fix một loạt bug phát hiện trong session 25-26/05/2026 khi user
-nhận thấy giá VND trên VN-SCANNER (17.90) không khớp với CafeF (17.60), và
-sau đó giá ACB (24.30) không khớp với SSI iBoard (24.80).
-
-Quá trình điều tra phát hiện ra **nhiều bug chồng chéo**, chứ không phải chỉ 1
-bug duy nhất như `PUSH_GUIDE.md` cũ giả định. Document này thay thế cho
-`PUSH_GUIDE.md` cũ (đã xóa vì giả thuyết sai).
-
 ---
 
-## Vấn đề 2 (2026-05-26 evening) — ACB partial data
+## Vấn đề mới nhất (2026-05-26 evening) — ACB partial data
 
-User phát hiện sau khi đã apply tất cả fix v3: ACB hiển thị giá 24.30 / KL 22M
-trên VN-SCANNER, trong khi SSI iBoard báo 24.80 / 58.82M cùng phiên 26/05/2026.
+User phát hiện sau khi đã apply tất cả fix v3 + valuation module: ACB hiển
+thị giá 24.30 / KL 22M trên VN-SCANNER, trong khi SSI iBoard báo 24.80 /
+58.82M cùng phiên 26/05/2026.
 
 **Diagnosis:** vnstock VCI trả về data PARTIAL (có data lịch sử nhưng thiếu
 phiên 26/05). Code v3 chỉ check `df is None or df.empty` → data partial vượt
@@ -36,9 +29,52 @@ tránh "infinite partial cache" (cache cũ partial → refetch partial → ghi
 2. vnstock trả full → StaleCache=False ✓
 3. Cache cũ partial + refetch partial → StaleCache=True (defense in depth) ✓
 
+**Trade-off:** Mã nào vnstock không có data phiên gần nhất sẽ KHÔNG xuất
+hiện trong kết quả scan. Đây là behavior đúng — thà thiếu mã còn hơn hiển
+thị sai data. Mã đó sẽ tự xuất hiện lại khi vnstock catch up.
+
 ---
 
-## Vấn đề 1 (2026-05-25) — VND phantom session
+## Module Valuation (định giá cổ phiếu) — bundle riêng từ chat khác
+
+Module valuation đã được phát triển trong session khác, gồm:
+
+- `backend/scanner/strategies/valuation/` — 9 files:
+  - `engine.py` — orchestrator chính
+  - `industry_classifier.py` — phân loại ngành (banking, real estate, tech, etc.)
+  - `methods_pb_roe.py` — P/B-ROE justified (cho banking)
+  - `methods_pe.py` — P/E multiple
+  - `methods_ev_ebitda.py` — EV/EBITDA (cho cyclical)
+  - `methods_dcf_ddm.py` — DCF FCFF + DDM (với safeguards)
+  - `methods_rnav_sotp.py` — RNAV/SOTP (cho real estate/holding)
+  - `normalizer.py` — normalize fundamentals
+- `backend/scanner/financial_fetcher.py` — fetch BCTC từ vnstock
+- `backend/scanner/market_metrics.py` — beta, market parameters
+- `backend/scanner/peer_database.py` — peer benchmark database
+- `backend/run_valuation.py` — entry point pipeline valuation
+- `backend/backtest.py` — backtest framework (90 ngày forward)
+- `web/valuation/` — dashboard riêng:
+  - `index.html`, `valuation.css`, `valuation.js`
+- 4 test suites: `test_valuation_integration.py`, `test_market_metrics.py`,
+  `test_peer_database.py`, `test_backtest.py`
+
+Methods, weights, confidence theo industry và safeguards xem chi tiết trong
+`ROADMAP_FINAL.md` và `VALUATION_INTEGRATION.md`.
+
+---
+
+# CHANGELOG — 2026-05-26
+
+Bản update này fix một loạt bug phát hiện trong session 25-26/05/2026 khi user
+nhận thấy giá VND trên VN-SCANNER (17.90) không khớp với CafeF (17.60).
+
+Quá trình điều tra phát hiện ra **nhiều bug chồng chéo**, chứ không phải chỉ 1
+bug duy nhất như `PUSH_GUIDE.md` cũ giả định. Document này thay thế cho
+`PUSH_GUIDE.md` cũ (đã xóa vì giả thuyết sai).
+
+---
+
+## Vấn đề ban đầu
 
 User báo cáo giá VND trên VN-SCANNER ngày 25/05/2026 không khớp với CafeF:
 - CafeF: 17.60 (+0.86%), KL 19.43M

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VN Valuation — Định giá đa phương pháp</title>
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="valuation.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="brand">
+      <span class="brand-mark">●</span>
+      <span class="brand-name">VN-SCANNER</span>
+    </div>
+    <span class="page-title">/ Định Giá Cổ Phiếu</span>
+  </div>
+
+  <div class="topbar-center">
+    <div class="stat-inline">
+      <span class="stat-num" id="stat-total">—</span>
+      <span class="stat-lbl">cổ phiếu</span>
+      <span class="stat-date" id="stat-date">—</span>
+    </div>
+    <span class="stat-sep">·</span>
+    <div class="stat-inline">
+      <span class="stat-num stat-buy" id="stat-buy">—</span>
+      <span class="stat-lbl">BUY</span>
+    </div>
+    <span class="stat-sep">·</span>
+    <div class="stat-inline">
+      <span class="stat-num stat-hold" id="stat-hold">—</span>
+      <span class="stat-lbl">HOLD</span>
+    </div>
+    <span class="stat-sep">·</span>
+    <div class="stat-inline">
+      <span class="stat-num stat-sell" id="stat-sell">—</span>
+      <span class="stat-lbl">SELL</span>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <a href="../index.html" class="link-btn" style="padding: 6px 12px; text-decoration: none;">← Scanner</a>
+    <span class="time" id="clock">—</span>
+  </div>
+</header>
+
+<div id="demo-banner" class="demo-banner" style="display: none;">
+  ⚠ Chưa có dữ liệu định giá — hãy chạy <code>python backend/run_valuation.py --limit 100</code> để tạo file
+  <code>web/data/valuation/latest.json</code>.
+</div>
+
+<main class="val-dashboard">
+
+  <aside class="val-filters">
+    <div class="col-head">
+      <span class="col-title">BỘ LỌC</span>
+    </div>
+    <div class="col-body">
+
+      <div class="fg">
+        <label class="fg-label">Search mã</label>
+        <input type="text" id="ticker-search" class="filter-input"
+               placeholder="VIB, FPT, HPG..." autocomplete="off">
+      </div>
+
+      <div class="fg">
+        <label class="fg-label">Verdict</label>
+        <div class="chip-group" id="filter-verdict">
+          <button class="chip active" data-verdict="">Tất cả</button>
+          <button class="chip chip-strong-buy" data-verdict="STRONG BUY">STRONG BUY</button>
+          <button class="chip chip-buy" data-verdict="BUY">BUY</button>
+          <button class="chip chip-hold" data-verdict="HOLD">HOLD</button>
+          <button class="chip chip-sell" data-verdict="SELL">SELL</button>
+          <button class="chip chip-strong-sell" data-verdict="STRONG SELL">STRONG SELL</button>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="fg-label">Ngành định giá</label>
+        <select id="filter-industry" class="filter-select">
+          <option value="">Tất cả ngành</option>
+        </select>
+      </div>
+
+      <div class="fg">
+        <label class="fg-label">Upside tối thiểu (%)</label>
+        <input type="range" id="filter-upside" min="-100" max="100" value="-100" step="5">
+        <div class="filter-meta">
+          <span>≥ <span id="filter-upside-value">-100</span>%</span>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="fg-label">Confidence tối thiểu (%)</label>
+        <input type="range" id="filter-confidence" min="0" max="100" value="30" step="5">
+        <div class="filter-meta">
+          <span>≥ <span id="filter-confidence-value">30</span>%</span>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="fg-label">Loại doanh nghiệp</label>
+        <div class="chip-group" id="filter-holding">
+          <button class="chip active" data-holding="">Tất cả</button>
+          <button class="chip" data-holding="false">Single-business</button>
+          <button class="chip" data-holding="true">Holding</button>
+        </div>
+      </div>
+
+      <button class="link-btn" id="reset-filters">↺ Reset bộ lọc</button>
+
+      <div class="info-card">
+        <div class="info-title">💡 Hướng dẫn nhanh</div>
+        <div class="info-body">
+          <p><b>Verdict</b>: kết hợp upside và confidence.</p>
+          <p>Click vào hàng để xem chi tiết phương pháp.</p>
+          <p>Confidence càng cao = engine càng tin tưởng vào kết quả.</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <section class="val-table-wrap">
+    <div class="val-table-head">
+      <div class="val-tab-info">
+        Định giá đa phương pháp — kết hợp <b>P/B-ROE</b>, <b>P/E</b>, <b>EV/EBITDA</b>,
+        <b>DCF FCFF</b>, <b>DDM</b> theo đặc thù ngành.
+        <span class="muted" id="result-count">— hiển thị</span>
+      </div>
+    </div>
+
+    <div class="val-table-container">
+      <table class="val-table" id="valuation-table">
+        <thead>
+          <tr>
+            <th class="th-sort" data-sort="ticker">Mã</th>
+            <th data-sort="industry">Ngành</th>
+            <th class="th-num th-sort" data-sort="current_price">Giá hiện tại</th>
+            <th class="th-num th-sort" data-sort="fair_value">Fair value</th>
+            <th class="th-num th-sort" data-sort="upside_pct">Upside</th>
+            <th class="th-center th-sort" data-sort="verdict">Verdict</th>
+            <th class="th-num th-sort" data-sort="confidence">Confidence</th>
+            <th class="th-center">Methods</th>
+          </tr>
+        </thead>
+        <tbody id="valuation-tbody">
+          <tr><td colspan="8" class="td-empty">Đang tải...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <aside class="val-detail" id="val-detail">
+    <div class="detail-empty" id="detail-empty">
+      <div class="detail-empty-icon">📊</div>
+      <p>Chọn một mã để xem chi tiết định giá</p>
+    </div>
+    <div class="detail-content" id="detail-content" style="display: none;">
+      <!-- Populated by JS -->
+    </div>
+  </aside>
+
+</main>
+
+<script src="valuation.js"></script>
+</body>
+</html>

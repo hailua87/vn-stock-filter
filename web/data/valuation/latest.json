@@ -1,0 +1,390 @@
+{
+  "generated_at": "2026-05-26T09:41:38.707762",
+  "strategy": "multi_method_valuation",
+  "total": 6,
+  "metadata": {
+    "period": "year",
+    "min_upside": -100,
+    "min_confidence": 0.3,
+    "total_attempted": 6,
+    "failures": 0,
+    "verdict_counts": {
+      "STRONG BUY": 2,
+      "HOLD": 2,
+      "STRONG SELL": 2
+    },
+    "demo": true
+  },
+  "signals": [
+    {
+      "ticker": "VHM",
+      "industry": "Real_Estate",
+      "industry_source": "icb_mapping",
+      "is_holding": false,
+      "current_price": 42000,
+      "fair_value": 78016.0,
+      "fair_value_low": 42215.0,
+      "fair_value_high": 115870.0,
+      "upside_pct": 85.8,
+      "verdict": "STRONG BUY",
+      "confidence": 45.0,
+      "methods_used": [
+        "RNAV",
+        "P/B-ROE Justified",
+        "P/E Multiple",
+        "Historical Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "RNAV",
+          "weight": 50.0,
+          "fair_value": 115870.0,
+          "upside_pct": 175.9,
+          "confidence": 40.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 20.0,
+          "fair_value": 81752.0,
+          "upside_pct": 94.6,
+          "confidence": 65.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 10.0,
+          "fair_value": 27878.0,
+          "upside_pct": -33.6,
+          "confidence": 75.0
+        },
+        {
+          "method": "Historical Multiple",
+          "weight": 20.0,
+          "fair_value": 42215.0,
+          "upside_pct": 0.5,
+          "confidence": 60.0
+        }
+      ],
+      "warnings": [
+        "P/B-ROE không phải phương pháp tối ưu cho ngành này"
+      ],
+      "notes": [
+        "Ngành định giá: Real_Estate (nguồn: icb_mapping, confidence: 85%)",
+        "✓ RNAV: fair=115,870, conf=40%",
+        "✓ P/B-ROE Justified: fair=81,752, conf=65%",
+        "✓ P/E Multiple: fair=27,878, conf=75%",
+        "✓ Historical Multiple: fair=42,215, conf=60%"
+      ]
+    },
+    {
+      "ticker": "VIB",
+      "industry": "Banking",
+      "industry_source": "icb_mapping",
+      "is_holding": false,
+      "current_price": 18500,
+      "fair_value": 26811.0,
+      "fair_value_low": 17154.0,
+      "fair_value_high": 36686.0,
+      "upside_pct": 44.9,
+      "verdict": "STRONG BUY",
+      "confidence": 65.0,
+      "methods_used": [
+        "P/B-ROE Justified",
+        "P/E Multiple",
+        "DDM",
+        "Historical Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 45.0,
+          "fair_value": 36686.0,
+          "upside_pct": 98.3,
+          "confidence": 85.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 25.0,
+          "fair_value": 17154.0,
+          "upside_pct": -7.3,
+          "confidence": 75.0
+        },
+        {
+          "method": "DDM",
+          "weight": 15.0,
+          "fair_value": 15266.0,
+          "upside_pct": -17.5,
+          "confidence": 70.0
+        },
+        {
+          "method": "Historical Multiple",
+          "weight": 15.0,
+          "fair_value": 18431.0,
+          "upside_pct": -0.4,
+          "confidence": 60.0
+        }
+      ],
+      "warnings": [],
+      "notes": [
+        "Ngành định giá: Banking (nguồn: icb_mapping, confidence: 85%)",
+        "✓ P/B-ROE Justified: fair=36,686, conf=85%",
+        "✓ P/E Multiple: fair=17,154, conf=75%",
+        "✓ DDM: fair=15,266, conf=70%",
+        "✓ Historical Multiple: fair=18,431, conf=60%"
+      ]
+    },
+    {
+      "ticker": "FPT",
+      "industry": "Technology",
+      "industry_source": "ticker_override",
+      "is_holding": false,
+      "current_price": 105000,
+      "fair_value": 100272.0,
+      "fair_value_low": 88499.0,
+      "fair_value_high": 148612.0,
+      "upside_pct": -4.5,
+      "verdict": "HOLD",
+      "confidence": 73.0,
+      "methods_used": [
+        "P/E Multiple",
+        "DCF FCFF",
+        "EV/EBITDA",
+        "Historical Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "P/E Multiple",
+          "weight": 40.0,
+          "fair_value": 88499.0,
+          "upside_pct": -15.7,
+          "confidence": 75.0
+        },
+        {
+          "method": "DCF FCFF",
+          "weight": 25.0,
+          "fair_value": 148612.0,
+          "upside_pct": 41.5,
+          "confidence": 75.0
+        },
+        {
+          "method": "EV/EBITDA",
+          "weight": 20.0,
+          "fair_value": 60550.0,
+          "upside_pct": -42.3,
+          "confidence": 75.0
+        },
+        {
+          "method": "Historical Multiple",
+          "weight": 15.0,
+          "fair_value": 105013.0,
+          "upside_pct": 0.0,
+          "confidence": 60.0
+        }
+      ],
+      "warnings": [],
+      "notes": [
+        "Ngành định giá: Technology (nguồn: ticker_override, confidence: 100%)",
+        "✓ P/E Multiple: fair=88,499, conf=75%",
+        "✓ DCF FCFF: fair=148,612, conf=75%",
+        "✓ EV/EBITDA: fair=60,550, conf=75%",
+        "✓ Historical Multiple: fair=105,013, conf=60%"
+      ]
+    },
+    {
+      "ticker": "PAN",
+      "industry": "Diversified_Holding",
+      "industry_source": "ticker_override",
+      "is_holding": true,
+      "current_price": 24700,
+      "fair_value": 23049.0,
+      "fair_value_low": 17182.0,
+      "fair_value_high": 24685.0,
+      "upside_pct": -6.7,
+      "verdict": "HOLD",
+      "confidence": 60.0,
+      "methods_used": [
+        "SOTP Simplified",
+        "P/E Multiple",
+        "EV/EBITDA",
+        "P/B-ROE Justified",
+        "Historical Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "SOTP Simplified",
+          "weight": 30.0,
+          "fair_value": 17603.0,
+          "upside_pct": -28.7,
+          "confidence": 40.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 25.0,
+          "fair_value": 37542.0,
+          "upside_pct": 52.0,
+          "confidence": 75.0
+        },
+        {
+          "method": "EV/EBITDA",
+          "weight": 20.0,
+          "fair_value": 10459.0,
+          "upside_pct": -57.7,
+          "confidence": 75.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 10.0,
+          "fair_value": 17182.0,
+          "upside_pct": -30.4,
+          "confidence": 55.0
+        },
+        {
+          "method": "Historical Multiple",
+          "weight": 15.0,
+          "fair_value": 24685.0,
+          "upside_pct": -0.1,
+          "confidence": 60.0
+        }
+      ],
+      "warnings": [
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 5.5%-9.5%)",
+        "P/B-ROE không phải phương pháp tối ưu cho ngành này"
+      ],
+      "notes": [
+        "Ngành định giá: Diversified_Holding (nguồn: ticker_override, confidence: 100%)",
+        "HOLDING COMPANY → khuyến nghị Sum-of-the-Parts (chưa implement đầy đủ)",
+        "✓ SOTP Simplified: fair=17,603, conf=40%",
+        "✓ P/E Multiple: fair=37,542, conf=75%",
+        "✓ EV/EBITDA: fair=10,459, conf=75%",
+        "✓ P/B-ROE Justified: fair=17,182, conf=55%",
+        "✓ Historical Multiple: fair=24,685, conf=60%"
+      ]
+    },
+    {
+      "ticker": "HPG",
+      "industry": "Steel_Metals",
+      "industry_source": "ticker_override",
+      "is_holding": false,
+      "current_price": 27500,
+      "fair_value": 18057.0,
+      "fair_value_low": 18057.0,
+      "fair_value_high": 27359.0,
+      "upside_pct": -34.3,
+      "verdict": "STRONG SELL",
+      "confidence": 68.0,
+      "methods_used": [
+        "EV/EBITDA",
+        "P/B-ROE Justified",
+        "P/E Multiple",
+        "Historical Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 50.0,
+          "fair_value": 15822.0,
+          "upside_pct": -42.5,
+          "confidence": 80.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 25.0,
+          "fair_value": 18269.0,
+          "upside_pct": -33.6,
+          "confidence": 55.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 10.0,
+          "fair_value": 18601.0,
+          "upside_pct": -32.4,
+          "confidence": 50.0
+        },
+        {
+          "method": "Historical Multiple",
+          "weight": 15.0,
+          "fair_value": 27359.0,
+          "upside_pct": -0.5,
+          "confidence": 60.0
+        }
+      ],
+      "warnings": [
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 7.4%-40.0%)",
+        "P/B-ROE không phải phương pháp tối ưu cho ngành này",
+        "EPS rất biến động (CV=0.69) - cân nhắc EV/EBITDA",
+        "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical"
+      ],
+      "notes": [
+        "Ngành định giá: Steel_Metals (nguồn: ticker_override, confidence: 100%)",
+        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
+        "✓ EV/EBITDA: fair=15,822, conf=80%",
+        "✓ P/B-ROE Justified: fair=18,269, conf=55%",
+        "✓ P/E Multiple: fair=18,601, conf=50%",
+        "✓ Historical Multiple: fair=27,359, conf=60%"
+      ]
+    },
+    {
+      "ticker": "DBC",
+      "industry": "Agriculture_Livestock",
+      "industry_source": "ticker_override",
+      "is_holding": false,
+      "current_price": 28800,
+      "fair_value": 15831.0,
+      "fair_value_low": 15831.0,
+      "fair_value_high": 32190.0,
+      "upside_pct": -45.0,
+      "verdict": "STRONG SELL",
+      "confidence": 65.0,
+      "methods_used": [
+        "EV/EBITDA",
+        "P/B-ROE Justified",
+        "P/E Multiple",
+        "Historical Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 50.0,
+          "fair_value": 7025.0,
+          "upside_pct": -75.6,
+          "confidence": 80.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 25.0,
+          "fair_value": 32190.0,
+          "upside_pct": 11.8,
+          "confidence": 55.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 10.0,
+          "fair_value": 20395.0,
+          "upside_pct": -29.2,
+          "confidence": 25.0
+        },
+        {
+          "method": "Historical Multiple",
+          "weight": 15.0,
+          "fair_value": 28713.0,
+          "upside_pct": -0.3,
+          "confidence": 60.0
+        }
+      ],
+      "warnings": [
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 18.0%-80.0%)",
+        "P/B-ROE không phải phương pháp tối ưu cho ngành này",
+        "Có năm thua lỗ trong 5 năm gần đây - P/E có thể không phù hợp",
+        "EPS rất biến động (CV=0.95) - cân nhắc EV/EBITDA",
+        "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical"
+      ],
+      "notes": [
+        "Ngành định giá: Agriculture_Livestock (nguồn: ticker_override, confidence: 100%)",
+        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
+        "✓ EV/EBITDA: fair=7,025, conf=80%",
+        "✓ P/B-ROE Justified: fair=32,190, conf=55%",
+        "✓ P/E Multiple: fair=20,395, conf=25%",
+        "✓ Historical Multiple: fair=28,713, conf=60%"
+      ]
+    }
+  ]
+}

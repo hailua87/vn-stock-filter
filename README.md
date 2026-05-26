@@ -1,121 +1,212 @@
-# VN-SCANNER
+# VN-SCANNER + Valuation Engine
 
-Multi-strategy scanner cho thị trường chứng khoán Việt Nam (HOSE/HNX/UPCOM).
+Dashboard quét tín hiệu kỹ thuật + định giá đa phương pháp cho thị trường chứng khoán
+Việt Nam, dựa trên vnstock 4.x.
 
-Quét tự động hàng ngày, phát hiện tín hiệu theo 4 chiến lược:
-- **Pre-Breakout** (sắp phá vỡ kháng cự)
-- **Golden Cross Long** (MA50 cắt MA200)
-- **Golden Cross Short** (MA20 cắt MA50)
-- **Ichimoku Kinko Hyo** (hệ thống tín hiệu Nhật)
+## Tổng quan
 
-## Kiến trúc
+Project có 2 module chính:
 
-```
-GitHub Actions (2 lần/ngày)
-        ↓
-backend/run_daily.py
-   ├── data_fetcher.py     ← vnstock 4.x (source='vci', adjusted)
-   ├── strategies/         ← 4 chiến lược scan
-   └── output JSON         ← commit lên repo
-        ↓
-Vercel deploy
-        ↓
-web/                       ← static site đọc JSON
-```
+### 1. Scanner kỹ thuật (đã có sẵn từ trước)
+- **Pre-Breakout**: tín hiệu nén giá sắp break
+- **Golden Cross dài hạn**: MA50 cắt lên MA200
+- **Golden Cross ngắn hạn**: MA10 cắt lên MA20
+- **Ichimoku**: TK cross, cloud signal
+- **Combined**: lọc mã thỏa nhiều chiến lược
+- **Analyzer**: phân tích chi tiết 1 mã
 
-**Quan trọng:** Web KHÔNG gọi API. Web chỉ đọc JSON tĩnh được commit. JSON
-được cập nhật khi workflow chạy.
-
-## Schedule
-
-- **12:00 ICT (sau phiên sáng)**: intraday update — badge cam `INTRADAY HH:MM`
-- **17:00 ICT (sau đóng cửa)**: EOD update — badge teal `EOD HH:MM`
-
-Chỉ chạy T2-T6 (không cuối tuần).
-
-## Setup local
-
-```bash
-# Backend
-cd backend
-pip install -r requirements.txt
-export VNSTOCK_API_KEY=your_key_here   # đăng ký free tại vnstocks.com
-python run_daily.py --min-score 5 --limit 500
-
-# Frontend (static, serve bằng bất kỳ HTTP server nào)
-cd web
-python -m http.server 8000
-# → http://localhost:8000
-```
-
-## Cài đặt API key
-
-vnstock 4.x giới hạn anonymous mode rất chặt (vài req/phút). Đăng ký free tại
-https://vnstocks.com/login để có 60 req/phút.
-
-Trong GitHub Actions: Settings → Secrets → New repository secret:
-- Name: `VNSTOCK_API_KEY`
-- Value: API key của bạn
-
-## Tests
-
-```bash
-cd backend
-pip install pytest
-pytest tests/ -v
-```
-
-39 tests, cover các strategy chính.
+### 2. Valuation Engine (mới — full roadmap 5/5 items)
+- **Industry Classifier** (4-tier): phân ngành cho 19 ValuationIndustry
+- **8 phương pháp định giá**:
+  - P/B-ROE Justified (2-stage growth) — Banking
+  - P/E Multiple (3-approach blend) — Consumer, Tech
+  - EV/EBITDA (mid-cycle) — Cyclicals, Utilities
+  - DCF FCFF (2-stage + sensitivity) — Consumer Staples, Utilities
+  - DDM (2-stage Gordon) — Banking, Utilities có cổ tức
+  - RNAV Simplified — Real Estate
+  - SOTP Simplified — Diversified Holding
+  - Historical Multiple — fallback
+- **Beta calculator** từ OHLCV cache + Blume adjustment
+- **Historical multiples** P/E, P/B từ price × historical EPS/BVPS
+- **Peer database** median per industry/metric
+- **Backtest framework** validate accuracy theo thời gian
+- **Web dashboard** cho valuation tại `/web/valuation/`
 
 ## Cấu trúc thư mục
 
 ```
-.github/workflows/
-    daily-scan.yml       — CI/CD workflow
-
-backend/
-    run_daily.py         — Pipeline chính
-    generate_demo_data.py — Tạo demo data nếu vnstock fail
-    scanner/
-        data_fetcher.py  — Fetch OHLCV từ vnstock
-        criteria.py      — Tiêu chí lọc cơ bản
-        top_liquid.py    — Curated list mã liquid
-        support_resistance.py — Fibonacci levels
-        strategies/
-            golden_cross.py
-            ichimoku.py
-            indicators_ext.py — Bollinger, ATR, ADX, etc.
-    tests/
-
-web/
-    index.html
-    app.js
-    styles.css
+vn-scanner/
+├── backend/
+│   ├── run_daily.py                       # Scanner kỹ thuật (đã có)
+│   ├── run_valuation.py                   # ★ MỚI — chạy valuation
+│   ├── backtest.py                        # ★ MỚI — backtest framework
+│   ├── scanner/
+│   │   ├── data_fetcher.py                # OHLCV fetch (đã có)
+│   │   ├── financial_fetcher.py           # ★ MỚI — fetch BCTC vnstock
+│   │   ├── market_metrics.py              # ★ MỚI — beta + historical multiples
+│   │   ├── peer_database.py               # ★ MỚI — peer median DB
+│   │   ├── criteria.py
+│   │   └── strategies/
+│   │       ├── golden_cross.py
+│   │       ├── ichimoku.py
+│   │       ├── indicators_ext.py
+│   │       └── valuation/                 # ★ MỚI — valuation module
+│   │           ├── __init__.py
+│   │           ├── engine.py
+│   │           ├── industry_classifier.py
+│   │           ├── normalizer.py
+│   │           ├── methods_pb_roe.py
+│   │           ├── methods_pe.py
+│   │           ├── methods_ev_ebitda.py
+│   │           ├── methods_dcf_ddm.py
+│   │           └── methods_rnav_sotp.py
+│   ├── tests/                             # Tests scanner (đã có)
+│   ├── test_valuation_integration.py      # ★ MỚI
+│   ├── test_market_metrics.py             # ★ MỚI
+│   ├── test_peer_database.py              # ★ MỚI
+│   └── test_backtest.py                   # ★ MỚI
+├── web/
+│   ├── index.html                         # Scanner dashboard (đã có)
+│   ├── app.js
+│   ├── styles.css
+│   ├── data/
+│   │   └── valuation/                     # ★ MỚI
+│   │       └── latest.json
+│   └── valuation/                         # ★ MỚI — Valuation dashboard
+│       ├── index.html
+│       ├── valuation.css
+│       └── valuation.js
+├── .github/workflows/daily-scan.yml
+├── README.md                              # File này
+├── CHANGELOG.md
+├── VALUATION_INTEGRATION.md               # ★ Hướng dẫn integration ban đầu
+├── ROADMAP_PROGRESS.md                    # ★ Roadmap items 1-4
+└── ROADMAP_FINAL.md                       # ★ Roadmap hoàn thiện 5/5
 ```
 
-## Lưu ý quan trọng
+## Quick Start
 
-### Giá adjusted
+### Setup
+```bash
+pip install vnstock pyarrow pandas numpy
+export VNSTOCK_API_KEY=your_key_here
+```
 
-Code dùng `source='vci'` của vnstock 4.x trả về **adjusted price** (đã trừ
-cổ tức quá khứ). Hệ quả: giá có thể KHÁC CafeF/SSI cho mã có cổ tức gần đây.
+### Chạy scanner kỹ thuật
+```bash
+cd backend
+python run_daily.py
+```
+Output: `web/data/<strategy>/latest.json`. Mở `web/index.html` để xem.
 
-Ví dụ VND chia 500đ ngày 15/07/2025:
-- CafeF: 17.60 (raw, hiện tại)
-- VN-SCANNER: 17.10 (= 17.60 - 0.50)
+### Chạy valuation
+```bash
+cd backend
+# Top 100 mã thanh khoản nhất
+python run_valuation.py --limit 100
 
-Đây là **đúng theo thiết kế** — adjusted price chính xác hơn cho phân tích kỹ
-thuật. UI có badge `Giá điều chỉnh` để user hiểu.
+# Hoặc danh sách cụ thể
+python run_valuation.py --tickers VIB,PAN,DBC,FPT,VNM,HPG
 
-### Intraday timing divergence
+# Filter
+python run_valuation.py --limit 200 --min-upside 15 --min-confidence 0.5
+```
+Output:
+- `web/data/valuation/latest.json` — dashboard data
+- `web/data/valuation/archive/<date>.json` — snapshot cho backtest
+- `backend/data/peer_multiples.json` — peer database
 
-Khi xem data INTRADAY (12:00 run), giá có thể chênh 0.5-2% so với SSI/CafeF
-vì vnstock và các nguồn này snapshot ở thời điểm khác nhau trong cùng phiên.
-**Không phải bug.**
+Mở `web/valuation/index.html` để xem.
 
-Sau 17:00 (EOD run), data dùng giá đóng cửa chính thức → khớp ~99% với
-CafeF/SSI.
+### Chạy backtest (sau >= 3 tháng tích lũy snapshots)
+```bash
+cd backend
+python backtest.py --horizon 90 --min-confidence 50
+```
 
-## Changelog
+### Chạy tests
+```bash
+cd backend
+python test_valuation_integration.py   # E2E với 3 mã VIB/PAN/DBC
+python test_market_metrics.py          # Beta + historical multiples
+python test_peer_database.py           # Peer DB build/load
+python test_backtest.py                # Backtest framework
+```
 
-Xem `CHANGELOG.md` để biết history các fix và cải tiến.
+## Schedule Production (GitHub Actions)
+
+Thêm vào `.github/workflows/daily-scan.yml`:
+
+```yaml
+  valuation_weekly:
+    if: github.event.schedule == '0 10 * * 1'  # Thứ Hai 17:00 ICT
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with: { python-version: '3.10' }
+      - run: pip install vnstock pyarrow pandas numpy
+      - env:
+          VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
+        run: |
+          cd backend
+          python run_valuation.py --limit 150 --min-confidence 0.4
+      - run: |
+          git config user.email "bot@valuation.vn"
+          git config user.name "Valuation Bot"
+          git add web/data/valuation/ backend/data/peer_multiples.json
+          git commit -m "valuation: weekly $(date +%Y-%m-%d)" || true
+          git push
+```
+
+## Logic định giá theo ngành
+
+```python
+INDUSTRY_METHOD_WEIGHTS = {
+    "Banking":            P/B-ROE 45% + P/E 25% + DDM 15% + Hist 15%
+    "Real_Estate":        RNAV 50% + P/B 20% + P/E 10% + Hist 20%
+    "Diversified_Holding":SOTP 30% + P/E 25% + EV/EBITDA 20% + ...
+    "Consumer_Staples":   DCF 30% + P/E 35% + EV/EBITDA 20% + ...
+    "Utilities":          DCF 35% + DDM 25% + EV/EBITDA 20% + ...
+    "Steel_Metals":       EV/EBITDA 50% + P/B 25% + P/E 10% + Hist 15%
+    "Agriculture":        EV/EBITDA 50% + P/B 25% + P/E 10% + Hist 15%
+    "Technology":         P/E 40% + DCF 25% + EV/EBITDA 20% + Hist 15%
+}
+```
+
+## Tài liệu chi tiết
+
+- **VALUATION_INTEGRATION.md** — Hướng dẫn deploy ban đầu, schema JSON, FAQ
+- **ROADMAP_PROGRESS.md** — Chi tiết items 1-4 (Beta, Historical, Peer DB, DCF/DDM)
+- **ROADMAP_FINAL.md** — Items 5 + Web Dashboard + Backtest, deployment guide
+
+## Status
+
+| Item | Status |
+|---|---|
+| Beta thực từ regression | ✅ Done |
+| Historical P/E, P/B chính xác | ✅ Done |
+| Peer database theo ICB | ✅ Done |
+| DCF FCFF + DDM | ✅ Done |
+| RNAV + SOTP simplified | ✅ Done |
+| Web dashboard | ✅ Done |
+| Backtest framework | ✅ Done |
+| **Tests** | ✅ 4/4 suites pass |
+
+## Demo kết quả với 6 mã
+
+```
+VHM   Real_Estate              STRONG BUY   +85.8% conf=45%  (RNAV)
+VIB   Banking                  STRONG BUY   +44.9% conf=65%
+FPT   Technology               HOLD          -4.5% conf=73%
+PAN   Diversified_Holding      HOLD          -6.7% conf=60%  (SOTP)
+HPG   Steel_Metals             STRONG SELL  -34.3% conf=68%
+DBC   Agriculture_Livestock    STRONG SELL  -45.0% conf=65%
+```
+
+## Caveat đã biết
+
+1. RNAV cần region data từ thuyết minh BCTC (hiện default = "other" 1.10×)
+2. SOTP simplified chỉ dùng aggregate, không phải segment-by-segment full
+3. Beta cần OHLCV cache → chạy `run_daily.py` ít nhất 1 lần trước
+4. Peer DB cần universe >= 50 mã để có >=3 mã/ngành
