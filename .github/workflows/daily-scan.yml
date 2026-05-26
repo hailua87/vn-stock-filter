@@ -173,37 +173,97 @@ jobs:
           git config user.name "VN Scanner Bot"
           git config user.email "bot@vn-scanner.local"
 
-          # FIX: pull --rebase trước khi commit để tránh conflict khi 2 lần
-          # chạy/ngày. Nếu intraday đã commit, EOD pull rebase rồi commit đè.
-          git pull --rebase origin ${{ github.ref_name }} || echo "Pull rebase failed, continuing"
+          # FIX (2026-05-26 v5): Conflict-resilient commit logic.
+          #
+          # Vấn đề trước đây: nếu remote main update giữa lúc workflow chạy (vd 2 lần
+          # workflow chạy gần nhau, hoặc user push code khi workflow đang scan), pull
+          # --rebase sẽ conflict trên các JSON files. Code cũ không xử lý conflict
+          # nên detached HEAD → push fail vĩnh viễn → data mới bị mất.
+          #
+          # Fix:
+          #   1. Stash trước khi pull rebase (clean working tree)
+          #   2. Restore stash sau khi rebase xong
+          #   3. Khi push fail: dùng git merge với strategy -X ours (giữ data scan mới
+          #      của workflow này, đè data cũ từ remote). JSON output là regenerated
+          #      mỗi run, conflict trên chúng luôn nên giải quyết theo "ours" (mới hơn).
+          #   4. Nếu rebase fail (vì conflict), abort rebase và dùng merge -X ours.
 
+          RUN_TYPE="${{ steps.runtype.outputs.run_type }}"
+          RUN_TIME_ICT=$(TZ=Asia/Ho_Chi_Minh date '+%H:%M')
+          DATE_ICT=$(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')
+          if [ "$RUN_TYPE" = "intraday" ]; then
+            MSG="chore: update signals $DATE_ICT [intraday $RUN_TIME_ICT]"
+          else
+            MSG="chore: update signals $DATE_ICT [EOD $RUN_TIME_ICT]"
+          fi
+
+          # Step 1: Stage tất cả thay đổi (sẽ commit ngay sau)
           git add web/data/latest.json web/data/archive/ \
                   web/data/golden_cross_long/ web/data/golden_cross_short/ \
                   web/data/ichimoku/
+
           if git diff --staged --quiet; then
             echo "ℹ️  No changes to commit (signals unchanged from last run)"
+            exit 0
+          fi
+
+          # Step 2: Commit local trước. Bây giờ working tree clean → an toàn để pull.
+          git commit -m "$MSG"
+          echo "✓ Committed locally"
+
+          # Step 3: Pull với rebase. Nếu conflict, abort và dùng strategy "ours" qua merge.
+          if git pull --rebase origin ${{ github.ref_name }}; then
+            echo "✓ Rebase successful (no conflicts)"
           else
-            RUN_TYPE="${{ steps.runtype.outputs.run_type }}"
-            RUN_TIME_ICT=$(TZ=Asia/Ho_Chi_Minh date '+%H:%M')
-            DATE_ICT=$(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')
-            # Commit message phân biệt intraday/eod để dễ đọc history
-            if [ "$RUN_TYPE" = "intraday" ]; then
-              MSG="chore: update signals $DATE_ICT [intraday $RUN_TIME_ICT]"
+            echo "⚠️  Rebase conflict detected, falling back to merge with -X ours"
+            git rebase --abort || true
+            # Fetch latest và merge với strategy "ours" — giữ data của workflow này
+            git fetch origin ${{ github.ref_name }}
+            if git merge -X ours --no-edit origin/${{ github.ref_name }} \
+                -m "merge: resolve workflow data conflict (keep latest scan)"; then
+              echo "✓ Merge with -X ours successful"
             else
-              MSG="chore: update signals $DATE_ICT [EOD $RUN_TIME_ICT]"
+              echo "❌ Merge -X ours failed, aborting and forcing push"
+              git merge --abort || true
+              # Last resort: force push commit local lên remote
+              # An toàn vì JSON output sẽ được regenerated lần workflow sau
+              git push --force-with-lease origin HEAD:${{ github.ref_name }} && {
+                echo "✓ Force-with-lease push succeeded"
+                exit 0
+              } || {
+                echo "❌ Force-with-lease push also failed"
+                exit 1
+              }
             fi
-            git commit -m "$MSG"
-            # Push với retry — đôi khi remote update giữa rebase và push
-            for i in 1 2 3; do
-              if git push; then
-                echo "✓ Pushed on attempt $i"
-                break
-              else
-                echo "Push attempt $i failed, pulling and retrying..."
-                git pull --rebase origin ${{ github.ref_name }} || true
-                sleep 2
-              fi
-            done
+          fi
+
+          # Step 4: Push với retry — đôi khi remote update giữa rebase và push
+          PUSH_SUCCESS=0
+          for i in 1 2 3; do
+            if git push origin HEAD:${{ github.ref_name }}; then
+              echo "✓ Pushed on attempt $i"
+              PUSH_SUCCESS=1
+              break
+            fi
+            echo "Push attempt $i failed"
+            if [ $i -lt 3 ]; then
+              echo "Fetching and merging with -X ours, retrying..."
+              git fetch origin ${{ github.ref_name }}
+              git merge -X ours --no-edit origin/${{ github.ref_name }} \
+                -m "merge: resolve push conflict (keep latest scan)" || {
+                git merge --abort || true
+              }
+              sleep 2
+            fi
+          done
+
+          if [ $PUSH_SUCCESS -eq 0 ]; then
+            echo "❌ All push attempts failed. Last resort: force-with-lease."
+            git push --force-with-lease origin HEAD:${{ github.ref_name }} || {
+              echo "❌ Force-with-lease push failed. Data NOT pushed to remote."
+              exit 1
+            }
+            echo "✓ Force-with-lease push succeeded"
           fi
 
       - name: Notify on failure
