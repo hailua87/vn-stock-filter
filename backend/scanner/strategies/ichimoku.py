@@ -102,12 +102,20 @@ def evaluate(df: pd.DataFrame, ticker: str,
       - Insufficient history
       - Low avg volume
       - Recent dilutive corporate action
+      - Stale cache (phiên cuối không khớp phiên giao dịch gần nhất)
       - Score < 2 (not even mildly bullish)
     """
     cfg = {**DEFAULT_CONFIG, **(config or {})}
     if len(df) < cfg['min_history_days']:
         return None
     if df['Volume'].tail(20).mean() < cfg['min_avg_volume']:
+        return None
+
+    # FIX: Reject stale-cache rows. fetch_with_cache đánh dấu cột 'StaleCache'=True
+    # khi refetch thất bại và phải dùng dữ liệu cũ. Trả về None để mã không lọt
+    # vào kết quả scan với giá/KL của phiên không khớp ngày hiển thị.
+    if 'StaleCache' in df.columns and bool(df['StaleCache'].iloc[-1]):
+        log.debug(f"  {ticker}: skipped (stale cache)")
         return None
 
     # Sanity check

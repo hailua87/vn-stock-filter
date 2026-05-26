@@ -215,19 +215,27 @@ def _sort_by_liquidity(universe: pd.DataFrame, limit: int) -> pd.DataFrame:
     from .top_liquid import get_top_liquid_tickers
 
     # Step 1: compute liquidity from cache
+    # FIX: glob cả *_raw.parquet (default) và *_adj.parquet (legacy)
+    # Trước đó chỉ glob *_adj.parquet — sai vì default là raw (suffix='_raw'),
+    # khiến liquidity dict luôn rỗng và fallback hoàn toàn vào curated list.
     liquidity = {}  # ticker → avg turnover
-    for cache_file in CACHE_DIR.glob('*_adj.parquet'):
-        ticker = cache_file.stem.replace('_adj', '')
-        try:
-            df = pd.read_parquet(cache_file)
-            if len(df) < 5:
+    seen = set()
+    for pattern, strip in (('*_raw.parquet', '_raw'), ('*_adj.parquet', '_adj')):
+        for cache_file in CACHE_DIR.glob(pattern):
+            ticker = cache_file.stem.replace(strip, '')
+            if ticker in seen:
                 continue
-            recent = df.tail(20)
-            avg_turnover = (recent['Close'] * recent['Volume']).mean()
-            if pd.notna(avg_turnover) and avg_turnover > 0:
-                liquidity[ticker] = avg_turnover
-        except Exception:
-            continue
+            seen.add(ticker)
+            try:
+                df = pd.read_parquet(cache_file)
+                if len(df) < 5:
+                    continue
+                recent = df.tail(20)
+                avg_turnover = (recent['Close'] * recent['Volume']).mean()
+                if pd.notna(avg_turnover) and avg_turnover > 0:
+                    liquidity[ticker] = avg_turnover
+            except Exception:
+                continue
 
     log.info(f"  Liquidity cache: {len(liquidity)} tickers with historical data")
 
@@ -277,10 +285,15 @@ def _load_fallback_universe(exchanges: tuple) -> pd.DataFrame:
 # Historical OHLCV fetcher — vnstock 4.x API
 # ─────────────────────────────────────────────────────────────────────────
 def fetch_ohlcv(ticker: str, start: str, end: str,
-                source: str = 'VCI', retries: int = 2,
-                adjusted: bool = True) -> Optional[pd.DataFrame]:
+                source: str = 'TCBS', retries: int = 2,
+                adjusted: bool = False) -> Optional[pd.DataFrame]:
     """
     Fetch daily OHLCV for a single ticker using vnstock 4.x.
+
+    Uses TCBS source by default which returns RAW (unadjusted) close prices
+    matching what cafef, broker apps, and traders see daily. VCI returns
+    backward-adjusted prices (accounting for past dividends) which differ
+    from the actual closing price by the cumulative dividend amount.
 
     Returns DataFrame: Date, Open, High, Low, Close, Volume
     """
@@ -297,7 +310,15 @@ def fetch_ohlcv(ticker: str, start: str, end: str,
             df = q.history(start=start, end=end, interval='1D')
 
             if df is None or df.empty:
-                return None
+                # Fallback to VCI if TCBS returns empty (e.g. some UPCOM tickers)
+                if source == 'TCBS' and attempt == 0:
+                    log.debug(f"  {ticker}: TCBS empty, trying VCI fallback")
+                    q = Quote(symbol=ticker, source='VCI')
+                    df = q.history(start=start, end=end, interval='1D')
+                    if df is None or df.empty:
+                        return None
+                else:
+                    return None
 
             df = df.rename(columns={
                 'time': 'Date', 'open': 'Open', 'high': 'High',
@@ -333,25 +354,53 @@ def fetch_ohlcv(ticker: str, start: str, end: str,
     return None
 
 
+def _last_trading_session(today: 'date') -> 'date':
+    """
+    Phiên giao dịch gần nhất tính đến `today` (chưa tính giờ trong ngày).
+    HOSE/HNX/UPCOM nghỉ thứ Bảy và Chủ Nhật (không xét nghỉ lễ — đơn giản hoá).
+    - Nếu today là Thứ Hai → phiên gần nhất = Thứ Sáu tuần trước.
+    - Nếu today là Thứ Bảy/Chủ Nhật → phiên gần nhất = Thứ Sáu cùng tuần.
+    - Còn lại: chính `today`.
+    Caller có trách nhiệm hiểu phiên T có thể CHƯA close (intraday).
+    """
+    d = today
+    # weekday(): Mon=0..Sun=6
+    while d.weekday() >= 5:  # 5=Sat, 6=Sun
+        d = d - timedelta(days=1)
+    return d
+
+
 def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
-                     force_refresh: bool = False, adjusted: bool = True) -> Optional[pd.DataFrame]:
+                     force_refresh: bool = False, adjusted: bool = False) -> Optional[pd.DataFrame]:
     """
     Fetch OHLCV using local parquet cache. Only pulls incremental data
     since last cached date.
+
+    FIX: Trước đây dùng `last_date >= end - timedelta(days=1)` — bug nghiêm trọng
+    vì end = today (datetime.now().date()), nên cache được coi là tươi nếu chỉ cũ
+    1 ngày, BẤT KỂ phiên đó có phải phiên giao dịch hợp lệ không. Hệ quả: chạy
+    scan vào sáng Thứ Hai có thể dùng dữ liệu Thứ Sáu mà không refetch ra phiên
+    Thứ Hai mới nhất. Đó chính là gốc rễ của lỗi "giá/KL của phiên sai".
+
+    Sửa: kiểm tra cache có chứa đúng phiên giao dịch gần nhất theo lịch không.
     """
     suffix = '_adj' if adjusted else '_raw'
     cache_file = CACHE_DIR / f'{ticker}{suffix}.parquet'
     end = datetime.now().date()
     start = end - timedelta(days=lookback_days)
+    last_session = _last_trading_session(end)
 
     if cache_file.exists() and not force_refresh:
         try:
             cached = pd.read_parquet(cache_file)
             cached['Date'] = pd.to_datetime(cached['Date'])
             last_date = cached['Date'].max().date()
-            if last_date >= end - timedelta(days=1):
+            # FIX: cache chỉ tươi nếu chứa đúng phiên giao dịch gần nhất.
+            # Trước đây: last_date >= end - 1 day (sai trên thứ Hai + sau nghỉ lễ)
+            if last_date >= last_session:
                 df = cached[cached['Date'] >= pd.Timestamp(start)]
             else:
+                # Incremental fetch — refresh last 30 days too (in case of late corp actions)
                 refetch_start = (last_date - timedelta(days=30))
                 new = fetch_ohlcv(ticker, str(refetch_start), str(end), adjusted=adjusted)
                 if new is not None and not new.empty:
@@ -359,9 +408,24 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
                     df = pd.concat([cached_old, new]).drop_duplicates('Date').sort_values('Date')
                     df.to_parquet(cache_file, index=False)
                 else:
-                    df = cached
+                    # Refetch thất bại → vẫn dùng cache cũ NHƯNG đánh dấu stale
+                    # để caller có thể loại bỏ trong sanity check.
+                    df = cached.copy()
+                    df.attrs['stale_cache'] = True
+                    df.attrs['stale_last_date'] = str(last_date)
+                    df.attrs['expected_session'] = str(last_session)
+                    log.warning(
+                        f"  {ticker}: refetch FAILED, using stale cache "
+                        f"(last={last_date}, expected={last_session})"
+                    )
             df['Exchange'] = exchange
             df['Ticker'] = ticker
+            # FIX: chuyển stale flag từ df.attrs (mất khi concat/slice) sang cột
+            # để các hàm evaluate downstream có thể đọc qua df['StaleCache'].any()
+            if df.attrs.get('stale_cache'):
+                df['StaleCache'] = True
+            else:
+                df['StaleCache'] = False
             return df.reset_index(drop=True)
         except Exception as e:
             log.warning(f"  cache read failed for {ticker}: {e}, refetching")
@@ -369,12 +433,22 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
     df = fetch_ohlcv(ticker, str(start), str(end), adjusted=adjusted)
     if df is None or df.empty:
         return None
+
+    # Sanity check: phiên cuối có khớp phiên giao dịch gần nhất không?
+    df_last_date = pd.to_datetime(df['Date']).max().date()
+    if df_last_date < last_session:
+        log.warning(
+            f"  {ticker}: fresh fetch returned last={df_last_date} "
+            f"but expected_session={last_session} — vnstock có thể chưa cập nhật"
+        )
+
     try:
         df.to_parquet(cache_file, index=False)
     except Exception as e:
         log.warning(f"  cache write failed for {ticker}: {e}")
     df['Exchange'] = exchange
     df['Ticker'] = ticker
+    df['StaleCache'] = False
     return df
 
 
@@ -428,233 +502,6 @@ def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
 def fetch_vnindex(lookback_days: int = 180) -> Optional[pd.DataFrame]:
     """VN-Index for relative strength calculation."""
     setup_api_key()
-    end = datetime.now().date()
-    start = end - timedelta(days=lookback_days)
-    try:
-        from vnstock.api.quote import Quote
-        q = Quote(symbol='VNINDEX', source='VCI')
-        idx = q.history(start=str(start), end=str(end), interval='1D')
-        idx = idx.rename(columns={'time': 'Date', 'close': 'Close'})
-        idx['Date'] = pd.to_datetime(idx['Date'])
-        return idx[['Date', 'Close']]
-    except Exception as e:
-        log.error(f"VN-Index fetch failed: {e}")
-        return None
-    """
-    Return a DataFrame with columns: ticker, exchange.
-    Uses vnstock 4.x Listing API.
-    """
-    try:
-        from vnstock.api.listing import Listing
-        listing = Listing()
-        all_df = listing.all_symbols()
-        # all_df has columns like: 'ticker', 'organ_name', 'exchange', ...
-        # Normalize column names
-        cols = {c.lower(): c for c in all_df.columns}
-        ticker_col = cols.get('symbol') or cols.get('ticker') or all_df.columns[0]
-        all_df = all_df.rename(columns={ticker_col: 'ticker'})
-
-        # Filter by exchange if column exists
-        if 'exchange' in cols:
-            ex_col = cols['exchange']
-            all_df = all_df.rename(columns={ex_col: 'exchange'})
-            result = all_df[all_df['exchange'].isin(exchanges)][['ticker', 'exchange']]
-        else:
-            # Fallback: try fetching per exchange
-            out = []
-            for ex in exchanges:
-                try:
-                    sub = listing.symbols_by_exchange(ex.lower())
-                    sub_cols = {c.lower(): c for c in sub.columns}
-                    tk_col = sub_cols.get('symbol') or sub_cols.get('ticker') or sub.columns[0]
-                    sub = sub.rename(columns={tk_col: 'ticker'})
-                    sub['exchange'] = ex
-                    out.append(sub[['ticker', 'exchange']])
-                except Exception as e:
-                    log.warning(f"  symbols_by_exchange({ex}) failed: {e}")
-            if out:
-                result = pd.concat(out, ignore_index=True)
-            else:
-                return _load_fallback_universe(exchanges)
-
-        result = result.drop_duplicates('ticker').reset_index(drop=True)
-        # Sanity check: filter out empty/short tickers
-        result = result[result['ticker'].str.len().between(3, 5)]
-        log.info(f"  Universe loaded: {len(result)} tickers from {exchanges}")
-        return result.reset_index(drop=True)
-    except Exception as e:
-        log.warning(f"vnstock listing failed ({e}), falling back to static universe")
-        return _load_fallback_universe(exchanges)
-
-
-def _load_fallback_universe(exchanges: tuple) -> pd.DataFrame:
-    """Static fallback list of liquid tickers if API is down."""
-    fallback = {
-        'HOSE': ['VCB','VIC','VHM','VRE','HPG','FPT','MWG','MBB','TCB','VPB',
-                 'STB','GAS','MSN','PNJ','DGC','SSI','VND','HCM','VCI','BID',
-                 'CTG','SHB','EIB','ACB','POW','REE','GVR','GMD','VNM','SAB',
-                 'PLX','BCM','BVH','PHR','DPM','DCM','PVD','HSG','NKG','HDB'],
-        'HNX':  ['SHS','CEO','IDC','PVS','MBS','TNG','NTP','PVI','HUT','BVS',
-                 'VCS','LAS','TVC','VC3','TIG'],
-        'UPCOM':['ACV','BSR','VEA','VGI','OIL','QNS','VTP','MCH','MSR','SIP',
-                 'VGT','LTG','FOX','MFS','BVB'],
-    }
-    rows = []
-    for ex in exchanges:
-        for tk in fallback.get(ex, []):
-            rows.append({'ticker': tk, 'exchange': ex})
-    return pd.DataFrame(rows)
-
-
-# ─────────────────────────────────────────────────────────────────────────
-# Historical OHLCV fetcher — vnstock 4.x API
-# ─────────────────────────────────────────────────────────────────────────
-def fetch_ohlcv(ticker: str, start: str, end: str,
-                source: str = 'VCI', retries: int = 2,
-                adjusted: bool = True) -> Optional[pd.DataFrame]:
-    """
-    Fetch daily OHLCV for a single ticker using vnstock 4.x.
-
-    Args:
-        ticker: stock symbol like 'FPT'
-        start, end: date strings in 'YYYY-MM-DD' format
-        source: 'VCI' (default), 'TCBS', or 'MSN'
-        retries: number of retry attempts on failure
-        adjusted: vnstock 4.x returns adjusted prices by default for VCI.
-
-    Returns DataFrame: Date, Open, High, Low, Close, Volume
-    """
-    try:
-        from vnstock.api.quote import Quote
-    except ImportError:
-        log.error("vnstock not installed or version too old. Run: pip install -U vnstock")
-        return None
-
-    for attempt in range(retries + 1):
-        try:
-            q = Quote(symbol=ticker, source=source)
-            df = q.history(start=start, end=end, interval='1D')
-
-            if df is None or df.empty:
-                return None
-
-            # vnstock 4.x column names: time, open, high, low, close, volume
-            df = df.rename(columns={
-                'time': 'Date', 'open': 'Open', 'high': 'High',
-                'low': 'Low', 'close': 'Close', 'volume': 'Volume'
-            })
-
-            # Verify required columns exist
-            required = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume']
-            missing = [c for c in required if c not in df.columns]
-            if missing:
-                log.warning(f"  {ticker}: missing columns {missing}, got {list(df.columns)}")
-                return None
-
-            df['Date'] = pd.to_datetime(df['Date'])
-            df = df[required].sort_values('Date')
-            return df.reset_index(drop=True)
-        except Exception as e:
-            # Log full traceback on first failure of first ticker, to help debug
-            if attempt == 0:
-                import traceback
-                tb_str = traceback.format_exc()
-                log.warning(f"  {ticker} attempt {attempt+1}: {type(e).__name__}: {e}\n{tb_str}")
-            else:
-                log.warning(f"  {ticker} attempt {attempt+1}: {type(e).__name__}: {e}")
-            time.sleep(1 + attempt * 2)
-    return None
-
-
-def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
-                     force_refresh: bool = False, adjusted: bool = True) -> Optional[pd.DataFrame]:
-    """
-    Fetch OHLCV using local parquet cache. Only pulls incremental data
-    since last cached date.
-    """
-    suffix = '_adj' if adjusted else '_raw'
-    cache_file = CACHE_DIR / f'{ticker}{suffix}.parquet'
-    end = datetime.now().date()
-    start = end - timedelta(days=lookback_days)
-
-    if cache_file.exists() and not force_refresh:
-        try:
-            cached = pd.read_parquet(cache_file)
-            cached['Date'] = pd.to_datetime(cached['Date'])
-            last_date = cached['Date'].max().date()
-            if last_date >= end - timedelta(days=1):
-                df = cached[cached['Date'] >= pd.Timestamp(start)]
-            else:
-                # Incremental fetch — refresh last 30 days too (in case of late corp actions)
-                refetch_start = (last_date - timedelta(days=30))
-                new = fetch_ohlcv(ticker, str(refetch_start), str(end), adjusted=adjusted)
-                if new is not None and not new.empty:
-                    cached_old = cached[cached['Date'] < pd.Timestamp(refetch_start)]
-                    df = pd.concat([cached_old, new]).drop_duplicates('Date').sort_values('Date')
-                    df.to_parquet(cache_file, index=False)
-                else:
-                    df = cached
-            df['Exchange'] = exchange
-            df['Ticker'] = ticker
-            return df.reset_index(drop=True)
-        except Exception as e:
-            log.warning(f"  cache read failed for {ticker}: {e}, refetching")
-
-    df = fetch_ohlcv(ticker, str(start), str(end), adjusted=adjusted)
-    if df is None or df.empty:
-        return None
-    try:
-        df.to_parquet(cache_file, index=False)
-    except Exception as e:
-        log.warning(f"  cache write failed for {ticker}: {e}")
-    df['Exchange'] = exchange
-    df['Ticker'] = ticker
-    return df
-
-
-def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
-                   max_workers: int = 4, delay: float = 0.2) -> pd.DataFrame:
-    """
-    Fetch OHLCV for entire universe. Uses threading + delay to respect
-    VCI/TCBS rate limits.
-    """
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-    all_frames = []
-    success = 0
-    fail = 0
-
-    def _worker(row):
-        time.sleep(delay)
-        return fetch_with_cache(row['ticker'], row['exchange'], lookback_days)
-
-    with ThreadPoolExecutor(max_workers=max_workers) as ex:
-        futures = {ex.submit(_worker, r): r['ticker']
-                   for _, r in tickers_df.iterrows()}
-        done = 0
-        for fut in as_completed(futures):
-            tk = futures[fut]
-            done += 1
-            try:
-                df = fut.result()
-                if df is not None and len(df) > 60:
-                    all_frames.append(df)
-                    success += 1
-                else:
-                    fail += 1
-            except Exception as e:
-                fail += 1
-                log.warning(f"  {tk}: {e}")
-            if done % 50 == 0:
-                log.info(f"  Fetched {done}/{len(futures)} tickers (ok={success}, fail={fail})")
-
-    log.info(f"  Total: {success} succeeded, {fail} failed")
-    if not all_frames:
-        return pd.DataFrame()
-    return pd.concat(all_frames, ignore_index=True)
-
-
-def fetch_vnindex(lookback_days: int = 180) -> Optional[pd.DataFrame]:
-    """VN-Index for relative strength calculation."""
     end = datetime.now().date()
     start = end - timedelta(days=lookback_days)
     try:

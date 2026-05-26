@@ -134,6 +134,10 @@ def evaluate(df: pd.DataFrame, ticker: str, preset: str = 'long',
     if df['Volume'].tail(20).mean() < cfg['min_avg_volume']:
         return None
 
+    # FIX: Reject stale-cache rows (xem giải thích trong ichimoku.evaluate).
+    if 'StaleCache' in df.columns and bool(df['StaleCache'].iloc[-1]):
+        return None
+
     # Sanity check for un-adjusted prices
     recent = df.tail(30)
     overnight_change = recent['Close'].pct_change()
