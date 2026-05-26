@@ -4,10 +4,13 @@ Data fetcher for Vietnam stock market — vnstock 4.x compatible.
 Migration notes (vnstock 4.x):
   Old API: Vnstock().stock(symbol='ACB').quote.history(...)
   New API: from vnstock.api.quote import Quote
-           Quote(symbol='ACB', source='VCI').history(...)
+           Quote(symbol='ACB', source='vci').history(...)
 
   The old `Vnstock` class was deprecated on 31/08/2025.
   See: https://vnstocks.com/vnstock-migration
+
+  Valid sources (lowercase): vci, kbs, msn, dnse, binance, fmp, fmarket.
+  TCBS was REMOVED in vnstock 4.x — using it raises ValueError.
 
 API Key (vnstock 4.x):
   Anonymous users have STRICT rate limits (few req/min). Register a free
@@ -18,9 +21,13 @@ Rate limit handling:
   vnstock calls sys.exit() when rate limit hit — we MONKEY-PATCH sys.exit
   to raise RateLimitError instead, so we can catch and retry.
 
-Primary source: vnstock 4.x (wraps VCI/TCBS/MSN public APIs)
-Cache: parquet files per ticker in `backend/data/cache/`.
-Daily increment: only fetch missing dates.
+Primary source: 'vci' (returns backward-adjusted prices — dividends already
+subtracted from historical bars). Prices will differ from cafef/broker apps
+for tickers with recent cash dividends; that's expected and correct for
+technical analysis (no fake gaps).
+
+Cache: parquet files per ticker in `backend/data/cache/` with suffix
+'_adj.parquet' (adjusted prices). Daily increment: only fetch missing dates.
 """
 from __future__ import annotations
 import os
@@ -215,12 +222,11 @@ def _sort_by_liquidity(universe: pd.DataFrame, limit: int) -> pd.DataFrame:
     from .top_liquid import get_top_liquid_tickers
 
     # Step 1: compute liquidity from cache
-    # FIX: glob cả *_raw.parquet (default) và *_adj.parquet (legacy)
-    # Trước đó chỉ glob *_adj.parquet — sai vì default là raw (suffix='_raw'),
-    # khiến liquidity dict luôn rỗng và fallback hoàn toàn vào curated list.
+    # FIX: glob cả *_adj.parquet (default mới) và *_raw.parquet (legacy fallback).
+    # Trước đó chỉ glob *_adj.parquet với suffix='_raw' khiến luôn miss.
     liquidity = {}  # ticker → avg turnover
     seen = set()
-    for pattern, strip in (('*_raw.parquet', '_raw'), ('*_adj.parquet', '_adj')):
+    for pattern, strip in (('*_adj.parquet', '_adj'), ('*_raw.parquet', '_raw')):
         for cache_file in CACHE_DIR.glob(pattern):
             ticker = cache_file.stem.replace(strip, '')
             if ticker in seen:
@@ -285,15 +291,25 @@ def _load_fallback_universe(exchanges: tuple) -> pd.DataFrame:
 # Historical OHLCV fetcher — vnstock 4.x API
 # ─────────────────────────────────────────────────────────────────────────
 def fetch_ohlcv(ticker: str, start: str, end: str,
-                source: str = 'TCBS', retries: int = 2,
-                adjusted: bool = False) -> Optional[pd.DataFrame]:
+                source: str = 'vci', retries: int = 2,
+                adjusted: bool = True) -> Optional[pd.DataFrame]:
     """
     Fetch daily OHLCV for a single ticker using vnstock 4.x.
 
-    Uses TCBS source by default which returns RAW (unadjusted) close prices
-    matching what cafef, broker apps, and traders see daily. VCI returns
-    backward-adjusted prices (accounting for past dividends) which differ
-    from the actual closing price by the cumulative dividend amount.
+    FIX (2026-05-26): chuyển source mặc định từ 'TCBS' → 'VCI'. Lý do:
+    vnstock 4.x đã BỎ source 'TCBS' — chỉ chấp nhận: kbs, vci, msn, dnse,
+    binance, fmp, fmarket. PUSH_GUIDE.md trước đó set source='TCBS' khiến
+    MỌI fetch fail với ValueError → fallback xuống cache cũ → giá sai phiên.
+
+    VCI trả về backward-adjusted prices (đã trừ cổ tức/cổ phiếu thưởng quá
+    khứ). Giá hiển thị sẽ KHÁC cafef cho mã có cổ tức gần đây — ví dụ VND
+    có cổ tức 500đ chia 15/07/2025 nên giá VCI sẽ thấp hơn cafef ~0.5.
+    Đây là TRADE-OFF có chủ ý: adjusted price cho phân tích kỹ thuật chính
+    xác hơn (RSI/Ichimoku/Fibonacci không bị gap giả), tuy giá tuyệt đối
+    khác broker app. UI nên có note "✓ Giá điều chỉnh" để user hiểu.
+
+    `adjusted` parameter chỉ ảnh hưởng suffix cache file (_adj vs _raw),
+    không ảnh hưởng VCI vì VCI luôn trả adjusted.
 
     Returns DataFrame: Date, Open, High, Low, Close, Volume
     """
@@ -310,15 +326,7 @@ def fetch_ohlcv(ticker: str, start: str, end: str,
             df = q.history(start=start, end=end, interval='1D')
 
             if df is None or df.empty:
-                # Fallback to VCI if TCBS returns empty (e.g. some UPCOM tickers)
-                if source == 'TCBS' and attempt == 0:
-                    log.debug(f"  {ticker}: TCBS empty, trying VCI fallback")
-                    q = Quote(symbol=ticker, source='VCI')
-                    df = q.history(start=start, end=end, interval='1D')
-                    if df is None or df.empty:
-                        return None
-                else:
-                    return None
+                return None
 
             df = df.rename(columns={
                 'time': 'Date', 'open': 'Open', 'high': 'High',
@@ -342,6 +350,21 @@ def fetch_ohlcv(ticker: str, start: str, end: str,
             # Backup: if monkey-patch didn't catch it
             log.warning(f"  {ticker} SystemExit raised, waiting 65s...")
             time.sleep(65)
+        except ValueError as e:
+            # FIX: invalid source / invalid ticker là lỗi config, không phải transient.
+            # Trước đây retry 3 lần x 500 mã x 2-4s → tốn ~1h CI vô ích trước khi fail.
+            # Nay: phát hiện và RAISE để fail-fast — pipeline sẽ stop ngay.
+            err_str = str(e)
+            if 'source' in err_str.lower() or 'Lớp Quote' in err_str:
+                log.error(f"FATAL CONFIG ERROR: {err_str}")
+                raise RuntimeError(
+                    f"vnstock source='{source}' không hợp lệ. Sửa data_fetcher.py "
+                    f"đặt source thành một trong: kbs, vci, msn, dnse, fmp, fmarket. "
+                    f"Original error: {err_str}"
+                ) from e
+            # ValueError khác (parse, range...) thì retry như cũ
+            log.warning(f"  {ticker} attempt {attempt+1}: ValueError: {str(e)[:150]}")
+            time.sleep(2 + attempt * 2)
         except BaseException as e:
             err_str = str(e).lower()
             if 'rate' in err_str or 'limit' in err_str or '429' in err_str:
@@ -371,16 +394,21 @@ def _last_trading_session(today: 'date') -> 'date':
 
 
 def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
-                     force_refresh: bool = False, adjusted: bool = False) -> Optional[pd.DataFrame]:
+                     force_refresh: bool = False, adjusted: bool = True) -> Optional[pd.DataFrame]:
     """
     Fetch OHLCV using local parquet cache. Only pulls incremental data
     since last cached date.
+
+    FIX (2026-05-26): adjusted=True mặc định (đi đôi với source='VCI' trong
+    fetch_ohlcv). Cache file dùng suffix '_adj.parquet'. Cache cũ '_raw.parquet'
+    (do TCBS-fail-fallback ghi) là dữ liệu rác — workflow cần purge trước
+    lần chạy đầu sau fix (đã bump cache key v1 → v2 trong daily-scan.yml).
 
     FIX: Trước đây dùng `last_date >= end - timedelta(days=1)` — bug nghiêm trọng
     vì end = today (datetime.now().date()), nên cache được coi là tươi nếu chỉ cũ
     1 ngày, BẤT KỂ phiên đó có phải phiên giao dịch hợp lệ không. Hệ quả: chạy
     scan vào sáng Thứ Hai có thể dùng dữ liệu Thứ Sáu mà không refetch ra phiên
-    Thứ Hai mới nhất. Đó chính là gốc rễ của lỗi "giá/KL của phiên sai".
+    Thứ Hai mới nhất.
 
     Sửa: kiểm tra cache có chứa đúng phiên giao dịch gần nhất theo lịch không.
     """
@@ -506,7 +534,7 @@ def fetch_vnindex(lookback_days: int = 180) -> Optional[pd.DataFrame]:
     start = end - timedelta(days=lookback_days)
     try:
         from vnstock.api.quote import Quote
-        q = Quote(symbol='VNINDEX', source='VCI')
+        q = Quote(symbol='VNINDEX', source='vci')
         idx = q.history(start=str(start), end=str(end), interval='1D')
         idx = idx.rename(columns={'time': 'Date', 'close': 'Close'})
         idx['Date'] = pd.to_datetime(idx['Date'])
