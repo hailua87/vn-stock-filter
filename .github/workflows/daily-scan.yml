@@ -2,7 +2,7 @@ name: Daily Scan
 
 # Lịch chạy:
 #   - 12:00 ICT (05:00 UTC) — INTRADAY: sau phiên sáng close (11:30 ICT + 30p buffer)
-#   - 17:00 ICT (10:00 UTC) — EOD: sau phiên chiều close (14:45 ICT + ~2h buffer)
+#   - 23:00 ICT (16:00 UTC) — EOD: đủ muộn để vnstock cập nhật giá ATC chính thức
 # Chỉ chạy T2-T6 (không cuối tuần).
 #
 # Phân biệt intraday vs EOD:
@@ -11,10 +11,18 @@ name: Daily Scan
 #
 # Manual trigger:
 #   - Có thể chọn loại run từ UI nếu cần override (vd test khi đang code)
+#
+# Tại sao EOD 23:00 thay vì 17:00? (Fix 2026-05-27)
+#   vnstock VCI có data freshness lag ~6-8 giờ sau HOSE đóng cửa (14:45 ICT):
+#     - 14:45-22:00 ICT: vnstock trả giá tạm (matched price giữa phiên)
+#     - 22:00+ ICT: vnstock cập nhật giá ATC chính thức
+#   Workflow EOD cũ 17:00 (chỉ 2h15 sau close) lấy giá tạm → cache giữ data sai
+#   → ngày sau dùng cache → giá vĩnh viễn sai cho phiên đó.
+#   23:00 ICT đảm bảo vnstock đã update đúng trước khi scan.
 on:
   schedule:
-    - cron: '0 5 * * 1-5'    # 12:00 ICT — INTRADAY
-    - cron: '0 10 * * 1-5'   # 17:00 ICT — EOD
+    - cron: '0 5 * * 1-5'    # 12:00 ICT — INTRADAY: sau phiên sáng
+    - cron: '0 16 * * 1-5'   # 23:00 ICT — EOD: đợi vnstock update giá ATC
   workflow_dispatch:
     inputs:
       run_type:
@@ -83,16 +91,24 @@ jobs:
 
       - name: Cache OHLCV parquet
         # FIX (2026-05-25): bumped prefix v1 → v2 to invalidate cache containing
-        # stale-session data from the "phantom session" bug. Cache key bao gồm
-        # github.run_id để mỗi run đều save cache mới; restore-keys khớp prefix
-        # 'ohlcv-cache-v2-' để restore cache mới nhất. Cache cũ (prefix khác) sẽ
-        # bị GitHub tự dọn sau 7 ngày không dùng.
+        # stale-session data from the "phantom session" bug.
+        #
+        # FIX (2026-05-27): bumped v2 → v3 to invalidate cache containing
+        # WRONG VALUE data. vnstock VCI có data freshness lag ~6-8h sau giờ đóng
+        # cửa. Workflow chạy quá sớm (17:00 ICT, chỉ 2h15 sau close) sẽ lấy data
+        # tạm của vnstock và cache lại. Sau khi vnstock update đúng (~22:00 ICT
+        # trở đi), workflow vẫn dùng cache cũ vì `last_date >= last_session`
+        # check pass → không refetch → data sai vĩnh viễn cho phiên đó.
+        #
+        # Cache key bao gồm github.run_id để mỗi run đều save cache mới;
+        # restore-keys khớp prefix 'ohlcv-cache-v3-' để restore cache mới nhất.
+        # Cache cũ (v1, v2) sẽ bị GitHub tự dọn sau 7 ngày không dùng.
         uses: actions/cache@v4
         with:
           path: backend/data/cache
-          key: ohlcv-cache-v2-${{ github.run_id }}
+          key: ohlcv-cache-v3-${{ github.run_id }}
           restore-keys: |
-            ohlcv-cache-v2-
+            ohlcv-cache-v3-
 
       - name: Run daily scan
         env:
