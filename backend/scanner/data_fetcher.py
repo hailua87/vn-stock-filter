@@ -432,11 +432,32 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
             cached = pd.read_parquet(cache_file)
             cached['Date'] = pd.to_datetime(cached['Date'])
             last_date = cached['Date'].max().date()
-            if last_date >= last_session:
-                # Cache đã chứa phiên gần nhất — dùng luôn
+            today = end  # alias để code rõ ràng hơn
+
+            # FIX (2026-05-27): Force refresh nếu last_date == today.
+            #
+            # Lý do: vnstock VCI có data freshness lag ~6-8h sau giờ đóng cửa HOSE.
+            # Trong khoảng 14:45-22:00 ICT, vnstock trả giá tạm (matched price giữa
+            # phiên), không phải giá ATC chính thức. Nếu workflow chạy trong khoảng
+            # này → cache ghi giá tạm → lần sau dùng cache (vì last_date >= last_session
+            # vẫn pass) → data sai vĩnh viễn cho phiên đó.
+            #
+            # Fix: chỉ dùng cache nếu last_date là PHIÊN ĐÃ QUA HẲN (không phải hôm
+            # nay). Nếu last_date == today → luôn refetch để pickup data mới nếu
+            # vnstock vừa update.
+            #
+            # Hệ quả: mỗi run workflow sẽ refetch phiên hôm nay (chậm thêm ~2-3 phút
+            # cho 500 mã). Đổi lại data luôn fresh nhất có thể.
+            cache_fresh = (last_date >= last_session) and (last_date < today)
+
+            if cache_fresh:
+                # Cache chứa phiên ĐÃ QUA HẲN — dùng luôn, không refetch
                 df = cached[cached['Date'] >= pd.Timestamp(start)].copy()
             else:
-                # Cache cũ — refetch incremental (refresh 30 ngày cuối phòng late corp actions)
+                # 2 trường hợp:
+                #   a) last_date < last_session → cache cũ thực sự
+                #   b) last_date == today → có thể vnstock đã update, refetch để chắc
+                # Refetch incremental (refresh 30 ngày cuối phòng late corp actions)
                 refetch_start = (last_date - timedelta(days=30))
                 new = fetch_ohlcv(ticker, str(refetch_start), str(end), adjusted=adjusted)
                 if new is not None and not new.empty:
