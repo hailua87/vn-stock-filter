@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-10T09:15:36.874185",
+  "generated_at": "2026-06-10T18:50:47.029156",
   "strategy": "ichimoku",
   "total": 66,
   "metadata": {
@@ -10,9 +10,9 @@
       "UPCOM"
     ],
     "total_scanned": 500,
-    "run_type": "intraday",
-    "run_time_ict": "16:15",
-    "run_date_ict": "2026-06-10"
+    "run_type": "eod",
+    "run_time_ict": "01:50",
+    "run_date_ict": "2026-06-11"
   },
   "signals": [
     {
@@ -4213,6 +4213,81 @@
       }
     },
     {
+      "ticker": "CMN",
+      "exchange": "UPCOM",
+      "date": "2026-06-10T00:00:00",
+      "close": 82.1,
+      "volume": 30800,
+      "total_score": 3,
+      "rating": "A",
+      "ich_tk_bullish": 1,
+      "ich_recent_tk_cross": 0,
+      "ich_price_above_cloud": 1,
+      "ich_cloud_bullish": 0,
+      "ich_chikou_free": 1,
+      "m_tenkan": 81.4,
+      "m_kijun": 73.55,
+      "m_senkou_a": 64.25,
+      "m_senkou_b": 65.5,
+      "m_cloud_top": 65.5,
+      "m_cloud_bottom": 64.25,
+      "m_cloud_distance_pct": 25.34,
+      "m_tk_cross_days_ago": null,
+      "m_is_turnaround": false,
+      "m_turnaround_reasons": [],
+      "m_change_5d_pct": 0.12,
+      "m_vol_ratio": 2.37,
+      "m_rsi14": 70.4,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 81.06,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 1.27
+        },
+        {
+          "price": 76.27,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 7.1
+        },
+        {
+          "price": 72.4,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 11.81
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 88.8,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 8.16
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 88.8,
+        "high_date": "2026-06-03",
+        "high_idx": 54,
+        "low": 56.0,
+        "low_date": "2026-03-23",
+        "low_idx": 7,
+        "direction": "up",
+        "range": 32.8
+      }
+    },
+    {
       "ticker": "CMS",
       "exchange": "HNX",
       "date": "2026-06-10T00:00:00",
@@ -4376,81 +4451,6 @@
         "low_idx": 14,
         "direction": "up",
         "range": 4.75
-      }
-    },
-    {
-      "ticker": "CMN",
-      "exchange": "UPCOM",
-      "date": "2026-06-10T00:00:00",
-      "close": 82.1,
-      "volume": 30800,
-      "total_score": 3,
-      "rating": "A",
-      "ich_tk_bullish": 1,
-      "ich_recent_tk_cross": 0,
-      "ich_price_above_cloud": 1,
-      "ich_cloud_bullish": 0,
-      "ich_chikou_free": 1,
-      "m_tenkan": 81.4,
-      "m_kijun": 73.55,
-      "m_senkou_a": 64.25,
-      "m_senkou_b": 65.5,
-      "m_cloud_top": 65.5,
-      "m_cloud_bottom": 64.25,
-      "m_cloud_distance_pct": 25.34,
-      "m_tk_cross_days_ago": null,
-      "m_is_turnaround": false,
-      "m_turnaround_reasons": [],
-      "m_change_5d_pct": 0.12,
-      "m_vol_ratio": 2.37,
-      "m_rsi14": 70.4,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 81.06,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 1.27
-        },
-        {
-          "price": 76.27,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 7.1
-        },
-        {
-          "price": 72.4,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 11.81
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 88.8,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 8.16
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 88.8,
-        "high_date": "2026-06-03",
-        "high_idx": 54,
-        "low": 56.0,
-        "low_date": "2026-03-23",
-        "low_idx": 7,
-        "direction": "up",
-        "range": 32.8
       }
     },
     {
