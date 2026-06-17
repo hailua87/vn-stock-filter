@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-17T10:19:34.198048",
+  "generated_at": "2026-06-17T18:38:22.346305",
   "strategy": "ichimoku",
   "total": 69,
   "metadata": {
@@ -11,8 +11,8 @@
     ],
     "total_scanned": 500,
     "run_type": "eod",
-    "run_time_ict": "17:19",
-    "run_date_ict": "2026-06-17"
+    "run_time_ict": "01:38",
+    "run_date_ict": "2026-06-18"
   },
   "signals": [
     {
@@ -1083,6 +1083,81 @@
       }
     },
     {
+      "ticker": "CAP",
+      "exchange": "HNX",
+      "date": "2026-06-17T00:00:00",
+      "close": 46.3,
+      "volume": 391400,
+      "total_score": 4,
+      "rating": "A+",
+      "ich_tk_bullish": 1,
+      "ich_recent_tk_cross": 0,
+      "ich_price_above_cloud": 1,
+      "ich_cloud_bullish": 1,
+      "ich_chikou_free": 1,
+      "m_tenkan": 44.4,
+      "m_kijun": 44.15,
+      "m_senkou_a": 41.7,
+      "m_senkou_b": 40.93,
+      "m_cloud_top": 41.7,
+      "m_cloud_bottom": 40.93,
+      "m_cloud_distance_pct": 11.03,
+      "m_tk_cross_days_ago": null,
+      "m_is_turnaround": false,
+      "m_turnaround_reasons": [],
+      "m_change_5d_pct": 1.76,
+      "m_vol_ratio": 7.82,
+      "m_rsi14": 67.7,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 45.38,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 1.99
+        },
+        {
+          "price": 44.19,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 4.56
+        },
+        {
+          "price": 43.23,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 6.63
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 47.3,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 2.16
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 47.3,
+        "high_date": "2026-06-12",
+        "high_idx": 56,
+        "low": 39.17,
+        "low_date": "2026-04-21",
+        "low_idx": 21,
+        "direction": "up",
+        "range": 8.13
+      }
+    },
+    {
       "ticker": "PSI",
       "exchange": "HNX",
       "date": "2026-06-17T00:00:00",
@@ -1233,81 +1308,6 @@
       }
     },
     {
-      "ticker": "TLD",
-      "exchange": "HOSE",
-      "date": "2026-06-17T00:00:00",
-      "close": 8.55,
-      "volume": 187100,
-      "total_score": 4,
-      "rating": "A+",
-      "ich_tk_bullish": 1,
-      "ich_recent_tk_cross": 0,
-      "ich_price_above_cloud": 1,
-      "ich_cloud_bullish": 1,
-      "ich_chikou_free": 1,
-      "m_tenkan": 8.52,
-      "m_kijun": 8.46,
-      "m_senkou_a": 8.46,
-      "m_senkou_b": 8.25,
-      "m_cloud_top": 8.46,
-      "m_cloud_bottom": 8.25,
-      "m_cloud_distance_pct": 1.0,
-      "m_tk_cross_days_ago": null,
-      "m_is_turnaround": false,
-      "m_turnaround_reasons": [],
-      "m_change_5d_pct": 0.35,
-      "m_vol_ratio": 0.91,
-      "m_rsi14": 59.3,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 8.49,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 0.7
-        },
-        {
-          "price": 8.36,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 2.22
-        },
-        {
-          "price": 8.25,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 3.51
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 8.7,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 1.75
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 8.7,
-        "high_date": "2026-05-05",
-        "high_idx": 28,
-        "low": 7.8,
-        "low_date": "2026-03-23",
-        "low_idx": 0,
-        "direction": "up",
-        "range": 0.9
-      }
-    },
-    {
       "ticker": "C32",
       "exchange": "UPCOM",
       "date": "2026-06-17T00:00:00",
@@ -1399,11 +1399,11 @@
       }
     },
     {
-      "ticker": "CAP",
-      "exchange": "HNX",
+      "ticker": "TLD",
+      "exchange": "HOSE",
       "date": "2026-06-17T00:00:00",
-      "close": 46.3,
-      "volume": 391400,
+      "close": 8.55,
+      "volume": 187100,
       "total_score": 4,
       "rating": "A+",
       "ich_tk_bullish": 1,
@@ -1411,143 +1411,66 @@
       "ich_price_above_cloud": 1,
       "ich_cloud_bullish": 1,
       "ich_chikou_free": 1,
-      "m_tenkan": 44.4,
-      "m_kijun": 44.15,
-      "m_senkou_a": 41.7,
-      "m_senkou_b": 40.93,
-      "m_cloud_top": 41.7,
-      "m_cloud_bottom": 40.93,
-      "m_cloud_distance_pct": 11.03,
+      "m_tenkan": 8.52,
+      "m_kijun": 8.46,
+      "m_senkou_a": 8.46,
+      "m_senkou_b": 8.25,
+      "m_cloud_top": 8.46,
+      "m_cloud_bottom": 8.25,
+      "m_cloud_distance_pct": 1.0,
       "m_tk_cross_days_ago": null,
       "m_is_turnaround": false,
       "m_turnaround_reasons": [],
-      "m_change_5d_pct": 1.76,
-      "m_vol_ratio": 7.82,
-      "m_rsi14": 67.7,
+      "m_change_5d_pct": 0.35,
+      "m_vol_ratio": 0.91,
+      "m_rsi14": 59.3,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
         {
-          "price": 45.38,
+          "price": 8.49,
           "label": "23.6%",
           "ratio": 0.236,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 1.99
+          "distance_pct": 0.7
         },
         {
-          "price": 44.19,
+          "price": 8.36,
           "label": "38.2%",
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 4.56
+          "distance_pct": 2.22
         },
         {
-          "price": 43.23,
+          "price": 8.25,
           "label": "50%",
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 6.63
+          "distance_pct": 3.51
         }
       ],
       "m_resistances": [
         {
-          "price": 47.3,
+          "price": 8.7,
           "label": "0%",
           "ratio": 0.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 2.16
+          "distance_pct": 1.75
         }
       ],
       "m_fibo_swing": {
-        "high": 47.3,
-        "high_date": "2026-06-12",
-        "high_idx": 56,
-        "low": 39.17,
-        "low_date": "2026-04-21",
-        "low_idx": 21,
-        "direction": "up",
-        "range": 8.13
-      }
-    },
-    {
-      "ticker": "TRC",
-      "exchange": "HOSE",
-      "date": "2026-06-17T00:00:00",
-      "close": 77.6,
-      "volume": 9300,
-      "total_score": 4,
-      "rating": "A+",
-      "ich_tk_bullish": 1,
-      "ich_recent_tk_cross": 1,
-      "ich_price_above_cloud": 1,
-      "ich_cloud_bullish": 0,
-      "ich_chikou_free": 1,
-      "m_tenkan": 76.1,
-      "m_kijun": 75.3,
-      "m_senkou_a": 73.75,
-      "m_senkou_b": 75.25,
-      "m_cloud_top": 75.25,
-      "m_cloud_bottom": 73.75,
-      "m_cloud_distance_pct": 3.12,
-      "m_tk_cross_days_ago": 0,
-      "m_is_turnaround": false,
-      "m_turnaround_reasons": [
-        "TK cross 0 phiên trước"
-      ],
-      "m_change_5d_pct": 2.11,
-      "m_vol_ratio": 0.72,
-      "m_rsi14": 63.3,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 75.13,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 3.18
-        },
-        {
-          "price": 73.54,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 5.23
-        },
-        {
-          "price": 72.25,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 6.89
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 77.7,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 0.13
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 77.7,
-        "high_date": "2026-06-17",
-        "high_idx": 59,
-        "low": 66.8,
+        "high": 8.7,
+        "high_date": "2026-05-05",
+        "high_idx": 28,
+        "low": 7.8,
         "low_date": "2026-03-23",
         "low_idx": 0,
         "direction": "up",
-        "range": 10.9
+        "range": 0.9
       }
     },
     {
@@ -1636,78 +1559,80 @@
       }
     },
     {
-      "ticker": "XMC",
-      "exchange": "HNX",
+      "ticker": "TRC",
+      "exchange": "HOSE",
       "date": "2026-06-17T00:00:00",
-      "close": 10.0,
-      "volume": 49500,
+      "close": 77.6,
+      "volume": 9300,
       "total_score": 4,
       "rating": "A+",
       "ich_tk_bullish": 1,
-      "ich_recent_tk_cross": 0,
+      "ich_recent_tk_cross": 1,
       "ich_price_above_cloud": 1,
-      "ich_cloud_bullish": 1,
+      "ich_cloud_bullish": 0,
       "ich_chikou_free": 1,
-      "m_tenkan": 9.75,
-      "m_kijun": 9.5,
-      "m_senkou_a": 9.27,
-      "m_senkou_b": 8.75,
-      "m_cloud_top": 9.27,
-      "m_cloud_bottom": 8.75,
-      "m_cloud_distance_pct": 7.82,
-      "m_tk_cross_days_ago": null,
+      "m_tenkan": 76.1,
+      "m_kijun": 75.3,
+      "m_senkou_a": 73.75,
+      "m_senkou_b": 75.25,
+      "m_cloud_top": 75.25,
+      "m_cloud_bottom": 73.75,
+      "m_cloud_distance_pct": 3.12,
+      "m_tk_cross_days_ago": 0,
       "m_is_turnaround": false,
-      "m_turnaround_reasons": [],
-      "m_change_5d_pct": 0.0,
-      "m_vol_ratio": 0.67,
-      "m_rsi14": 50.0,
+      "m_turnaround_reasons": [
+        "TK cross 0 phiên trước"
+      ],
+      "m_change_5d_pct": 2.11,
+      "m_vol_ratio": 0.72,
+      "m_rsi14": 63.3,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
         {
-          "price": 9.79,
+          "price": 75.13,
           "label": "23.6%",
           "ratio": 0.236,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 2.1
+          "distance_pct": 3.18
         },
         {
-          "price": 9.35,
+          "price": 73.54,
           "label": "38.2%",
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 6.5
+          "distance_pct": 5.23
         },
         {
-          "price": 9.0,
+          "price": 72.25,
           "label": "50%",
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 10.0
+          "distance_pct": 6.89
         }
       ],
       "m_resistances": [
         {
-          "price": 10.5,
+          "price": 77.7,
           "label": "0%",
           "ratio": 0.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 5.0
+          "distance_pct": 0.13
         }
       ],
       "m_fibo_swing": {
-        "high": 10.5,
-        "high_date": "2026-05-25",
-        "high_idx": 42,
-        "low": 7.5,
-        "low_date": "2026-03-11",
-        "low_idx": 2,
+        "high": 77.7,
+        "high_date": "2026-06-17",
+        "high_idx": 59,
+        "low": 66.8,
+        "low_date": "2026-03-23",
+        "low_idx": 0,
         "direction": "up",
-        "range": 3.0
+        "range": 10.9
       }
     },
     {
@@ -1783,6 +1708,81 @@
         "low_idx": 0,
         "direction": "up",
         "range": 1.94
+      }
+    },
+    {
+      "ticker": "XMC",
+      "exchange": "HNX",
+      "date": "2026-06-17T00:00:00",
+      "close": 10.0,
+      "volume": 49500,
+      "total_score": 4,
+      "rating": "A+",
+      "ich_tk_bullish": 1,
+      "ich_recent_tk_cross": 0,
+      "ich_price_above_cloud": 1,
+      "ich_cloud_bullish": 1,
+      "ich_chikou_free": 1,
+      "m_tenkan": 9.75,
+      "m_kijun": 9.5,
+      "m_senkou_a": 9.27,
+      "m_senkou_b": 8.75,
+      "m_cloud_top": 9.27,
+      "m_cloud_bottom": 8.75,
+      "m_cloud_distance_pct": 7.82,
+      "m_tk_cross_days_ago": null,
+      "m_is_turnaround": false,
+      "m_turnaround_reasons": [],
+      "m_change_5d_pct": 0.0,
+      "m_vol_ratio": 0.67,
+      "m_rsi14": 50.0,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 9.79,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 2.1
+        },
+        {
+          "price": 9.35,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 6.5
+        },
+        {
+          "price": 9.0,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 10.0
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 10.5,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 5.0
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 10.5,
+        "high_date": "2026-05-25",
+        "high_idx": 42,
+        "low": 7.5,
+        "low_date": "2026-03-11",
+        "low_idx": 2,
+        "direction": "up",
+        "range": 3.0
       }
     },
     {
@@ -1944,6 +1944,72 @@
       }
     },
     {
+      "ticker": "WSS",
+      "exchange": "HNX",
+      "date": "2026-06-17T00:00:00",
+      "close": 6.8,
+      "volume": 40300,
+      "total_score": 4,
+      "rating": "A+",
+      "ich_tk_bullish": 1,
+      "ich_recent_tk_cross": 0,
+      "ich_price_above_cloud": 1,
+      "ich_cloud_bullish": 1,
+      "ich_chikou_free": 1,
+      "m_tenkan": 6.6,
+      "m_kijun": 6.5,
+      "m_senkou_a": 6.25,
+      "m_senkou_b": 6.2,
+      "m_cloud_top": 6.25,
+      "m_cloud_bottom": 6.2,
+      "m_cloud_distance_pct": 8.8,
+      "m_tk_cross_days_ago": null,
+      "m_is_turnaround": false,
+      "m_turnaround_reasons": [],
+      "m_change_5d_pct": 3.03,
+      "m_vol_ratio": 2.07,
+      "m_rsi14": 60.0,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 6.54,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 3.82
+        },
+        {
+          "price": 6.38,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 6.18
+        },
+        {
+          "price": 6.25,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 8.09
+        }
+      ],
+      "m_resistances": [],
+      "m_fibo_swing": {
+        "high": 6.8,
+        "high_date": "2026-06-01",
+        "high_idx": 47,
+        "low": 5.7,
+        "low_date": "2026-03-23",
+        "low_idx": 1,
+        "direction": "up",
+        "range": 1.1
+      }
+    },
+    {
       "ticker": "MCO",
       "exchange": "HNX",
       "date": "2026-06-17T00:00:00",
@@ -2032,72 +2098,6 @@
         "low_idx": 44,
         "direction": "up",
         "range": 3.1
-      }
-    },
-    {
-      "ticker": "WSS",
-      "exchange": "HNX",
-      "date": "2026-06-17T00:00:00",
-      "close": 6.8,
-      "volume": 40300,
-      "total_score": 4,
-      "rating": "A+",
-      "ich_tk_bullish": 1,
-      "ich_recent_tk_cross": 0,
-      "ich_price_above_cloud": 1,
-      "ich_cloud_bullish": 1,
-      "ich_chikou_free": 1,
-      "m_tenkan": 6.6,
-      "m_kijun": 6.5,
-      "m_senkou_a": 6.25,
-      "m_senkou_b": 6.2,
-      "m_cloud_top": 6.25,
-      "m_cloud_bottom": 6.2,
-      "m_cloud_distance_pct": 8.8,
-      "m_tk_cross_days_ago": null,
-      "m_is_turnaround": false,
-      "m_turnaround_reasons": [],
-      "m_change_5d_pct": 3.03,
-      "m_vol_ratio": 2.07,
-      "m_rsi14": 60.0,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 6.54,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 3.82
-        },
-        {
-          "price": 6.38,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 6.18
-        },
-        {
-          "price": 6.25,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 8.09
-        }
-      ],
-      "m_resistances": [],
-      "m_fibo_swing": {
-        "high": 6.8,
-        "high_date": "2026-06-01",
-        "high_idx": 47,
-        "low": 5.7,
-        "low_date": "2026-03-23",
-        "low_idx": 1,
-        "direction": "up",
-        "range": 1.1
       }
     },
     {
@@ -2414,6 +2414,81 @@
       }
     },
     {
+      "ticker": "KDC",
+      "exchange": "HOSE",
+      "date": "2026-06-17T00:00:00",
+      "close": 50.4,
+      "volume": 443700,
+      "total_score": 3,
+      "rating": "A",
+      "ich_tk_bullish": 1,
+      "ich_recent_tk_cross": 0,
+      "ich_price_above_cloud": 1,
+      "ich_cloud_bullish": 0,
+      "ich_chikou_free": 1,
+      "m_tenkan": 50.27,
+      "m_kijun": 49.35,
+      "m_senkou_a": 43.77,
+      "m_senkou_b": 45.45,
+      "m_cloud_top": 45.45,
+      "m_cloud_bottom": 43.77,
+      "m_cloud_distance_pct": 10.89,
+      "m_tk_cross_days_ago": null,
+      "m_is_turnaround": false,
+      "m_turnaround_reasons": [],
+      "m_change_5d_pct": 1.51,
+      "m_vol_ratio": 0.57,
+      "m_rsi14": 50.0,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 48.48,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 3.81
+        },
+        {
+          "price": 46.61,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 7.52
+        },
+        {
+          "price": 45.1,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 10.52
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 51.5,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 2.18
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 51.5,
+        "high_date": "2026-06-03",
+        "high_idx": 49,
+        "low": 38.7,
+        "low_date": "2026-04-29",
+        "low_idx": 26,
+        "direction": "up",
+        "range": 12.8
+      }
+    },
+    {
       "ticker": "PHR",
       "exchange": "HOSE",
       "date": "2026-06-17T00:00:00",
@@ -2502,81 +2577,6 @@
         "low_idx": 0,
         "direction": "up",
         "range": 18.7
-      }
-    },
-    {
-      "ticker": "KDC",
-      "exchange": "HOSE",
-      "date": "2026-06-17T00:00:00",
-      "close": 50.4,
-      "volume": 443700,
-      "total_score": 3,
-      "rating": "A",
-      "ich_tk_bullish": 1,
-      "ich_recent_tk_cross": 0,
-      "ich_price_above_cloud": 1,
-      "ich_cloud_bullish": 0,
-      "ich_chikou_free": 1,
-      "m_tenkan": 50.27,
-      "m_kijun": 49.35,
-      "m_senkou_a": 43.77,
-      "m_senkou_b": 45.45,
-      "m_cloud_top": 45.45,
-      "m_cloud_bottom": 43.77,
-      "m_cloud_distance_pct": 10.89,
-      "m_tk_cross_days_ago": null,
-      "m_is_turnaround": false,
-      "m_turnaround_reasons": [],
-      "m_change_5d_pct": 1.51,
-      "m_vol_ratio": 0.57,
-      "m_rsi14": 50.0,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 48.48,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 3.81
-        },
-        {
-          "price": 46.61,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 7.52
-        },
-        {
-          "price": 45.1,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 10.52
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 51.5,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 2.18
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 51.5,
-        "high_date": "2026-06-03",
-        "high_idx": 49,
-        "low": 38.7,
-        "low_date": "2026-04-29",
-        "low_idx": 26,
-        "direction": "up",
-        "range": 12.8
       }
     },
     {
@@ -3459,81 +3459,6 @@
       }
     },
     {
-      "ticker": "QNS",
-      "exchange": "UPCOM",
-      "date": "2026-06-17T00:00:00",
-      "close": 48.3,
-      "volume": 30700,
-      "total_score": 3,
-      "rating": "A",
-      "ich_tk_bullish": 1,
-      "ich_recent_tk_cross": 0,
-      "ich_price_above_cloud": 1,
-      "ich_cloud_bullish": 1,
-      "ich_chikou_free": 0,
-      "m_tenkan": 48.3,
-      "m_kijun": 47.05,
-      "m_senkou_a": 46.65,
-      "m_senkou_b": 45.5,
-      "m_cloud_top": 46.65,
-      "m_cloud_bottom": 45.5,
-      "m_cloud_distance_pct": 3.54,
-      "m_tk_cross_days_ago": null,
-      "m_is_turnaround": false,
-      "m_turnaround_reasons": [],
-      "m_change_5d_pct": -1.23,
-      "m_vol_ratio": 0.41,
-      "m_rsi14": 47.5,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 48.13,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 0.35
-        },
-        {
-          "price": 47.34,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 1.99
-        },
-        {
-          "price": 46.7,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 3.31
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 49.4,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 2.28
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 49.4,
-        "high_date": "2026-06-10",
-        "high_idx": 54,
-        "low": 44.0,
-        "low_date": "2026-04-22",
-        "low_idx": 22,
-        "direction": "up",
-        "range": 5.4
-      }
-    },
-    {
       "ticker": "TDP",
       "exchange": "HOSE",
       "date": "2026-06-17T00:00:00",
@@ -3617,6 +3542,81 @@
         "low_idx": 31,
         "direction": "down",
         "range": 3.4
+      }
+    },
+    {
+      "ticker": "QNS",
+      "exchange": "UPCOM",
+      "date": "2026-06-17T00:00:00",
+      "close": 48.3,
+      "volume": 30700,
+      "total_score": 3,
+      "rating": "A",
+      "ich_tk_bullish": 1,
+      "ich_recent_tk_cross": 0,
+      "ich_price_above_cloud": 1,
+      "ich_cloud_bullish": 1,
+      "ich_chikou_free": 0,
+      "m_tenkan": 48.3,
+      "m_kijun": 47.05,
+      "m_senkou_a": 46.65,
+      "m_senkou_b": 45.5,
+      "m_cloud_top": 46.65,
+      "m_cloud_bottom": 45.5,
+      "m_cloud_distance_pct": 3.54,
+      "m_tk_cross_days_ago": null,
+      "m_is_turnaround": false,
+      "m_turnaround_reasons": [],
+      "m_change_5d_pct": -1.23,
+      "m_vol_ratio": 0.41,
+      "m_rsi14": 47.5,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 48.13,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 0.35
+        },
+        {
+          "price": 47.34,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 1.99
+        },
+        {
+          "price": 46.7,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 3.31
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 49.4,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 2.28
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 49.4,
+        "high_date": "2026-06-10",
+        "high_idx": 54,
+        "low": 44.0,
+        "low_date": "2026-04-22",
+        "low_idx": 22,
+        "direction": "up",
+        "range": 5.4
       }
     },
     {
@@ -4209,92 +4209,6 @@
       }
     },
     {
-      "ticker": "DTD",
-      "exchange": "HNX",
-      "date": "2026-06-17T00:00:00",
-      "close": 15.0,
-      "volume": 107100,
-      "total_score": 3,
-      "rating": "A",
-      "ich_tk_bullish": 1,
-      "ich_recent_tk_cross": 1,
-      "ich_price_above_cloud": 0,
-      "ich_cloud_bullish": 0,
-      "ich_chikou_free": 1,
-      "m_tenkan": 14.75,
-      "m_kijun": 14.65,
-      "m_senkou_a": 16.12,
-      "m_senkou_b": 16.45,
-      "m_cloud_top": 16.45,
-      "m_cloud_bottom": 16.12,
-      "m_cloud_distance_pct": -6.98,
-      "m_tk_cross_days_ago": 0,
-      "m_is_turnaround": false,
-      "m_turnaround_reasons": [
-        "TK cross 0 phiên trước",
-        "Giá chuẩn bị break cloud"
-      ],
-      "m_change_5d_pct": 2.04,
-      "m_vol_ratio": 0.99,
-      "m_rsi14": 66.7,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 14.92,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 0.53
-        },
-        {
-          "price": 14.0,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 6.67
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 15.49,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 3.27
-        },
-        {
-          "price": 15.95,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 6.33
-        },
-        {
-          "price": 16.41,
-          "label": "61.8%",
-          "ratio": 0.618,
-          "is_golden": true,
-          "type": "fibo",
-          "distance_pct": 9.4
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 17.9,
-        "high_date": "2026-04-08",
-        "high_idx": 12,
-        "low": 14.0,
-        "low_date": "2026-05-20",
-        "low_idx": 39,
-        "direction": "down",
-        "range": 3.9
-      }
-    },
-    {
       "ticker": "CTP",
       "exchange": "HNX",
       "date": "2026-06-17T00:00:00",
@@ -4453,6 +4367,92 @@
         "low_idx": 11,
         "direction": "up",
         "range": 8.15
+      }
+    },
+    {
+      "ticker": "DTD",
+      "exchange": "HNX",
+      "date": "2026-06-17T00:00:00",
+      "close": 15.0,
+      "volume": 107100,
+      "total_score": 3,
+      "rating": "A",
+      "ich_tk_bullish": 1,
+      "ich_recent_tk_cross": 1,
+      "ich_price_above_cloud": 0,
+      "ich_cloud_bullish": 0,
+      "ich_chikou_free": 1,
+      "m_tenkan": 14.75,
+      "m_kijun": 14.65,
+      "m_senkou_a": 16.12,
+      "m_senkou_b": 16.45,
+      "m_cloud_top": 16.45,
+      "m_cloud_bottom": 16.12,
+      "m_cloud_distance_pct": -6.98,
+      "m_tk_cross_days_ago": 0,
+      "m_is_turnaround": false,
+      "m_turnaround_reasons": [
+        "TK cross 0 phiên trước",
+        "Giá chuẩn bị break cloud"
+      ],
+      "m_change_5d_pct": 2.04,
+      "m_vol_ratio": 0.99,
+      "m_rsi14": 66.7,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 14.92,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 0.53
+        },
+        {
+          "price": 14.0,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 6.67
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 15.49,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 3.27
+        },
+        {
+          "price": 15.95,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 6.33
+        },
+        {
+          "price": 16.41,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 9.4
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 17.9,
+        "high_date": "2026-04-08",
+        "high_idx": 12,
+        "low": 14.0,
+        "low_date": "2026-05-20",
+        "low_idx": 39,
+        "direction": "down",
+        "range": 3.9
       }
     },
     {
@@ -4812,6 +4812,89 @@
       }
     },
     {
+      "ticker": "SVN",
+      "exchange": "HNX",
+      "date": "2026-06-17T00:00:00",
+      "close": 3.0,
+      "volume": 661700,
+      "total_score": 3,
+      "rating": "A",
+      "ich_tk_bullish": 0,
+      "ich_recent_tk_cross": 0,
+      "ich_price_above_cloud": 1,
+      "ich_cloud_bullish": 1,
+      "ich_chikou_free": 1,
+      "m_tenkan": 2.65,
+      "m_kijun": 2.65,
+      "m_senkou_a": 2.1,
+      "m_senkou_b": 2.05,
+      "m_cloud_top": 2.1,
+      "m_cloud_bottom": 2.05,
+      "m_cloud_distance_pct": 42.86,
+      "m_tk_cross_days_ago": null,
+      "m_is_turnaround": false,
+      "m_turnaround_reasons": [],
+      "m_change_5d_pct": 15.38,
+      "m_vol_ratio": 1.75,
+      "m_rsi14": 72.7,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 2.79,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 7.0
+        },
+        {
+          "price": 2.6,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 13.33
+        },
+        {
+          "price": 2.41,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 19.67
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 3.02,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 0.67
+        },
+        {
+          "price": 3.4,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 13.33
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 3.4,
+        "high_date": "2026-06-17",
+        "high_idx": 59,
+        "low": 1.8,
+        "low_date": "2026-03-23",
+        "low_idx": 0,
+        "direction": "up",
+        "range": 1.6
+      }
+    },
+    {
       "ticker": "NCT",
       "exchange": "HOSE",
       "date": "2026-06-17T00:00:00",
@@ -4895,89 +4978,6 @@
         "low_idx": 13,
         "direction": "up",
         "range": 7.4
-      }
-    },
-    {
-      "ticker": "SVN",
-      "exchange": "HNX",
-      "date": "2026-06-17T00:00:00",
-      "close": 3.0,
-      "volume": 661700,
-      "total_score": 3,
-      "rating": "A",
-      "ich_tk_bullish": 0,
-      "ich_recent_tk_cross": 0,
-      "ich_price_above_cloud": 1,
-      "ich_cloud_bullish": 1,
-      "ich_chikou_free": 1,
-      "m_tenkan": 2.65,
-      "m_kijun": 2.65,
-      "m_senkou_a": 2.1,
-      "m_senkou_b": 2.05,
-      "m_cloud_top": 2.1,
-      "m_cloud_bottom": 2.05,
-      "m_cloud_distance_pct": 42.86,
-      "m_tk_cross_days_ago": null,
-      "m_is_turnaround": false,
-      "m_turnaround_reasons": [],
-      "m_change_5d_pct": 15.38,
-      "m_vol_ratio": 1.75,
-      "m_rsi14": 72.7,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 2.79,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 7.0
-        },
-        {
-          "price": 2.6,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 13.33
-        },
-        {
-          "price": 2.41,
-          "label": "61.8%",
-          "ratio": 0.618,
-          "is_golden": true,
-          "type": "fibo",
-          "distance_pct": 19.67
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 3.02,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 0.67
-        },
-        {
-          "price": 3.4,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 13.33
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 3.4,
-        "high_date": "2026-06-17",
-        "high_idx": 59,
-        "low": 1.8,
-        "low_date": "2026-03-23",
-        "low_idx": 0,
-        "direction": "up",
-        "range": 1.6
       }
     },
     {
