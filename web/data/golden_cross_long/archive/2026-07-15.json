@@ -1,0 +1,95 @@
+{
+  "generated_at": "2026-07-15T07:42:54.793830",
+  "strategy": "golden_cross_long",
+  "total": 1,
+  "metadata": {
+    "min_score": 2,
+    "exchanges": [
+      "HOSE",
+      "HNX",
+      "UPCOM"
+    ],
+    "total_scanned": 500
+  },
+  "signals": [
+    {
+      "ticker": "DST",
+      "exchange": "HNX",
+      "date": "2026-07-15T00:00:00",
+      "close": 11.3,
+      "volume": 49000,
+      "preset": "long",
+      "total_score": 4,
+      "rating": "A",
+      "gc_recent_cross": 1,
+      "gc_price_above_fast": 1,
+      "gc_ma_stacking": 1,
+      "gc_slow_rising": 1,
+      "gc_volume_confirm": 0,
+      "m_preset_name": "MA50×MA200",
+      "m_cross_days_ago": 1,
+      "m_fast_ma": 9.26,
+      "m_slow_ma": 9.12,
+      "m_slow_spread_pct": 1.57,
+      "m_change_5d_pct": -15.04,
+      "m_vol_ratio": 0.26,
+      "m_rsi14": 53.2,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 10.33,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 8.58
+        },
+        {
+          "price": 9.1,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 19.47
+        },
+        {
+          "price": 7.87,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 30.35
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 11.85,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 4.87
+        },
+        {
+          "price": 14.3,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 26.55
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 14.3,
+        "high_date": "2026-06-11",
+        "high_idx": 35,
+        "low": 3.9,
+        "low_date": "2026-05-12",
+        "low_idx": 13,
+        "direction": "up",
+        "range": 10.4
+      }
+    }
+  ]
+}
