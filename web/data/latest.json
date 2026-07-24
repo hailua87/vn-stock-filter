@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-23T07:57:11.298557",
-  "total": 16,
+  "generated_at": "2026-07-24T07:56:56.770635",
+  "total": 17,
   "metadata": {
     "min_score": 5,
     "exchanges": [
@@ -11,90 +11,98 @@
     "total_scanned": 500,
     "run_type": "intraday",
     "run_time_ict": "14:57",
-    "run_date_ict": "2026-07-23"
+    "run_date_ict": "2026-07-24"
   },
   "signals": [
     {
-      "ticker": "MSB",
+      "ticker": "BMP",
       "exchange": "HOSE",
-      "date": "2026-07-23T00:00:00",
-      "close": 16.05,
-      "volume": 6471300,
+      "date": "2026-07-24T00:00:00",
+      "close": 149.8,
+      "volume": 40800,
       "total_score": 7,
       "rating": "A",
       "c1_atr_squeeze": 0,
       "c2_bb_squeeze": 1,
-      "c3_near_high20": 1,
-      "c4_stealth_accum": 0,
+      "c3_near_high20": 0,
+      "c4_stealth_accum": 1,
       "c5_vol_surge": 1,
       "c6_upper_close": 1,
       "c7_ma_align": 1,
       "c8_rsi_zone": 1,
       "c9_pocket_pivot": 0,
       "c10_no_gap_down": 1,
-      "m_change_5d_pct": -1.83,
-      "m_vol_ratio": 0.82,
-      "m_rsi14": 51.2,
-      "m_atr_pct": 2.38,
-      "m_dist_to_high20_pct": 2.43,
-      "m_high20": 16.45,
-      "m_ma10": 16.12,
-      "m_ma20": 16.06,
+      "m_change_5d_pct": -1.19,
+      "m_vol_ratio": 0.26,
+      "m_rsi14": 51.7,
+      "m_atr_pct": 2.69,
+      "m_dist_to_high20_pct": 3.97,
+      "m_high20": 156.0,
+      "m_ma10": 151.57,
+      "m_ma20": 151.04,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
         {
-          "price": 15.52,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 3.3
-        },
-        {
-          "price": 14.94,
+          "price": 146.68,
           "label": "38.2%",
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 6.92
+          "distance_pct": 2.08
         },
         {
-          "price": 14.47,
+          "price": 143.8,
           "label": "50%",
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 9.84
+          "distance_pct": 4.01
+        },
+        {
+          "price": 140.92,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 5.93
         }
       ],
       "m_resistances": [
         {
-          "price": 16.45,
+          "price": 150.24,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 0.29
+        },
+        {
+          "price": 156.0,
           "label": "0%",
           "ratio": 0.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 2.49
+          "distance_pct": 4.14
         }
       ],
       "m_fibo_swing": {
-        "high": 16.45,
-        "high_date": "2026-07-15",
-        "high_idx": 53,
-        "low": 12.5,
-        "low_date": "2026-04-29",
-        "low_idx": 0,
+        "high": 156.0,
+        "high_date": "2026-07-20",
+        "high_idx": 55,
+        "low": 131.6,
+        "low_date": "2026-06-08",
+        "low_idx": 25,
         "direction": "up",
-        "range": 3.95
+        "range": 24.4
       }
     },
     {
       "ticker": "VPI",
       "exchange": "HOSE",
-      "date": "2026-07-23T00:00:00",
-      "close": 63.5,
-      "volume": 1598500,
+      "date": "2026-07-24T00:00:00",
+      "close": 63.6,
+      "volume": 1251900,
       "total_score": 7,
       "rating": "A",
       "c1_atr_squeeze": 0,
@@ -107,544 +115,162 @@
       "c8_rsi_zone": 1,
       "c9_pocket_pivot": 0,
       "c10_no_gap_down": 1,
-      "m_change_5d_pct": 2.58,
-      "m_vol_ratio": 1.53,
-      "m_rsi14": 62.8,
-      "m_atr_pct": 2.65,
-      "m_dist_to_high20_pct": 0.47,
-      "m_high20": 63.8,
-      "m_ma10": 61.89,
-      "m_ma20": 61.89,
+      "m_change_5d_pct": 3.92,
+      "m_vol_ratio": 1.2,
+      "m_rsi14": 60.9,
+      "m_atr_pct": 2.64,
+      "m_dist_to_high20_pct": 0.93,
+      "m_high20": 64.2,
+      "m_ma10": 62.07,
+      "m_ma20": 62.01,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
         {
-          "price": 62.43,
+          "price": 62.74,
           "label": "23.6%",
           "ratio": 0.236,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 1.69
+          "distance_pct": 1.35
         },
         {
-          "price": 61.58,
+          "price": 61.83,
           "label": "38.2%",
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 3.02
+          "distance_pct": 2.78
         },
         {
-          "price": 60.9,
+          "price": 61.1,
           "label": "50%",
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 4.09
+          "distance_pct": 3.93
         }
       ],
       "m_resistances": [
         {
-          "price": 63.8,
+          "price": 64.2,
           "label": "0%",
           "ratio": 0.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 0.47
+          "distance_pct": 0.94
         }
       ],
       "m_fibo_swing": {
-        "high": 63.8,
-        "high_date": "2026-07-10",
-        "high_idx": 50,
+        "high": 64.2,
+        "high_date": "2026-07-24",
+        "high_idx": 59,
         "low": 58.0,
         "low_date": "2026-06-09",
-        "low_idx": 27,
+        "low_idx": 26,
         "direction": "up",
-        "range": 5.8
+        "range": 6.2
       }
     },
     {
-      "ticker": "LPB",
+      "ticker": "LSS",
       "exchange": "HOSE",
-      "date": "2026-07-23T00:00:00",
-      "close": 55.0,
-      "volume": 2521100,
-      "total_score": 7,
-      "rating": "A",
-      "c1_atr_squeeze": 1,
-      "c2_bb_squeeze": 1,
-      "c3_near_high20": 1,
-      "c4_stealth_accum": 0,
-      "c5_vol_surge": 1,
-      "c6_upper_close": 1,
-      "c7_ma_align": 1,
-      "c8_rsi_zone": 0,
-      "c9_pocket_pivot": 0,
-      "c10_no_gap_down": 1,
-      "m_change_5d_pct": 5.77,
-      "m_vol_ratio": 0.91,
-      "m_rsi14": 68.2,
-      "m_atr_pct": 3.31,
-      "m_dist_to_high20_pct": 2.14,
-      "m_high20": 56.2,
-      "m_ma10": 53.04,
-      "m_ma20": 52.92,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 54.8,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 0.36
-        },
-        {
-          "price": 52.51,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 4.53
-        },
-        {
-          "price": 50.66,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 7.89
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 58.5,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 6.36
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 58.5,
-        "high_date": "2026-06-25",
-        "high_idx": 39,
-        "low": 42.81,
-        "low_date": "2026-04-29",
-        "low_idx": 0,
-        "direction": "up",
-        "range": 15.69
-      }
-    },
-    {
-      "ticker": "HCM",
-      "exchange": "HOSE",
-      "date": "2026-07-23T00:00:00",
-      "close": 25.75,
-      "volume": 9410000,
+      "date": "2026-07-24T00:00:00",
+      "close": 8.2,
+      "volume": 93000,
       "total_score": 6,
       "rating": "A",
       "c1_atr_squeeze": 0,
       "c2_bb_squeeze": 0,
       "c3_near_high20": 1,
-      "c4_stealth_accum": 0,
-      "c5_vol_surge": 1,
-      "c6_upper_close": 1,
-      "c7_ma_align": 1,
-      "c8_rsi_zone": 1,
-      "c9_pocket_pivot": 0,
-      "c10_no_gap_down": 1,
-      "m_change_5d_pct": 3.41,
-      "m_vol_ratio": 1.57,
-      "m_rsi14": 59.3,
-      "m_atr_pct": 4.03,
-      "m_dist_to_high20_pct": 2.09,
-      "m_high20": 26.3,
-      "m_ma10": 24.73,
-      "m_ma20": 24.41,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 24.7,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 4.08
-        },
-        {
-          "price": 22.93,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 10.95
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 25.8,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 0.19
-        },
-        {
-          "price": 26.69,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 3.65
-        },
-        {
-          "price": 27.58,
-          "label": "61.8%",
-          "ratio": 0.618,
-          "is_golden": true,
-          "type": "fibo",
-          "distance_pct": 7.11
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 30.45,
-        "high_date": "2026-05-19",
-        "high_idx": 12,
-        "low": 22.93,
-        "low_date": "2026-07-13",
-        "low_idx": 51,
-        "direction": "down",
-        "range": 7.52
-      }
-    },
-    {
-      "ticker": "VNL",
-      "exchange": "HOSE",
-      "date": "2026-07-23T00:00:00",
-      "close": 18.8,
-      "volume": 10600,
-      "total_score": 6,
-      "rating": "A",
-      "c1_atr_squeeze": 1,
-      "c2_bb_squeeze": 0,
-      "c3_near_high20": 1,
       "c4_stealth_accum": 1,
       "c5_vol_surge": 1,
-      "c6_upper_close": 0,
-      "c7_ma_align": 1,
+      "c6_upper_close": 1,
+      "c7_ma_align": 0,
       "c8_rsi_zone": 0,
-      "c9_pocket_pivot": 0,
+      "c9_pocket_pivot": 1,
       "c10_no_gap_down": 1,
-      "m_change_5d_pct": -1.57,
-      "m_vol_ratio": 0.67,
-      "m_rsi14": 47.1,
-      "m_atr_pct": 0.99,
-      "m_dist_to_high20_pct": 2.34,
-      "m_high20": 19.25,
-      "m_ma10": 18.91,
-      "m_ma20": 18.89,
+      "m_change_5d_pct": -0.49,
+      "m_vol_ratio": 2.31,
+      "m_rsi14": 46.7,
+      "m_atr_pct": 1.74,
+      "m_dist_to_high20_pct": 1.68,
+      "m_high20": 8.34,
+      "m_ma10": 8.2,
+      "m_ma20": 8.23,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
         {
-          "price": 18.65,
+          "price": 8.17,
           "label": "38.2%",
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 0.8
+          "distance_pct": 0.37
         },
         {
-          "price": 18.4,
+          "price": 8.1,
           "label": "23.6%",
           "ratio": 0.236,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 2.13
+          "distance_pct": 1.22
         },
         {
-          "price": 18.0,
+          "price": 7.98,
           "label": "0%",
           "ratio": 0.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 4.26
+          "distance_pct": 2.68
         }
       ],
       "m_resistances": [
         {
-          "price": 18.85,
+          "price": 8.24,
           "label": "50%",
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 0.27
+          "distance_pct": 0.49
         },
         {
-          "price": 19.05,
+          "price": 8.3,
           "label": "61.8%",
           "ratio": 0.618,
           "is_golden": true,
           "type": "fibo",
-          "distance_pct": 1.33
+          "distance_pct": 1.22
         },
         {
-          "price": 19.34,
+          "price": 8.38,
           "label": "78.6%",
           "ratio": 0.786,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 2.87
+          "distance_pct": 2.2
         }
       ],
       "m_fibo_swing": {
-        "high": 19.7,
-        "high_date": "2026-04-22",
-        "high_idx": 2,
-        "low": 18.0,
-        "low_date": "2026-06-16",
-        "low_idx": 35,
-        "direction": "down",
-        "range": 1.7
-      }
-    },
-    {
-      "ticker": "L18",
-      "exchange": "HNX",
-      "date": "2026-07-23T00:00:00",
-      "close": 16.4,
-      "volume": 4600,
-      "total_score": 5,
-      "rating": "B",
-      "c1_atr_squeeze": 0,
-      "c2_bb_squeeze": 1,
-      "c3_near_high20": 0,
-      "c4_stealth_accum": 0,
-      "c5_vol_surge": 1,
-      "c6_upper_close": 1,
-      "c7_ma_align": 0,
-      "c8_rsi_zone": 1,
-      "c9_pocket_pivot": 0,
-      "c10_no_gap_down": 1,
-      "m_change_5d_pct": -0.61,
-      "m_vol_ratio": 0.27,
-      "m_rsi14": 50.0,
-      "m_atr_pct": 6.88,
-      "m_dist_to_high20_pct": 8.89,
-      "m_high20": 18.0,
-      "m_ma10": 16.65,
-      "m_ma20": 16.64,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 14.56,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 11.22
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 16.65,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 1.52
-        },
-        {
-          "price": 17.94,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 9.39
-        },
-        {
-          "price": 18.98,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 15.73
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 23.4,
-        "high_date": "2026-04-29",
-        "high_idx": 0,
-        "low": 14.56,
-        "low_date": "2026-05-21",
-        "low_idx": 14,
-        "direction": "down",
-        "range": 8.84
-      }
-    },
-    {
-      "ticker": "CMI",
-      "exchange": "UPCOM",
-      "date": "2026-07-17T00:00:00",
-      "close": 1.1,
-      "volume": 1400,
-      "total_score": 5,
-      "rating": "B",
-      "c1_atr_squeeze": 1,
-      "c2_bb_squeeze": 0,
-      "c3_near_high20": 0,
-      "c4_stealth_accum": 0,
-      "c5_vol_surge": 0,
-      "c6_upper_close": 1,
-      "c7_ma_align": 1,
-      "c8_rsi_zone": 1,
-      "c9_pocket_pivot": 0,
-      "c10_no_gap_down": 1,
-      "m_change_5d_pct": 57.14,
-      "m_vol_ratio": 0.07,
-      "m_rsi14": 63.6,
-      "m_atr_pct": 11.69,
-      "m_dist_to_high20_pct": 0.0,
-      "m_high20": 1.1,
-      "m_ma10": 0.75,
-      "m_ma20": 0.71,
-      "m_suspicious_data": true,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 0.93,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 15.45
-        },
-        {
-          "price": 0.83,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 24.55
-        },
-        {
-          "price": 0.75,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 31.82
-        }
-      ],
-      "m_resistances": [],
-      "m_fibo_swing": {
-        "high": 1.1,
-        "high_date": "2026-07-17",
-        "high_idx": 59,
-        "low": 0.4,
-        "low_date": "2026-05-29",
-        "low_idx": 52,
-        "direction": "up",
-        "range": 0.7
-      }
-    },
-    {
-      "ticker": "TDP",
-      "exchange": "HOSE",
-      "date": "2026-07-23T00:00:00",
-      "close": 28.7,
-      "volume": 207200,
-      "total_score": 5,
-      "rating": "B",
-      "c1_atr_squeeze": 0,
-      "c2_bb_squeeze": 0,
-      "c3_near_high20": 1,
-      "c4_stealth_accum": 0,
-      "c5_vol_surge": 1,
-      "c6_upper_close": 1,
-      "c7_ma_align": 0,
-      "c8_rsi_zone": 1,
-      "c9_pocket_pivot": 0,
-      "c10_no_gap_down": 1,
-      "m_change_5d_pct": -0.35,
-      "m_vol_ratio": 1.17,
-      "m_rsi14": 51.1,
-      "m_atr_pct": 2.34,
-      "m_dist_to_high20_pct": 2.71,
-      "m_high20": 29.5,
-      "m_ma10": 28.68,
-      "m_ma20": 28.71,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 28.29,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 1.43
-        },
-        {
-          "price": 27.5,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 4.18
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 28.78,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 0.28
-        },
-        {
-          "price": 29.18,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 1.67
-        },
-        {
-          "price": 29.57,
-          "label": "61.8%",
-          "ratio": 0.618,
-          "is_golden": true,
-          "type": "fibo",
-          "distance_pct": 3.03
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 30.85,
+        "high": 8.49,
         "high_date": "2026-05-05",
-        "high_idx": 2,
-        "low": 27.5,
-        "low_date": "2026-06-24",
-        "low_idx": 38,
+        "high_idx": 1,
+        "low": 7.98,
+        "low_date": "2026-07-24",
+        "low_idx": 59,
         "direction": "down",
-        "range": 3.35
+        "range": 0.51
       }
     },
     {
       "ticker": "DCL",
       "exchange": "HOSE",
-      "date": "2026-07-23T00:00:00",
+      "date": "2026-07-24T00:00:00",
       "close": 38.0,
-      "volume": 650300,
-      "total_score": 5,
-      "rating": "B",
+      "volume": 479600,
+      "total_score": 6,
+      "rating": "A",
       "c1_atr_squeeze": 1,
       "c2_bb_squeeze": 1,
       "c3_near_high20": 1,
@@ -652,17 +278,17 @@
       "c5_vol_surge": 0,
       "c6_upper_close": 0,
       "c7_ma_align": 1,
-      "c8_rsi_zone": 0,
+      "c8_rsi_zone": 1,
       "c9_pocket_pivot": 0,
       "c10_no_gap_down": 1,
-      "m_change_5d_pct": -1.04,
-      "m_vol_ratio": 1.01,
-      "m_rsi14": 44.3,
-      "m_atr_pct": 1.21,
+      "m_change_5d_pct": -0.78,
+      "m_vol_ratio": 0.73,
+      "m_rsi14": 50.0,
+      "m_atr_pct": 1.16,
       "m_dist_to_high20_pct": 1.3,
       "m_high20": 38.5,
-      "m_ma10": 38.14,
-      "m_ma20": 38.12,
+      "m_ma10": 38.15,
+      "m_ma20": 38.14,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
@@ -712,24 +338,24 @@
       "m_fibo_swing": {
         "high": 39.3,
         "high_date": "2026-05-25",
-        "high_idx": 16,
+        "high_idx": 15,
         "low": 35.1,
         "low_date": "2026-06-17",
-        "low_idx": 33,
+        "low_idx": 32,
         "direction": "down",
         "range": 4.2
       }
     },
     {
-      "ticker": "PSW",
-      "exchange": "HNX",
-      "date": "2026-07-23T00:00:00",
-      "close": 8.1,
-      "volume": 87000,
-      "total_score": 5,
-      "rating": "B",
+      "ticker": "MSB",
+      "exchange": "HOSE",
+      "date": "2026-07-24T00:00:00",
+      "close": 15.9,
+      "volume": 2257900,
+      "total_score": 6,
+      "rating": "A",
       "c1_atr_squeeze": 0,
-      "c2_bb_squeeze": 0,
+      "c2_bb_squeeze": 1,
       "c3_near_high20": 0,
       "c4_stealth_accum": 0,
       "c5_vol_surge": 1,
@@ -738,309 +364,476 @@
       "c8_rsi_zone": 1,
       "c9_pocket_pivot": 0,
       "c10_no_gap_down": 1,
-      "m_change_5d_pct": 5.19,
-      "m_vol_ratio": 4.26,
-      "m_rsi14": 61.1,
-      "m_atr_pct": 2.82,
-      "m_dist_to_high20_pct": 4.71,
-      "m_high20": 8.5,
-      "m_ma10": 7.91,
-      "m_ma20": 7.88,
+      "m_change_5d_pct": -2.75,
+      "m_vol_ratio": 0.3,
+      "m_rsi14": 52.5,
+      "m_atr_pct": 2.34,
+      "m_dist_to_high20_pct": 3.34,
+      "m_high20": 16.45,
+      "m_ma10": 16.13,
+      "m_ma20": 16.06,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
         {
-          "price": 8.05,
+          "price": 15.52,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 2.39
+        },
+        {
+          "price": 14.94,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 6.04
+        },
+        {
+          "price": 14.47,
           "label": "50%",
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 0.62
+          "distance_pct": 8.99
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 16.45,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 3.46
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 16.45,
+        "high_date": "2026-07-15",
+        "high_idx": 52,
+        "low": 12.5,
+        "low_date": "2026-05-04",
+        "low_idx": 0,
+        "direction": "up",
+        "range": 3.95
+      }
+    },
+    {
+      "ticker": "DHM",
+      "exchange": "UPCOM",
+      "date": "2026-07-24T00:00:00",
+      "close": 6.36,
+      "volume": 43300,
+      "total_score": 5,
+      "rating": "B",
+      "c1_atr_squeeze": 0,
+      "c2_bb_squeeze": 0,
+      "c3_near_high20": 0,
+      "c4_stealth_accum": 1,
+      "c5_vol_surge": 1,
+      "c6_upper_close": 0,
+      "c7_ma_align": 1,
+      "c8_rsi_zone": 1,
+      "c9_pocket_pivot": 0,
+      "c10_no_gap_down": 1,
+      "m_change_5d_pct": -12.64,
+      "m_vol_ratio": 0.53,
+      "m_rsi14": 52.8,
+      "m_atr_pct": 6.76,
+      "m_dist_to_high20_pct": 17.4,
+      "m_high20": 7.7,
+      "m_ma10": 6.6,
+      "m_ma20": 6.43,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 6.13,
+          "label": "78.6%",
+          "ratio": 0.786,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 3.62
         },
         {
-          "price": 7.94,
+          "price": 5.7,
+          "label": "100%",
+          "ratio": 1.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 10.38
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 6.46,
           "label": "61.8%",
           "ratio": 0.618,
           "is_golden": true,
           "type": "fibo",
-          "distance_pct": 1.98
+          "distance_pct": 1.57
         },
+        {
+          "price": 6.7,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 5.35
+        },
+        {
+          "price": 6.94,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 9.12
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 7.7,
+        "high_date": "2026-07-20",
+        "high_idx": 55,
+        "low": 5.7,
+        "low_date": "2026-06-04",
+        "low_idx": 23,
+        "direction": "up",
+        "range": 2.0
+      }
+    },
+    {
+      "ticker": "VNL",
+      "exchange": "HOSE",
+      "date": "2026-07-24T00:00:00",
+      "close": 18.85,
+      "volume": 500,
+      "total_score": 5,
+      "rating": "B",
+      "c1_atr_squeeze": 1,
+      "c2_bb_squeeze": 0,
+      "c3_near_high20": 1,
+      "c4_stealth_accum": 1,
+      "c5_vol_surge": 1,
+      "c6_upper_close": 0,
+      "c7_ma_align": 0,
+      "c8_rsi_zone": 0,
+      "c9_pocket_pivot": 0,
+      "c10_no_gap_down": 1,
+      "m_change_5d_pct": -1.31,
+      "m_vol_ratio": 0.04,
+      "m_rsi14": 45.5,
+      "m_atr_pct": 0.97,
+      "m_dist_to_high20_pct": 2.08,
+      "m_high20": 19.25,
+      "m_ma10": 18.9,
+      "m_ma20": 18.91,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 18.65,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 1.06
+        },
+        {
+          "price": 18.4,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 2.39
+        },
+        {
+          "price": 18.0,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 4.51
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 19.05,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 1.06
+        },
+        {
+          "price": 19.34,
+          "label": "78.6%",
+          "ratio": 0.786,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 2.6
+        },
+        {
+          "price": 19.7,
+          "label": "100%",
+          "ratio": 1.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 4.51
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 19.7,
+        "high_date": "2026-04-22",
+        "high_idx": 1,
+        "low": 18.0,
+        "low_date": "2026-06-16",
+        "low_idx": 34,
+        "direction": "down",
+        "range": 1.7
+      }
+    },
+    {
+      "ticker": "PSW",
+      "exchange": "HNX",
+      "date": "2026-07-24T00:00:00",
+      "close": 7.9,
+      "volume": 9800,
+      "total_score": 5,
+      "rating": "B",
+      "c1_atr_squeeze": 0,
+      "c2_bb_squeeze": 0,
+      "c3_near_high20": 0,
+      "c4_stealth_accum": 1,
+      "c5_vol_surge": 1,
+      "c6_upper_close": 0,
+      "c7_ma_align": 1,
+      "c8_rsi_zone": 1,
+      "c9_pocket_pivot": 0,
+      "c10_no_gap_down": 1,
+      "m_change_5d_pct": -1.25,
+      "m_vol_ratio": 0.48,
+      "m_rsi14": 52.6,
+      "m_atr_pct": 2.89,
+      "m_dist_to_high20_pct": 7.06,
+      "m_high20": 8.5,
+      "m_ma10": 7.92,
+      "m_ma20": 7.88,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
         {
           "price": 7.79,
           "label": "78.6%",
           "ratio": 0.786,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 3.83
+          "distance_pct": 1.39
+        },
+        {
+          "price": 7.6,
+          "label": "100%",
+          "ratio": 1.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 3.8
         }
       ],
       "m_resistances": [
+        {
+          "price": 7.94,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 0.51
+        },
+        {
+          "price": 8.05,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 1.9
+        },
         {
           "price": 8.16,
           "label": "38.2%",
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 0.74
-        },
-        {
-          "price": 8.29,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 2.35
-        },
-        {
-          "price": 8.5,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 4.94
+          "distance_pct": 3.29
         }
       ],
       "m_fibo_swing": {
         "high": 8.5,
         "high_date": "2026-07-21",
-        "high_idx": 57,
+        "high_idx": 56,
         "low": 7.6,
         "low_date": "2026-07-01",
-        "low_idx": 45,
+        "low_idx": 44,
         "direction": "up",
         "range": 0.9
       }
     },
     {
-      "ticker": "DSG",
-      "exchange": "UPCOM",
-      "date": "2026-07-03T00:00:00",
-      "close": 7.0,
-      "volume": 8400,
+      "ticker": "NVL",
+      "exchange": "HOSE",
+      "date": "2026-07-24T00:00:00",
+      "close": 12.85,
+      "volume": 20681300,
       "total_score": 5,
       "rating": "B",
-      "c1_atr_squeeze": 1,
+      "c1_atr_squeeze": 0,
       "c2_bb_squeeze": 1,
       "c3_near_high20": 0,
       "c4_stealth_accum": 0,
-      "c5_vol_surge": 0,
+      "c5_vol_surge": 1,
+      "c6_upper_close": 0,
+      "c7_ma_align": 0,
+      "c8_rsi_zone": 1,
+      "c9_pocket_pivot": 1,
+      "c10_no_gap_down": 1,
+      "m_change_5d_pct": 1.58,
+      "m_vol_ratio": 1.7,
+      "m_rsi14": 59.6,
+      "m_atr_pct": 4.31,
+      "m_dist_to_high20_pct": 3.75,
+      "m_high20": 13.35,
+      "m_ma10": 12.47,
+      "m_ma20": 12.46,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 11.45,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 10.89
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 13.63,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 6.07
+        },
+        {
+          "price": 14.98,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 16.58
+        },
+        {
+          "price": 16.07,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 25.06
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 20.7,
+        "high_date": "2026-05-04",
+        "high_idx": 0,
+        "low": 11.45,
+        "low_date": "2026-07-16",
+        "low_idx": 53,
+        "direction": "down",
+        "range": 9.25
+      }
+    },
+    {
+      "ticker": "ACB",
+      "exchange": "HOSE",
+      "date": "2026-07-24T00:00:00",
+      "close": 22.45,
+      "volume": 11561700,
+      "total_score": 5,
+      "rating": "B",
+      "c1_atr_squeeze": 0,
+      "c2_bb_squeeze": 0,
+      "c3_near_high20": 0,
+      "c4_stealth_accum": 1,
+      "c5_vol_surge": 1,
       "c6_upper_close": 0,
       "c7_ma_align": 1,
       "c8_rsi_zone": 1,
       "c9_pocket_pivot": 0,
       "c10_no_gap_down": 1,
-      "m_change_5d_pct": 2.94,
+      "m_change_5d_pct": -4.67,
       "m_vol_ratio": 0.7,
-      "m_rsi14": 59.3,
-      "m_atr_pct": 4.49,
-      "m_dist_to_high20_pct": 0.0,
-      "m_high20": 7.0,
-      "m_ma10": 6.9,
-      "m_ma20": 6.58,
-      "m_suspicious_data": true,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 5.99,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 14.43
-        },
-        {
-          "price": 5.36,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 23.43
-        },
-        {
-          "price": 4.85,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 30.71
-        }
-      ],
-      "m_resistances": [],
-      "m_fibo_swing": {
-        "high": 7.0,
-        "high_date": "2025-12-26",
-        "high_idx": 38,
-        "low": 2.7,
-        "low_date": "2025-10-31",
-        "low_idx": 30,
-        "direction": "up",
-        "range": 4.3
-      }
-    },
-    {
-      "ticker": "SJS",
-      "exchange": "HOSE",
-      "date": "2026-07-23T00:00:00",
-      "close": 47.5,
-      "volume": 55900,
-      "total_score": 5,
-      "rating": "B",
-      "c1_atr_squeeze": 0,
-      "c2_bb_squeeze": 1,
-      "c3_near_high20": 0,
-      "c4_stealth_accum": 0,
-      "c5_vol_surge": 1,
-      "c6_upper_close": 1,
-      "c7_ma_align": 0,
-      "c8_rsi_zone": 0,
-      "c9_pocket_pivot": 1,
-      "c10_no_gap_down": 1,
-      "m_change_5d_pct": -1.04,
-      "m_vol_ratio": 1.84,
-      "m_rsi14": 41.4,
-      "m_atr_pct": 3.08,
-      "m_dist_to_high20_pct": 3.55,
-      "m_high20": 49.25,
-      "m_ma10": 47.75,
-      "m_ma20": 47.81,
+      "m_rsi14": 53.3,
+      "m_atr_pct": 2.74,
+      "m_dist_to_high20_pct": 5.87,
+      "m_high20": 23.85,
+      "m_ma10": 22.88,
+      "m_ma20": 22.76,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
         {
-          "price": 44.5,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 6.32
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 47.99,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 1.03
-        },
-        {
-          "price": 50.15,
+          "price": 22.11,
           "label": "38.2%",
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 5.58
+          "distance_pct": 1.51
         },
         {
-          "price": 51.9,
+          "price": 21.58,
           "label": "50%",
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 9.26
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 59.3,
-        "high_date": "2026-05-04",
-        "high_idx": 1,
-        "low": 44.5,
-        "low_date": "2026-07-03",
-        "low_idx": 45,
-        "direction": "down",
-        "range": 14.8
-      }
-    },
-    {
-      "ticker": "BDT",
-      "exchange": "UPCOM",
-      "date": "2026-07-23T00:00:00",
-      "close": 9.2,
-      "volume": 1223100,
-      "total_score": 5,
-      "rating": "B",
-      "c1_atr_squeeze": 0,
-      "c2_bb_squeeze": 0,
-      "c3_near_high20": 1,
-      "c4_stealth_accum": 1,
-      "c5_vol_surge": 1,
-      "c6_upper_close": 1,
-      "c7_ma_align": 0,
-      "c8_rsi_zone": 0,
-      "c9_pocket_pivot": 1,
-      "c10_no_gap_down": 0,
-      "m_change_5d_pct": 6.98,
-      "m_vol_ratio": 5.88,
-      "m_rsi14": 47.6,
-      "m_atr_pct": 2.87,
-      "m_dist_to_high20_pct": 2.13,
-      "m_high20": 9.4,
-      "m_ma10": 8.89,
-      "m_ma20": 9.06,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 9.0,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 2.17
+          "distance_pct": 3.88
         },
         {
-          "price": 8.69,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 5.54
-        },
-        {
-          "price": 8.31,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 9.67
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 9.31,
+          "price": 21.04,
           "label": "61.8%",
           "ratio": 0.618,
           "is_golden": true,
           "type": "fibo",
-          "distance_pct": 1.2
-        },
+          "distance_pct": 6.28
+        }
+      ],
+      "m_resistances": [
         {
-          "price": 9.74,
-          "label": "78.6%",
-          "ratio": 0.786,
+          "price": 22.78,
+          "label": "23.6%",
+          "ratio": 0.236,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 5.87
+          "distance_pct": 1.47
         },
         {
-          "price": 10.3,
-          "label": "100%",
-          "ratio": 1.0,
+          "price": 23.85,
+          "label": "0%",
+          "ratio": 0.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 11.96
+          "distance_pct": 6.24
         }
       ],
       "m_fibo_swing": {
-        "high": 10.3,
-        "high_date": "2026-05-06",
-        "high_idx": 9,
-        "low": 7.7,
-        "low_date": "2026-06-09",
-        "low_idx": 32,
-        "direction": "down",
-        "range": 2.6
+        "high": 23.85,
+        "high_date": "2026-07-17",
+        "high_idx": 54,
+        "low": 19.3,
+        "low_date": "2026-05-13",
+        "low_idx": 7,
+        "direction": "up",
+        "range": 4.55
       }
     },
     {
@@ -1119,11 +912,11 @@
       }
     },
     {
-      "ticker": "TCL",
+      "ticker": "SJS",
       "exchange": "HOSE",
-      "date": "2026-07-23T00:00:00",
-      "close": 29.85,
-      "volume": 26000,
+      "date": "2026-07-24T00:00:00",
+      "close": 47.5,
+      "volume": 3200,
       "total_score": 5,
       "rating": "B",
       "c1_atr_squeeze": 0,
@@ -1136,144 +929,475 @@
       "c8_rsi_zone": 0,
       "c9_pocket_pivot": 0,
       "c10_no_gap_down": 1,
-      "m_change_5d_pct": -0.33,
-      "m_vol_ratio": 1.95,
-      "m_rsi14": 34.6,
-      "m_atr_pct": 0.86,
-      "m_dist_to_high20_pct": 1.65,
-      "m_high20": 30.35,
-      "m_ma10": 29.99,
-      "m_ma20": 30.03,
+      "m_change_5d_pct": 0.0,
+      "m_vol_ratio": 0.1,
+      "m_rsi14": 44.4,
+      "m_atr_pct": 3.17,
+      "m_dist_to_high20_pct": 2.26,
+      "m_high20": 48.6,
+      "m_ma10": 47.71,
+      "m_ma20": 47.78,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
         {
-          "price": 29.3,
+          "price": 44.5,
           "label": "0%",
           "ratio": 0.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 1.84
+          "distance_pct": 6.32
         }
       ],
       "m_resistances": [
         {
-          "price": 30.02,
+          "price": 47.99,
           "label": "23.6%",
           "ratio": 0.236,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 0.57
+          "distance_pct": 1.03
         },
         {
-          "price": 30.47,
+          "price": 50.15,
           "label": "38.2%",
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 2.08
+          "distance_pct": 5.58
         },
         {
-          "price": 30.83,
+          "price": 51.9,
           "label": "50%",
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 3.28
+          "distance_pct": 9.26
         }
       ],
       "m_fibo_swing": {
-        "high": 32.36,
+        "high": 59.3,
         "high_date": "2026-05-04",
-        "high_idx": 1,
-        "low": 29.3,
-        "low_date": "2026-05-26",
-        "low_idx": 17,
+        "high_idx": 0,
+        "low": 44.5,
+        "low_date": "2026-07-03",
+        "low_idx": 44,
         "direction": "down",
-        "range": 3.06
+        "range": 14.8
       }
     },
     {
-      "ticker": "TDM",
+      "ticker": "HII",
       "exchange": "HOSE",
-      "date": "2026-07-23T00:00:00",
-      "close": 59.7,
-      "volume": 1500,
+      "date": "2026-07-24T00:00:00",
+      "close": 6.12,
+      "volume": 1120200,
+      "total_score": 5,
+      "rating": "B",
+      "c1_atr_squeeze": 0,
+      "c2_bb_squeeze": 0,
+      "c3_near_high20": 0,
+      "c4_stealth_accum": 0,
+      "c5_vol_surge": 1,
+      "c6_upper_close": 1,
+      "c7_ma_align": 1,
+      "c8_rsi_zone": 0,
+      "c9_pocket_pivot": 1,
+      "c10_no_gap_down": 1,
+      "m_change_5d_pct": 4.26,
+      "m_vol_ratio": 6.51,
+      "m_rsi14": 65.4,
+      "m_atr_pct": 3.12,
+      "m_dist_to_high20_pct": 0.0,
+      "m_high20": 6.12,
+      "m_ma10": 5.75,
+      "m_ma20": 5.74,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 6.05,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 1.14
+        },
+        {
+          "price": 5.82,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 4.9
+        },
+        {
+          "price": 5.44,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 11.11
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 6.24,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 1.96
+        },
+        {
+          "price": 6.42,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 4.9
+        },
+        {
+          "price": 6.69,
+          "label": "78.6%",
+          "ratio": 0.786,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 9.31
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 7.03,
+        "high_date": "2026-05-07",
+        "high_idx": 3,
+        "low": 5.44,
+        "low_date": "2026-05-20",
+        "low_idx": 12,
+        "direction": "down",
+        "range": 1.59
+      }
+    },
+    {
+      "ticker": "ABS",
+      "exchange": "UPCOM",
+      "date": "2026-07-24T00:00:00",
+      "close": 3.09,
+      "volume": 526400,
       "total_score": 5,
       "rating": "B",
       "c1_atr_squeeze": 0,
       "c2_bb_squeeze": 0,
       "c3_near_high20": 0,
       "c4_stealth_accum": 1,
-      "c5_vol_surge": 0,
-      "c6_upper_close": 1,
+      "c5_vol_surge": 1,
+      "c6_upper_close": 0,
       "c7_ma_align": 1,
       "c8_rsi_zone": 1,
       "c9_pocket_pivot": 0,
       "c10_no_gap_down": 1,
-      "m_change_5d_pct": 2.4,
-      "m_vol_ratio": 0.02,
-      "m_rsi14": 56.1,
-      "m_atr_pct": 4.34,
-      "m_dist_to_high20_pct": 4.48,
-      "m_high20": 62.5,
-      "m_ma10": 59.47,
-      "m_ma20": 58.49,
+      "m_change_5d_pct": -3.74,
+      "m_vol_ratio": 0.94,
+      "m_rsi14": 51.2,
+      "m_atr_pct": 7.4,
+      "m_dist_to_high20_pct": 15.34,
+      "m_high20": 3.65,
+      "m_ma10": 3.21,
+      "m_ma20": 3.12,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
         {
-          "price": 59.6,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 0.17
-        },
-        {
-          "price": 58.4,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 2.18
-        },
-        {
-          "price": 57.2,
+          "price": 3.07,
           "label": "61.8%",
           "ratio": 0.618,
           "is_golden": true,
           "type": "fibo",
-          "distance_pct": 4.19
+          "distance_pct": 0.65
+        },
+        {
+          "price": 2.91,
+          "label": "78.6%",
+          "ratio": 0.786,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 5.83
+        },
+        {
+          "price": 2.71,
+          "label": "100%",
+          "ratio": 1.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 12.3
         }
       ],
       "m_resistances": [
         {
-          "price": 61.09,
+          "price": 3.18,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 2.91
+        },
+        {
+          "price": 3.29,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 6.47
+        },
+        {
+          "price": 3.43,
           "label": "23.6%",
           "ratio": 0.236,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 2.33
+          "distance_pct": 11.0
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 3.65,
+        "high_date": "2026-07-21",
+        "high_idx": 56,
+        "low": 2.71,
+        "low_date": "2026-05-06",
+        "low_idx": 2,
+        "direction": "up",
+        "range": 0.94
+      }
+    },
+    {
+      "ticker": "TDG",
+      "exchange": "HOSE",
+      "date": "2026-07-24T00:00:00",
+      "close": 2.56,
+      "volume": 96500,
+      "total_score": 5,
+      "rating": "B",
+      "c1_atr_squeeze": 0,
+      "c2_bb_squeeze": 0,
+      "c3_near_high20": 1,
+      "c4_stealth_accum": 0,
+      "c5_vol_surge": 1,
+      "c6_upper_close": 0,
+      "c7_ma_align": 1,
+      "c8_rsi_zone": 1,
+      "c9_pocket_pivot": 0,
+      "c10_no_gap_down": 1,
+      "m_change_5d_pct": 3.23,
+      "m_vol_ratio": 1.27,
+      "m_rsi14": 64.6,
+      "m_atr_pct": 4.3,
+      "m_dist_to_high20_pct": 2.29,
+      "m_high20": 2.62,
+      "m_ma10": 2.44,
+      "m_ma20": 2.42,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 2.53,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 1.17
         },
         {
-          "price": 63.5,
+          "price": 2.48,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 3.13
+        },
+        {
+          "price": 2.41,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 5.86
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 2.58,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 0.78
+        },
+        {
+          "price": 2.66,
+          "label": "78.6%",
+          "ratio": 0.786,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 3.91
+        },
+        {
+          "price": 2.76,
+          "label": "100%",
+          "ratio": 1.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 7.81
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 2.76,
+        "high_date": "2026-05-04",
+        "high_idx": 0,
+        "low": 2.3,
+        "low_date": "2026-07-07",
+        "low_idx": 46,
+        "direction": "down",
+        "range": 0.46
+      }
+    },
+    {
+      "ticker": "DXP",
+      "exchange": "HNX",
+      "date": "2026-07-24T00:00:00",
+      "close": 13.1,
+      "volume": 213100,
+      "total_score": 5,
+      "rating": "B",
+      "c1_atr_squeeze": 0,
+      "c2_bb_squeeze": 1,
+      "c3_near_high20": 0,
+      "c4_stealth_accum": 0,
+      "c5_vol_surge": 1,
+      "c6_upper_close": 1,
+      "c7_ma_align": 0,
+      "c8_rsi_zone": 1,
+      "c9_pocket_pivot": 0,
+      "c10_no_gap_down": 1,
+      "m_change_5d_pct": 0.77,
+      "m_vol_ratio": 1.45,
+      "m_rsi14": 50.0,
+      "m_atr_pct": 2.89,
+      "m_dist_to_high20_pct": 5.07,
+      "m_high20": 13.8,
+      "m_ma10": 12.99,
+      "m_ma20": 13.15,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 12.4,
           "label": "0%",
           "ratio": 0.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 6.37
+          "distance_pct": 5.34
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 13.25,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 1.15
+        },
+        {
+          "price": 13.78,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 5.19
+        },
+        {
+          "price": 14.2,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 8.4
         }
       ],
       "m_fibo_swing": {
-        "high": 63.5,
-        "high_date": "2026-06-04",
-        "high_idx": 24,
-        "low": 53.3,
-        "low_date": "2026-05-21",
-        "low_idx": 14,
+        "high": 16.0,
+        "high_date": "2026-05-06",
+        "high_idx": 2,
+        "low": 12.4,
+        "low_date": "2026-07-16",
+        "low_idx": 53,
+        "direction": "down",
+        "range": 3.6
+      }
+    },
+    {
+      "ticker": "DSG",
+      "exchange": "UPCOM",
+      "date": "2026-07-03T00:00:00",
+      "close": 7.0,
+      "volume": 8400,
+      "total_score": 5,
+      "rating": "B",
+      "c1_atr_squeeze": 1,
+      "c2_bb_squeeze": 1,
+      "c3_near_high20": 0,
+      "c4_stealth_accum": 0,
+      "c5_vol_surge": 0,
+      "c6_upper_close": 0,
+      "c7_ma_align": 1,
+      "c8_rsi_zone": 1,
+      "c9_pocket_pivot": 0,
+      "c10_no_gap_down": 1,
+      "m_change_5d_pct": 2.94,
+      "m_vol_ratio": 0.7,
+      "m_rsi14": 59.3,
+      "m_atr_pct": 4.49,
+      "m_dist_to_high20_pct": 0.0,
+      "m_high20": 7.0,
+      "m_ma10": 6.9,
+      "m_ma20": 6.58,
+      "m_suspicious_data": true,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 5.99,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 14.43
+        },
+        {
+          "price": 5.36,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 23.43
+        },
+        {
+          "price": 4.85,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 30.71
+        }
+      ],
+      "m_resistances": [],
+      "m_fibo_swing": {
+        "high": 7.0,
+        "high_date": "2025-12-26",
+        "high_idx": 38,
+        "low": 2.7,
+        "low_date": "2025-10-31",
+        "low_idx": 30,
         "direction": "up",
-        "range": 10.2
+        "range": 4.3
       }
     }
   ]
