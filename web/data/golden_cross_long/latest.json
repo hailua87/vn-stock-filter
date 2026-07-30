@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-30T07:58:33.452119",
+  "generated_at": "2026-07-30T17:37:01.066495",
   "strategy": "golden_cross_long",
   "total": 2,
   "metadata": {
@@ -10,9 +10,9 @@
       "UPCOM"
     ],
     "total_scanned": 500,
-    "run_type": "intraday",
-    "run_time_ict": "14:58",
-    "run_date_ict": "2026-07-30"
+    "run_type": "eod",
+    "run_time_ict": "00:37",
+    "run_date_ict": "2026-07-31"
   },
   "signals": [
     {
@@ -20,7 +20,7 @@
       "exchange": "HOSE",
       "date": "2026-07-30T00:00:00",
       "close": 6.9,
-      "volume": 2109400,
+      "volume": 2158500,
       "preset": "long",
       "total_score": 3,
       "rating": "B",
@@ -35,7 +35,7 @@
       "m_slow_ma": 5.18,
       "m_slow_spread_pct": 1.78,
       "m_change_5d_pct": 1.62,
-      "m_vol_ratio": 1.37,
+      "m_vol_ratio": 1.4,
       "m_rsi14": 67.8,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
@@ -90,8 +90,8 @@
       "ticker": "ABS",
       "exchange": "UPCOM",
       "date": "2026-07-30T00:00:00",
-      "close": 3.09,
-      "volume": 395700,
+      "close": 3.1,
+      "volume": 407400,
       "preset": "long",
       "total_score": 3,
       "rating": "B",
@@ -105,19 +105,27 @@
       "m_fast_ma": 3.04,
       "m_slow_ma": 3.03,
       "m_slow_spread_pct": 0.6,
-      "m_change_5d_pct": -2.52,
-      "m_vol_ratio": 0.67,
-      "m_rsi14": 51.9,
+      "m_change_5d_pct": -2.21,
+      "m_vol_ratio": 0.68,
+      "m_rsi14": 52.1,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
+        {
+          "price": 3.09,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 0.32
+        },
         {
           "price": 2.94,
           "label": "78.6%",
           "ratio": 0.786,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 4.85
+          "distance_pct": 5.16
         },
         {
           "price": 2.75,
@@ -125,7 +133,7 @@
           "ratio": 1.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 11.0
+          "distance_pct": 11.29
         }
       ],
       "m_resistances": [
@@ -135,7 +143,7 @@
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 3.56
+          "distance_pct": 3.23
         },
         {
           "price": 3.31,
@@ -143,7 +151,7 @@
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 7.12
+          "distance_pct": 6.77
         },
         {
           "price": 3.44,
@@ -151,7 +159,7 @@
           "ratio": 0.236,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 11.33
+          "distance_pct": 10.97
         }
       ],
       "m_fibo_swing": {
