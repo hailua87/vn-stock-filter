@@ -168,6 +168,7 @@ class ValuationReport:
     verdict: str                    # STRONG BUY / BUY / HOLD / SELL / STRONG SELL
     confidence: float
     methods_used: List[str]
+    method_dispersion: float = 0.0   # (max-min)/median giữa các phương pháp
     method_results: Dict[str, ValuationResult] = field(default_factory=dict)
     method_weights: Dict[str, float] = field(default_factory=dict)
     warnings: List[str] = field(default_factory=list)
@@ -187,6 +188,8 @@ class ValuationReport:
             'upside_pct': round(self.upside_pct * 100, 1),
             'verdict': self.verdict,
             'confidence': round(self.confidence * 100, 0),
+            'method_dispersion_pct': round(self.method_dispersion * 100, 0),
+            'methods_conflict': self.method_dispersion > MAX_METHOD_DISPERSION,
             'methods_used': self.methods_used,
             'method_details': [
                 {
@@ -250,21 +253,64 @@ def _historical_multiple_valuation(data: Dict[str, Any]) -> ValuationResult:
     )
 
 
-def _determine_verdict(upside_pct: float, confidence: float) -> str:
-    """Chuyển upside + confidence thành verdict."""
-    # Discount upside theo confidence
-    effective_upside = upside_pct * (0.5 + 0.5 * confidence)
+# Biên an toàn (margin of safety) cho TTCK Việt Nam.
+#
+# Vì sao cần: sai số của mô hình định giá chạy trên BCTC do bên thứ ba cung cấp
+# dễ dàng ±20-30%. Khuyến nghị MUA khi upside chỉ 10% là nằm trong nhiễu.
+# Graham dùng 25-30% cho thị trường phát triển; VN có chất lượng dữ liệu và
+# thanh khoản kém hơn nên không thể đặt thấp hơn.
+MARGIN_OF_SAFETY = 0.25          # ngưỡng BUY
+STRONG_BUY_THRESHOLD = 0.45      # ngưỡng STRONG BUY
+SELL_THRESHOLD = -0.20
+STRONG_SELL_THRESHOLD = -0.35
 
-    if effective_upside > 0.25:
-        return "STRONG BUY"
-    elif effective_upside > 0.10:
-        return "BUY"
-    elif effective_upside > -0.10:
+# Nếu các phương pháp lệch nhau quá mức này, fair value tổng hợp không còn ý
+# nghĩa — báo mâu thuẫn thay vì đưa ra một con số duy nhất.
+MAX_METHOD_DISPERSION = 0.40
+
+
+def _method_dispersion(fair_values: List[float]) -> float:
+    """
+    Độ phân tán giữa các phương pháp = (max - min) / median.
+
+    Ví dụ có thật trong output demo: VHM có RNAV = 115.870 và P/E = 27.878
+    (lệch hơn 4 lần) nhưng vẫn được gộp thành một fair value duy nhất kèm
+    "khoảng tin cậy" tính bằng phân vị — con số đó không có ý nghĩa thống kê.
+    """
+    vals = [v for v in fair_values if v and v > 0]
+    if len(vals) < 2:
+        return 0.0
+    vals = sorted(vals)
+    median = vals[len(vals) // 2]
+    if median <= 0:
+        return 0.0
+    return (vals[-1] - vals[0]) / median
+
+
+def _determine_verdict(upside_pct: float, dispersion: float = 0.0) -> str:
+    """
+    Chuyển upside thành verdict, có biên an toàn.
+
+    FIX: bản cũ nhân upside với `(0.5 + 0.5 × confidence)` — nhưng confidence ĐÃ
+    được dùng làm trọng số hiệu dụng khi tổng hợp fair value
+    (`effective_weight = base_weight × confidence`). Nhân thêm lần nữa ở đây là
+    ĐẾM CONFIDENCE HAI LẦN, kéo mọi kết quả về HOLD một cách giả tạo.
+
+    Nay: confidence chỉ ảnh hưởng trọng số; verdict dựa trên upside so với biên
+    an toàn. Khi các phương pháp mâu thuẫn mạnh → không khuyến nghị.
+    """
+    if dispersion > MAX_METHOD_DISPERSION:
         return "HOLD"
-    elif effective_upside > -0.25:
-        return "SELL"
-    else:
+
+    if upside_pct >= STRONG_BUY_THRESHOLD:
+        return "STRONG BUY"
+    if upside_pct >= MARGIN_OF_SAFETY:
+        return "BUY"
+    if upside_pct <= STRONG_SELL_THRESHOLD:
         return "STRONG SELL"
+    if upside_pct <= SELL_THRESHOLD:
+        return "SELL"
+    return "HOLD"
 
 
 def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
@@ -413,12 +459,29 @@ def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
 
     current_price = data["market"]["current_price"]
     upside = (fair_value - current_price) / current_price
-    verdict = _determine_verdict(upside, overall_confidence)
+
+    dispersion = _method_dispersion(all_fair_values)
+    verdict = _determine_verdict(upside, dispersion)
 
     # Collect warnings
     all_warnings = []
     for r in results.values():
         all_warnings.extend(r.warnings)
+
+    if dispersion > MAX_METHOD_DISPERSION:
+        all_warnings.insert(0, (
+            f"Các phương pháp mâu thuẫn mạnh (chênh lệch {dispersion:.0%} quanh trung vị) — "
+            f"fair value tổng hợp không đáng tin, đã hạ verdict về HOLD"
+        ))
+        rec_notes.append(f"Độ phân tán giữa các phương pháp: {dispersion:.0%} (ngưỡng "
+                         f"{MAX_METHOD_DISPERSION:.0%})")
+        overall_confidence *= 0.5
+
+    if data['ratios'].get('_historical_multiples_source') == 'unavailable':
+        rec_notes.append(
+            "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — "
+            "các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+        )
 
     return ValuationReport(
         ticker=ticker,
@@ -429,7 +492,8 @@ def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
         fair_value_high=fv_high,
         upside_pct=upside,
         verdict=verdict,
-        confidence=overall_confidence,
+        confidence=min(1.0, max(0.0, overall_confidence)),
+        method_dispersion=dispersion,
         methods_used=used_methods,
         method_results=results,
         method_weights={m: method_weights[m] for m in used_methods},

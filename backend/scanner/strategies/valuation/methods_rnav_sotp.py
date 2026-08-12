@@ -125,16 +125,15 @@ def calculate_rnav_simplified(data: Dict[str, Any]) -> ValuationResult:
     fair_value = (rnav_total * 1_000_000_000) / shares if shares > 0 else 0
     upside = (fair_value - current_price) / current_price if current_price > 0 else 0
 
-    # Sanity caps - RNAV có thể extreme nếu data lệch
+    # Sanity check — KHÔNG cắt fair value về bội số của giá thị trường (sẽ neo
+    # giá trị nội tại vào chính cái đang so sánh). Giữ nguyên con số và hạ
+    # confidence để engine loại. Xem methods_dcf_ddm.calculate_dcf_fcff.
     extreme_factor = fair_value / current_price if current_price > 0 else 0
-    if extreme_factor > 4.0:
-        warnings.append(f"RNAV cao bất thường ({extreme_factor:.1f}× giá). Capped tại 3×.")
-        fair_value = current_price * 3.0
-        upside = (fair_value - current_price) / current_price
-    elif 0 < extreme_factor < 0.25:
-        warnings.append(f"RNAV thấp bất thường ({extreme_factor:.2f}× giá). Floor tại 0.4×.")
-        fair_value = current_price * 0.4
-        upside = (fair_value - current_price) / current_price
+    extreme_result = extreme_factor > 4.0 or 0 < extreme_factor < 0.25
+    if extreme_result:
+        warnings.append(
+            f"RNAV bất thường ({extreme_factor:.2f}× giá) — loại khỏi tổng hợp."
+        )
 
     # === Cross-check với P/B ===
     pb_implied = fair_value * shares / (shareholders_equity * 1_000_000_000) if shareholders_equity > 0 else 0
@@ -147,9 +146,13 @@ def calculate_rnav_simplified(data: Dict[str, Any]) -> ValuationResult:
         confidence -= 0.20  # không phải pure RE
     if region == 'other':
         confidence -= 0.10  # không biết region cụ thể
-    if data.get('overview', {}).get('industry') in ['Bất động sản', 'Real Estate']:
+    # Dùng ngành đã phân loại thay vì chuỗi thô từ vnstock
+    if (data.get('_industry') == 'Real_Estate'
+            or data.get('overview', {}).get('industry') in ['Bất động sản', 'Real Estate']):
         confidence += 0.10  # đúng ngành
-    confidence = max(0.1, min(1.0, confidence))
+    if extreme_result:
+        confidence = 0.0
+    confidence = max(0.0, min(1.0, confidence))
 
     return ValuationResult(
         method="RNAV",

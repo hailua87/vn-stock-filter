@@ -300,23 +300,35 @@ def calculate_pb_roe_valuation(data: Dict[str, Any]) -> ValuationResult:
     #   = Stage1_value_factor + Terminal_value_factor
 
     high_growth_years = 8
-    g1 = g  # đã được cap
+    g1 = g  # đã được cap về GDP dài hạn ở bước 2
     roe_terminal = min(sustainable_roe, MARKET_PARAMS["long_term_gdp_growth"] / (1 - payout) + 0.08)
     # roe_terminal max ~ 14-15% (fade về DM-bank levels)
     g2 = MARKET_PARAMS["long_term_gdp_growth"] * 0.7  # ~4.2% terminal growth
 
-    # Stage 1: PV of excess return creation
-    # Mỗi năm, value added = (ROE - CoE) × BV / CoE đối với perpetual
-    # Stage 1 dùng formula: sum of dividends + terminal book value at year N
+    # Stage 1: PV of dividends + terminal book value at year N
+    #
+    # FIX: bản cũ tăng book value theo `sustainable_roe × (1 - payout)` — với
+    # ROE 20% và payout 30% là 14%/năm suốt 8 năm (bv_factor = 2,85×) — trong
+    # khi biến `g1` đã được cap về GDP 6% lại KHÔNG được dùng ở đâu cả. Note in
+    # ra cho người dùng ghi "g = 6%" còn mô hình chạy 14%: con số hiển thị khác
+    # con số tính toán, dạng lỗi nguy hiểm nhất với một sản phẩm định giá.
+    #
+    # Nay tốc độ tăng book value = g1 (đã cap). Payout ngụ ý được suy ngược từ
+    # chính g1 để giữ đồng nhất kế toán: g = ROE × (1 - payout) ⇒
+    # payout_implied = 1 - g1/ROE. Nếu g1 bị cap xuống thì phần lợi nhuận không
+    # dùng để tăng trưởng phải được trả về cổ đông.
+    payout_implied = payout
+    if sustainable_roe > 0:
+        payout_implied = max(payout, min(1.0, 1 - g1 / sustainable_roe))
+
     pv_dividends = 0
     bv_factor = 1.0  # BV(t) / BV(0)
     for t in range(1, high_growth_years + 1):
-        # Cuối năm t-1, BV = bv_factor × BVPS
-        # Dividend năm t = ROE × BV(t-1) × payout
-        div_per_bvps = sustainable_roe * bv_factor * payout
+        # Dividend năm t = ROE × BV(t-1) × payout_implied
+        div_per_bvps = sustainable_roe * bv_factor * payout_implied
         pv_dividends += div_per_bvps / (1 + coe) ** t
-        # BV update: BV(t) = BV(t-1) × (1 + ROE × retention)
-        bv_factor *= (1 + sustainable_roe * (1 - payout))
+        # BV(t) = BV(t-1) × (1 + g1) — đúng bằng tốc độ đã cap
+        bv_factor *= (1 + g1)
 
     # Terminal P/B at year N (Gordon)
     terminal_pb = (roe_terminal - g2) / (coe - g2) if coe - g2 > 0.005 else 1.0
@@ -325,8 +337,9 @@ def calculate_pb_roe_valuation(data: Dict[str, Any]) -> ValuationResult:
     raw_pb = pv_dividends + pv_terminal
 
     notes.append(
-        f"2-stage P/B: Stage1 ({high_growth_years}y, ROE={sustainable_roe:.1%}, g={g1:.1%}) "
-        f"contributes {pv_dividends:.2f}x"
+        f"2-stage P/B: Stage1 ({high_growth_years}y, ROE={sustainable_roe:.1%}, "
+        f"g={g1:.1%}, payout ngụ ý={payout_implied:.0%}) contributes {pv_dividends:.2f}x "
+        f"(BV cuối kỳ = {bv_factor:.2f}× BV hiện tại)"
     )
     notes.append(
         f"Stage2 terminal: ROE_T={roe_terminal:.1%}, g_T={g2:.1%}, "
@@ -343,13 +356,20 @@ def calculate_pb_roe_valuation(data: Dict[str, Any]) -> ValuationResult:
         notes.append(f"  ▸ {msg}")
 
     # --- 6. Cross-check với historical band ---
-    pb_5y_median = ratios.get("pb_5y_median", adjusted_pb)
-    pb_5y_p25 = ratios.get("pb_5y_p25", adjusted_pb * 0.85)
-    pb_5y_p75 = ratios.get("pb_5y_p75", adjusted_pb * 1.15)
+    # pb_5y_median có thể là None (normalizer không còn suy từ pb_current nữa —
+    # nếu suy thì final_pb sẽ chứa 30% giá thị trường ⇒ circular).
+    pb_5y_median = ratios.get("pb_5y_median")
+    pb_5y_p25 = ratios.get("pb_5y_p25")
+    pb_5y_p75 = ratios.get("pb_5y_p75")
 
-    # Weighted blend: 70% justified, 30% historical median
-    final_pb = 0.70 * adjusted_pb + 0.30 * pb_5y_median
-    notes.append(f"Blend final P/B = 70% × {adjusted_pb:.2f} + 30% × hist_median {pb_5y_median:.2f} = {final_pb:.2f}x")
+    if pb_5y_median:
+        final_pb = 0.70 * adjusted_pb + 0.30 * pb_5y_median
+        notes.append(f"Blend final P/B = 70% × {adjusted_pb:.2f} + 30% × hist_median "
+                     f"{pb_5y_median:.2f} = {final_pb:.2f}x")
+    else:
+        final_pb = adjusted_pb
+        notes.append(f"Không có historical P/B thực → dùng thẳng justified P/B = {final_pb:.2f}x")
+        warnings.append("Thiếu historical P/B (cần OHLCV cache >= 3 năm)")
 
     # --- 7. Fair Value ---
     bvps = per_share["bvps"]
@@ -358,12 +378,26 @@ def calculate_pb_roe_valuation(data: Dict[str, Any]) -> ValuationResult:
     upside = (fair_value - current_price) / current_price
 
     # --- 8. Confidence scoring ---
+    # FIX 1: `confidence -= 0.10 × len(warnings)` biến độ tin cậy thành hàm của
+    # SỐ DÒNG CẢNH BÁO, không phải chất lượng dữ liệu — thêm một cảnh báo diễn
+    # giải cũng làm tụt confidence. Nay phạt theo từng nguyên nhân cụ thể.
+    # FIX 2: kiểm tra ngành bằng chuỗi thô `overview['industry']` trong khi
+    # engine ĐÃ phân loại xong và ghi vào `data['_industry']`. Mã ngân hàng có
+    # tên ngành khác chuẩn ("Ngân hàng thương mại"...) bị trừ oan 20%.
     confidence = 0.85  # base cho banking
     if not roe_5y or len(roe_5y) < 3:
         confidence -= 0.15
-    if len(warnings) > 0:
-        confidence -= 0.10 * len(warnings)
-    if data.get("overview", {}).get("industry") not in ["Ngân hàng", "Banks", "Dịch vụ tài chính"]:
+    if not pb_5y_median:
+        confidence -= 0.10
+    if market.get('beta_fallback', True):
+        confidence -= 0.05      # beta mặc định 1.0, không phải regression thật
+    if abs(roe_ttm - sustainable_roe) / max(sustainable_roe, 1e-6) > 0.30:
+        confidence -= 0.10      # ROE lệch mạnh so với trung bình chu kỳ
+
+    industry = (data.get('_industry')
+                or data.get("overview", {}).get("industry") or '')
+    PB_ROE_SUITABLE = {'Banking', 'Securities', 'Insurance', 'Real_Estate'}
+    if industry not in PB_ROE_SUITABLE:
         confidence -= 0.20
         warnings.append("P/B-ROE không phải phương pháp tối ưu cho ngành này")
     confidence = max(0.1, min(1.0, confidence))
