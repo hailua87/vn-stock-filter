@@ -130,6 +130,42 @@ def backfill_ticker(ticker: str, start: datetime, end: datetime,
     return ('ok' if len(df) >= expected else 'partial'), len(df)
 
 
+def preflight() -> None:
+    """
+    Kiểm tra điều kiện tiên quyết TRƯỚC khi chạy vòng lặp dài.
+
+    Vì sao cần: nếu vnstock chưa cài, mỗi lần gọi fetch_ohlcv chỉ log một dòng
+    lỗi rồi trả None, nên script cứ thế lặp qua cả 400 mã × 6 đoạn = 2.400 lần
+    in đúng một thông báo trong ~14 phút mà không làm được gì. Phải dừng ngay
+    và nói rõ cách sửa.
+    """
+    try:
+        import vnstock  # noqa: F401
+    except ImportError:
+        log.error("=" * 70)
+        log.error("THIẾU THƯ VIỆN vnstock — không thể lấy dữ liệu.")
+        log.error("")
+        log.error("  Sửa:  pip install -r backend/requirements.txt")
+        log.error("  hoặc: pip install -U vnstock")
+        log.error("=" * 70)
+        sys.exit(1)
+
+    import os
+    if not os.environ.get('VNSTOCK_API_KEY'):
+        log.warning("=" * 70)
+        log.warning("CHƯA CÓ VNSTOCK_API_KEY — đang ở chế độ ẩn danh.")
+        log.warning("")
+        log.warning("  Chế độ ẩn danh bị giới hạn rất chặt (vài request/phút).")
+        log.warning("  Backfill vài trăm mã × 6 năm gần như chắc chắn sẽ bị chặn giữa chừng.")
+        log.warning("")
+        log.warning("  Đăng ký key miễn phí (60 req/phút) tại https://vnstocks.com/login")
+        log.warning("  rồi đặt biến môi trường trước khi chạy:")
+        log.warning("")
+        log.warning('    PowerShell:  $env:VNSTOCK_API_KEY = "khoa-cua-ban"')
+        log.warning('    Git Bash:    export VNSTOCK_API_KEY="khoa-cua-ban"')
+        log.warning("=" * 70)
+
+
 def load_extra_tickers(path: str | None) -> list[str]:
     """Đọc danh sách mã bổ sung (thường là mã đã huỷ niêm yết)."""
     if not path:
@@ -163,6 +199,7 @@ def main():
                    help='Chỉ backfill danh sách này (phân tách bằng dấu phẩy)')
     args = p.parse_args()
 
+    preflight()
     setup_api_key()
     end = datetime.now()
     start = end - timedelta(days=int(args.years * 365))
@@ -201,6 +238,7 @@ def main():
 
     stats = {'ok': 0, 'partial': 0, 'skip': 0, 'fail': 0}
     partial_list, fail_list = [], []
+    consecutive_fail = 0
 
     for i, ticker in enumerate(tickers, 1):
         try:
@@ -217,6 +255,19 @@ def main():
             partial_list.append(f'{ticker}({n})')
         elif status == 'fail':
             fail_list.append(ticker)
+
+        # Ngắt mạch: hỏng liên tiếp nghĩa là lỗi hệ thống (mất mạng, hết quota,
+        # sai API key), không phải mã lỗi lẻ tẻ. Chạy tiếp hàng chục phút chỉ để
+        # in cùng một thông báo là vô ích.
+        consecutive_fail = consecutive_fail + 1 if status == 'fail' else 0
+        if consecutive_fail >= 10:
+            log.error("=" * 70)
+            log.error(f"DỪNG: {consecutive_fail} mã liên tiếp thất bại — nhiều khả năng "
+                      f"là lỗi hệ thống chứ không phải từng mã.")
+            log.error("  Kiểm tra: kết nối mạng · VNSTOCK_API_KEY · quota vnstock")
+            log.error("  Đã backfill xong sẽ được giữ lại; chạy lại với --resume để tiếp tục.")
+            log.error("=" * 70)
+            break
 
         if i % 20 == 0 or i == len(tickers):
             log.info(f"  {i}/{len(tickers)} — ok={stats['ok']} partial={stats['partial']} "
