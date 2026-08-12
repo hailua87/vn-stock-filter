@@ -5,13 +5,76 @@ Final composite score is a weighted sum (default weights = 1).
 """
 import logging
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Optional
 import pandas as pd
 import numpy as np
 
-from .indicators import atr, rsi, obv, bollinger_width
+from .indicators import atr, rsi, obv, bollinger_width, obv_normalized_change
 
 log = logging.getLogger(__name__)
+
+
+# Trọng số từng tiêu chí. Mặc định = 1.0 cho cả 10 tiêu chí (giữ nguyên thang
+# 0-10 và toàn bộ dữ liệu archive đã sinh ra trước đây).
+#
+# Điểm cần biết trước khi hiệu chỉnh: các tiêu chí KHÔNG độc lập.
+#   - atr_squeeze và bb_squeeze đo gần như cùng một hiện tượng (nén biến động)
+#     → hiện đang được cộng 2 điểm cho 1 thông tin.
+#   - near_high20 và ma_align tương quan mạnh.
+#   - no_gap_down là tiêu chí "vắng mặt điều xấu", ~95% mã đạt → gần như +1 miễn
+#     phí, làm lạm phát điểm và giảm khả năng phân biệt A với B.
+# Trọng số đúng phải đến từ dữ liệu (information coefficient của từng tiêu chí),
+# không phải đặt tay — xem backend/scanner/weight_calibration.py và
+# backend/run_weight_calibration.py.
+DEFAULT_CRITERIA_WEIGHTS = {
+    'atr_squeeze': 1.0,
+    'bb_squeeze': 1.0,
+    'near_high20': 1.0,
+    'stealth_accum': 1.0,
+    'vol_surge': 1.0,
+    'upper_close': 1.0,
+    'ma_align': 1.0,
+    'rsi_zone': 1.0,
+    'pocket_pivot': 1.0,
+    'no_gap_down': 1.0,
+}
+
+# Trọng số đã hiệu chỉnh, do `run_weight_calibration.py --apply` sinh ra.
+# KHÔNG sửa tay file này: nó chỉ được ghi khi kiểm định NGOÀI MẪU đạt ngưỡng.
+ACTIVE_WEIGHTS_PATH = Path(__file__).resolve().parent.parent / 'data' / 'criteria_weights.json'
+
+
+def load_active_weights() -> tuple[dict, str]:
+    """
+    Đọc trọng số đang dùng. Trả về (weights, version).
+
+    Không có file → trọng số đều, version 'default'. Đây là trạng thái ĐÚNG khi
+    chưa đủ dữ liệu lịch sử: trọng số đều là một prior trung thực, còn trọng số
+    fit trên 1,6 năm dữ liệu chỉ là nhiễu được đóng gói cho đẹp.
+
+    `version` được ghi vào mọi file output để tín hiệu quá khứ tái lập được —
+    thiếu nó thì backtest trên archive về sau vô nghĩa, vì không biết điểm số
+    ngày đó được sinh ra bằng bộ trọng số nào.
+    """
+    if not ACTIVE_WEIGHTS_PATH.exists():
+        return dict(DEFAULT_CRITERIA_WEIGHTS), 'default'
+    try:
+        import json
+        data = json.loads(ACTIVE_WEIGHTS_PATH.read_text(encoding='utf-8'))
+        raw = data.get('weights') or {}
+        # Chỉ nhận key đã biết — phòng file bị sửa tay sai
+        merged = {k: float(raw.get(k, 0.0)) for k in DEFAULT_CRITERIA_WEIGHTS}
+        if sum(merged.values()) <= 0:
+            log.warning("  criteria_weights.json có tổng trọng số = 0 → dùng mặc định")
+            return dict(DEFAULT_CRITERIA_WEIGHTS), 'default'
+        return merged, str(data.get('version', 'unknown'))
+    except Exception as e:
+        log.warning(f"  Đọc criteria_weights.json thất bại ({e}) → dùng mặc định")
+        return dict(DEFAULT_CRITERIA_WEIGHTS), 'default'
+
+
+ACTIVE_WEIGHTS, ACTIVE_WEIGHTS_VERSION = load_active_weights()
 
 
 @dataclass
@@ -23,17 +86,29 @@ class CriteriaResult:
     volume: int
     scores: dict = field(default_factory=dict)
     metrics: dict = field(default_factory=dict)
+    weights: dict = field(default_factory=lambda: dict(ACTIVE_WEIGHTS))
+    weights_version: str = ACTIVE_WEIGHTS_VERSION
 
     @property
-    def total_score(self) -> int:
-        return sum(self.scores.values())
+    def total_score(self) -> float:
+        total = sum(self.scores[k] * self.weights.get(k, 1.0) for k in self.scores)
+        # Trọng số mặc định đều là 1.0 → tổng là số nguyên; round() giữ cho
+        # JSON output và so sánh `>= min_score` không bị nhiễu dấu phẩy động.
+        return round(total, 2)
+
+    @property
+    def max_score(self) -> float:
+        return round(sum(self.weights.get(k, 1.0) for k in self.scores), 2)
 
     @property
     def rating(self) -> str:
-        s = self.total_score
-        if s >= 8: return 'A+'
-        if s >= 6: return 'A'
-        if s >= 4: return 'B'
+        # Ngưỡng theo TỶ LỆ để không phụ thuộc thang điểm khi trọng số thay đổi.
+        # 8/10, 6/10, 4/10 — giữ đúng hành vi cũ khi mọi trọng số = 1.
+        mx = self.max_score or 1
+        pct = self.total_score / mx
+        if pct >= 0.8: return 'A+'
+        if pct >= 0.6: return 'A'
+        if pct >= 0.4: return 'B'
         return 'C'
 
     def to_dict(self) -> dict:
@@ -44,7 +119,9 @@ class CriteriaResult:
             'close': self.close,
             'volume': self.volume,
             'total_score': self.total_score,
+            'max_score': self.max_score,
             'rating': self.rating,
+            'weights_version': self.weights_version,
             **{f'c{i+1}_{k}': v for i, (k, v) in enumerate(self.scores.items())},
             **{f'm_{k}': v for k, v in self.metrics.items()},
         }
@@ -68,6 +145,8 @@ DEFAULT_CONFIG = {
     'corporate_action_lookback_days': 5,  # skip signal if dilutive event in last N days
     'corporate_action_lookahead_days': 5, # warn if upcoming ex-rights in next N days
     'sanity_max_single_day_drop': 0.15,   # >15% drop in 1 day → suspect un-adjusted data
+    'stealth_obv_days_min': 1.0,          # OBV ròng >= 1 phiên khối lượng TB
+    'criteria_weights': ACTIVE_WEIGHTS,
 }
 
 
@@ -88,6 +167,14 @@ def evaluate(df: pd.DataFrame, ticker: str,
     if len(df) < cfg['min_history_days']:
         return None
     if df['Volume'].tail(20).mean() < cfg['min_avg_volume']:
+        return None
+
+    # FIX: reject stale-cache rows — giống golden_cross.evaluate và
+    # ichimoku.evaluate. Trước đây Pre-Breakout (strategy chính, ghi ra
+    # web/data/latest.json) là strategy DUY NHẤT thiếu guard này, nên đúng lỗi
+    # "giá phiên cũ hiển thị dưới ngày mới" đã fix ở 2 strategy kia vẫn còn.
+    if 'StaleCache' in df.columns and bool(df['StaleCache'].iloc[-1]):
+        log.debug(f"  {ticker}: skipped (stale cache)")
         return None
 
     # Sanity check: detect un-adjusted prices via implausibly large overnight drops
@@ -150,13 +237,15 @@ def evaluate(df: pd.DataFrame, ticker: str,
     dist_high = (last['High20'] - last['Close']) / last['High20'] * 100
     scores['near_high20'] = int(0 < dist_high <= cfg['near_high_pct'])
 
-    # ── C4: Stealth accumulation (OBV leads price) ───────────────────
-    obv_chg = (df['OBV'].iloc[-1] - df['OBV'].iloc[-11]) / (abs(df['OBV'].iloc[-11]) + 1)
+    # ── C4: Stealth accumulation (dòng tiền vào nhưng giá chưa chạy) ──
+    # obv_days = khối lượng ròng 10 phiên qua, tính bằng "số phiên khối lượng TB".
+    # So sánh với price_chg (đơn vị %) đã bị bỏ: hai đại lượng khác đơn vị nên
+    # điều kiện `obv_chg > price_chg * 2` cũ không có ý nghĩa toán học.
+    obv_days = obv_normalized_change(df['OBV'], vol, lookback=10, vol_ma=20)
     price_chg = (close.iloc[-1] - close.iloc[-11]) / close.iloc[-11]
     scores['stealth_accum'] = int(
-        obv_chg > cfg['stealth_obv_chg_min']
+        obv_days >= cfg['stealth_obv_days_min']
         and price_chg < cfg['stealth_price_chg_max']
-        and obv_chg > price_chg * 2
     )
 
     # ── C5: Volume surge (5d avg > 20d MA * 1.15) ────────────────────
@@ -211,6 +300,7 @@ def evaluate(df: pd.DataFrame, ticker: str,
         'vol_ratio': round(last['Volume'] / last['VolMA20'], 2) if last['VolMA20'] > 0 else 0,
         'rsi14': round(last['RSI14'], 1),
         'atr_pct': round(last['ATR_pct'], 2),
+        'obv_days_10d': round(obv_days, 2),
         'dist_to_high20_pct': round(dist_high, 2),
         'high20': round(last['High20'], 2),
         'ma10': round(last['MA10'], 2),
@@ -230,4 +320,5 @@ def evaluate(df: pd.DataFrame, ticker: str,
         volume=int(last['Volume']),
         scores=scores,
         metrics=metrics,
+        weights=dict(cfg.get('criteria_weights') or ACTIVE_WEIGHTS),
     )

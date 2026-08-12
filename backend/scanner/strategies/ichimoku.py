@@ -41,6 +41,7 @@ from typing import Optional
 import pandas as pd
 
 from .indicators_ext import compute_ichimoku, detect_recent_cross_up
+from ..indicators import rsi_last
 
 log = logging.getLogger(__name__)
 
@@ -55,6 +56,25 @@ DEFAULT_CONFIG = {
 }
 
 
+# Trọng số chấm điểm.
+#
+# FIX ĐẾM TRÙNG: `recent_tk_cross` hàm ý `tk_bullish` (đã cắt lên và còn hiệu
+# lực ⇒ Tenkan > Kijun), nên trước đây MỘT sự kiện được cộng HAI điểm — mã vừa
+# cross tự động có 2/5 và gần như chắc chắn lọt qua ngưỡng lọc 3/5.
+# Nay `recent_tk_cross` giữ nguyên trong output (frontend dùng làm chip lọc và
+# badge ⭐) nhưng trọng số 0; thay vào đó chấm điểm `future_cloud_bullish` —
+# mây Kumo phía trước, thành phần dự báo độc lập và đặc trưng nhất của Ichimoku.
+# Thang điểm vẫn là 0-5 nên --min-score-ichimoku và dữ liệu archive cũ giữ nguyên ý nghĩa.
+ICHIMOKU_WEIGHTS = {
+    'tk_bullish':           1.0,
+    'recent_tk_cross':      0.0,   # nhãn chất lượng, không cộng điểm
+    'price_above_cloud':    1.0,
+    'cloud_bullish':        1.0,
+    'chikou_free':          1.0,
+    'future_cloud_bullish': 1.0,
+}
+
+
 @dataclass
 class IchimokuResult:
     ticker: str
@@ -66,16 +86,21 @@ class IchimokuResult:
     metrics: dict
 
     @property
-    def total_score(self) -> int:
-        return sum(self.scores.values())
+    def total_score(self) -> float:
+        total = sum(self.scores[k] * ICHIMOKU_WEIGHTS.get(k, 1.0) for k in self.scores)
+        return round(total, 2)
+
+    @property
+    def max_score(self) -> float:
+        return round(sum(ICHIMOKU_WEIGHTS.get(k, 1.0) for k in self.scores), 2)
 
     @property
     def rating(self) -> str:
-        # 5 criteria total. Recent TK cross is bonus.
-        s = self.total_score
-        if s >= 5: return 'A+'    # 5/5 — full setup + just crossed
-        if s == 4: return 'A+'    # 4/5 — strong
-        if s == 3: return 'A'     # 3/5 — bullish
+        # Ngưỡng theo tỷ lệ để không phụ thuộc thang điểm: 4/5 = A+, 3/5 = A.
+        mx = self.max_score or 1
+        pct = self.total_score / mx
+        if pct >= 0.8: return 'A+'
+        if pct >= 0.6: return 'A'
         return 'C'  # filtered out
 
     def to_dict(self) -> dict:
@@ -86,6 +111,7 @@ class IchimokuResult:
             'close': self.close,
             'volume': self.volume,
             'total_score': self.total_score,
+            'max_score': self.max_score,
             'rating': self.rating,
             **{f'ich_{k}': v for k, v in self.scores.items()},
             **{f'm_{k}': v for k, v in self.metrics.items()},
@@ -186,12 +212,25 @@ def evaluate(df: pd.DataFrame, ticker: str,
     else:
         scores['chikou_free'] = 0
 
+    # 5. Mây tương lai bullish — Senkou A(+26) > Senkou B(+26).
+    # Độc lập với TK cross và với mây hiện tại: cho biết cấu trúc giá 26 phiên
+    # tới đang nghiêng về phía tăng hay giảm.
+    fut_a = ich['future_senkou_a'].iloc[-1]
+    fut_b = ich['future_senkou_b'].iloc[-1]
+    if pd.isna(fut_a) or pd.isna(fut_b):
+        scores['future_cloud_bullish'] = 0
+        future_cloud_gap_pct = None
+    else:
+        fut_a, fut_b = float(fut_a), float(fut_b)
+        scores['future_cloud_bullish'] = int(fut_a > fut_b)
+        future_cloud_gap_pct = round((fut_a - fut_b) / fut_b * 100, 2) if fut_b else None
+
     # Filter: must have at least 3 of 5 bullish signals (flexible mode)
     if sum(scores.values()) < 3:
         return None
 
     # Common metrics
-    rsi14_val = _compute_rsi(df['Close'], 14)
+    rsi14_val = rsi_last(df['Close'], 14)
     vol_ma20 = float(df['Volume'].tail(20).mean())
     vol_ratio = last_volume / vol_ma20 if vol_ma20 > 0 else 0
 
@@ -246,7 +285,9 @@ def evaluate(df: pd.DataFrame, ticker: str,
         'cloud_top': round(cloud_top, 2),
         'cloud_bottom': round(cloud_bottom, 2),
         'cloud_distance_pct': round(cloud_distance_pct, 2),
+        'future_cloud_gap_pct': future_cloud_gap_pct,
         'tk_cross_days_ago': tk_cross['days_ago'],
+        'tk_cross_reverted': bool(tk_cross.get('reverted')),
         'is_turnaround': bool(is_turnaround),
         'turnaround_reasons': turnaround_reasons,
         'change_5d_pct': round((df['Close'].iloc[-1] / df['Close'].iloc[-6] - 1) * 100, 2),
@@ -268,12 +309,3 @@ def evaluate(df: pd.DataFrame, ticker: str,
         scores=scores,
         metrics=metrics,
     )
-
-
-def _compute_rsi(close: pd.Series, period: int = 14) -> float:
-    delta = close.diff()
-    gains = delta.where(delta > 0, 0).rolling(period).mean()
-    losses = -delta.where(delta < 0, 0).rolling(period).mean()
-    rs = gains / losses
-    rsi = 100 - 100 / (1 + rs)
-    return float(rsi.iloc[-1]) if not rsi.empty and rsi.iloc[-1] == rsi.iloc[-1] else 50.0

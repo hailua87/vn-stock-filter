@@ -31,6 +31,7 @@ from typing import Optional
 import pandas as pd
 
 from .indicators_ext import ma, detect_recent_cross_up
+from ..indicators import rsi_last
 
 log = logging.getLogger(__name__)
 
@@ -214,7 +215,7 @@ def evaluate(df: pd.DataFrame, ticker: str, preset: str = 'long',
         return None
 
     # Common metrics
-    rsi14_val = _compute_rsi(close, 14)
+    rsi14_val = rsi_last(close, 14)
     vol_ma20 = float(df['Volume'].tail(20).mean())
     vol_ratio = last_volume / vol_ma20 if vol_ma20 > 0 else 0
 
@@ -252,12 +253,3 @@ def evaluate(df: pd.DataFrame, ticker: str, preset: str = 'long',
         scores=scores,
         metrics=metrics,
     )
-
-
-def _compute_rsi(close: pd.Series, period: int = 14) -> float:
-    delta = close.diff()
-    gains = delta.where(delta > 0, 0).rolling(period).mean()
-    losses = -delta.where(delta < 0, 0).rolling(period).mean()
-    rs = gains / losses
-    rsi = 100 - 100 / (1 + rs)
-    return float(rsi.iloc[-1]) if not rsi.empty and rsi.iloc[-1] == rsi.iloc[-1] else 50.0
