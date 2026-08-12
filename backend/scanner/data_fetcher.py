@@ -380,17 +380,17 @@ def fetch_ohlcv(ticker: str, start: str, end: str,
 def _last_trading_session(today: 'date') -> 'date':
     """
     Phiên giao dịch gần nhất tính đến `today` (chưa tính giờ trong ngày).
-    HOSE/HNX/UPCOM nghỉ thứ Bảy và Chủ Nhật (không xét nghỉ lễ — đơn giản hoá).
-    - Nếu today là Thứ Hai → phiên gần nhất = Thứ Sáu tuần trước.
-    - Nếu today là Thứ Bảy/Chủ Nhật → phiên gần nhất = Thứ Sáu cùng tuần.
-    - Còn lại: chính `today`.
-    Caller có trách nhiệm hiểu phiên T có thể CHƯA close (intraday).
+
+    FIX: bản cũ chỉ trừ T7/CN. Trong kỳ nghỉ Tết (5-7 phiên), 30/4 hay 2/9,
+    "phiên gần nhất" rơi vào ngày thường không có giao dịch → mọi mã bị gắn
+    StaleCache → Golden Cross và Ichimoku trả 0 tín hiệu suốt kỳ nghỉ, còn
+    workflow vẫn commit file rỗng đè lên dữ liệu tốt.
+
+    Nay dùng bảng nghỉ lễ HOSE (scanner/trading_calendar.py). Caller vẫn có
+    trách nhiệm hiểu phiên T có thể CHƯA đóng cửa (intraday).
     """
-    d = today
-    # weekday(): Mon=0..Sun=6
-    while d.weekday() >= 5:  # 5=Sat, 6=Sun
-        d = d - timedelta(days=1)
-    return d
+    from .trading_calendar import last_trading_session
+    return last_trading_session(today)
 
 
 def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
