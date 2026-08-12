@@ -1,10 +1,20 @@
 """
-Backtest framework — measure historical hit rate of the scanner.
+Backtest framework — BẢN CŨ, giữ lại cho tương thích ngược.
 
-A "successful signal" = within `lookahead_days` after signal date,
-the price closes above (signal_close * (1 + breakout_threshold)).
+⚠️  KHÔNG DÙNG ĐỂ RA QUYẾT ĐỊNH. Hãy dùng `scanner/backtest_engine.py`
+    (CLI: `python backend/run_backtest.py`).
+
+Module này đo `max_close` trong N phiên — tức Maximum Favorable Excursion, lợi
+nhuận nếu bán ĐÚNG ĐỈNH. Nó còn bỏ qua T+2, bỏ phí/thuế, không so với
+benchmark hay base rate, và gọi lại `evaluate()` cho từng phiên nên chậm tới
+mức không chạy nổi trên universe thật. Con số nó đưa ra luôn đẹp hơn thực tế.
+
+`backtest_engine` khắc phục toàn bộ những điểm trên và còn tính information
+coefficient của từng tiêu chí để hiệu chỉnh trọng số.
 """
 from __future__ import annotations
+
+import warnings as _warnings
 from dataclasses import dataclass
 from typing import Optional
 import pandas as pd
@@ -46,6 +56,12 @@ def backtest(df_all: pd.DataFrame,
         min_score: signal threshold
         warmup_days: history needed before generating first signal
     """
+    _warnings.warn(
+        "scanner.backtest.backtest() đo Maximum Favorable Excursion, bỏ qua T+2 "
+        "và phí giao dịch nên cho kết quả lạc quan giả tạo. "
+        "Dùng scanner.backtest_engine.run_backtest() thay thế.",
+        DeprecationWarning, stacklevel=2,
+    )
     cfg = {**DEFAULT_CONFIG, **(config or {})}
     df_all = df_all.copy()
     df_all['Date'] = pd.to_datetime(df_all['Date'])
