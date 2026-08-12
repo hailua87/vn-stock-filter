@@ -34,6 +34,13 @@ from collections import defaultdict
 
 import numpy as np
 
+try:
+    from scanner.price_units import VND_PER_QUOTE_UNIT
+except ImportError:  # chạy từ thư mục khác
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from scanner.price_units import VND_PER_QUOTE_UNIT
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 log = logging.getLogger('backtest')
 
@@ -62,7 +69,8 @@ def fetch_actual_price(ticker: str, target_date: str,
                        ohlcv_cache_dir: Path) -> Optional[float]:
     """
     Lấy giá thực tế tại target_date (hoặc ngày giao dịch gần nhất sau đó)
-    từ OHLCV parquet cache.
+    từ OHLCV parquet cache. Trả về **VND/cp** để so sánh được với fair_value
+    và current_price trong snapshot định giá (cache lưu theo nghìn VND).
 
     Args:
         ticker: Stock code
@@ -82,7 +90,7 @@ def fetch_actual_price(ticker: str, target_date: str,
             # Lấy giá ngày target hoặc 1-5 ngày sau (tránh weekend/holiday)
             window = df[(df['Date'] >= target) & (df['Date'] <= target + timedelta(days=7))]
             if not window.empty:
-                return float(window.iloc[0]['Close'])
+                return float(window.iloc[0]['Close']) * VND_PER_QUOTE_UNIT
         except Exception as e:
             log.debug(f"  {ticker} cache read failed: {e}")
     return None
