@@ -51,24 +51,75 @@ async function loadData() {
     state.signals = data.signals || [];
     state.metadata = data.metadata || {};
 
-    if (state.signals.length === 0) {
-      showDemoBanner();
-    }
+    checkDataQuality(data);
 
     populateIndustryFilter();
     updateTopbarStats(data);
     applyFiltersAndRender();
   } catch (e) {
     console.warn('Load failed:', e.message);
-    showDemoBanner();
+    showBanner('empty');
     document.getElementById('valuation-tbody').innerHTML =
       `<tr><td colspan="8" class="td-empty">Chưa có dữ liệu định giá.<br>
        Chạy <code>python backend/run_valuation.py --limit 100</code> trước.</td></tr>`;
   }
 }
 
-function showDemoBanner() {
-  document.getElementById('demo-banner').style.display = 'block';
+// Số ngày sau đó dữ liệu định giá bị coi là cũ. BCTC ra theo quý nhưng giá đổi
+// hàng ngày → upside trong file cũ hơn 8 ngày không còn phản ánh thị trường.
+const STALE_AFTER_DAYS = 8;
+
+/**
+ * Quyết định banner cảnh báo dựa trên chất lượng file dữ liệu.
+ *
+ * FIX: trước đây chỉ hiện banner khi signals rỗng, nên file demo (metadata.demo
+ * = true, 6 mã) hiển thị như dữ liệu thật — người dùng thấy "VHM STRONG BUY
+ * +85.8%" mà không biết đó là số minh hoạ.
+ */
+function checkDataQuality(data) {
+  if (data.metadata?.demo) return showBanner('demo');
+  if (!state.signals.length) return showBanner('empty');
+
+  const ageDays = dataAgeDays(data.generated_at);
+  if (ageDays !== null && ageDays > STALE_AFTER_DAYS) {
+    return showBanner('stale', ageDays);
+  }
+  showBanner(null);
+}
+
+function dataAgeDays(generatedAt) {
+  if (!generatedAt) return null;
+  const t = new Date(generatedAt).getTime();
+  if (Number.isNaN(t)) return null;
+  return Math.floor((Date.now() - t) / 86400000);
+}
+
+function showBanner(kind, ageDays) {
+  const el = document.getElementById('demo-banner');
+  if (!el) return;
+  el.classList.remove('demo-banner--danger', 'demo-banner--warn');
+
+  if (kind === null) {
+    el.style.display = 'none';
+    return;
+  }
+
+  if (kind === 'demo') {
+    el.classList.add('demo-banner--danger');
+    el.innerHTML = '⚠ <strong>DỮ LIỆU DEMO</strong> — các mức định giá dưới đây là số minh hoạ ' +
+      'để trình bày giao diện, <strong>không phải kết quả định giá thật</strong>. ' +
+      'Chạy <code>python backend/run_valuation.py --limit 100</code> để tạo dữ liệu thật.';
+  } else if (kind === 'stale') {
+    el.classList.add('demo-banner--warn');
+    el.innerHTML = `⚠ Dữ liệu định giá đã <strong>${ageDays} ngày tuổi</strong> — giá thị trường ` +
+      'đã thay đổi nên upside hiển thị có thể không còn đúng. Hãy chạy lại ' +
+      '<code>run_valuation.py</code>.';
+  } else {
+    el.innerHTML = '⚠ Chưa có dữ liệu định giá — hãy chạy ' +
+      '<code>python backend/run_valuation.py --limit 100</code> để tạo file ' +
+      '<code>web/data/valuation/latest.json</code>.';
+  }
+  el.style.display = 'block';
 }
 
 function updateTopbarStats(data) {

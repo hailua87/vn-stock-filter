@@ -52,10 +52,12 @@ const STRATEGIES = {
     maxScore: 5,
     criteria: [
       { key: 'ich_tk_bullish',        name: 'Tenkan > Kijun (TK bullish)',  cat: 'trend' },
-      { key: 'ich_recent_tk_cross',   name: 'TK vừa cắt lên (≤5 phiên) ⭐', cat: 'squeeze' },
+      // Không cộng điểm (trùng với TK bullish) — giữ làm nhãn chất lượng ⭐
+      { key: 'ich_recent_tk_cross',   name: 'TK vừa cắt lên (≤5 phiên) ⭐', cat: 'squeeze', noScore: true },
       { key: 'ich_price_above_cloud', name: 'Giá trên Cloud',               cat: 'trend' },
       { key: 'ich_cloud_bullish',     name: 'Cloud bullish (A > B)',        cat: 'trend' },
       { key: 'ich_chikou_free',       name: 'Chikou thoát kháng cự',        cat: 'flow' },
+      { key: 'ich_future_cloud_bullish', name: 'Mây tương lai bullish (+26)', cat: 'trend' },
     ],
   },
   combined: {
@@ -319,6 +321,9 @@ async function loadCombinedData(silent = false) {
     if (metadata.universe_size && metadata.universe_size > universeSize) universeSize = metadata.universe_size;
     if (metadata.demo) demoFlag = true;
     if (metadata.scan_date) scanDate = metadata.scan_date;
+    if (metadata.market_context && metadata.market_context.available) {
+      renderMarketContext(metadata.market_context, metadata.intraday);
+    }
     // Update count in filter UI
     const cntEl = document.getElementById(`cnt-${key}`);
     if (cntEl) cntEl.textContent = signals.length;
@@ -1815,4 +1820,49 @@ function bindAnalyzerEvents() {
       analyzeTicker(t);
     });
   });
+}
+
+// ════════════════════════════════════════════════════════════
+// BỐI CẢNH THỊ TRƯỜNG (market regime + breadth)
+// ════════════════════════════════════════════════════════════
+// Vì sao quan trọng: phần lớn tín hiệu breakout thất bại khi VN-Index dưới
+// MA50/MA200. Trước đây dashboard hiển thị "MUA MẠNH 8-12% NAV" giống hệt nhau
+// bất kể thị trường đang uptrend hay downtrend.
+function renderMarketContext(ctx, isIntraday) {
+  const el = document.getElementById('market-context');
+  if (!el || !ctx || !ctx.available) return;
+
+  const cls = {
+    risk_on: 'mc-on',
+    neutral: 'mc-neutral',
+    risk_off: 'mc-off',
+  }[ctx.regime] || 'mc-neutral';
+
+  const icon = { risk_on: '🟢', neutral: '🟡', risk_off: '🔴' }[ctx.regime] || '⚪';
+  const breadth = ctx.breadth && ctx.breadth.pct_above_ma50 != null
+    ? `${ctx.breadth.pct_above_ma50}% mã trên MA50`
+    : 'độ rộng: —';
+
+  const sizing = ctx.position_size_multiplier < 1
+    ? `<span class="mc-warn">Gợi ý giảm tỷ trọng còn ~${Math.round(ctx.position_size_multiplier * 100)}% mức thường</span>`
+    : '';
+
+  const intradayTag = isIntraday
+    ? '<span class="mc-intraday">Bản giữa phiên — khối lượng chưa đủ ngày</span>'
+    : '';
+
+  el.className = `market-context ${cls}`;
+  el.innerHTML = `
+    <span class="mc-icon">${icon}</span>
+    <span class="mc-label">${ctx.label}</span>
+    <span class="mc-stats">
+      VN-Index ${Number(ctx.close).toLocaleString('vi-VN')}
+      · MA50 ${ctx.ma50 ? Number(ctx.ma50).toLocaleString('vi-VN') : '—'}
+      · 20 phiên ${ctx.change_20d_pct > 0 ? '+' : ''}${ctx.change_20d_pct}%
+      · ${breadth}
+    </span>
+    ${sizing}
+    ${intradayTag}
+  `;
+  el.style.display = 'flex';
 }

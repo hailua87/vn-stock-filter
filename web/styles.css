@@ -2174,3 +2174,50 @@ kbd {
   border-radius: 3px;
   border-left: 2px solid var(--up);
 }
+
+/* ─── Miễn trừ trách nhiệm (bắt buộc: UI có đưa ra gợi ý tỷ trọng NAV) ─── */
+.site-disclaimer {
+  padding: 14px 20px 20px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-dim, #8b93a7);
+  background: var(--bg-base);
+  border-top: 1px solid var(--border, #2a3040);
+  text-align: center;
+}
+
+.site-disclaimer strong { color: var(--text, #e6e9ef); }
+
+/* ─── Băng bối cảnh thị trường ─── */
+.market-context {
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 16px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border, #2a3040);
+  background: var(--bg-elev-1, #1f242e);
+}
+
+.market-context .mc-icon { font-size: 13px; }
+.market-context .mc-label { font-weight: 600; color: var(--text, #e6e9ef); }
+.market-context .mc-stats { color: var(--text-dim, #8b93a7); font-family: var(--font-mono); }
+
+.market-context.mc-on      { border-left: 3px solid #00c853; }
+.market-context.mc-neutral { border-left: 3px solid #ffb300; }
+.market-context.mc-off     { border-left: 3px solid #ef5350; }
+
+.market-context .mc-warn {
+  color: #ffcc80;
+  background: rgba(255, 179, 0, .12);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.market-context .mc-intraday {
+  color: #90caf9;
+  background: rgba(33, 150, 243, .12);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
