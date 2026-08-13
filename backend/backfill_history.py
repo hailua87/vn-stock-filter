@@ -166,6 +166,71 @@ def preflight() -> None:
         log.warning("=" * 70)
 
 
+def probe_tickers(tickers: list[str], delay: float = 2.0,
+                  out_path: Path | None = None) -> dict:
+    """
+    Kiểm chứng nhanh: mã nào thực sự có dữ liệu giá?
+
+    Dùng cho danh sách mã huỷ niêm yết soạn tay — thay vì tin vào danh sách,
+    để máy thử lấy 90 phiên gần nhất VÀ một đoạn trong quá khứ, rồi phân loại:
+
+      alive    : còn dữ liệu gần đây (chưa rời sàn, hoặc đã chuyển UPCoM)
+      historic : chỉ có dữ liệu quá khứ → ĐÚNG là mã đã rời sàn, RẤT có giá trị
+                 cho việc chống survivorship bias
+      none     : không có dữ liệu nào → mã sai hoặc đã huỷ đăng ký hoàn toàn
+
+    Mỗi mã tốn 2 request nên với danh sách ~100 mã mất khoảng 7 phút.
+    """
+    today = datetime.now()
+    recent_start = today - timedelta(days=120)
+    past_start = today - timedelta(days=365 * 4)
+    past_end = past_start + timedelta(days=180)
+
+    result = {'alive': [], 'historic': [], 'none': []}
+
+    for i, tk in enumerate(tickers, 1):
+        has_recent = has_past = False
+        try:
+            df = fetch_ohlcv(tk, str(recent_start.date()), str(today.date()))
+            has_recent = df is not None and not df.empty
+        except Exception:
+            pass
+        time.sleep(delay)
+
+        if not has_recent:
+            try:
+                df = fetch_ohlcv(tk, str(past_start.date()), str(past_end.date()))
+                has_past = df is not None and not df.empty
+            except Exception:
+                pass
+            time.sleep(delay)
+
+        bucket = 'alive' if has_recent else ('historic' if has_past else 'none')
+        result[bucket].append(tk)
+        log.info(f"  [{i}/{len(tickers)}] {tk:<6} → {bucket}")
+
+    log.info("=" * 70)
+    log.info(f"alive    : {len(result['alive'])} mã — còn giao dịch (có thể đã chuyển UPCoM)")
+    log.info(f"historic : {len(result['historic'])} mã — ĐÃ RỜI SÀN, đúng thứ cần cho backfill")
+    log.info(f"none     : {len(result['none'])} mã — không có dữ liệu (mã sai hoặc huỷ hoàn toàn)")
+
+    if result['none']:
+        log.info(f"  Không có dữ liệu: {', '.join(result['none'])}")
+
+    if out_path:
+        usable = sorted(result['alive'] + result['historic'])
+        out_path.write_text(
+            "# Danh sách đã KIỂM CHỨNG bằng máy — chỉ gồm mã thực sự có dữ liệu giá.\n"
+            f"# Sinh tự động bởi backfill_history.py --probe ngày {today.date()}\n"
+            f"# alive={len(result['alive'])} historic={len(result['historic'])} "
+            f"(bỏ {len(result['none'])} mã không có dữ liệu)\n\n"
+            + "\n".join(usable) + "\n",
+            encoding='utf-8')
+        log.info(f"  Danh sách sạch → {out_path}")
+
+    return result
+
+
 def load_extra_tickers(path: str | None) -> list[str]:
     """Đọc danh sách mã bổ sung (thường là mã đã huỷ niêm yết)."""
     if not path:
@@ -197,10 +262,32 @@ def main():
     p.add_argument('--no-resume', dest='resume', action='store_false')
     p.add_argument('--tickers', type=str, default=None,
                    help='Chỉ backfill danh sách này (phân tách bằng dấu phẩy)')
+    p.add_argument('--probe', action='store_true',
+                   help='Chỉ KIỂM CHỨNG danh sách --extra-tickers (mã nào có dữ liệu '
+                        'thật), không backfill. Chạy sau khi backfill chính xong để '
+                        'tránh tranh chấp quota.')
     args = p.parse_args()
 
     preflight()
     setup_api_key()
+
+    # ── Chế độ kiểm chứng danh sách ──────────────────────────────────────
+    if args.probe:
+        candidates = load_extra_tickers(args.extra_tickers)
+        if args.tickers:
+            candidates += [t.strip().upper() for t in args.tickers.split(',')]
+        candidates = list(dict.fromkeys(candidates))
+        if not candidates:
+            log.error("--probe cần --extra-tickers hoặc --tickers")
+            sys.exit(1)
+        log.info(f"Kiểm chứng {len(candidates)} mã "
+                 f"(~{len(candidates) * 2 * args.delay / 60:.0f} phút)...")
+        out = (Path(args.extra_tickers).with_name(
+                   Path(args.extra_tickers).stem + '_verified.txt')
+               if args.extra_tickers else None)
+        probe_tickers(candidates, args.delay, out)
+        return
+
     end = datetime.now()
     start = end - timedelta(days=int(args.years * 365))
     log.info(f"Backfill {args.years} năm: {start.date()} → {end.date()}")

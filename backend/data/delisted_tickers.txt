@@ -1,0 +1,152 @@
+# ═══════════════════════════════════════════════════════════════════════
+# MÃ ĐÃ HUỶ NIÊM YẾT / ĐÌNH CHỈ / RỜI SÀN — dùng chống survivorship bias
+# ═══════════════════════════════════════════════════════════════════════
+#
+# CẢNH BÁO VỀ ĐỘ TIN CẬY:
+#   Danh sách này được soạn từ trí nhớ, KHÔNG phải từ nguồn tra cứu chính thức.
+#   Chắc chắn có sai sót về mã lẫn về năm. PHẢI đối chiếu với thông báo huỷ
+#   niêm yết của HOSE (hose.vn) và HNX (hnx.vn) trước khi dùng kết quả nghiên
+#   cứu vào quyết định thật.
+#
+# VÌ SAO SAI SÓT Ở ĐÂY ÍT NGUY HIỂM:
+#   - Mã sai / không tồn tại  → fetch thất bại, ghi 'fail' vào log, hết.
+#   - Mã bị BỎ SÓT            → survivorship bias, làm mọi thống kê đẹp lên
+#                               một cách giả tạo.
+#   Bất đối xứng đó là lý do danh sách cố ý rộng hơn là hẹp.
+#
+# LƯU Ý QUAN TRỌNG:
+#   Phần lớn mã huỷ niêm yết HOSE/HNX được chuyển xuống UPCoM và VẪN GIAO DỊCH.
+#   Với mục đích backfill, điều đó là TỐT: dữ liệu giá vẫn lấy được và chuỗi
+#   lịch sử vẫn phản ánh đúng kết cục của cổ đông. Chỉ những mã bị huỷ đăng ký
+#   giao dịch hoàn toàn mới không có dữ liệu.
+#
+# CÁCH KIỂM CHỨNG BẰNG MÁY (chạy SAU khi backfill chính đã xong, tránh
+# tranh chấp quota 60 req/phút):
+#   python backend/backfill_history.py --probe --extra-tickers backend/data/delisted_tickers.txt
+#   → in ra mã nào có dữ liệu, mã nào không, và ghi file *_verified.txt
+#
+# SỬ DỤNG:
+#   python backend/backfill_history.py --years 6 --limit 400 \
+#          --extra-tickers backend/data/delisted_tickers.txt
+#
+# ═══════════════════════════════════════════════════════════════════════
+
+
+# ───────────────────────────────────────────────────────────────────────
+# NHÓM A — Độ tin cậy CAO
+# Các vụ được đưa tin rộng rãi, tôi khá chắc về sự kiện (dù có thể sai năm).
+# ───────────────────────────────────────────────────────────────────────
+
+# Hệ sinh thái FLC — huỷ niêm yết bắt buộc 2022-2023
+FLC
+ROS
+HAI
+AMD
+KLF
+ART
+GAB
+
+# Nhóm Louis Holdings — 2022-2023
+TGG
+BII
+VKC
+SMT
+
+# Các vụ lớn 2024-2025
+POM
+HNG
+HBC
+ITA
+LDG
+DLG
+
+
+# ───────────────────────────────────────────────────────────────────────
+# NHÓM B — Độ tin cậy TRUNG BÌNH
+# Tôi nhớ có vấn đề (huỷ niêm yết, đình chỉ, kiểm toán từ chối, chuyển sàn)
+# nhưng không chắc về thời điểm hoặc hình thức xử lý.
+# ───────────────────────────────────────────────────────────────────────
+
+FTM
+PVX
+VIS
+TDH
+VNE
+PSH
+SJF
+TNI
+APC
+KSA
+CDO
+HAR
+PXS
+PXT
+PVV
+KSH
+VHG
+TTB
+MCG
+PPI
+NVT
+ATG
+DAH
+HHS
+QCG
+RIC
+TVC
+SDU
+KHL
+BCG
+TCD
+TGD
+
+
+# ───────────────────────────────────────────────────────────────────────
+# NHÓM C — CẦN KIỂM TRA
+# Nhớ mơ hồ. Rất có thể sai. Giữ lại vì chi phí của mã sai gần như bằng 0,
+# nhưng đừng coi việc mã xuất hiện ở đây là bằng chứng nó đã rời sàn.
+# ───────────────────────────────────────────────────────────────────────
+
+HU3
+KAC
+DRH
+PTL
+LMH
+FID
+SPI
+BAX
+VMD
+DPS
+KVC
+HKB
+PVL
+PVR
+SGO
+KSK
+DCS
+CTC
+PGT
+TIX
+UDC
+VID
+LCM
+JVC
+TTF
+HOT
+YBC
+PVA
+VE1
+
+
+# ───────────────────────────────────────────────────────────────────────
+# GHI CHÚ BỔ SUNG DANH SÁCH
+# ───────────────────────────────────────────────────────────────────────
+# Ngoài việc tra cứu HOSE/HNX, còn hai cách máy móc để tìm mã bị bỏ sót:
+#
+# 1. So sánh universe theo thời gian: nếu bạn có snapshot danh sách mã của
+#    các năm trước, mã có ở snapshot cũ mà không có ở snapshot mới chính là
+#    ứng viên. Từ nay `run_daily.py` lưu total_scanned nhưng chưa lưu danh
+#    sách mã — cân nhắc bổ sung để 5 năm nữa có dữ liệu này.
+#
+# 2. Duyệt web/data/archive/*.json: mã từng xuất hiện trong kết quả scan cũ
+#    nhưng không còn trong universe hiện tại.
