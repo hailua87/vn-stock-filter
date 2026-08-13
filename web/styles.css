@@ -2305,3 +2305,94 @@ kbd {
     min-width: 44px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   QUY ƯỚC MÀU BẢNG ĐIỆN VIỆT NAM
+   Nhà đầu tư VN đọc bảng điện theo quy ước: TÍM = trần, XANH LAM = sàn,
+   VÀNG = tham chiếu. Không hiển thị lớp thông tin này là bỏ mất một tầng dữ
+   liệu mà mọi người dùng bản địa đều mong đợi — và quan trọng hơn: mã dư mua
+   trần thì KHÔNG MUA ĐƯỢC, nên tín hiệu breakout ở đó là tín hiệu không thực
+   hiện được.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  --limit-up:   #c77dff;   /* tím — giá trần */
+  --limit-down: #4dd0e1;   /* xanh lam — giá sàn */
+  --limit-ref:  #ffd54f;   /* vàng — giá tham chiếu */
+}
+
+.limit-up   { color: var(--limit-up);   font-weight: 700; }
+.limit-down { color: var(--limit-down); font-weight: 700; }
+.limit-ref  { color: var(--limit-ref); }
+
+.limit-lock {
+  font-size: 9px;
+  margin-left: 3px;
+  opacity: .85;
+  cursor: help;
+}
+
+.legend-inline .lg-sep {
+  opacity: .35;
+  margin: 0 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ƯU TIÊN CỘT TRÊN MÀN HÌNH HẸP
+   Bảng 15 cột trên màn 375px là cuộn ngang vô tận. Thay vì đổi sang card
+   layout (phá vỡ khả năng quét nhanh theo cột — thứ khiến bảng có giá trị),
+   ta giấu dần các cột ít quan trọng theo 4 mức ưu tiên:
+
+     (không nhãn) — luôn hiện : MÃ · GIÁ · ĐIỂM · HẠNG
+     prio-1       — ẩn cuối   : ±1D  (trần/sàn — thông tin giao dịch cốt lõi)
+     prio-2                   : KLGD
+     prio-3                   : SÀN · ±5D · GTGD · VOL× · RSI
+     prio-4       — ẩn trước  : # · S · R · TIÊU CHÍ
+
+   Chi tiết đầy đủ vẫn xem được ở panel bên phải khi chạm vào hàng.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .signal-table .prio-4 { display: none; }
+}
+
+@media (max-width: 860px) {
+  .signal-table .prio-3 { display: none; }
+}
+
+@media (max-width: 600px) {
+  .signal-table .prio-2 { display: none; }
+}
+
+/* Dưới 420px chỉ còn: MÃ · GIÁ · ±1D · ĐIỂM · HẠNG — vừa đúng một màn điện thoại */
+@media (max-width: 420px) {
+  .signal-table { font-size: 12px; }
+  .signal-table th,
+  .signal-table td { padding-left: 6px; padding-right: 6px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THỐNG KÊ CHUYỂN TỪ TOPBAR XUỐNG ĐẦU BẢNG
+   Topbar cũ chứa ~15 phần tử trên một hàng (brand + LIVE + 3 chỉ số + 6 tab +
+   ô tìm + link + help + trạng thái + đồng hồ) — chen chúc ở màn 1366px vốn rất
+   phổ biến. Ba chỉ số A+/mã quét/ngày thuộc về NGỮ CẢNH KẾT QUẢ nên đặt ngay
+   cạnh "N tín hiệu" là đúng chỗ hơn, và giải phóng topbar cho điều hướng.
+   ═══════════════════════════════════════════════════════════════════════ */
+.head-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 14px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.head-stats b {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.head-stats .hs-sep { opacity: .3; }
+
+@media (max-width: 700px) {
+  .head-stats { display: none; }
+}

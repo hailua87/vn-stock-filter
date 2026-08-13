@@ -227,7 +227,15 @@ def evaluate(df: pd.DataFrame, ticker: str, preset: str = 'long',
     except Exception:
         sr = {'supports': [], 'resistances': [], 'swing': None}
 
+    from ..price_limits import classify_price_limit
+    _exch = df['Exchange'].iloc[-1] if 'Exchange' in df.columns else None
+    limit_info = classify_price_limit(df, _exch)
+
     metrics = {
+        'change_1d_pct': limit_info['change_1d_pct'],
+        'limit_status': limit_info['limit_status'],
+        'limit_locked': limit_info['limit_locked'],
+        'tradable_warning': limit_info['tradable_warning'],
         'preset_name': p['name'],
         'cross_days_ago': cross_info['days_ago'],
         'fast_ma': round(float(fast_ma.iloc[-1]), 2),

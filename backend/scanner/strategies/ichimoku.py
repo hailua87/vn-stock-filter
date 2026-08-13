@@ -277,7 +277,15 @@ def evaluate(df: pd.DataFrame, ticker: str,
                         turnaround_reasons.append(f'Volume {vol_ratio:.1f}× MA20')
                         is_turnaround = True
 
+    from ..price_limits import classify_price_limit
+    _exch = df['Exchange'].iloc[-1] if 'Exchange' in df.columns else None
+    limit_info = classify_price_limit(df, _exch)
+
     metrics = {
+        'change_1d_pct': limit_info['change_1d_pct'],
+        'limit_status': limit_info['limit_status'],
+        'limit_locked': limit_info['limit_locked'],
+        'tradable_warning': limit_info['tradable_warning'],
         'tenkan': round(last_tenkan, 2),
         'kijun': round(last_kijun, 2),
         'senkou_a': round(last_senkou_a, 2),

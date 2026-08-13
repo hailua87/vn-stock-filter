@@ -283,6 +283,13 @@ async function switchStrategy(strategy) {
   const dashboard = document.getElementById('dashboard');
   const analyzerView = document.getElementById('analyzer-view');
 
+  // GỘP HAI Ô TÌM KIẾM: trước đây ô tìm của Analyzer luôn nằm trên topbar,
+  // cạnh ô "Tìm mã" trong sidebar — hai ô trông giống nhau nhưng hành vi khác
+  // hẳn (một cái mở phân tích chi tiết, một cái lọc bảng), người dùng không
+  // biết dùng cái nào. Nay ô Analyzer chỉ xuất hiện đúng lúc nó có tác dụng.
+  const analyzerBox = document.querySelector('.topbar-analyzer');
+  if (analyzerBox) analyzerBox.hidden = (strategy !== 'analyzer');
+
   // Toggle layout mode
   if (strategy === 'analyzer') {
     dashboard.classList.add('analyzer-mode');
@@ -482,7 +489,7 @@ async function loadLatestFirst() {
   } catch (e) {
     console.error('Load latest failed:', e);
     document.getElementById('signal-rows').innerHTML =
-      `<tr><td colspan="14" class="empty">Không tải được dữ liệu: ${e.message}</td></tr>`;
+      `<tr><td colspan="15" class="empty">Không tải được dữ liệu: ${e.message}</td></tr>`;
   }
 }
 
@@ -834,7 +841,8 @@ function renderRunBadge() {
 function render() {
   state.filtered = applyFilters();
   document.getElementById('result-count').textContent = state.filtered.length;
-  document.getElementById('stat-total').textContent = state.raw.length;
+  // `stat-total` da duoc go: no trung lap voi `result-count` ngay tren bang.
+  document.getElementById('stat-total')?.replaceChildren(String(state.raw.length));
   document.getElementById('stat-aplus').textContent =
     state.raw.filter(s => s.rating === 'A+').length;
 
@@ -947,7 +955,7 @@ function applyFilters() {
 function renderRows() {
   const tbody = document.getElementById('signal-rows');
   if (!state.filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="14" class="empty">Không có tín hiệu khớp bộ lọc</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="15" class="empty">Không có tín hiệu khớp bộ lọc</td></tr>`;
     return;
   }
   tbody.innerHTML = state.filtered.map((s, i) => renderRow(s, i + 1)).join('');
@@ -960,6 +968,48 @@ function renderRows() {
       if (sig) openDetail(sig);
     });
   });
+}
+
+
+/**
+ * Ô %1D với màu theo quy ước bảng điện Việt Nam.
+ *
+ * Vì sao quan trọng hơn thẩm mỹ: mã đang dư mua TRẦN thì bạn KHÔNG MUA ĐƯỢC.
+ * Một "tín hiệu breakout" trên mã trần cứng là tín hiệu không thực hiện được.
+ * Tương tự, mã nằm sàn thì không thoát được hàng — rủi ro thực tế lớn hơn
+ * nhiều so với những gì mức cắt lỗ trên giấy thể hiện.
+ *
+ * Quy ước: TÍM = trần · XANH LAM = sàn · VÀNG = tham chiếu · xanh/đỏ = tăng/giảm
+ */
+function renderChange1D(s) {
+  const v = s.m_change_1d_pct;
+  if (v === null || v === undefined) return '<span class="dim">—</span>';
+
+  const status = s.m_limit_status || 'normal';
+  const locked = s.m_limit_locked;
+  const sign = v > 0 ? '+' : '';
+  const text = `${sign}${Number(v).toFixed(2)}%`;
+
+  const cls = {
+    ceiling: 'limit-up',
+    floor: 'limit-down',
+    reference: 'limit-ref',
+  }[status] || (v > 0 ? 'up' : v < 0 ? 'down' : 'flat');
+
+  const mark = status === 'ceiling' ? '▲' : status === 'floor' ? '▼' : '';
+  const lock = locked && (status === 'ceiling' || status === 'floor')
+    ? '<span class="limit-lock" title="Khoá cứng — cả phiên chỉ khớp một mức giá">🔒</span>'
+    : '';
+  const title = s.m_tradable_warning ? ` title="${escapeAttr(s.m_tradable_warning)}"` : '';
+
+  return `<span class="${cls}"${title}>${mark}${text}</span>${lock}`;
+}
+
+/** Thoát ký tự cho thuộc tính HTML — dữ liệu tuy tự sinh nhưng mã đến từ API ngoài. */
+function escapeAttr(str) {
+  return String(str).replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
 }
 
 function renderRow(s, idx) {
@@ -1006,7 +1056,8 @@ function renderRow(s, idx) {
       <td class="ticker-with-badges"><span class="ticker-cell">${s.ticker}</span>${eventFlag}<span class="ticker-badges">${badgesInline}</span></td>
       <td><span class="exchange-cell">${s.exchange}</span></td>
       <td class="num">${fmtPrice(s.close)}</td>
-      <td class="num ${changeClass}">${sign}${change.toFixed(2)}%</td>
+      <td class="num prio-1">${renderChange1D(s)}</td>
+      <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
       <td class="num">${fmtVolume(s.volume)}</td>
       <td class="num">${fmtValue(s.close, s.volume)}</td>
       <td class="num">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
@@ -1043,7 +1094,8 @@ function renderRow(s, idx) {
     <td><span class="ticker-cell">${s.ticker}</span>${tkCrossFlag}${turnaroundFlag}${eventFlag}</td>
     <td><span class="exchange-cell">${s.exchange}</span></td>
     <td class="num">${fmtPrice(s.close)}</td>
-    <td class="num ${changeClass}">${sign}${change.toFixed(2)}%</td>
+    <td class="num prio-1">${renderChange1D(s)}</td>
+    <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
     <td class="num">${fmtVolume(s.volume)}</td>
     <td class="num">${fmtValue(s.close, s.volume)}</td>
     <td class="num">${(s.m_vol_ratio || 0).toFixed(2)}×</td>

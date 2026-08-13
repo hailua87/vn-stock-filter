@@ -295,7 +295,17 @@ def evaluate(df: pd.DataFrame, ticker: str,
         log.warning(f"  {ticker}: Fibo SR calculation failed: {e}")
         sr = {'supports': [], 'resistances': [], 'swing': None}
 
+    # Trạng thái trần/sàn: mã đang dư mua trần thì KHÔNG MUA ĐƯỢC, nên một
+    # "tín hiệu breakout" ở đó là tín hiệu không thực hiện được.
+    from .price_limits import classify_price_limit
+    exchange_val = df['Exchange'].iloc[-1] if 'Exchange' in df.columns else None
+    limit_info = classify_price_limit(df, exchange_val)
+
     metrics = {
+        'change_1d_pct': limit_info['change_1d_pct'],
+        'limit_status': limit_info['limit_status'],
+        'limit_locked': limit_info['limit_locked'],
+        'tradable_warning': limit_info['tradable_warning'],
         'change_5d_pct': round((close.iloc[-1] / close.iloc[-6] - 1) * 100, 2),
         'vol_ratio': round(last['Volume'] / last['VolMA20'], 2) if last['VolMA20'] > 0 else 0,
         'rsi14': round(last['RSI14'], 1),

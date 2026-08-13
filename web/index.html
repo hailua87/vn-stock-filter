@@ -32,27 +32,6 @@
     </div>
   </div>
 
-  <div class="topbar-center">
-    <div class="stat-inline">
-      <span class="stat-num" id="stat-total">—</span>
-      <span class="stat-lbl">tín hiệu</span>
-      <span class="stat-date" id="stat-date">—</span>
-      <!-- FIX (2026-05-26): badge cho biết data từ run intraday (12:00 ICT)
-           hay EOD (17:00 ICT). Hidden mặc định; JS show + set class theo metadata. -->
-      <span class="run-badge" id="run-badge" hidden></span>
-    </div>
-    <span class="stat-sep">·</span>
-    <div class="stat-inline">
-      <span class="stat-num stat-aplus" id="stat-aplus">—</span>
-      <span class="stat-lbl">A+</span>
-    </div>
-    <span class="stat-sep">·</span>
-    <div class="stat-inline">
-      <span class="stat-num stat-dim" id="stat-scanned">—</span>
-      <span class="stat-lbl">mã quét</span>
-    </div>
-  </div>
-
   <nav class="strategy-tabs">
     <button class="strat-tab active" data-strategy="pre_breakout">Pre-Breakout</button>
     <button class="strat-tab" data-strategy="golden_cross_long">GC dài hạn</button>
@@ -62,7 +41,7 @@
     <button class="strat-tab strat-tab-analyzer" data-strategy="analyzer" title="Phân tích chi tiết 1 mã qua mọi chiến lược"><span aria-hidden="true">🔍</span> Phân tích mã</button>
   </nav>
 
-  <div class="topbar-analyzer">
+  <div class="topbar-analyzer" hidden>
     <input type="text" id="analyzer-search" class="analyzer-input"
            placeholder="🔍 Nhập mã để phân tích (vd: FPT, VNM, HPG)..."
            maxlength="10" autocomplete="off">
@@ -212,6 +191,14 @@
     <div class="list-head">
       <div class="list-head-left">
         <span class="result-count" role="status" aria-live="polite" aria-atomic="true"><span id="result-count">—</span> tín hiệu</span>
+        <span class="head-stats">
+          <span class="hs-item"><b class="stat-aplus" id="stat-aplus">—</b> A+</span>
+          <span class="hs-sep">·</span>
+          <span class="hs-item"><b id="stat-scanned">—</b> mã quét</span>
+          <span class="hs-sep">·</span>
+          <span class="hs-item" id="stat-date">—</span>
+          <span class="run-badge" id="run-badge" hidden></span>
+        </span>
         <span class="event-warn" id="event-warn" style="display:none">
           ⚑ <span id="event-count">0</span> mã có sự kiện
         </span>
@@ -222,32 +209,37 @@
           <span class="lg-dot" style="background: var(--cat-flow)"></span> Dòng tiền
           <span class="lg-dot" style="background: var(--cat-trend)"></span> Trend
           <span class="lg-dot" style="background: var(--cat-event)"></span> Sự kiện
+          <span class="lg-sep">|</span>
+          <span class="lg-dot" style="background: var(--limit-up)"></span> Trần
+          <span class="lg-dot" style="background: var(--limit-down)"></span> Sàn
         </div>
         <button class="btn-ghost" id="export-csv">↓ CSV</button>
       </div>
     </div>
     <div class="table-wrap">
       <table class="signal-table" id="signal-table">
-        <th scope="col"ead>
+        <thead>
           <tr>
-            <th scope="col" class="th-idx">#</th>
+            <th scope="col" class="th-idx prio-4">#</th>
             <th scope="col" class="th-ticker">MÃ</th>
-            <th scope="col" class="th-exch">SÀN</th>
+            <th scope="col" class="th-exch prio-3">SÀN</th>
             <th scope="col" class="num sortable" data-sort="close">GIÁ <span class="sort-ind"></span></th>
-            <th scope="col" class="num sortable" data-sort="m_change_5d_pct">±5D <span class="sort-ind"></span></th>
-            <th scope="col" class="num sortable" data-sort="volume">KLGD <span class="sort-ind"></span></th>
-            <th scope="col" class="num sortable" data-sort="_gtgd">GTGD <span class="sort-ind"></span></th>
-            <th scope="col" class="num sortable" data-sort="m_vol_ratio">VOL× <span class="sort-ind"></span></th>
-            <th scope="col" class="num sortable" data-sort="m_rsi14">RSI <span class="sort-ind"></span></th>
-            <th scope="col" class="num" title="Hỗ trợ Fibo">S</th>
-            <th scope="col" class="num" title="Kháng cự Fibo">R</th>
-            <th scope="col" class="th-criteria" id="th-criteria-label">TIÊU CHÍ</th>
+            <th scope="col" class="num sortable prio-1" data-sort="m_change_1d_pct"
+                title="Thay đổi so với phiên trước. Tím = trần, lam = sàn, vàng = tham chiếu">±1D <span class="sort-ind"></span></th>
+            <th scope="col" class="num sortable prio-3" data-sort="m_change_5d_pct">±5D <span class="sort-ind"></span></th>
+            <th scope="col" class="num sortable prio-2" data-sort="volume">KLGD <span class="sort-ind"></span></th>
+            <th scope="col" class="num sortable prio-3" data-sort="_gtgd">GTGD <span class="sort-ind"></span></th>
+            <th scope="col" class="num sortable prio-3" data-sort="m_vol_ratio">VOL× <span class="sort-ind"></span></th>
+            <th scope="col" class="num sortable prio-3" data-sort="m_rsi14">RSI <span class="sort-ind"></span></th>
+            <th scope="col" class="num prio-4" title="Hỗ trợ Fibo">S</th>
+            <th scope="col" class="num prio-4" title="Kháng cự Fibo">R</th>
+            <th scope="col" class="th-criteria prio-4" id="th-criteria-label">TIÊU CHÍ</th>
             <th scope="col" class="num sortable" data-sort="total_score" id="th-score-label">ĐIỂM <span class="sort-ind"></span></th>
             <th scope="col" class="th-rating">HẠNG</th>
           </tr>
         </thead>
         <tbody id="signal-rows">
-          <tr><td colspan="14" class="empty">Đang tải...</td></tr>
+          <tr><td colspan="15" class="empty">Đang tải...</td></tr>
         </tbody>
       </table>
     </div>
