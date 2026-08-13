@@ -2396,3 +2396,44 @@ kbd {
 @media (max-width: 700px) {
   .head-stats { display: none; }
 }
+
+/* ─── Kế hoạch vào lệnh: nói rõ kịch bản, từ chối khi R:R xấu ─── */
+.rec-plan { margin: 10px 0; }
+
+.plan-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px; flex-wrap: wrap;
+}
+
+.plan-mode {
+  font-size: 10px; font-weight: 700; letter-spacing: .04em;
+  padding: 3px 8px; border-radius: 3px;
+}
+
+.plan-breakout { background: rgba(38,166,154,.18); color: var(--up); }
+.plan-pullback { background: rgba(79,195,247,.16); color: var(--focus); }
+.plan-note     { font-size: 11px; color: var(--text-dim); }
+
+/* Kế hoạch R:R kém: làm mờ số liệu để mắt không bị hút vào một lệnh xấu */
+.rec-plan-rejected .rec-levels { opacity: .45; }
+
+.plan-reject {
+  font-size: 11px; line-height: 1.5;
+  color: #ffcc80;
+  background: rgba(255,179,0,.10);
+  border-left: 3px solid #ffb300;
+  padding: 8px 10px; margin-bottom: 8px; border-radius: 0 3px 3px 0;
+}
+
+/* Đơn vị giá ở tiêu đề cột — cùng gốc với bug sai 1000× ở module định giá:
+   đơn vị ngầm định mà không ai viết ra. */
+.th-unit {
+  font-size: 9px; font-weight: 400;
+  color: var(--text-mute); text-transform: none;
+}
+
+/* Trạng thái lỗi có lối thoát, thay vì là ngõ cụt */
+.error-state { padding: 32px 16px !important; }
+.error-title  { font-size: 14px; color: var(--down); margin-bottom: 6px; font-weight: 600; }
+.error-detail { font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
+.error-state .btn-ghost { margin-top: 12px; }

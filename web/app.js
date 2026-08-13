@@ -210,10 +210,10 @@ function startClock() {
     const stateEl = document.querySelector('.market-state');
     if (isOpen) {
       stateEl.classList.add('open');
-      document.getElementById('market-text').textContent = 'MARKET OPEN';
+      document.getElementById('market-text').textContent = 'ĐANG GIAO DỊCH';
     } else {
       stateEl.classList.remove('open');
-      document.getElementById('market-text').textContent = 'MARKET CLOSED';
+      document.getElementById('market-text').textContent = 'NGOÀI GIỜ';
     }
   };
   tick();
@@ -489,7 +489,12 @@ async function loadLatestFirst() {
   } catch (e) {
     console.error('Load latest failed:', e);
     document.getElementById('signal-rows').innerHTML =
-      `<tr><td colspan="15" class="empty">Không tải được dữ liệu: ${e.message}</td></tr>`;
+      `<tr><td colspan="15" class="empty error-state">
+         <div class="error-title">Không tải được dữ liệu</div>
+         <div class="error-detail">${escapeAttr(e.message)}</div>
+         <div class="error-detail">${navigator.onLine ? 'Máy chủ dữ liệu có thể đang bận.' : 'Thiết bị đang offline.'}</div>
+         <button class="btn-ghost" onclick="location.reload()">↻ Thử lại</button>
+       </td></tr>`;
   }
 }
 
@@ -555,6 +560,19 @@ function renderDateOptions() {
  * Gộp nhiều lần gọi liên tiếp thành một, chờ `wait` ms sau lần gọi cuối.
  * Sự kiện được giữ lại vì handler cần `e.target`.
  */
+/**
+ * Đơn vị giá hiển thị.
+ *
+ * Toàn bộ pipeline technical dùng đơn vị quote của vnstock (NGHÌN VND) — giống
+ * bảng điện. Nhưng trước đây không chỗ nào trên giao diện viết ra điều đó: cột
+ * hiện "137.3" và người dùng phải tự đoán.
+ *
+ * Đây đúng là loại nhầm lẫn đã gây ra bug sai 1000× trong module định giá.
+ * Nếu chính hệ thống còn nhầm được thì không thể trách người dùng.
+ */
+const PRICE_UNIT_LABEL = 'nghìn đ';
+function fmtPriceUnit() { return PRICE_UNIT_LABEL; }
+
 function debounce(fn, wait = 150) {
   let timer = null;
   return function (...args) {
@@ -1761,32 +1779,80 @@ function scalePosition(position, factor) {
 }
 
 // Compute entry levels for analyzer (similar to existing detail panel)
+/**
+ * Kế hoạch vào lệnh.
+ *
+ * LỖI ĐÃ SỬA — LỜI KHUYÊN TỰ MÂU THUẪN:
+ *   Bản cũ luôn đặt entry tại Fibonacci golden support, tức THẤP HƠN giá hiện
+ *   tại, trong khi Pre-Breakout lại đi tìm mã ĐANG cách đỉnh 20 phiên ≤ 3%.
+ *   Người dùng làm theo sẽ hoặc không bao giờ khớp lệnh (giá chạy tiếp), hoặc
+ *   nếu giá về tới đó thì setup breakout đã hỏng rồi.
+ *   Stop lại lấy hỗ trợ SÂU NHẤT trong 3 mức — có khi −15% dưới entry, gấp đôi
+ *   rủi ro mà người dùng nghĩ mình đang nhận.
+ *
+ * Cách làm mới — hai kịch bản, và nói thẳng đang dùng cái nào:
+ *   BREAKOUT (giá sát đỉnh) : mua khi vượt đỉnh; stop = max(hỗ trợ gần, 2×ATR)
+ *   PULLBACK (giá xa đỉnh)  : chờ về vùng hỗ trợ mới mua
+ *
+ * Stop luôn bị chặn ở mức lỗ tối đa, và kế hoạch bị TỪ CHỐI nếu R:R quá thấp —
+ * thà không đưa lời khuyên còn hơn đưa lời khuyên xấu.
+ */
+const MAX_STOP_PCT = 0.08;        // không bao giờ đề xuất cắt lỗ quá 8%
+const MIN_ACCEPTABLE_RR = 1.5;
+
 function computeAnalyzerLevels(s) {
   if (!s) return null;
   const supports = s.m_supports || [];
   const resistances = s.m_resistances || [];
-  if (!supports.length) return null;
+  const price = s.close;
+  if (!price) return null;
 
-  // Prefer Golden Ratio support for entry
-  const golden = supports.find(x => x.is_golden);
+  const high20 = s.m_high20;
+  const atrPct = (s.m_atr_pct || 2.5) / 100;
   const nearestSup = supports[0];
   const nearestRes = resistances[0];
 
-  const entry = golden ? golden.price : nearestSup.price;
-  // Stop = deepest support, but must be < entry. Fallback: 7% below entry.
-  let stop;
-  if (supports.length > 1) {
-    const deepest = supports[supports.length - 1].price;
-    stop = deepest < entry * 0.99 ? deepest : entry * 0.93;
+  // Cách đỉnh 20 phiên bao nhiêu % — đây là thứ quyết định kịch bản
+  const distToHigh = high20 ? (high20 - price) / price * 100 : null;
+  const isBreakoutSetup = distToHigh !== null && distToHigh <= 3;
+
+  let entry, stop, mode, entryNote;
+
+  if (isBreakoutSetup) {
+    mode = 'breakout';
+    entry = high20 * 1.005;      // đệm 0,5% phòng phá vỡ giả
+    entryNote = `Mua khi vượt đỉnh 20 phiên (${fmtPrice(high20)})`;
+    const atrStop = entry * (1 - 2 * atrPct);
+    const supStop = nearestSup ? nearestSup.price : atrStop;
+    stop = Math.max(atrStop, supStop);   // lấy mức chặt hơn
   } else {
-    stop = entry * 0.93;
+    mode = 'pullback';
+    const golden = supports.find(x => x.is_golden);
+    entry = golden ? golden.price : (nearestSup ? nearestSup.price : price * 0.97);
+    const away = (price - entry) / price * 100;
+    entryNote = `Chờ giá chỉnh về vùng hỗ trợ (còn ${away.toFixed(1)}% nữa)`;
+    const deeper = supports.find(x => x.price < entry * 0.99);
+    stop = deeper ? deeper.price : entry * (1 - 2 * atrPct);
   }
-  const target = nearestRes && nearestRes.price > entry * 1.01 ? nearestRes.price : entry * 1.08;
-  const riskPct = ((entry - stop) / entry * 100);
-  const gainPct = ((target - entry) / entry * 100);
+
+  // Chặn cứng mức lỗ tối đa — bản cũ có thể cho stop −15%
+  stop = Math.max(stop, entry * (1 - MAX_STOP_PCT));
+
+  const target = nearestRes && nearestRes.price > entry * 1.02
+    ? nearestRes.price
+    : entry * 1.08;
+
+  const riskPct = (entry - stop) / entry * 100;
+  const gainPct = (target - entry) / entry * 100;
   const rr = riskPct > 0.1 ? gainPct / riskPct : 0;
 
-  return { entry, stop, target, riskPct, gainPct, rr };
+  return {
+    entry, stop, target, riskPct, gainPct, rr, mode, entryNote,
+    acceptable: rr >= MIN_ACCEPTABLE_RR,
+    rejectReason: rr < MIN_ACCEPTABLE_RR
+      ? `R:R chỉ ${rr.toFixed(1)} — dưới ngưỡng ${MIN_ACCEPTABLE_RR}, không đáng vào lệnh`
+      : null,
+  };
 }
 
 // ── Main analyzer entry point ──
@@ -1901,11 +1967,25 @@ function renderAnalyzer(ticker, signal, perStrategy, passCount, rec, levels) {
   // Entry levels
   let levelsHtml = '';
   if (levels && passCount >= 2) {
-    levelsHtml = `<div class="rec-levels">
+    // Nói rõ đang dùng kịch bản nào — trước đây UI im lặng đưa ra một mức giá
+    // mà không cho biết đó là "mua ngay khi vượt đỉnh" hay "chờ chỉnh mới mua",
+    // hai việc hoàn toàn khác nhau.
+    const modeBadge = levels.mode === 'breakout'
+      ? '<span class="plan-mode plan-breakout">KỊCH BẢN BREAKOUT</span>'
+      : '<span class="plan-mode plan-pullback">KỊCH BẢN CHỜ CHỈNH</span>';
+
+    const rejectBanner = levels.acceptable ? '' :
+      `<div class="plan-reject">⚠ ${escapeAttr(levels.rejectReason)} —
+       thà bỏ lỡ còn hơn vào một lệnh có tỷ lệ lời/lỗ xấu.</div>`;
+
+    levelsHtml = `<div class="rec-plan${levels.acceptable ? '' : ' rec-plan-rejected'}">
+      <div class="plan-head">${modeBadge}<span class="plan-note">${levels.entryNote}</span></div>
+      ${rejectBanner}
+      <div class="rec-levels">
       <div class="rec-level rec-level-entry">
         <div class="rec-level-label">VÀO LỆNH</div>
         <div class="rec-level-value">${levels.entry.toFixed(2).replace('.',',')}</div>
-        <div class="rec-level-sub">${levels.entry < signal.close ? '↓ Đợi pullback' : '≈ Giá hiện tại'}</div>
+        <div class="rec-level-sub">${fmtPriceUnit()}</div>
       </div>
       <div class="rec-level rec-level-stop">
         <div class="rec-level-label">CẮT LỖ</div>
@@ -1920,7 +2000,8 @@ function renderAnalyzer(ticker, signal, perStrategy, passCount, rec, levels) {
       <div class="rec-level rec-level-rr">
         <div class="rec-level-label">R:R</div>
         <div class="rec-level-value">1 : ${levels.rr.toFixed(1)}</div>
-        <div class="rec-level-sub">${levels.rr >= 2 ? 'Tốt' : levels.rr >= 1.5 ? 'Khá' : 'Trung bình'}</div>
+        <div class="rec-level-sub">${levels.rr >= 2 ? 'Tốt' : levels.rr >= 1.5 ? 'Khá' : 'Không đạt'}</div>
+      </div>
       </div>
     </div>`;
   }
