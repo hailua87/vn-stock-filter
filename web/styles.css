@@ -2315,14 +2315,37 @@ kbd {
    hiện được.
    ═══════════════════════════════════════════════════════════════════════ */
 :root {
-  --limit-up:   #c77dff;   /* tím — giá trần */
-  --limit-down: #4dd0e1;   /* xanh lam — giá sàn */
-  --limit-ref:  #ffd54f;   /* vàng — giá tham chiếu */
+  /* Màu lấy theo bảng điện thật (SSI/VNDirect/VPS), KHÔNG dùng sắc pastel:
+     ở cỡ chữ 12px trên nền đen, tím lavender nhạt (#c77dff) đọc ra gần như
+     trắng — mất hẳn ý nghĩa cảnh báo. */
+  --limit-up:   #e040fb;   /* tím đậm — giá trần */
+  --limit-down: #22d3ee;   /* xanh lơ — giá sàn (tách khỏi --focus xanh dương) */
+  --limit-ref:  #ffca28;   /* vàng — giá tham chiếu */
 }
 
-.limit-up   { color: var(--limit-up);   font-weight: 700; }
-.limit-down { color: var(--limit-down); font-weight: 700; }
-.limit-ref  { color: var(--limit-ref); }
+/* Trần/sàn hiển thị dạng "chip" có nền mờ, giống bảng điện tô cả ô.
+   Chỉ đổi màu chữ là chưa đủ nổi khi cột nằm cạnh nhiều số khác. */
+.limit-up,
+.limit-down {
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.limit-up {
+  color: var(--limit-up);
+  background: rgba(224, 64, 251, .16);
+  box-shadow: inset 0 0 0 1px rgba(224, 64, 251, .35);
+}
+
+.limit-down {
+  color: var(--limit-down);
+  background: rgba(34, 211, 238, .16);
+  box-shadow: inset 0 0 0 1px rgba(34, 211, 238, .35);
+}
+
+.limit-ref { color: var(--limit-ref); }
 
 .limit-lock {
   font-size: 9px;
