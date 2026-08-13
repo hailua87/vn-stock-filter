@@ -7,9 +7,18 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Font tai BAT DONG BO: <link rel=stylesheet> toi origin ngoai chan render,
+     them 200-400ms LCP va lam trang hong hoan toan khi offline / bi chan mang.
+     media="print" khien trinh duyet tai voi do uu tien thap, onload doi lai
+     thanh "all". <noscript> lo cho truong hop tat JS. -->
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<noscript><link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
 </head>
 <body>
+
+<a href="#signal-table" class="skip-link">Bo qua toi bang tin hieu</a>
 
 <header class="topbar">
   <div class="topbar-left">
@@ -49,8 +58,8 @@
     <button class="strat-tab" data-strategy="golden_cross_long">GC dài hạn</button>
     <button class="strat-tab" data-strategy="golden_cross_short">GC ngắn hạn</button>
     <button class="strat-tab" data-strategy="ichimoku">Ichimoku</button>
-    <button class="strat-tab strat-tab-combined" data-strategy="combined" title="Lọc mã thỏa nhiều chiến lược cùng lúc">⚡ Tổng hợp</button>
-    <button class="strat-tab strat-tab-analyzer" data-strategy="analyzer" title="Phân tích chi tiết 1 mã qua mọi chiến lược">🔍 Phân tích mã</button>
+    <button class="strat-tab strat-tab-combined" data-strategy="combined" title="Lọc mã thỏa nhiều chiến lược cùng lúc"><span aria-hidden="true">⚡</span> Tổng hợp</button>
+    <button class="strat-tab strat-tab-analyzer" data-strategy="analyzer" title="Phân tích chi tiết 1 mã qua mọi chiến lược"><span aria-hidden="true">🔍</span> Phân tích mã</button>
   </nav>
 
   <div class="topbar-analyzer">
@@ -61,8 +70,8 @@
   </div>
 
   <div class="topbar-right">
-    <a href="valuation/index.html" class="icon-btn" title="Định giá cổ phiếu" style="text-decoration: none; padding: 4px 10px; font-size: 11px; font-weight: 600;">💰 VALUATION</a>
-    <button class="icon-btn" id="help-btn" title="Hướng dẫn">?</button>
+    <a href="valuation/index.html" class="icon-btn" title="Định giá cổ phiếu" style="text-decoration: none; padding: 4px 10px; font-size: 11px; font-weight: 600;"><span aria-hidden="true">💰</span> VALUATION</a>
+    <button class="icon-btn" id="help-btn" title="Hướng dẫn" aria-label="Mở hướng dẫn sử dụng">?</button>
     <span class="market-state">
       <span class="market-dot"></span>
       <span id="market-text">MARKET CLOSED</span>
@@ -80,7 +89,7 @@
 <div id="market-context" class="market-context" style="display: none;"></div>
 
 <div class="mobile-bar">
-  <button id="mobile-filter-btn">☰ Bộ lọc</button>
+  <button id="mobile-filter-btn"><span aria-hidden="true">☰</span> Bộ lọc</button>
   <button id="mobile-stats-btn">— tín hiệu</button>
 </div>
 
@@ -91,21 +100,21 @@
   <aside class="col col-filters" id="col-filters">
     <div class="col-head">
       <span class="col-title">BỘ LỌC</span>
-      <button class="collapse-btn" id="collapse-filters" title="Thu gọn">‹</button>
+      <button class="collapse-btn" id="collapse-filters" title="Thu gọn" aria-label="Thu gọn cột bộ lọc">‹</button>
     </div>
     <div class="col-body">
       <div class="fg">
-        <label class="fg-label">Ngày phân tích</label>
+        <label class="fg-label" for="date-select">Ngày phân tích</label>
         <div class="date-picker">
-          <button class="dp-nav" id="date-prev">‹</button>
+          <button class="dp-nav" id="date-prev" aria-label="Phiên trước">‹</button>
           <select id="date-select" class="dp-select"></select>
-          <button class="dp-nav" id="date-next">›</button>
+          <button class="dp-nav" id="date-next" aria-label="Phiên sau">›</button>
         </div>
-        <button class="link-btn" id="date-latest">↺ Về phiên mới nhất</button>
+        <button class="link-btn" id="date-latest"><span aria-hidden="true">↺</span> Về phiên mới nhất</button>
       </div>
       <div class="fg">
-        <label class="fg-label">Sàn giao dịch</label>
-        <div class="chip-row" data-filter="exchange">
+        <label class="fg-label" id="lbl-exchange">Sàn giao dịch</label>
+        <div class="chip-row" data-filter="exchange" role="group" aria-labelledby="lbl-exchange">
           <button class="chip active" data-value="">Tất cả</button>
           <button class="chip" data-value="HOSE">HOSE</button>
           <button class="chip" data-value="HNX">HNX</button>
@@ -113,8 +122,8 @@
         </div>
       </div>
       <div class="fg">
-        <label class="fg-label">Xếp loại</label>
-        <div class="chip-row" data-filter="rating">
+        <label class="fg-label" id="lbl-rating">Xếp loại</label>
+        <div class="chip-row" data-filter="rating" role="group" aria-labelledby="lbl-rating">
           <button class="chip active" data-value="">Tất cả</button>
           <button class="chip" data-value="A+">A+</button>
           <button class="chip" data-value="A">A</button>
@@ -122,17 +131,17 @@
         </div>
       </div>
       <div class="fg">
-        <label class="fg-label">Khối lượng GD</label>
+        <label class="fg-label" for="vol-min">Khối lượng GD</label>
         <div class="vol-range">
           <input type="text" id="vol-min" class="vol-input" placeholder="Từ" maxlength="10">
           <span class="vol-sep">–</span>
           <input type="text" id="vol-max" class="vol-input" placeholder="Đến" maxlength="10">
-          <button class="vol-clear" id="vol-clear">×</button>
+          <button class="vol-clear" id="vol-clear" aria-label="Xoá bộ lọc khối lượng">×</button>
         </div>
         <div class="fg-hint">vd: 100K · 1M · 5M</div>
       </div>
       <div class="fg">
-        <label class="fg-label">Tìm mã</label>
+        <label class="fg-label" for="search">Tìm mã</label>
         <input type="text" id="search" class="search-input" placeholder="VD: FPT, VPB" maxlength="10">
       </div>
       <div class="fg" id="fg-ichimoku" style="display: none;">
@@ -202,7 +211,7 @@
   <section class="col col-list">
     <div class="list-head">
       <div class="list-head-left">
-        <span class="result-count"><span id="result-count">—</span> tín hiệu</span>
+        <span class="result-count" role="status" aria-live="polite" aria-atomic="true"><span id="result-count">—</span> tín hiệu</span>
         <span class="event-warn" id="event-warn" style="display:none">
           ⚑ <span id="event-count">0</span> mã có sự kiện
         </span>
@@ -219,22 +228,22 @@
     </div>
     <div class="table-wrap">
       <table class="signal-table" id="signal-table">
-        <thead>
+        <th scope="col"ead>
           <tr>
-            <th class="th-idx">#</th>
-            <th class="th-ticker">MÃ</th>
-            <th class="th-exch">SÀN</th>
-            <th class="num sortable" data-sort="close">GIÁ <span class="sort-ind"></span></th>
-            <th class="num sortable" data-sort="m_change_5d_pct">±5D <span class="sort-ind"></span></th>
-            <th class="num sortable" data-sort="volume">KLGD <span class="sort-ind"></span></th>
-            <th class="num sortable" data-sort="_gtgd">GTGD <span class="sort-ind"></span></th>
-            <th class="num sortable" data-sort="m_vol_ratio">VOL× <span class="sort-ind"></span></th>
-            <th class="num sortable" data-sort="m_rsi14">RSI <span class="sort-ind"></span></th>
-            <th class="num" title="Hỗ trợ Fibo">S</th>
-            <th class="num" title="Kháng cự Fibo">R</th>
-            <th class="th-criteria" id="th-criteria-label">TIÊU CHÍ</th>
-            <th class="num sortable" data-sort="total_score" id="th-score-label">ĐIỂM <span class="sort-ind"></span></th>
-            <th class="th-rating">HẠNG</th>
+            <th scope="col" class="th-idx">#</th>
+            <th scope="col" class="th-ticker">MÃ</th>
+            <th scope="col" class="th-exch">SÀN</th>
+            <th scope="col" class="num sortable" data-sort="close">GIÁ <span class="sort-ind"></span></th>
+            <th scope="col" class="num sortable" data-sort="m_change_5d_pct">±5D <span class="sort-ind"></span></th>
+            <th scope="col" class="num sortable" data-sort="volume">KLGD <span class="sort-ind"></span></th>
+            <th scope="col" class="num sortable" data-sort="_gtgd">GTGD <span class="sort-ind"></span></th>
+            <th scope="col" class="num sortable" data-sort="m_vol_ratio">VOL× <span class="sort-ind"></span></th>
+            <th scope="col" class="num sortable" data-sort="m_rsi14">RSI <span class="sort-ind"></span></th>
+            <th scope="col" class="num" title="Hỗ trợ Fibo">S</th>
+            <th scope="col" class="num" title="Kháng cự Fibo">R</th>
+            <th scope="col" class="th-criteria" id="th-criteria-label">TIÊU CHÍ</th>
+            <th scope="col" class="num sortable" data-sort="total_score" id="th-score-label">ĐIỂM <span class="sort-ind"></span></th>
+            <th scope="col" class="th-rating">HẠNG</th>
           </tr>
         </thead>
         <tbody id="signal-rows">
@@ -291,16 +300,16 @@
 
 </main>
 
-<div class="modal-overlay" id="help-modal" style="display: none;">
+<div class="modal-overlay" id="help-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
   <div class="modal">
     <div class="modal-head">
-      <h3>Hướng dẫn sử dụng</h3>
-      <button class="icon-btn" id="help-close">×</button>
+      <h3 id="help-title">Hướng dẫn sử dụng</h3>
+      <button class="icon-btn" id="help-close" aria-label="Đóng hướng dẫn">×</button>
     </div>
     <div class="modal-body">
       <h4>3 câu hỏi của trader trong &lt;10 giây</h4>
       <ol>
-        <li><strong>Hôm nay có tín hiệu gì?</strong> — Top bar: số tín hiệu + LIVE date + A+ count</li>
+        <li><strong>Hôm nay có tín hiệu gì?</strong> — Top bar: số tín hiệu + thời điểm quét + số mã A+</li>
         <li><strong>Mã nào mạnh nhất?</strong> — Bảng sort theo điểm. Row 1 là mã mạnh nhất.</li>
         <li><strong>Có điểm vào lệnh đẹp không?</strong> — Click row → cột phải hiện gợi ý</li>
       </ol>

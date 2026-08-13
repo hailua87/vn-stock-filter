@@ -2221,3 +2221,87 @@ kbd {
   padding: 2px 8px;
   border-radius: 3px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   KHẢ NĂNG TIẾP CẬN
+   Trước đây toàn bộ file có 0 lần :focus-visible và 3 lần `outline: none`
+   không thay thế — người dùng bàn phím hoàn toàn không thấy mình đang ở đâu.
+   Điều này đặc biệt vô lý vì dashboard đã có phím tắt cho power user, mà
+   power user thì thao tác bằng bàn phím.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Vòng focus dùng chung. :focus-visible chỉ hiện khi điều hướng bằng bàn phím,
+   không hiện khi click chuột — nên không ảnh hưởng thẩm mỹ với người dùng chuột. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Hàng bảng focus được: bàn phím ↑↓ đã có sẵn, nay có phản hồi thị giác */
+.signal-table tbody tr:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+/* Bỏ qua tới nội dung chính — phần tử đầu tiên nhận focus khi nhấn Tab */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 999;
+  padding: 10px 16px;
+  background: var(--focus);
+  color: #06121a;
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+/* Chỉ dành cho trình đọc màn hình */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Tôn trọng lựa chọn giảm chuyển động của hệ điều hành.
+   Quan trọng với người bị rối loạn tiền đình — và dashboard này có chấm nhấp
+   nháy, transition trên mọi hàng bảng. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Tương phản: --rating-c #546e7a trên nền #0e1117 chỉ đạt ~2,9:1, dưới chuẩn
+   WCAG AA (4,5:1). Nâng lên mức đọc được mà vẫn giữ vai trò "mờ nhất". */
+:root {
+  --rating-c: #7d8b96;
+}
+
+/* Vùng cảm ứng tối thiểu 44×44px theo khuyến nghị của Apple/WCAG 2.5.5.
+   Chip lọc hiện cao ~24px — khó bấm trúng trên điện thoại. */
+@media (pointer: coarse) {
+  .chip,
+  .dp-nav,
+  .icon-btn,
+  .strat-tab {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

@@ -220,6 +220,43 @@ function startClock() {
   setInterval(tick, 1000);
 }
 
+/**
+ * Thay chỉ báo "LIVE" bằng ĐỘ TƯƠI THẬT của dữ liệu.
+ *
+ * Vì sao: header có chấm xanh "LIVE" + đồng hồ chạy từng giây, trong khi dữ
+ * liệu chỉ cập nhật 2 lần/ngày. Người dùng mới sẽ hiểu là realtime. Đây cùng
+ * một họ lỗi với bug banner demo: giao diện hứa nhiều hơn dữ liệu thực có.
+ * Với sản phẩm tài chính, đó không phải chuyện thẩm mỹ.
+ */
+function updateDataFreshness(generatedAt, runType) {
+  const dot = document.getElementById('live-dot');
+  const text = document.getElementById('live-text');
+  if (!text) return;
+
+  if (!generatedAt) {
+    text.textContent = 'CHƯA CÓ DỮ LIỆU';
+    if (dot) dot.className = 'live-dot stale';
+    return;
+  }
+
+  const t = new Date(generatedAt);
+  if (Number.isNaN(t.getTime())) return;
+
+  const ageHours = (Date.now() - t.getTime()) / 3600000;
+  const stamp = t.toLocaleString('vi-VN', {
+    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+  });
+
+  const label = runType === 'intraday' ? 'GIỮA PHIÊN' : 'EOD';
+  text.textContent = `${label} ${stamp}`;
+  text.title = `Dữ liệu quét lúc ${t.toLocaleString('vi-VN')} — không phải realtime`;
+
+  if (dot) {
+    // > 30 giờ nghĩa là đã lỡ ít nhất một phiên
+    dot.className = 'live-dot' + (ageHours > 30 ? ' stale' : '');
+  }
+}
+
 // ──────────── Strategy tabs ────────────
 function bindStrategyTabs() {
   document.querySelectorAll('.strat-tab').forEach(tab => {
@@ -410,6 +447,8 @@ function applyExchangeOverrides(signals) {
 // Data cũ (chưa có tag) → trả null cho các field → badge không hiển thị.
 function extractRunMetadata(data) {
   const m = data?.metadata || {};
+  // Cập nhật luôn chỉ báo độ tươi ở header — thay cho nhãn "LIVE" gây hiểu nhầm
+  updateDataFreshness(data?.generated_at, m.run_type || (m.intraday ? 'intraday' : 'eod'));
   return {
     runType: m.run_type || null,          // 'intraday' | 'eod' | null
     runTimeIct: m.run_time_ict || null,    // 'HH:MM' | null
@@ -505,14 +544,33 @@ function renderDateOptions() {
   document.getElementById('date-latest').onclick = () => loadDateData(state.latestDate);
 }
 
+/**
+ * Gộp nhiều lần gọi liên tiếp thành một, chờ `wait` ms sau lần gọi cuối.
+ * Sự kiện được giữ lại vì handler cần `e.target`.
+ */
+function debounce(fn, wait = 150) {
+  let timer = null;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
 // ──────────── Filters ────────────
 function bindFilters() {
   document.querySelectorAll('.chip-row').forEach(group => {
     const filter = group.dataset.filter;
     group.querySelectorAll('.chip').forEach(chip => {
+      // aria-pressed: truoc day trang thai bat/tat cua chip CHI ton tai bang mau.
+      // Nguoi dung trinh doc man hinh khong biet bo loc nao dang bat.
+      chip.setAttribute('aria-pressed', chip.classList.contains('active') ? 'true' : 'false');
       chip.addEventListener('click', () => {
-        group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        group.querySelectorAll('.chip').forEach(c => {
+          c.classList.remove('active');
+          c.setAttribute('aria-pressed', 'false');
+        });
         chip.classList.add('active');
+        chip.setAttribute('aria-pressed', 'true');
         state.filters[filter] = chip.dataset.value;
         // Update Ichimoku filter hint dynamically
         if (filter === 'ich_special') {
@@ -531,10 +589,13 @@ function bindFilters() {
     });
   });
 
-  document.getElementById('search').addEventListener('input', e => {
+  // Debounce: mỗi ký tự gõ vào từng dựng lại TOÀN BỘ tbody bằng innerHTML.
+  // Với 50-200 dòng thì tạm ổn, nhưng universe lên 400 mã sẽ giật, và việc
+  // thay innerHTML còn xoá luôn trạng thái chọn dòng của người dùng.
+  document.getElementById('search').addEventListener('input', debounce(e => {
     state.filters.search = e.target.value.trim().toUpperCase();
     render();
-  });
+  }, 150));
 
   document.getElementById('vol-min').addEventListener('input', e => {
     state.filters.volMin = parseVolumeInput(e.target.value);
@@ -667,12 +728,65 @@ function moveSelection(delta) {
 }
 
 // ──────────── Help modal ────────────
+//
+// Modal cũ chỉ đổi `display` — thiếu 4 hành vi mà người dùng mong đợi ở một hộp
+// thoại: đóng bằng Esc, giam focus bên trong, trả focus về nút mở khi đóng, và
+// ẩn nội dung nền khỏi trình đọc màn hình.
 function bindHelp() {
   const modal = document.getElementById('help-modal');
-  document.getElementById('help-btn').addEventListener('click', () => modal.style.display = 'flex');
-  document.getElementById('help-close').addEventListener('click', () => modal.style.display = 'none');
+  const openBtn = document.getElementById('help-btn');
+  const closeBtn = document.getElementById('help-close');
+  let lastFocused = null;
+
+  const FOCUSABLE = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+  function open() {
+    lastFocused = document.activeElement;
+    modal.hidden = false;
+    modal.style.display = 'flex';
+    openBtn.setAttribute('aria-expanded', 'true');
+    (modal.querySelector(FOCUSABLE) || modal).focus();
+    document.addEventListener('keydown', onKeydown, true);
+  }
+
+  function close() {
+    modal.style.display = 'none';
+    modal.hidden = true;
+    openBtn.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('keydown', onKeydown, true);
+    // Trả focus về đúng nơi người dùng đã rời đi
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+  }
+
+  function onKeydown(e) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      close();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+
+    // Giam focus: Tab ở phần tử cuối quay về đầu và ngược lại. Không có cái này,
+    // Tab sẽ đi ra ngoài modal và người dùng bàn phím lạc mất hộp thoại.
+    const items = [...modal.querySelectorAll(FOCUSABLE)].filter(el => el.offsetParent !== null);
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  openBtn.setAttribute('aria-expanded', 'false');
+  openBtn.setAttribute('aria-controls', 'help-modal');
+  openBtn.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
   modal.addEventListener('click', e => {
-    if (e.target === modal) modal.style.display = 'none';
+    if (e.target === modal) close();
   });
 }
 
