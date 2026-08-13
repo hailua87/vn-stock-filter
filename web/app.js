@@ -120,6 +120,9 @@ const state = {
   // Đọc từ JSON metadata fields: run_type, run_time_ict, run_date_ict.
   // Dùng để hiển thị badge "INTRADAY 12:00" / "EOD 17:00" cho user biết độ tươi data.
   runMetadata: { runType: null, runTimeIct: null, runDateIct: null },
+  // Bối cảnh thị trường từ metadata.market_context — dùng làm CỔNG cho tỷ trọng
+  // khuyến nghị, không cộng vào điểm số (xem buildRecommendation).
+  marketContext: null,
   sort: { column: null, direction: null },
   filters: { exchange: '', rating: '', search: '', volMin: null, volMax: null, ich_special: '' },
   // ─── Combined mode ───
@@ -322,6 +325,7 @@ async function loadCombinedData(silent = false) {
     if (metadata.demo) demoFlag = true;
     if (metadata.scan_date) scanDate = metadata.scan_date;
     if (metadata.market_context && metadata.market_context.available) {
+      state.marketContext = metadata.market_context;
       renderMarketContext(metadata.market_context, metadata.intraday);
     }
     // Update count in filter UI
@@ -1461,6 +1465,20 @@ function buildRecommendation(passCount, hasAplus, primarySignal) {
 
   // Modifiers
   let warnings = [];
+
+  // ── Relative strength vs VN-Index ──────────────────────────────────────
+  // RS là yếu tố dự báo mạnh nhất trong các nghiên cứu momentum, nhưng nó KHÔNG
+  // được cộng vào điểm số (điểm số thuộc về từng chiến lược). Ở đây nó điều
+  // chỉnh mức độ tự tin của khuyến nghị.
+  const rsRank = primarySignal?.m_rs_rank;
+  if (typeof rsRank === 'number') {
+    if (rsRank < 40) {
+      warnings.push(`RS ${rsRank}/99 — mã đang YẾU hơn thị trường. Tín hiệu kỹ thuật ` +
+                    `trên nền sức mạnh tương đối kém có tỷ lệ thất bại cao hơn đáng kể`);
+    } else if (rsRank >= 80) {
+      warnings.push(`RS ${rsRank}/99 — mã dẫn dắt, khoẻ hơn ${rsRank}% thị trường`);
+    }
+  }
   if (rsi > 75) warnings.push(`RSI ${rsi.toFixed(0)} — quá mua, cẩn trọng vào lệnh full size hoặc đợi pullback`);
   else if (rsi > 70) warnings.push(`RSI ${rsi.toFixed(0)} — gần quá mua, vào lệnh từ tốn`);
   if (rsi < 30) warnings.push(`RSI ${rsi.toFixed(0)} — quá bán, có thể có rebound nhưng risk cao`);
@@ -1477,13 +1495,20 @@ function buildRecommendation(passCount, hasAplus, primarySignal) {
     cls = 'rec-strong-buy';
     stars = '⭐⭐⭐⭐';
     title = 'MUA MẠNH';
-    desc = 'Mã pass đồng thời cả 4 chiến lược với nhiều A+. Đây là tín hiệu hiếm và rất đáng tin cậy. Có thể tham gia vị thế lớn nếu phù hợp khẩu vị rủi ro.';
+    // Diễn đạt trung thực: 4 chiến lược này KHÔNG độc lập. Cả bốn đều là bộ lọc
+    // xu hướng mua lên, dùng chung MA của cùng một chuỗi giá, nên tương quan rất
+    // cao. Gọi đó là "4 nguồn xác nhận độc lập" là sai về mặt thống kê và khiến
+    // người dùng tự tin quá mức.
+    desc = 'Mã pass cả 4 chiến lược với nhiều A+ — setup kỹ thuật rất đồng thuận. ' +
+           'Lưu ý: 4 chiến lược này cùng nhóm xu hướng nên tương quan cao, ' +
+           'không phải 4 nguồn xác nhận độc lập.';
     position = '8-12% NAV';
   } else if (passCount === 4) {
     cls = 'rec-strong-buy';
     stars = '⭐⭐⭐⭐';
     title = 'MUA MẠNH';
-    desc = 'Mã pass đồng thời cả 4 chiến lược. Đây là tín hiệu rất mạnh, đa nguồn xác nhận.';
+    desc = 'Mã pass cả 4 chiến lược — setup kỹ thuật đồng thuận cao. ' +
+           'Lưu ý: 4 chiến lược cùng nhóm xu hướng nên tương quan cao với nhau.';
     position = '6-10% NAV';
   } else if (passCount === 3 && hasAplus >= 1) {
     cls = 'rec-buy';
@@ -1520,10 +1545,53 @@ function buildRecommendation(passCount, hasAplus, primarySignal) {
   // Apply warning modifiers
   if (rsi > 75 && (passCount === 4 || passCount === 3)) {
     desc += ' Tuy nhiên RSI rất cao — đợi pullback hoặc vào với size nhỏ hơn.';
-    position = position.replace(/(\d+)-(\d+)% NAV/, (_, a, b) => `${Math.max(1, +a - 2)}-${Math.max(2, +b - 3)}% NAV`);
+    position = scalePosition(position, 0.7);
+  }
+
+  // ── CỔNG BỐI CẢNH THỊ TRƯỜNG ──────────────────────────────────────────
+  // Phần lớn tín hiệu breakout thất bại khi VN-Index dưới MA50/MA200. Trước
+  // đây UI đưa ra cùng một tỷ trọng "8-12% NAV" bất kể thị trường đang uptrend
+  // hay downtrend — đó là thiếu sót lớn nhất về mặt quản trị rủi ro.
+  //
+  // Regime KHÔNG được cộng vào điểm (điểm đo chất lượng setup của từng mã);
+  // nó nhân vào TỶ TRỌNG, tức tách bạch "tín hiệu tốt đến đâu" khỏi "nên đặt
+  // bao nhiêu tiền".
+  const ctx = state.marketContext;
+  if (ctx && ctx.available && ctx.position_size_multiplier < 1) {
+    position = scalePosition(position, ctx.position_size_multiplier);
+    const pct = Math.round(ctx.position_size_multiplier * 100);
+    warnings.unshift(
+      `Bối cảnh thị trường ${ctx.regime === 'risk_off' ? 'BẤT LỢI' : 'trung tính'} — ` +
+      `đã giảm tỷ trọng đề xuất còn ~${pct}% mức thường. ${ctx.label}`
+    );
+    if (ctx.regime === 'risk_off' && (passCount >= 3)) {
+      desc += ' Lưu ý: setup đẹp nhưng thị trường chung đang bất lợi — ' +
+              'phần lớn breakout thất bại trong giai đoạn này.';
+    }
+  }
+
+  // Độ rộng thị trường: chỉ số có thể được kéo bởi vài mã vốn hoá lớn trong
+  // khi đa số cổ phiếu đã giảm.
+  const breadth = ctx?.breadth?.pct_above_ma50;
+  if (typeof breadth === 'number' && breadth < 35) {
+    warnings.push(`Độ rộng yếu — chỉ ${breadth}% số mã nằm trên MA50`);
   }
 
   return { cls, stars, title, desc, position, warnings };
+}
+
+/**
+ * Co giãn chuỗi tỷ trọng dạng "8-12% NAV" theo hệ số.
+ * Tách riêng để logic co tỷ trọng chỉ tồn tại ở MỘT chỗ — trước đây nó nằm
+ * inline trong nhánh RSI với công thức trừ cứng (−2/−3 điểm phần trăm).
+ */
+function scalePosition(position, factor) {
+  if (!position || factor >= 1) return position;
+  return position.replace(/(\d+)-(\d+)%\s*NAV/, (_, a, b) => {
+    const lo = Math.max(1, Math.round(+a * factor));
+    const hi = Math.max(lo + 1, Math.round(+b * factor));
+    return `${lo}-${hi}% NAV`;
+  });
 }
 
 // Compute entry levels for analyzer (similar to existing detail panel)
