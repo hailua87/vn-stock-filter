@@ -330,3 +330,75 @@ def test_corrupt_archive_index_is_ignored(tmp_path):
     r = evaluate(tmp_path, date(2026, 8, 20))
     assert r['stale'] is True
     assert r['session_date'] is None
+
+
+# ── Độc lập thật sự: không được kéo theo pandas ──────────────────────────
+def test_runs_without_pandas(tmp_path):
+    """
+    Chuông cố ý không cài `backend/requirements.txt`. Nếu nó lỡ kéo theo pandas
+    thì lời hứa độc lập ở đầu check_freshness.py là giả.
+
+    Đã hỏng thật: run 32998375558 chết với `ModuleNotFoundError: No module named
+    'pandas'` vì `from scanner.trading_calendar import ...` chạy
+    `scanner/__init__.py` → `BreakoutScanner` → `pandas`. Toàn bộ test còn lại
+    trong file này KHÔNG bắt được, vì máy nào chạy pytest cũng có sẵn pandas.
+
+    Test này dựng lại đúng môi trường đó: chặn pandas/numpy/vnstock ở tầng import
+    rồi chạy lại toàn bộ đường đi.
+    """
+    import subprocess
+    import textwrap
+
+    backend = str(Path(__file__).resolve().parent.parent)
+    repo = tmp_path / 'repo'
+    _write(repo, PRIMARY, '2026-08-14')
+
+    code = textwrap.dedent(f'''
+        import sys
+
+        BLOCKED = {{'pandas', 'numpy', 'vnstock', 'vnai'}}
+
+        class Blocker:
+            def find_spec(self, name, path=None, target=None):
+                if name.split('.')[0] in BLOCKED:
+                    raise ImportError('chan boi test: ' + name)
+                return None
+
+        sys.meta_path.insert(0, Blocker())
+        sys.path.insert(0, {backend!r})
+
+        import check_freshness
+        rc = check_freshness.main([
+            '--repo-root', {str(repo)!r},
+            '--today', '2026-08-20',
+        ])
+        print('EXITCODE', rc)
+    ''')
+
+    proc = subprocess.run([sys.executable, '-c', code],
+                          capture_output=True, text=True, encoding='utf-8')
+    assert proc.returncode == 0, f'stdout={proc.stdout}\nstderr={proc.stderr}'
+    assert 'EXITCODE 2' in proc.stdout, proc.stdout      # 2 = lệch, đúng kỳ vọng
+    assert 'pandas' not in proc.stderr
+
+
+def test_import_chain_stays_stdlib_only():
+    """
+    Chốt chặn thứ hai, rẻ hơn: nạp lẻ trading_calendar không được lôi `scanner`
+    vào sys.modules. Nếu ai đó sửa lại thành `from scanner...` thì test này đỏ.
+    """
+    import subprocess
+    import textwrap
+
+    backend = str(Path(__file__).resolve().parent.parent)
+    code = textwrap.dedent(f'''
+        import sys
+        sys.path.insert(0, {backend!r})
+        import check_freshness
+        heavy = [m for m in sys.modules if m.split('.')[0] in ('pandas', 'scanner')]
+        print('HEAVY', heavy)
+    ''')
+    proc = subprocess.run([sys.executable, '-c', code],
+                          capture_output=True, text=True, encoding='utf-8')
+    assert proc.returncode == 0, proc.stderr
+    assert 'HEAVY []' in proc.stdout, proc.stdout

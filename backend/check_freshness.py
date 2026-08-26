@@ -36,6 +36,7 @@ Mã thoát:
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import sys
@@ -43,14 +44,44 @@ from datetime import date
 from pathlib import Path
 from typing import Optional
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from scanner.trading_calendar import (
-    has_holiday_table,
-    is_trading_day,
-    previous_trading_day,
-    trading_sessions_between,
-)
+def _load_trading_calendar():
+    """
+    Nạp `scanner/trading_calendar.py` THẲNG TỪ FILE, không qua câu lệnh
+    `from scanner.trading_calendar import ...`.
+
+    Vì sao phải vòng vèo: `import scanner.trading_calendar` chạy
+    `scanner/__init__.py` trước, mà file đó `from .scanner import BreakoutScanner`
+    → `import pandas`. Chuông này cố ý KHÔNG cài requirements.txt, nên đường
+    import qua package chết ngay tại dòng pandas.
+
+    Đã xảy ra thật, không phải giả định: run 32998375558 (26/08/2026) chết với
+    `ModuleNotFoundError: No module named 'pandas'`. Cái độc lập mà file này
+    tuyên bố ở đầu module đã bị một dòng import lặng lẽ phá, và test local không
+    thấy vì máy phát triển nào cũng có sẵn pandas.
+
+    `trading_calendar.py` tự nó chỉ dùng thư viện chuẩn ở mức module (pandas được
+    import muộn bên trong `infer_last_session_from_dates`, hàm mà file này không
+    gọi), nên nạp lẻ là hợp lệ.
+
+    Xem test_freshness_alert.test_runs_without_pandas — nó chặn pandas rồi chạy
+    lại, tức ghim đúng lỗi trên.
+    """
+    path = Path(__file__).resolve().parent / 'scanner' / 'trading_calendar.py'
+    spec = importlib.util.spec_from_file_location('_freshness_trading_calendar', path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f'không nạp được lịch giao dịch từ {path}')
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+_tc = _load_trading_calendar()
+
+has_holiday_table = _tc.has_holiday_table
+is_trading_day = _tc.is_trading_day
+previous_trading_day = _tc.previous_trading_day
+trading_sessions_between = _tc.trading_sessions_between
 
 EXIT_FRESH = 0
 EXIT_STALE = 2
@@ -337,6 +368,15 @@ def main(argv=None) -> int:
     parser.add_argument('--json-out', default=None,
                         help='Ghi toàn bộ kết quả dạng JSON ra file này')
     args = parser.parse_args(argv)
+
+    # Console Windows mặc định cp1252 còn báo cáo thì có tiếng Việt: in thẳng sẽ
+    # nổ UnicodeEncodeError và cái chuông chết vì lý do chẳng liên quan gì tới dữ
+    # liệu. Không dựa vào PYTHONIOENCODING vì người chạy tay sẽ không đặt nó.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding='utf-8', errors='replace')
+        except (AttributeError, ValueError):
+            pass
 
     today = date.fromisoformat(args.today) if args.today else date.today()
     result = evaluate(Path(args.repo_root), today, max_lag=args.max_lag)
