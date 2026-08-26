@@ -132,7 +132,9 @@ jobs:
               echo "── $f ──"
               python -c "
           import json, sys
-          with open('$f') as fp:
+          # encoding tường minh: archive_gate chứa tiếng Việt, đọc bằng locale
+          # mặc định sẽ nổ UnicodeDecodeError nếu runner không phải UTF-8.
+          with open('$f', encoding='utf-8') as fp:
               d = json.load(fp)
           meta = d.get('metadata', {})
           print(f'  generated_at:   {d.get(\"generated_at\", \"?\")}')
@@ -142,6 +144,19 @@ jobs:
           if d.get('signals'):
               tickers = [s.get('ticker', '?') for s in d['signals'][:5]]
               print(f'  top 5 tickers:  {\", \".join(tickers)}')
+          sess = meta.get('session_date', '?')
+          writ = meta.get('written_at_ict', '?')
+          comp = meta.get('session_complete', '?')
+          awrt = meta.get('archive_written', '?')
+          agat = meta.get('archive_gate', '?')
+          print('  ── cong archive ──')
+          print(f'  session_date:     {sess}')
+          print(f'  written_at_ict:   {writ}')
+          print(f'  session_complete: {comp}   (co thong tin, khong dung de chan)')
+          print(f'  archive_written:  {awrt}')
+          print(f'  archive_gate:     {agat}')
+          if meta.get('archive_forced'):
+              print('  ARCHIVE BI EP GHI bang --force-archive')
           "
             else
               echo "  ❌ MISSING: $f"
@@ -205,11 +220,32 @@ jobs:
 
           RUN_TYPE="${{ steps.runtype.outputs.run_type }}"
           RUN_TIME_ICT=$(TZ=Asia/Ho_Chi_Minh date '+%H:%M')
-          DATE_ICT=$(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')
+
+          # NGÀY TRONG MESSAGE LÀ NGÀY PHIÊN, không phải ngày commit.
+          #
+          # Hai thứ này đã từng lệch thật: commit 68b7237 ghi "signals 2026-08-22"
+          # trong khi file nó tạo ra là archive/2026-08-21.json. Nguyên nhân là
+          # DATE_ICT lấy đồng hồ lúc commit, còn tên file archive lấy từ
+          # df['Date'].max(). Bản EOD chạy 23:00 ICT chỉ cần quét quá 60 phút là
+          # qua nửa đêm ICT, và message lệch một ngày so với chính dữ liệu bên
+          # trong. Nay cả hai đọc chung một nguồn: metadata.session_date.
+          SESSION_DATE=$(python -c "
+          import json
+          with open('web/data/latest.json', encoding='utf-8') as f:
+              print(json.load(f).get('metadata', {}).get('session_date') or '')
+          " 2>/dev/null || true)
+
+          if [ -z "$SESSION_DATE" ]; then
+            # Không đọc được thì lùi về đồng hồ, nhưng nói rõ ra: nếu thấy dòng
+            # này trong log thì message có thể lệch ngày, đừng tin nó.
+            SESSION_DATE=$(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')
+            echo "::warning::Không đọc được metadata.session_date từ latest.json — message tạm dùng ngày ICT $SESSION_DATE, có thể lệch ngày phiên"
+          fi
+
           if [ "$RUN_TYPE" = "intraday" ]; then
-            MSG="chore(data): tin hieu $DATE_ICT [intraday $RUN_TIME_ICT] [skip ci]"
+            MSG="chore(data): tin hieu $SESSION_DATE [intraday $RUN_TIME_ICT] [skip ci]"
           else
-            MSG="chore(data): tin hieu $DATE_ICT [EOD $RUN_TIME_ICT] [skip ci]"
+            MSG="chore(data): tin hieu $SESSION_DATE [EOD $RUN_TIME_ICT] [skip ci]"
           fi
 
           # Đăng ký merge driver "ours" cho file dữ liệu (khai báo ở .gitattributes).
