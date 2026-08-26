@@ -9,11 +9,18 @@ name: Weekly Valuation
 # ngày nhưng fair value thì không; frontend đã có cảnh báo khi dữ liệu quá
 # STALE_AFTER_DAYS ngày.
 #
-# Lịch: 07:00 ICT Chủ Nhật (00:00 UTC) — ngoài giờ giao dịch, không đụng
+# Lịch: 07:09 ICT Chủ Nhật (00:09 UTC) — ngoài giờ giao dịch, không đụng
 # concurrency với daily-scan.
+#
+# Phút 09 chứ không phải 00 (sửa 2026-08-27): cron của GitHub Actions là nỗ lực
+# tối đa chứ không phải cam kết, và 00:00 UTC là khung nghẽn nhất trong tuần —
+# vừa đầu giờ vừa đầu ngày. Trên chính repo này, các ca EOD đặt ở `0 16` đã bị
+# xếp hàng trễ 12-22 phút, và ca 26/08 thì bị bỏ tick hẳn (không có run object
+# nào được tạo). Workflow này mới lên main 27/08 nên chưa từng chạy lần nào;
+# đừng để lần đầu tiên của nó rơi đúng khung xấu nhất.
 on:
   schedule:
-    - cron: '0 0 * * 0'
+    - cron: '9 0 * * 0'
   workflow_dispatch:
     inputs:
       limit:
