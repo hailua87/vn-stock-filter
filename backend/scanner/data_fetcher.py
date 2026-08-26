@@ -30,8 +30,10 @@ Cache: parquet files per ticker in `backend/data/cache/` with suffix
 '_adj.parquet' (adjusted prices). Daily increment: only fetch missing dates.
 """
 from __future__ import annotations
+import json
 import os
 import sys
+import threading
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -44,6 +46,21 @@ log = logging.getLogger(__name__)
 
 CACHE_DIR = Path(__file__).resolve().parent.parent / 'data' / 'cache'
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+# Nơi fetch_universe ghi tiến độ khi vòng lặp dừng sớm. Nằm trong CACHE_DIR để đi
+# cùng cache OHLCV mà workflow đã save/restore sẵn.
+CHECKPOINT_PATH = CACHE_DIR / 'fetch_checkpoint.json'
+
+
+class _Skipped:
+    """Mã chưa được thử vì van đã đóng — khác hẳn mã đã thử và hỏng."""
+    __slots__ = ()
+
+    def __repr__(self):
+        return '<skipped>'
+
+
+_SKIPPED = _Skipped()
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -513,24 +530,126 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
 
 
 def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
-                   max_workers: int = 1, delay: float = 2.0) -> pd.DataFrame:
+                   max_workers: int = 1, delay: float = 2.0,
+                   time_budget_s: Optional[float] = None,
+                   max_consecutive_failures: int = 20,
+                   checkpoint_path: Optional[Path] = None,
+                   checkpoint_every: int = 25,
+                   clock=None) -> pd.DataFrame:
     """
     Fetch OHLCV for entire universe. Single-threaded with delay
     to respect vnstock 4.x free-tier rate limit (60 req/min Community).
     Each ticker fetch may use 2 internal API calls (metadata + history),
     so we use 2.0s delay = 30 req/min = 60 internal calls/min, safe under 60/min.
 
+    FIX (2026-08-27): NGÂN SÁCH THỜI GIAN + CẦU DAO.
+
+    Triệu chứng: 17-20/08/2026 cả 8 ca daily-scan đều chết vì
+    `##[error]The action 'Run daily scan' has timed out after 60 minutes.`
+    Không có traceback — nó không crash, nó HẾT GIỜ.
+
+    Cơ chế: vnstock VCI trả lỗi lai rai (`RetryError[<Future ... raised
+    UnboundLocalError>]`, hoặc read-timeout 30s tới trading.vietcap.com.vn).
+    `fetch_ohlcv` thử lại 3 lần cho mọi lỗi không phải rate-limit, ngủ 2/4/6s
+    giữa các lần. Đo trên log thật: ~26s mỗi mã khi upstream hỏng kiểu này, có
+    lúc 90s+. Với 500 mã, 60 phút chỉ đủ tới mã thứ ~140 rồi runner giết cả job
+    — và vì bị giết TRƯỚC bước ghi file, 140 mã đã lấy về cũng mất trắng.
+
+    Nghịch lý cần chặn: upstream hỏng NHẸ thì tốn giờ nhất. Hỏng dứt khoát
+    (ValueError sai source) đã có đường fail-fast từ trước; hỏng lai rai thì
+    không, nên nó cứ bò cho tới lúc bị giết.
+
+    Hai cái van, và chúng chặn hai thứ khác nhau:
+
+      time_budget_s  — trần cứng cho TOÀN BỘ vòng lặp. Đặt dưới
+                       `timeout-minutes` của workflow (45 < 60) để mình tự dừng
+                       trong tay mình, còn kịp trả dữ liệu và ghi checkpoint.
+                       Chặn cả trường hợp upstream chỉ chậm chứ không lỗi.
+      max_consecutive_failures — cầu dao. Khi upstream sập hẳn thì mã nào cũng
+                       hỏng; ngồi đợi hết 45 phút để xác nhận điều đã rõ sau 20
+                       mã là phí. Đếm LIÊN TIẾP chứ không đếm tổng: một rổ 500 mã
+                       luôn có sẵn dăm mã chết (huỷ niêm yết, mã mới), đếm tổng
+                       sẽ nhả cầu dao oan.
+
+    Dừng vì bất kỳ van nào cũng KHÔNG phải lỗi: hàm trả về phần đã lấy được và
+    ghi lý do vào `df.attrs['fetch_summary']`. Caller quyết định phần dữ liệu đó
+    có đủ dùng không — xem run_daily.
+
     Args:
         max_workers: 1 = sequential (safer for rate limit)
         delay: seconds between requests
+        time_budget_s: trần thời gian, giây. None = không giới hạn (hành vi cũ).
+        max_consecutive_failures: số mã hỏng liên tiếp thì nhả cầu dao.
+                                  <= 0 để tắt cầu dao.
+        checkpoint_path: file JSON ghi tiến độ. None = không ghi.
+        checkpoint_every: ghi checkpoint sau mỗi ngần này mã.
+        clock: hàm trả về giây đơn điệu tăng — chỉ để test tiêm đồng hồ giả.
     """
     from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    now = clock or time.monotonic
+    started_at = now()
+    started_wall = datetime.now().isoformat(timespec='seconds')
+    deadline = (started_at + time_budget_s) if time_budget_s else None
+
+    total = len(tickers_df)
     all_frames = []
-    success = 0
-    fail = 0
+    ok_tickers: list[str] = []
+    failed_tickers: list[str] = []
+    skipped_tickers: list[str] = []
+    consecutive_failures = 0
+    stop_reason: Optional[str] = None
+    stop_event = threading.Event()
+
+    def _summary(done: int) -> dict:
+        return {
+            'started_at': started_wall,
+            'elapsed_s': round(now() - started_at, 1),
+            'total': total,
+            'done': done,
+            'ok': len(ok_tickers),
+            'failed': len(failed_tickers),
+            'skipped': len(skipped_tickers),
+            'coverage': round(len(ok_tickers) / total, 4) if total else 0.0,
+            'stop_reason': stop_reason,
+            'truncated': stop_reason is not None,
+            'time_budget_s': time_budget_s,
+            'max_consecutive_failures': max_consecutive_failures,
+            'ok_tickers': list(ok_tickers),
+            'failed_tickers': list(failed_tickers),
+            'skipped_tickers': list(skipped_tickers),
+        }
+
+    def _write_checkpoint(done: int) -> None:
+        """
+        Ghi tiến độ ra đĩa. Đây là phần "thay vì mất trắng": dữ liệu OHLCV thật
+        đã nằm trong parquet cache theo từng mã, còn file này ghi lại mã nào đã
+        xong để lần chạy sau — và người đọc log — biết vòng lặp dừng ở đâu và
+        vì sao.
+
+        Nuốt mọi lỗi ghi: checkpoint hỏng không được phép giết một vòng fetch
+        đang chạy tốt.
+        """
+        if checkpoint_path is None:
+            return
+        try:
+            p = Path(checkpoint_path)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            with open(p, 'w', encoding='utf-8') as f:
+                json.dump(_summary(done), f, ensure_ascii=False, indent=2)
+        except Exception as e:                       # noqa: BLE001
+            log.warning(f"  checkpoint write failed: {e}")
 
     def _worker(row):
-        time.sleep(delay)
+        # Kiểm ngay tại cửa: mọi future đã được submit từ đầu, nên khi van đã
+        # đóng thì phần còn lại phải trả về tức thì thay vì nối thêm một lượt
+        # fetch 26-90 giây nữa.
+        if stop_event.is_set():
+            return _SKIPPED
+        if deadline is not None and now() >= deadline:
+            return _SKIPPED
+        if delay:
+            time.sleep(delay)
         return fetch_with_cache(row['ticker'], row['exchange'], lookback_days)
 
     with ThreadPoolExecutor(max_workers=max_workers) as ex:
@@ -542,21 +661,65 @@ def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
             done += 1
             try:
                 df = fut.result()
+                if df is _SKIPPED:
+                    skipped_tickers.append(tk)
+                    continue
                 if df is not None and len(df) > 60:
                     all_frames.append(df)
-                    success += 1
+                    ok_tickers.append(tk)
+                    consecutive_failures = 0
                 else:
-                    fail += 1
+                    failed_tickers.append(tk)
+                    consecutive_failures += 1
             except Exception as e:
-                fail += 1
+                failed_tickers.append(tk)
+                consecutive_failures += 1
                 log.warning(f"  {tk}: {e}")
-            if done % 25 == 0:
-                log.info(f"  Fetched {done}/{len(futures)} tickers (ok={success}, fail={fail})")
 
-    log.info(f"  Total: {success} succeeded, {fail} failed")
+            if stop_reason is None:
+                # Cầu dao trước: khi upstream sập hẳn, nhả sớm còn giữ được thời
+                # gian cho các bước sau của workflow.
+                if (max_consecutive_failures > 0
+                        and consecutive_failures >= max_consecutive_failures):
+                    stop_reason = 'circuit_breaker'
+                    stop_event.set()
+                    log.error(
+                        f"  CẦU DAO: {consecutive_failures} mã hỏng liên tiếp "
+                        f"(ngưỡng {max_consecutive_failures}) — dừng ở {done}/{total}. "
+                        f"Upstream hỏng, không phải mã lẻ."
+                    )
+                elif deadline is not None and now() >= deadline:
+                    stop_reason = 'time_budget'
+                    stop_event.set()
+                    log.error(
+                        f"  HẾT NGÂN SÁCH: {round(now() - started_at)}s "
+                        f"(trần {time_budget_s}s) — dừng ở {done}/{total}, "
+                        f"giữ lại {len(ok_tickers)} mã đã lấy xong."
+                    )
+                if stop_reason is not None:
+                    _write_checkpoint(done)
+
+            if done % checkpoint_every == 0:
+                log.info(f"  Fetched {done}/{total} tickers "
+                         f"(ok={len(ok_tickers)}, fail={len(failed_tickers)})")
+                _write_checkpoint(done)
+
+    summary = _summary(done)
+    _write_checkpoint(done)
+
+    log.info(f"  Total: {summary['ok']} succeeded, {summary['failed']} failed, "
+             f"{summary['skipped']} skipped in {summary['elapsed_s']}s")
+    if stop_reason:
+        log.error(f"  VÒNG FETCH DỪNG SỚM ({stop_reason}) — "
+                  f"độ phủ {summary['coverage']:.1%} ({summary['ok']}/{total}).")
+
     if not all_frames:
-        return pd.DataFrame()
-    return pd.concat(all_frames, ignore_index=True)
+        out = pd.DataFrame()
+    else:
+        out = pd.concat(all_frames, ignore_index=True)
+    # attrs sống sót qua concat khi gán sau; caller đọc để biết có bị cắt không.
+    out.attrs['fetch_summary'] = summary
+    return out
 
 
 def fetch_vnindex(lookback_days: int = 180) -> Optional[pd.DataFrame]:

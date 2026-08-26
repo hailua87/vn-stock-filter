@@ -22,7 +22,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from scanner import BreakoutScanner
 from scanner.exporter import to_excel, to_json, to_html, write_json
-from scanner.data_fetcher import get_ticker_universe, fetch_universe, fetch_vnindex
+from scanner.data_fetcher import (
+    CHECKPOINT_PATH, get_ticker_universe, fetch_universe, fetch_vnindex,
+)
 from scanner.corporate_actions import apply_event_filter
 from scanner.market_regime import (
     compute_regime, compute_breadth, compute_relative_strength, annotate_results,
@@ -51,6 +53,20 @@ ICT = timezone(timedelta(hours=7), name='ICT')
 #     ghi lúc 15:08 trở đi → 0% thiếu, khớp 100%
 # 15:15 là mốc chốt đó cộng biên an toàn.
 ARCHIVE_CUTOFF_ICT = dtime(15, 15)
+
+# Trần thời gian cho vòng fetch, giây. 45 phút — cố ý thấp hơn `timeout-minutes:
+# 60` của workflow 15 phút.
+#
+# Khoảng chênh đó không phải cho đẹp: 17-20/08/2026 cả 8 ca đều bị runner giết ở
+# đúng phút 60 giữa lúc đang fetch, tức chết TRƯỚC mọi bước ghi file, nên ~140 mã
+# đã lấy về không thành cái gì cả. Tự dừng ở phút 45 thì phần chấm điểm, ghi JSON
+# và commit vẫn còn 15 phút để chạy — hỏng có kiểm soát thay vì bị chặt ngang.
+FETCH_BUDGET_S = int(os.environ.get('FETCH_BUDGET_S', 45 * 60))
+
+# Độ phủ tối thiểu để bản quét được coi là đại diện cho cả phiên. Dưới mức này,
+# archive bị chặn: một file archive mỏng là VĨNH VIỄN (không ai chạy lại phiên
+# cũ), còn latest.json thì ca sau ghi đè được.
+MIN_COVERAGE_FOR_ARCHIVE = float(os.environ.get('MIN_COVERAGE_FOR_ARCHIVE', 0.8))
 
 
 def now_ict() -> datetime:
@@ -108,7 +124,9 @@ def session_completeness(by_ticker: dict) -> Optional[float]:
     return round(float(pd.Series(ratios).median()), 3)
 
 
-def archive_decision(force: bool = False, now: Optional[datetime] = None) -> dict:
+def archive_decision(force: bool = False, now: Optional[datetime] = None,
+                     fetch_summary: Optional[dict] = None,
+                     min_coverage: Optional[float] = None) -> dict:
     """
     Có được ghi archive không — quyết định bằng ĐỒNG HỒ TẠI LÚC GHI.
 
@@ -120,16 +138,48 @@ def archive_decision(force: bool = False, now: Optional[datetime] = None) -> dic
     Điểm cuối cùng là thay đổi quan trọng nhất về mặt an toàn: bản cũ hỏi
     `env == 'intraday'`, nên thiếu biến sẽ trả False và archive được ghi vô điều
     kiện — hỏng theo hướng MỞ. Nay thiếu thông tin thì đóng.
+
+    CỔNG THỨ HAI (2026-08-27): độ phủ. Khi vòng fetch dừng sớm vì hết ngân sách
+    thời gian hoặc vì cầu dao, `fetch_summary['coverage']` tụt xuống — quét 140
+    trên 500 mã không phải bản ghi của phiên đó, nó là một lát cắt. File archive
+    thì VĨNH VIỄN: không có ca nào chạy lại phiên cũ để sửa, và backtest sau này
+    sẽ đọc lát cắt đó như dữ liệu thật. latest.json thì khác, ca sau ghi đè được,
+    nên vẫn ghi bình thường.
+
+    Cổng độ phủ đứng SAU `force`: `--force-archive` là để người biết rõ mình đang
+    làm gì ép ghi, và mọi lần ép đều bị đánh dấu `archive_forced=true`.
     """
     now = now or now_ict()
     run_type = get_run_type()
     after_cutoff = now.time() >= ARCHIVE_CUTOFF_ICT
     cutoff_str = ARCHIVE_CUTOFF_ICT.strftime('%H:%M')
 
-    if after_cutoff:
-        return {'write': True, 'forced': False, 'run_type': run_type,
+    min_coverage = (MIN_COVERAGE_FOR_ARCHIVE if min_coverage is None
+                    else min_coverage)
+    coverage = (fetch_summary or {}).get('coverage')
+    truncated = bool((fetch_summary or {}).get('truncated'))
+    thin = (coverage is not None and coverage < min_coverage)
+
+    coverage_blocked = truncated or thin
+    stop = (fetch_summary or {}).get('stop_reason') or 'không rõ'
+    cov_str = f'{coverage:.1%}' if coverage is not None else '?'
+    thin_note = (f'vòng fetch dừng sớm ({stop}), độ phủ {cov_str} < '
+                 f'{min_coverage:.0%} — bản quét không đại diện cho phiên')
+
+    if coverage_blocked and not force:
+        return {'write': False, 'forced': False, 'run_type': run_type,
                 'written_at_ict': now.strftime('%Y-%m-%d %H:%M:%S%z'),
-                'reason': f'{now:%H:%M} ICT >= {cutoff_str} — khối lượng đã chốt'}
+                'reason': thin_note}
+
+    if after_cutoff:
+        # `forced` phải bật kể cả khi cổng đồng hồ tự nó đã mở: thứ bị ép qua ở
+        # đây là cổng ĐỘ PHỦ. Không đánh dấu thì một file archive dựng từ 140/500
+        # mã trông y hệt file dựng từ 500/500 — đúng kiểu im lặng đang phải sửa.
+        return {'write': True, 'forced': coverage_blocked, 'run_type': run_type,
+                'written_at_ict': now.strftime('%Y-%m-%d %H:%M:%S%z'),
+                'reason': (f'{now:%H:%M} ICT >= {cutoff_str} — khối lượng đã chốt'
+                           + (f'; ÉP GHI qua cổng độ phủ: {thin_note}'
+                              if coverage_blocked else ''))}
     if force:
         return {'write': True, 'forced': True, 'run_type': run_type,
                 'written_at_ict': now.strftime('%Y-%m-%d %H:%M:%S%z'),
@@ -140,7 +190,8 @@ def archive_decision(force: bool = False, now: Optional[datetime] = None) -> dic
 
 
 def build_metadata(min_score, exchanges, total_scanned, market_context,
-                   session_date, decision, completeness) -> dict:
+                   session_date, decision, completeness,
+                   fetch_summary: Optional[dict] = None) -> dict:
     """
     Metadata dùng chung cho latest.json VÀ file archive.
 
@@ -161,6 +212,14 @@ def build_metadata(min_score, exchanges, total_scanned, market_context,
         'archive_written': decision['write'],
         'archive_forced': decision['forced'],
         'archive_gate': decision['reason'],
+        # Bằng chứng về vòng fetch. `fetch_truncated` là trường mà chuông báo độ
+        # tươi (check_freshness.py) và người đọc dashboard cần thấy: một file
+        # sinh ra từ 140/500 mã trông y hệt file sinh ra từ 500/500 nếu không nói
+        # ra. `fetch_stop_reason` là None khi vòng lặp chạy trọn.
+        'fetch_truncated': bool((fetch_summary or {}).get('truncated')),
+        'fetch_stop_reason': (fetch_summary or {}).get('stop_reason'),
+        'fetch_coverage': (fetch_summary or {}).get('coverage'),
+        'fetch_elapsed_s': (fetch_summary or {}).get('elapsed_s'),
         # Giữ khoá cũ: web/app.js:373 đọc `metadata.intraday` làm nguồn dự phòng
         # khi thiếu `run_type`.
         'intraday': decision['run_type'] == 'intraday',
@@ -169,7 +228,8 @@ def build_metadata(min_score, exchanges, total_scanned, market_context,
 
 def write_strategy_outputs(results, web_subdir, session_date, min_score,
                            exchanges, total_scanned, strategy_label,
-                           market_context=None, decision=None, completeness=None):
+                           market_context=None, decision=None, completeness=None,
+                           fetch_summary=None):
     """Write latest.json + archive/<date>.json + archive/index.json for one strategy."""
     web_subdir.mkdir(parents=True, exist_ok=True)
     archive_dir = web_subdir / 'archive'
@@ -188,7 +248,7 @@ def write_strategy_outputs(results, web_subdir, session_date, min_score,
         'total': len(signals),
         'metadata': build_metadata(min_score, exchanges, total_scanned,
                                    market_context, session_date, decision,
-                                   completeness),
+                                   completeness, fetch_summary),
         'signals': signals,
     }
 
@@ -231,6 +291,13 @@ def main():
     parser.add_argument('--output-dir', type=str, default='backend/data/results')
     parser.add_argument('--no-corporate-actions', action='store_true',
                         help='Bỏ qua bộ lọc sự kiện quyền (nhanh hơn, dùng khi test)')
+    parser.add_argument('--fetch-budget', type=int, default=FETCH_BUDGET_S,
+                        help='Trần thời gian cho vòng fetch, giây (0 = bỏ trần). '
+                             'Mặc định %(default)s, cố ý thấp hơn timeout-minutes '
+                             'của workflow để còn kịp ghi file.')
+    parser.add_argument('--max-consecutive-failures', type=int, default=20,
+                        help='Số mã hỏng LIÊN TIẾP thì nhả cầu dao và dừng vòng '
+                             'fetch (0 = tắt cầu dao). Mặc định %(default)s.')
     parser.add_argument('--force-archive', action='store_true',
                         help='Ghi archive kể cả khi chưa qua %s ICT. Chỉ dùng khi '
                              'biết rõ dữ liệu đã đủ; lần ghi đè sẽ được đánh dấu '
@@ -251,13 +318,34 @@ def main():
     universe = get_ticker_universe(exchanges, limit=args.limit)
     log.info(f"  Universe: {len(universe)} tickers")
 
-    df_all_raw = fetch_universe(universe, lookback_days=args.lookback)
+    df_all_raw = fetch_universe(
+        universe,
+        lookback_days=args.lookback,
+        time_budget_s=args.fetch_budget,
+        max_consecutive_failures=args.max_consecutive_failures,
+        checkpoint_path=CHECKPOINT_PATH,
+    )
+    fetch_summary = df_all_raw.attrs.get('fetch_summary', {})
+
     if df_all_raw.empty:
-        log.error("No data fetched from vnstock")
+        log.error("No data fetched from vnstock "
+                  f"(stop_reason={fetch_summary.get('stop_reason')})")
         sys.exit(1)
 
     total_scanned = df_all_raw['Ticker'].nunique()
     log.info(f"  Fetched data for {total_scanned} tickers")
+
+    # Vòng fetch dừng sớm là chuyện phải nói to. Bản cũ chết lặng ở phút 60 và
+    # không ai biết cho tới khi soi log; nay nó tự dừng, giữ lại phần đã lấy, và
+    # đóng dấu vào metadata của cả 4 file để dashboard lẫn chuông báo đều thấy.
+    if fetch_summary.get('truncated'):
+        log.error(
+            f"  VÒNG FETCH BỊ CẮT ({fetch_summary.get('stop_reason')}): "
+            f"{fetch_summary.get('ok')}/{fetch_summary.get('total')} mã "
+            f"(độ phủ {fetch_summary.get('coverage', 0):.1%}) sau "
+            f"{fetch_summary.get('elapsed_s')}s. Checkpoint: {CHECKPOINT_PATH}"
+        )
+        log.error("  Kết quả phiên này là MỘT LÁT CẮT, không phải bản quét đầy đủ.")
 
     # -------- Bối cảnh thị trường (regime + breadth + relative strength) -----
     # Trước đây `fetch_vnindex` được import nhưng không dùng ở đâu: hệ thống bắn
@@ -284,10 +372,13 @@ def main():
     # -------- Cổng archive: quyết định bằng đồng hồ TẠI LÚC GHI --------
     session_date = session_date_from_data(df_all_raw)
     completeness = session_completeness(by_ticker)
-    decision = archive_decision(force=args.force_archive)
+    decision = archive_decision(force=args.force_archive,
+                                fetch_summary=fetch_summary)
     log.info(f"  Ngày phiên (từ dữ liệu): {session_date}")
     log.info(f"  Độ trọn vẹn phiên: {completeness} "
              f"(cờ thông tin, không dùng để chặn)")
+    log.info(f"  Độ phủ vòng fetch: {fetch_summary.get('coverage')} "
+             f"(ngưỡng archive {MIN_COVERAGE_FOR_ARCHIVE})")
     if decision['write']:
         log.info(f"  Archive: GHI — {decision['reason']}")
         if decision['forced']:
@@ -314,7 +405,7 @@ def main():
 
         pb_meta = build_metadata(args.min_score, exchanges, total_scanned,
                                  market_context, session_date, decision,
-                                 completeness)
+                                 completeness, fetch_summary)
         to_json(pb_signals, web_dir / 'latest.json', metadata=pb_meta)
 
         if decision['write'] and session_date is not None:
@@ -359,7 +450,8 @@ def main():
         'GC-long', lambda df_t, tk: golden_cross.evaluate(df_t, tk, preset='long'))
     write_strategy_outputs(gc_long_results, web_dir / 'golden_cross_long', session_date,
                            args.min_score_goldencross, exchanges, total_scanned,
-                           'golden_cross_long', market_context, decision, completeness)
+                           'golden_cross_long', market_context, decision, completeness,
+                           fetch_summary)
 
     # -------- Golden Cross — SHORT preset (MA10 × MA20) --------
     log.info("Running Golden Cross strategy (SHORT: MA10×MA20)...")
@@ -367,14 +459,16 @@ def main():
         'GC-short', lambda df_t, tk: golden_cross.evaluate(df_t, tk, preset='short'))
     write_strategy_outputs(gc_short_results, web_dir / 'golden_cross_short', session_date,
                            args.min_score_goldencross, exchanges, total_scanned,
-                           'golden_cross_short', market_context, decision, completeness)
+                           'golden_cross_short', market_context, decision, completeness,
+                           fetch_summary)
 
     # -------- Ichimoku --------
     log.info("Running Ichimoku strategy...")
     ich_results = run_strategy('Ichimoku', lambda df_t, tk: ichimoku.evaluate(df_t, tk))
     write_strategy_outputs(ich_results, web_dir / 'ichimoku', session_date,
                            args.min_score_ichimoku, exchanges, total_scanned,
-                           'ichimoku', market_context, decision, completeness)
+                           'ichimoku', market_context, decision, completeness,
+                           fetch_summary)
 
     log.info(f"All strategies complete for session {session_date}")
 

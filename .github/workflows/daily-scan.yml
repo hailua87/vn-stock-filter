@@ -110,13 +110,54 @@ jobs:
           restore-keys: |
             ohlcv-cache-v3-
 
+      # FETCH_BUDGET_S = 2700 (45 phút) trong khi timeout-minutes = 60.
+      # Khoảng chênh 15 phút là cố ý: 17-20/08/2026 cả 8 ca đều bị runner giết ở
+      # đúng phút 60 GIỮA LÚC ĐANG FETCH, tức chết trước mọi bước ghi file, nên
+      # ~140 mã đã lấy về không thành cái gì. Tự dừng ở phút 45 thì phần chấm
+      # điểm, ghi JSON và commit vẫn còn 15 phút — hỏng có kiểm soát thay vì bị
+      # chặt ngang. timeout-minutes giữ nguyên làm lưới cuối.
       - name: Run daily scan
         env:
           VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
           SCAN_RUN_TYPE: ${{ steps.runtype.outputs.run_type }}
+          FETCH_BUDGET_S: '2700'
         run: |
-          python backend/run_daily.py --min-score 5 --limit 500
+          python backend/run_daily.py --min-score 5 --limit 500             --max-consecutive-failures 20
         timeout-minutes: 60
+
+      # Chạy cả khi bước trên hỏng: checkpoint chỉ có giá trị đúng lúc mọi thứ
+      # hỏng. `if: always()` là điểm mấu chốt, không phải thói quen.
+      # Chạy cả khi bước trên hỏng: checkpoint chỉ có giá trị đúng lúc mọi thứ
+      # hỏng. `if: always()` là điểm mấu chốt, không phải thói quen.
+      #
+      # Dùng heredoc thay cho `python -c "..."`: thân script có cả nháy đơn lẫn
+      # nháy kép, nhét vào một chuỗi shell nháy kép thì nó tự đóng sớm.
+      - name: Report fetch checkpoint
+        if: always()
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          echo "==================================================="
+          python - <<'PY'
+          import json, pathlib
+          cp = pathlib.Path('backend/data/cache/fetch_checkpoint.json')
+          if not cp.exists():
+              print('(khong co checkpoint - vong fetch chua kip chay)')
+              raise SystemExit(0)
+          d = json.loads(cp.read_text(encoding='utf-8'))
+          print('VONG FETCH')
+          print('  bat dau     :', d.get('started_at'))
+          print('  chay het    :', d.get('elapsed_s'), 's  (tran', d.get('time_budget_s'), 's)')
+          print('  da thu      :', d.get('done'), '/', d.get('total'))
+          print('  ok/hong/bo  :', d.get('ok'), '/', d.get('failed'), '/', d.get('skipped'))
+          print('  do phu      :', d.get('coverage'))
+          print('  ly do dung  :', d.get('stop_reason'))
+          if d.get('truncated'):
+              sk = d.get('skipped_tickers') or []
+              print('  => VONG FETCH BI CAT. Ket qua phien nay la MOT LAT CAT.')
+              print('  ma chua thu :', len(sk), '-', ', '.join(sk[:15]) + ('...' if len(sk) > 15 else ''))
+          PY
+          echo "==================================================="
 
       - name: Verify scan results
         run: |
