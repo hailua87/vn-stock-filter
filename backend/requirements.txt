@@ -5,7 +5,15 @@ openpyxl>=3.1.0
 pyarrow>=14.0.0          # parquet cache
 
 # Data source
-vnstock>=4.0.0          # primary VN market data (4.x API)
+# GHIM CUNG, khong phai >=. Bang chung tu log CI thang 8/2026:
+#     4.0.5  — 14/08 chay tot
+#     4.0.6  — 17,18,19,20/08: FAIL ca 8 ca voi
+#              RetryError[<Future ... raised UnboundLocalError>]
+#     4.0.7  — 21,24,25,26/08 chay tot tro lai
+# `>=4.0.0` nghia la moi lan CI `pip install` deu keo ban moi nhat, nen mot ban
+# loi cua upstream tu no thanh su co cua repo nay, khong qua mot lan review nao.
+# Nang ban la viec CO Y: sua so o day, xem CI xanh, roi moi merge.
+vnstock==4.0.7          # primary VN market data (4.x API)
 requests>=2.31.0
 
 # API server
