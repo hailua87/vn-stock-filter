@@ -1,9 +1,19 @@
 name: Daily Scan
 
 # Lịch chạy:
-#   - 12:00 ICT (05:00 UTC) — INTRADAY: sau phiên sáng close (11:30 ICT + 30p buffer)
-#   - 23:00 ICT (16:00 UTC) — EOD: đủ muộn để vnstock cập nhật giá ATC chính thức
+#   - 12:05 ICT (05:05 UTC) — INTRADAY: sau phiên sáng close (11:30 ICT + 35p buffer)
+#   - 23:05 ICT (16:05 UTC) — EOD: đủ muộn để vnstock cập nhật giá ATC chính thức
 # Chỉ chạy T2-T6 (không cuối tuần).
+#
+# Tại sao phút 05 chứ không phải phút 00? (Fix 2026-08-27)
+#   Cron của GitHub Actions là NỖ LỰC TỐI ĐA, không phải cam kết, và mốc đầu giờ
+#   là khung nghẽn nhất. Đo trên chính repo này, giờ thực tế các ca EOD được xếp
+#   hàng: 16:12, 16:16, 16:18, 16:20, 16:21 — tức đã trễ sẵn 12-22 phút so với
+#   `0 16`. Ca EOD 26/08 thì bị bỏ hẳn: KHÔNG có run object nào được tạo, nên
+#   `gh run list` không có cả dòng đỏ để nhìn thấy — im lặng tuyệt đối.
+#   Dời khỏi phút 00 không làm GitHub cam kết gì thêm, nhưng ra khỏi khung đông
+#   nhất thì xác suất bị bỏ tick thấp hơn. Đây là giảm rủi ro, không phải sửa
+#   dứt điểm — thứ bắt được lần bỏ tick tiếp theo là data-freshness-alert.yml.
 #
 # Phân biệt intraday vs EOD:
 #   - Workflow tự detect dựa trên giờ chạy (UTC < 9 → intraday, ≥9 → eod)
@@ -12,17 +22,17 @@ name: Daily Scan
 # Manual trigger:
 #   - Có thể chọn loại run từ UI nếu cần override (vd test khi đang code)
 #
-# Tại sao EOD 23:00 thay vì 17:00? (Fix 2026-05-27)
+# Tại sao EOD 23:05 thay vì 17:00? (Fix 2026-05-27)
 #   vnstock VCI có data freshness lag ~6-8 giờ sau HOSE đóng cửa (14:45 ICT):
 #     - 14:45-22:00 ICT: vnstock trả giá tạm (matched price giữa phiên)
 #     - 22:00+ ICT: vnstock cập nhật giá ATC chính thức
 #   Workflow EOD cũ 17:00 (chỉ 2h15 sau close) lấy giá tạm → cache giữ data sai
 #   → ngày sau dùng cache → giá vĩnh viễn sai cho phiên đó.
-#   23:00 ICT đảm bảo vnstock đã update đúng trước khi scan.
+#   23:05 ICT đảm bảo vnstock đã update đúng trước khi scan.
 on:
   schedule:
-    - cron: '0 5 * * 1-5'    # 12:00 ICT — INTRADAY: sau phiên sáng
-    - cron: '0 16 * * 1-5'   # 23:00 ICT — EOD: đợi vnstock update giá ATC
+    - cron: '5 5 * * 1-5'    # 12:05 ICT — INTRADAY: sau phiên sáng
+    - cron: '5 16 * * 1-5'   # 23:05 ICT — EOD: đợi vnstock update giá ATC
   workflow_dispatch:
     inputs:
       run_type:
@@ -267,7 +277,7 @@ jobs:
           # Hai thứ này đã từng lệch thật: commit 68b7237 ghi "signals 2026-08-22"
           # trong khi file nó tạo ra là archive/2026-08-21.json. Nguyên nhân là
           # DATE_ICT lấy đồng hồ lúc commit, còn tên file archive lấy từ
-          # df['Date'].max(). Bản EOD chạy 23:00 ICT chỉ cần quét quá 60 phút là
+          # df['Date'].max(). Bản EOD chạy 23:05 ICT chỉ cần quét quá 55 phút là
           # qua nửa đêm ICT, và message lệch một ngày so với chính dữ liệu bên
           # trong. Nay cả hai đọc chung một nguồn: metadata.session_date.
           SESSION_DATE=$(python -c "
