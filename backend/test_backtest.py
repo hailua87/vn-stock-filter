@@ -137,12 +137,18 @@ def setup_synthetic_data():
                 price = price_orig * (1 + return_pct/100 * progress) * (1 + np.random.normal(0, 0.005))
             prices.append(price)
 
+        # QUAN TRỌNG — ĐƠN VỊ: cache OHLCV lưu theo đơn vị quote của vnstock
+        # (nghìn VND, ví dụ ACB = 24.30) trong khi snapshot định giá lưu VND.
+        # Fixture phải mô phỏng đúng thực tế, nếu không backtest sẽ báo sai số
+        # hàng trăm nghìn phần trăm. Xem scanner/price_units.py.
+        prices_quote = [p / 1_000 for p in prices]
+
         df = pd.DataFrame({
             'Date': dates,
-            'Open': prices,
-            'High': [p * 1.01 for p in prices],
-            'Low': [p * 0.99 for p in prices],
-            'Close': prices,
+            'Open': prices_quote,
+            'High': [p * 1.01 for p in prices_quote],
+            'Low': [p * 0.99 for p in prices_quote],
+            'Close': prices_quote,
             'Volume': [1_000_000] * len(prices),
         })
         df.to_parquet(OHLCV_DIR / f'{ticker}_adj.parquet', index=False)

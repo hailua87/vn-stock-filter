@@ -219,22 +219,21 @@ def calculate_dcf_fcff(data: Dict[str, Any],
     upside = (fair_value - current_price) / current_price if current_price > 0 else 0
 
     # Sanity check: DCF rất nhạy với growth và WACC.
-    # Nếu fair value > 4× current price → quá optimistic, cap lại để aggregation không bị skew
+    #
+    # FIX: bản cũ GHI ĐÈ fair_value = current_price × 3.0 (hoặc × 0.4). Đó là
+    # neo giá trị nội tại vào chính cái mình đang muốn so sánh — kết quả "định
+    # giá" trở thành hàm của giá thị trường nhưng vẫn được đưa vào bình quân
+    # gia quyền như một ý kiến độc lập.
+    # Xử lý đúng: GIỮ NGUYÊN con số, hạ confidence để engine tự loại (engine bỏ
+    # mọi method có confidence < 0.15).
     extreme_factor = fair_value / current_price if current_price > 0 else 0
-    if extreme_factor > 4.0:
+    extreme_result = extreme_factor > 4.0 or 0 < extreme_factor < 0.25
+    if extreme_result:
         warnings.append(
-            f"DCF fair value cao bất thường ({extreme_factor:.1f}× giá hiện tại). "
-            f"Có thể do growth/WACC assumption quá lạc quan. Capped tại 3× giá."
+            f"DCF fair value bất thường ({extreme_factor:.2f}× giá hiện tại) — "
+            f"giả định growth/WACC hoặc FCFF đầu vào không đáng tin. "
+            f"Loại khỏi tổng hợp thay vì cắt về bội số của giá."
         )
-        fair_value = current_price * 3.0
-        upside = (fair_value - current_price) / current_price
-    elif extreme_factor < 0.25 and extreme_factor > 0:
-        warnings.append(
-            f"DCF fair value thấp bất thường ({extreme_factor:.2f}× giá hiện tại). "
-            f"Có thể do FCFF âm/quá thấp. Floor tại 0.4× giá."
-        )
-        fair_value = current_price * 0.4
-        upside = (fair_value - current_price) / current_price
 
     # === Sensitivity table cho WACC × terminal g ===
     sens_table = []
@@ -270,7 +269,9 @@ def calculate_dcf_fcff(data: Dict[str, Any],
         confidence -= 0.10  # high growth assumption rủi ro
     if wacc_info['debt_to_equity'] > 2.0:
         confidence -= 0.10  # leverage cao → WACC kém tin cậy
-    confidence = max(0.1, min(1.0, confidence))
+    if extreme_result:
+        confidence = 0.0    # dưới ngưỡng 0.15 của engine → bị loại khỏi tổng hợp
+    confidence = max(0.0, min(1.0, confidence))
 
     return ValuationResult(
         method="DCF FCFF",
@@ -380,20 +381,14 @@ def calculate_ddm(data: Dict[str, Any], forecast_years: int = 8) -> ValuationRes
     fair_value = pv_explicit + pv_terminal
     upside = (fair_value - current_price) / current_price if current_price > 0 else 0
 
-    # Sanity check
+    # Sanity check — xem giải thích ở calculate_dcf_fcff: không cắt fair value
+    # về bội số của giá thị trường, chỉ hạ confidence để engine loại.
     extreme_factor = fair_value / current_price if current_price > 0 else 0
-    if extreme_factor > 4.0:
+    extreme_result = extreme_factor > 4.0 or 0 < extreme_factor < 0.25
+    if extreme_result:
         warnings.append(
-            f"DDM fair value cao bất thường ({extreme_factor:.1f}× giá). Capped tại 3×."
+            f"DDM fair value bất thường ({extreme_factor:.2f}× giá) — loại khỏi tổng hợp."
         )
-        fair_value = current_price * 3.0
-        upside = (fair_value - current_price) / current_price
-    elif extreme_factor < 0.25 and extreme_factor > 0:
-        warnings.append(
-            f"DDM fair value thấp bất thường ({extreme_factor:.2f}×). Floor tại 0.4×."
-        )
-        fair_value = current_price * 0.4
-        upside = (fair_value - current_price) / current_price
 
     terminal_share = pv_terminal / fair_value if fair_value > 0 else 0
     if terminal_share > 0.85:
@@ -409,7 +404,11 @@ def calculate_ddm(data: Dict[str, Any], forecast_years: int = 8) -> ValuationRes
         confidence -= 0.20  # high growth → DDM kém phù hợp (low payout)
     if terminal_share > 0.85:
         confidence -= 0.10
-    confidence = max(0.1, min(1.0, confidence))
+    if per_share.get('dps_source') == 'eps_x_payout':
+        confidence -= 0.10  # DPS ước tính, không phải cổ tức đã công bố
+    if extreme_result:
+        confidence = 0.0
+    confidence = max(0.0, min(1.0, confidence))
 
     return ValuationResult(
         method="DDM",

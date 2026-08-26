@@ -140,6 +140,13 @@ def normalize_fundamentals(raw: Dict[str, Any]) -> Dict[str, Any]:
         log.warning(f"  {ticker}: missing core financial statements")
         return None
 
+    # === Invariant đơn vị: valuation engine chạy hoàn toàn bằng VND/cp ===
+    # Chặn ngay tại biên thay vì để giá đơn vị quote (nghìn VND) lan xuống và
+    # tạo ra upside +98.000%. Xem scanner/price_units.py.
+    from ...price_units import assert_price_is_vnd
+    if current_price is not None:
+        assert_price_is_vnd(current_price, ticker, 'current_price')
+
     # === Latest period (year[0]) ===
     bs0 = bs_records[0] if bs_records else {}
     is0 = is_records[0] if is_records else {}
@@ -229,28 +236,61 @@ def normalize_fundamentals(raw: Dict[str, Any]) -> Dict[str, Any]:
             ratios['pb_5y_p75'] = hist_mults['pb_5y_p75']
         ratios['_historical_multiples_source'] = 'computed'
     else:
-        # Fallback proxy ±20% từ current (kém chính xác)
-        if ratios.get('pe_ttm', 0) > 0:
-            ratios.setdefault('pe_5y_median', ratios['pe_ttm'])
-            ratios.setdefault('pe_5y_p25', ratios['pe_ttm'] * 0.80)
-            ratios.setdefault('pe_5y_p75', ratios['pe_ttm'] * 1.20)
-        if ratios.get('pb_current', 0) > 0:
-            ratios.setdefault('pb_5y_median', ratios['pb_current'])
-            ratios.setdefault('pb_5y_p25', ratios['pb_current'] * 0.80)
-            ratios.setdefault('pb_5y_p75', ratios['pb_current'] * 1.20)
-        ratios['_historical_multiples_source'] = 'proxy_fallback'
+        # KHÔNG suy historical multiple từ multiple hiện tại.
+        #
+        # FIX CIRCULARITY: bản cũ đặt pe_5y_median = pe_ttm và pb_5y_median =
+        # pb_current. Hệ quả: "Historical Multiple" cho fair_value = pe_ttm × EPS
+        # = ĐÚNG BẰNG GIÁ THỊ TRƯỜNG (nhìn output demo: 42.215 vs 42.000,
+        # 105.013 vs 105.000), mà phương pháp này lại chiếm 10-25% trọng số.
+        # P/E Multiple cũng lấy 40% trọng số từ chính con số đó.
+        # ⇒ "fair value" tự kéo về giá thị trường và upside bị triệt tiêu.
+        #
+        # Nguyên tắc: không input nào của giá trị nội tại được chứa current_price.
+        # Thiếu dữ liệu lịch sử thì để None, các method sẽ tự bỏ cấu phần đó và
+        # chuẩn hoá lại trọng số.
+        ratios['pe_5y_median'] = None
+        ratios['pe_5y_p25'] = None
+        ratios['pe_5y_p75'] = None
+        ratios['pb_5y_median'] = None
+        ratios['pb_5y_p25'] = None
+        ratios['pb_5y_p75'] = None
+        ratios['_historical_multiples_source'] = 'unavailable'
 
     # === Per-share ===
     eps_ttm = _safe_float(_get_field(r0, RATIO_ALIASES['eps_ttm']))
     if eps_ttm == 0 and shares > 0 and net_profit_parent > 0:
         eps_ttm = (net_profit_parent * 1_000_000_000) / shares
 
-    dps_ttm = current_price * ratios.get('dividend_yield', 0) if current_price else 0
+    # === DPS: phải là số tuyệt đối, KHÔNG suy từ giá ===
+    # FIX CIRCULARITY: bản cũ `dps_ttm = current_price × dividend_yield`. DDM khi
+    # đó cho fair value tỷ lệ thuận với giá hiện tại → upside gần như hằng số
+    # bất kể thị trường định giá cao hay thấp. Thứ tự ưu tiên mới:
+    #   1. DPS công bố trong bảng ratio
+    #   2. Cổ tức đã trả trên báo cáo lưu chuyển tiền tệ / số cổ phiếu
+    #   3. EPS × payout ratio (thuần cơ bản, vẫn không dính giá)
+    dps_ttm = _safe_float(_get_field(r0, [
+        'dps', 'dividend_per_share', 'cash_dividend_per_share', 'co_tuc_tien_mat',
+    ]))
+    dps_source = 'reported'
+
+    if dps_ttm <= 0:
+        dividends_paid = abs(_safe_float(_get_field(cf0, [
+            'dividends_paid', 'dividend_paid', 'payment_of_dividends',
+            'co_tuc_da_tra',
+        ])))
+        if dividends_paid > 0 and shares > 0:
+            dps_ttm = (dividends_paid * 1_000_000_000) / shares
+            dps_source = 'cash_flow'
+
+    if dps_ttm <= 0 and eps_ttm > 0:
+        dps_ttm = eps_ttm * ratios.get('payout_ratio', 0.30)
+        dps_source = 'eps_x_payout'
 
     per_share = {
         'eps_ttm': eps_ttm,
         'bvps': bvps,
-        'dps_ttm': dps_ttm,
+        'dps_ttm': max(0.0, dps_ttm),
+        'dps_source': dps_source,
     }
 
     # === Growth ===
@@ -294,6 +334,23 @@ def normalize_fundamentals(raw: Dict[str, Any]) -> Dict[str, Any]:
 
     # === Market data ===
     market_cap = (current_price * shares / 1_000_000_000) if (current_price and shares) else 0
+
+    # === EV/EBITDA hiện tại ===
+    # FIX: trước đây không module nào set key này, nên methods_ev_ebitda luôn
+    # rơi vào default `ratios.get("ev_ebitda", 6.0)` → bội số mục tiêu là HẰNG SỐ
+    # 6.0x (cyclical) hoặc 6.8x (stable) cho MỌI doanh nghiệp — trong khi
+    # EV/EBITDA giữ 45-50% trọng số cho Thép/Hoá chất/Dầu khí/Nông nghiệp.
+    # Đồng thời peer_database.extract_peer_input() lấy ratios['ev_ebitda'] = None
+    # nên peer band cho ev_ebitda vĩnh viễn rỗng.
+    net_debt_bn = (balance_sheet['short_term_debt'] + balance_sheet['long_term_debt']
+                   - balance_sheet['cash_and_equivalents'])
+    enterprise_value_bn = market_cap + net_debt_bn + balance_sheet['minority_interest']
+    if ebitda_ttm > 0 and enterprise_value_bn > 0:
+        ratios['ev_ebitda'] = enterprise_value_bn / ebitda_ttm
+    else:
+        ratios['ev_ebitda'] = None
+    ratios['net_debt'] = net_debt_bn
+    ratios['enterprise_value'] = enterprise_value_bn if enterprise_value_bn > 0 else None
 
     # Beta: dùng beta thực từ regression nếu có, fallback 1.0
     beta_info = raw.get('beta_info', {})

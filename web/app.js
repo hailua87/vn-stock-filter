@@ -52,10 +52,12 @@ const STRATEGIES = {
     maxScore: 5,
     criteria: [
       { key: 'ich_tk_bullish',        name: 'Tenkan > Kijun (TK bullish)',  cat: 'trend' },
-      { key: 'ich_recent_tk_cross',   name: 'TK vừa cắt lên (≤5 phiên) ⭐', cat: 'squeeze' },
+      // Không cộng điểm (trùng với TK bullish) — giữ làm nhãn chất lượng ⭐
+      { key: 'ich_recent_tk_cross',   name: 'TK vừa cắt lên (≤5 phiên) ⭐', cat: 'squeeze', noScore: true },
       { key: 'ich_price_above_cloud', name: 'Giá trên Cloud',               cat: 'trend' },
       { key: 'ich_cloud_bullish',     name: 'Cloud bullish (A > B)',        cat: 'trend' },
       { key: 'ich_chikou_free',       name: 'Chikou thoát kháng cự',        cat: 'flow' },
+      { key: 'ich_future_cloud_bullish', name: 'Mây tương lai bullish (+26)', cat: 'trend' },
     ],
   },
   combined: {
@@ -118,6 +120,9 @@ const state = {
   // Đọc từ JSON metadata fields: run_type, run_time_ict, run_date_ict.
   // Dùng để hiển thị badge "INTRADAY 12:00" / "EOD 17:00" cho user biết độ tươi data.
   runMetadata: { runType: null, runTimeIct: null, runDateIct: null },
+  // Bối cảnh thị trường từ metadata.market_context — dùng làm CỔNG cho tỷ trọng
+  // khuyến nghị, không cộng vào điểm số (xem buildRecommendation).
+  marketContext: null,
   sort: { column: null, direction: null },
   filters: { exchange: '', rating: '', search: '', volMin: null, volMax: null, ich_special: '' },
   // ─── Combined mode ───
@@ -205,14 +210,51 @@ function startClock() {
     const stateEl = document.querySelector('.market-state');
     if (isOpen) {
       stateEl.classList.add('open');
-      document.getElementById('market-text').textContent = 'MARKET OPEN';
+      document.getElementById('market-text').textContent = 'ĐANG GIAO DỊCH';
     } else {
       stateEl.classList.remove('open');
-      document.getElementById('market-text').textContent = 'MARKET CLOSED';
+      document.getElementById('market-text').textContent = 'NGOÀI GIỜ';
     }
   };
   tick();
   setInterval(tick, 1000);
+}
+
+/**
+ * Thay chỉ báo "LIVE" bằng ĐỘ TƯƠI THẬT của dữ liệu.
+ *
+ * Vì sao: header có chấm xanh "LIVE" + đồng hồ chạy từng giây, trong khi dữ
+ * liệu chỉ cập nhật 2 lần/ngày. Người dùng mới sẽ hiểu là realtime. Đây cùng
+ * một họ lỗi với bug banner demo: giao diện hứa nhiều hơn dữ liệu thực có.
+ * Với sản phẩm tài chính, đó không phải chuyện thẩm mỹ.
+ */
+function updateDataFreshness(generatedAt, runType) {
+  const dot = document.getElementById('live-dot');
+  const text = document.getElementById('live-text');
+  if (!text) return;
+
+  if (!generatedAt) {
+    text.textContent = 'CHƯA CÓ DỮ LIỆU';
+    if (dot) dot.className = 'live-dot stale';
+    return;
+  }
+
+  const t = new Date(generatedAt);
+  if (Number.isNaN(t.getTime())) return;
+
+  const ageHours = (Date.now() - t.getTime()) / 3600000;
+  const stamp = t.toLocaleString('vi-VN', {
+    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+  });
+
+  const label = runType === 'intraday' ? 'GIỮA PHIÊN' : 'EOD';
+  text.textContent = `${label} ${stamp}`;
+  text.title = `Dữ liệu quét lúc ${t.toLocaleString('vi-VN')} — không phải realtime`;
+
+  if (dot) {
+    // > 30 giờ nghĩa là đã lỡ ít nhất một phiên
+    dot.className = 'live-dot' + (ageHours > 30 ? ' stale' : '');
+  }
 }
 
 // ──────────── Strategy tabs ────────────
@@ -240,6 +282,13 @@ async function switchStrategy(strategy) {
 
   const dashboard = document.getElementById('dashboard');
   const analyzerView = document.getElementById('analyzer-view');
+
+  // GỘP HAI Ô TÌM KIẾM: trước đây ô tìm của Analyzer luôn nằm trên topbar,
+  // cạnh ô "Tìm mã" trong sidebar — hai ô trông giống nhau nhưng hành vi khác
+  // hẳn (một cái mở phân tích chi tiết, một cái lọc bảng), người dùng không
+  // biết dùng cái nào. Nay ô Analyzer chỉ xuất hiện đúng lúc nó có tác dụng.
+  const analyzerBox = document.querySelector('.topbar-analyzer');
+  if (analyzerBox) analyzerBox.hidden = (strategy !== 'analyzer');
 
   // Toggle layout mode
   if (strategy === 'analyzer') {
@@ -319,6 +368,10 @@ async function loadCombinedData(silent = false) {
     if (metadata.universe_size && metadata.universe_size > universeSize) universeSize = metadata.universe_size;
     if (metadata.demo) demoFlag = true;
     if (metadata.scan_date) scanDate = metadata.scan_date;
+    if (metadata.market_context && metadata.market_context.available) {
+      state.marketContext = metadata.market_context;
+      renderMarketContext(metadata.market_context, metadata.intraday);
+    }
     // Update count in filter UI
     const cntEl = document.getElementById(`cnt-${key}`);
     if (cntEl) cntEl.textContent = signals.length;
@@ -401,6 +454,8 @@ function applyExchangeOverrides(signals) {
 // Data cũ (chưa có tag) → trả null cho các field → badge không hiển thị.
 function extractRunMetadata(data) {
   const m = data?.metadata || {};
+  // Cập nhật luôn chỉ báo độ tươi ở header — thay cho nhãn "LIVE" gây hiểu nhầm
+  updateDataFreshness(data?.generated_at, m.run_type || (m.intraday ? 'intraday' : 'eod'));
   return {
     runType: m.run_type || null,          // 'intraday' | 'eod' | null
     runTimeIct: m.run_time_ict || null,    // 'HH:MM' | null
@@ -434,7 +489,12 @@ async function loadLatestFirst() {
   } catch (e) {
     console.error('Load latest failed:', e);
     document.getElementById('signal-rows').innerHTML =
-      `<tr><td colspan="14" class="empty">Không tải được dữ liệu: ${e.message}</td></tr>`;
+      `<tr><td colspan="15" class="empty error-state">
+         <div class="error-title">Không tải được dữ liệu</div>
+         <div class="error-detail">${escapeAttr(e.message)}</div>
+         <div class="error-detail">${navigator.onLine ? 'Máy chủ dữ liệu có thể đang bận.' : 'Thiết bị đang offline.'}</div>
+         <button class="btn-ghost" onclick="location.reload()">↻ Thử lại</button>
+       </td></tr>`;
   }
 }
 
@@ -496,14 +556,46 @@ function renderDateOptions() {
   document.getElementById('date-latest').onclick = () => loadDateData(state.latestDate);
 }
 
+/**
+ * Gộp nhiều lần gọi liên tiếp thành một, chờ `wait` ms sau lần gọi cuối.
+ * Sự kiện được giữ lại vì handler cần `e.target`.
+ */
+/**
+ * Đơn vị giá hiển thị.
+ *
+ * Toàn bộ pipeline technical dùng đơn vị quote của vnstock (NGHÌN VND) — giống
+ * bảng điện. Nhưng trước đây không chỗ nào trên giao diện viết ra điều đó: cột
+ * hiện "137.3" và người dùng phải tự đoán.
+ *
+ * Đây đúng là loại nhầm lẫn đã gây ra bug sai 1000× trong module định giá.
+ * Nếu chính hệ thống còn nhầm được thì không thể trách người dùng.
+ */
+const PRICE_UNIT_LABEL = 'nghìn đ';
+function fmtPriceUnit() { return PRICE_UNIT_LABEL; }
+
+function debounce(fn, wait = 150) {
+  let timer = null;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
 // ──────────── Filters ────────────
 function bindFilters() {
   document.querySelectorAll('.chip-row').forEach(group => {
     const filter = group.dataset.filter;
     group.querySelectorAll('.chip').forEach(chip => {
+      // aria-pressed: truoc day trang thai bat/tat cua chip CHI ton tai bang mau.
+      // Nguoi dung trinh doc man hinh khong biet bo loc nao dang bat.
+      chip.setAttribute('aria-pressed', chip.classList.contains('active') ? 'true' : 'false');
       chip.addEventListener('click', () => {
-        group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        group.querySelectorAll('.chip').forEach(c => {
+          c.classList.remove('active');
+          c.setAttribute('aria-pressed', 'false');
+        });
         chip.classList.add('active');
+        chip.setAttribute('aria-pressed', 'true');
         state.filters[filter] = chip.dataset.value;
         // Update Ichimoku filter hint dynamically
         if (filter === 'ich_special') {
@@ -522,10 +614,13 @@ function bindFilters() {
     });
   });
 
-  document.getElementById('search').addEventListener('input', e => {
+  // Debounce: mỗi ký tự gõ vào từng dựng lại TOÀN BỘ tbody bằng innerHTML.
+  // Với 50-200 dòng thì tạm ổn, nhưng universe lên 400 mã sẽ giật, và việc
+  // thay innerHTML còn xoá luôn trạng thái chọn dòng của người dùng.
+  document.getElementById('search').addEventListener('input', debounce(e => {
     state.filters.search = e.target.value.trim().toUpperCase();
     render();
-  });
+  }, 150));
 
   document.getElementById('vol-min').addEventListener('input', e => {
     state.filters.volMin = parseVolumeInput(e.target.value);
@@ -658,12 +753,65 @@ function moveSelection(delta) {
 }
 
 // ──────────── Help modal ────────────
+//
+// Modal cũ chỉ đổi `display` — thiếu 4 hành vi mà người dùng mong đợi ở một hộp
+// thoại: đóng bằng Esc, giam focus bên trong, trả focus về nút mở khi đóng, và
+// ẩn nội dung nền khỏi trình đọc màn hình.
 function bindHelp() {
   const modal = document.getElementById('help-modal');
-  document.getElementById('help-btn').addEventListener('click', () => modal.style.display = 'flex');
-  document.getElementById('help-close').addEventListener('click', () => modal.style.display = 'none');
+  const openBtn = document.getElementById('help-btn');
+  const closeBtn = document.getElementById('help-close');
+  let lastFocused = null;
+
+  const FOCUSABLE = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+  function open() {
+    lastFocused = document.activeElement;
+    modal.hidden = false;
+    modal.style.display = 'flex';
+    openBtn.setAttribute('aria-expanded', 'true');
+    (modal.querySelector(FOCUSABLE) || modal).focus();
+    document.addEventListener('keydown', onKeydown, true);
+  }
+
+  function close() {
+    modal.style.display = 'none';
+    modal.hidden = true;
+    openBtn.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('keydown', onKeydown, true);
+    // Trả focus về đúng nơi người dùng đã rời đi
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+  }
+
+  function onKeydown(e) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      close();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+
+    // Giam focus: Tab ở phần tử cuối quay về đầu và ngược lại. Không có cái này,
+    // Tab sẽ đi ra ngoài modal và người dùng bàn phím lạc mất hộp thoại.
+    const items = [...modal.querySelectorAll(FOCUSABLE)].filter(el => el.offsetParent !== null);
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  openBtn.setAttribute('aria-expanded', 'false');
+  openBtn.setAttribute('aria-controls', 'help-modal');
+  openBtn.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
   modal.addEventListener('click', e => {
-    if (e.target === modal) modal.style.display = 'none';
+    if (e.target === modal) close();
   });
 }
 
@@ -711,7 +859,8 @@ function renderRunBadge() {
 function render() {
   state.filtered = applyFilters();
   document.getElementById('result-count').textContent = state.filtered.length;
-  document.getElementById('stat-total').textContent = state.raw.length;
+  // `stat-total` da duoc go: no trung lap voi `result-count` ngay tren bang.
+  document.getElementById('stat-total')?.replaceChildren(String(state.raw.length));
   document.getElementById('stat-aplus').textContent =
     state.raw.filter(s => s.rating === 'A+').length;
 
@@ -824,7 +973,7 @@ function applyFilters() {
 function renderRows() {
   const tbody = document.getElementById('signal-rows');
   if (!state.filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="14" class="empty">Không có tín hiệu khớp bộ lọc</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="15" class="empty">Không có tín hiệu khớp bộ lọc</td></tr>`;
     return;
   }
   tbody.innerHTML = state.filtered.map((s, i) => renderRow(s, i + 1)).join('');
@@ -837,6 +986,48 @@ function renderRows() {
       if (sig) openDetail(sig);
     });
   });
+}
+
+
+/**
+ * Ô %1D với màu theo quy ước bảng điện Việt Nam.
+ *
+ * Vì sao quan trọng hơn thẩm mỹ: mã đang dư mua TRẦN thì bạn KHÔNG MUA ĐƯỢC.
+ * Một "tín hiệu breakout" trên mã trần cứng là tín hiệu không thực hiện được.
+ * Tương tự, mã nằm sàn thì không thoát được hàng — rủi ro thực tế lớn hơn
+ * nhiều so với những gì mức cắt lỗ trên giấy thể hiện.
+ *
+ * Quy ước: TÍM = trần · XANH LAM = sàn · VÀNG = tham chiếu · xanh/đỏ = tăng/giảm
+ */
+function renderChange1D(s) {
+  const v = s.m_change_1d_pct;
+  if (v === null || v === undefined) return '<span class="dim">—</span>';
+
+  const status = s.m_limit_status || 'normal';
+  const locked = s.m_limit_locked;
+  const sign = v > 0 ? '+' : '';
+  const text = `${sign}${Number(v).toFixed(2)}%`;
+
+  const cls = {
+    ceiling: 'limit-up',
+    floor: 'limit-down',
+    reference: 'limit-ref',
+  }[status] || (v > 0 ? 'up' : v < 0 ? 'down' : 'flat');
+
+  const mark = status === 'ceiling' ? '▲' : status === 'floor' ? '▼' : '';
+  const lock = locked && (status === 'ceiling' || status === 'floor')
+    ? '<span class="limit-lock" title="Khoá cứng — cả phiên chỉ khớp một mức giá">🔒</span>'
+    : '';
+  const title = s.m_tradable_warning ? ` title="${escapeAttr(s.m_tradable_warning)}"` : '';
+
+  return `<span class="${cls}"${title}>${mark}${text}</span>${lock}`;
+}
+
+/** Thoát ký tự cho thuộc tính HTML — dữ liệu tuy tự sinh nhưng mã đến từ API ngoài. */
+function escapeAttr(str) {
+  return String(str).replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
 }
 
 function renderRow(s, idx) {
@@ -883,7 +1074,8 @@ function renderRow(s, idx) {
       <td class="ticker-with-badges"><span class="ticker-cell">${s.ticker}</span>${eventFlag}<span class="ticker-badges">${badgesInline}</span></td>
       <td><span class="exchange-cell">${s.exchange}</span></td>
       <td class="num">${fmtPrice(s.close)}</td>
-      <td class="num ${changeClass}">${sign}${change.toFixed(2)}%</td>
+      <td class="num prio-1">${renderChange1D(s)}</td>
+      <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
       <td class="num">${fmtVolume(s.volume)}</td>
       <td class="num">${fmtValue(s.close, s.volume)}</td>
       <td class="num">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
@@ -920,7 +1112,8 @@ function renderRow(s, idx) {
     <td><span class="ticker-cell">${s.ticker}</span>${tkCrossFlag}${turnaroundFlag}${eventFlag}</td>
     <td><span class="exchange-cell">${s.exchange}</span></td>
     <td class="num">${fmtPrice(s.close)}</td>
-    <td class="num ${changeClass}">${sign}${change.toFixed(2)}%</td>
+    <td class="num prio-1">${renderChange1D(s)}</td>
+    <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
     <td class="num">${fmtVolume(s.volume)}</td>
     <td class="num">${fmtValue(s.close, s.volume)}</td>
     <td class="num">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
@@ -1456,6 +1649,20 @@ function buildRecommendation(passCount, hasAplus, primarySignal) {
 
   // Modifiers
   let warnings = [];
+
+  // ── Relative strength vs VN-Index ──────────────────────────────────────
+  // RS là yếu tố dự báo mạnh nhất trong các nghiên cứu momentum, nhưng nó KHÔNG
+  // được cộng vào điểm số (điểm số thuộc về từng chiến lược). Ở đây nó điều
+  // chỉnh mức độ tự tin của khuyến nghị.
+  const rsRank = primarySignal?.m_rs_rank;
+  if (typeof rsRank === 'number') {
+    if (rsRank < 40) {
+      warnings.push(`RS ${rsRank}/99 — mã đang YẾU hơn thị trường. Tín hiệu kỹ thuật ` +
+                    `trên nền sức mạnh tương đối kém có tỷ lệ thất bại cao hơn đáng kể`);
+    } else if (rsRank >= 80) {
+      warnings.push(`RS ${rsRank}/99 — mã dẫn dắt, khoẻ hơn ${rsRank}% thị trường`);
+    }
+  }
   if (rsi > 75) warnings.push(`RSI ${rsi.toFixed(0)} — quá mua, cẩn trọng vào lệnh full size hoặc đợi pullback`);
   else if (rsi > 70) warnings.push(`RSI ${rsi.toFixed(0)} — gần quá mua, vào lệnh từ tốn`);
   if (rsi < 30) warnings.push(`RSI ${rsi.toFixed(0)} — quá bán, có thể có rebound nhưng risk cao`);
@@ -1472,13 +1679,20 @@ function buildRecommendation(passCount, hasAplus, primarySignal) {
     cls = 'rec-strong-buy';
     stars = '⭐⭐⭐⭐';
     title = 'MUA MẠNH';
-    desc = 'Mã pass đồng thời cả 4 chiến lược với nhiều A+. Đây là tín hiệu hiếm và rất đáng tin cậy. Có thể tham gia vị thế lớn nếu phù hợp khẩu vị rủi ro.';
+    // Diễn đạt trung thực: 4 chiến lược này KHÔNG độc lập. Cả bốn đều là bộ lọc
+    // xu hướng mua lên, dùng chung MA của cùng một chuỗi giá, nên tương quan rất
+    // cao. Gọi đó là "4 nguồn xác nhận độc lập" là sai về mặt thống kê và khiến
+    // người dùng tự tin quá mức.
+    desc = 'Mã pass cả 4 chiến lược với nhiều A+ — setup kỹ thuật rất đồng thuận. ' +
+           'Lưu ý: 4 chiến lược này cùng nhóm xu hướng nên tương quan cao, ' +
+           'không phải 4 nguồn xác nhận độc lập.';
     position = '8-12% NAV';
   } else if (passCount === 4) {
     cls = 'rec-strong-buy';
     stars = '⭐⭐⭐⭐';
     title = 'MUA MẠNH';
-    desc = 'Mã pass đồng thời cả 4 chiến lược. Đây là tín hiệu rất mạnh, đa nguồn xác nhận.';
+    desc = 'Mã pass cả 4 chiến lược — setup kỹ thuật đồng thuận cao. ' +
+           'Lưu ý: 4 chiến lược cùng nhóm xu hướng nên tương quan cao với nhau.';
     position = '6-10% NAV';
   } else if (passCount === 3 && hasAplus >= 1) {
     cls = 'rec-buy';
@@ -1515,39 +1729,130 @@ function buildRecommendation(passCount, hasAplus, primarySignal) {
   // Apply warning modifiers
   if (rsi > 75 && (passCount === 4 || passCount === 3)) {
     desc += ' Tuy nhiên RSI rất cao — đợi pullback hoặc vào với size nhỏ hơn.';
-    position = position.replace(/(\d+)-(\d+)% NAV/, (_, a, b) => `${Math.max(1, +a - 2)}-${Math.max(2, +b - 3)}% NAV`);
+    position = scalePosition(position, 0.7);
+  }
+
+  // ── CỔNG BỐI CẢNH THỊ TRƯỜNG ──────────────────────────────────────────
+  // Phần lớn tín hiệu breakout thất bại khi VN-Index dưới MA50/MA200. Trước
+  // đây UI đưa ra cùng một tỷ trọng "8-12% NAV" bất kể thị trường đang uptrend
+  // hay downtrend — đó là thiếu sót lớn nhất về mặt quản trị rủi ro.
+  //
+  // Regime KHÔNG được cộng vào điểm (điểm đo chất lượng setup của từng mã);
+  // nó nhân vào TỶ TRỌNG, tức tách bạch "tín hiệu tốt đến đâu" khỏi "nên đặt
+  // bao nhiêu tiền".
+  const ctx = state.marketContext;
+  if (ctx && ctx.available && ctx.position_size_multiplier < 1) {
+    position = scalePosition(position, ctx.position_size_multiplier);
+    const pct = Math.round(ctx.position_size_multiplier * 100);
+    warnings.unshift(
+      `Bối cảnh thị trường ${ctx.regime === 'risk_off' ? 'BẤT LỢI' : 'trung tính'} — ` +
+      `đã giảm tỷ trọng đề xuất còn ~${pct}% mức thường. ${ctx.label}`
+    );
+    if (ctx.regime === 'risk_off' && (passCount >= 3)) {
+      desc += ' Lưu ý: setup đẹp nhưng thị trường chung đang bất lợi — ' +
+              'phần lớn breakout thất bại trong giai đoạn này.';
+    }
+  }
+
+  // Độ rộng thị trường: chỉ số có thể được kéo bởi vài mã vốn hoá lớn trong
+  // khi đa số cổ phiếu đã giảm.
+  const breadth = ctx?.breadth?.pct_above_ma50;
+  if (typeof breadth === 'number' && breadth < 35) {
+    warnings.push(`Độ rộng yếu — chỉ ${breadth}% số mã nằm trên MA50`);
   }
 
   return { cls, stars, title, desc, position, warnings };
 }
 
+/**
+ * Co giãn chuỗi tỷ trọng dạng "8-12% NAV" theo hệ số.
+ * Tách riêng để logic co tỷ trọng chỉ tồn tại ở MỘT chỗ — trước đây nó nằm
+ * inline trong nhánh RSI với công thức trừ cứng (−2/−3 điểm phần trăm).
+ */
+function scalePosition(position, factor) {
+  if (!position || factor >= 1) return position;
+  return position.replace(/(\d+)-(\d+)%\s*NAV/, (_, a, b) => {
+    const lo = Math.max(1, Math.round(+a * factor));
+    const hi = Math.max(lo + 1, Math.round(+b * factor));
+    return `${lo}-${hi}% NAV`;
+  });
+}
+
 // Compute entry levels for analyzer (similar to existing detail panel)
+/**
+ * Kế hoạch vào lệnh.
+ *
+ * LỖI ĐÃ SỬA — LỜI KHUYÊN TỰ MÂU THUẪN:
+ *   Bản cũ luôn đặt entry tại Fibonacci golden support, tức THẤP HƠN giá hiện
+ *   tại, trong khi Pre-Breakout lại đi tìm mã ĐANG cách đỉnh 20 phiên ≤ 3%.
+ *   Người dùng làm theo sẽ hoặc không bao giờ khớp lệnh (giá chạy tiếp), hoặc
+ *   nếu giá về tới đó thì setup breakout đã hỏng rồi.
+ *   Stop lại lấy hỗ trợ SÂU NHẤT trong 3 mức — có khi −15% dưới entry, gấp đôi
+ *   rủi ro mà người dùng nghĩ mình đang nhận.
+ *
+ * Cách làm mới — hai kịch bản, và nói thẳng đang dùng cái nào:
+ *   BREAKOUT (giá sát đỉnh) : mua khi vượt đỉnh; stop = max(hỗ trợ gần, 2×ATR)
+ *   PULLBACK (giá xa đỉnh)  : chờ về vùng hỗ trợ mới mua
+ *
+ * Stop luôn bị chặn ở mức lỗ tối đa, và kế hoạch bị TỪ CHỐI nếu R:R quá thấp —
+ * thà không đưa lời khuyên còn hơn đưa lời khuyên xấu.
+ */
+const MAX_STOP_PCT = 0.08;        // không bao giờ đề xuất cắt lỗ quá 8%
+const MIN_ACCEPTABLE_RR = 1.5;
+
 function computeAnalyzerLevels(s) {
   if (!s) return null;
   const supports = s.m_supports || [];
   const resistances = s.m_resistances || [];
-  if (!supports.length) return null;
+  const price = s.close;
+  if (!price) return null;
 
-  // Prefer Golden Ratio support for entry
-  const golden = supports.find(x => x.is_golden);
+  const high20 = s.m_high20;
+  const atrPct = (s.m_atr_pct || 2.5) / 100;
   const nearestSup = supports[0];
   const nearestRes = resistances[0];
 
-  const entry = golden ? golden.price : nearestSup.price;
-  // Stop = deepest support, but must be < entry. Fallback: 7% below entry.
-  let stop;
-  if (supports.length > 1) {
-    const deepest = supports[supports.length - 1].price;
-    stop = deepest < entry * 0.99 ? deepest : entry * 0.93;
+  // Cách đỉnh 20 phiên bao nhiêu % — đây là thứ quyết định kịch bản
+  const distToHigh = high20 ? (high20 - price) / price * 100 : null;
+  const isBreakoutSetup = distToHigh !== null && distToHigh <= 3;
+
+  let entry, stop, mode, entryNote;
+
+  if (isBreakoutSetup) {
+    mode = 'breakout';
+    entry = high20 * 1.005;      // đệm 0,5% phòng phá vỡ giả
+    entryNote = `Mua khi vượt đỉnh 20 phiên (${fmtPrice(high20)})`;
+    const atrStop = entry * (1 - 2 * atrPct);
+    const supStop = nearestSup ? nearestSup.price : atrStop;
+    stop = Math.max(atrStop, supStop);   // lấy mức chặt hơn
   } else {
-    stop = entry * 0.93;
+    mode = 'pullback';
+    const golden = supports.find(x => x.is_golden);
+    entry = golden ? golden.price : (nearestSup ? nearestSup.price : price * 0.97);
+    const away = (price - entry) / price * 100;
+    entryNote = `Chờ giá chỉnh về vùng hỗ trợ (còn ${away.toFixed(1)}% nữa)`;
+    const deeper = supports.find(x => x.price < entry * 0.99);
+    stop = deeper ? deeper.price : entry * (1 - 2 * atrPct);
   }
-  const target = nearestRes && nearestRes.price > entry * 1.01 ? nearestRes.price : entry * 1.08;
-  const riskPct = ((entry - stop) / entry * 100);
-  const gainPct = ((target - entry) / entry * 100);
+
+  // Chặn cứng mức lỗ tối đa — bản cũ có thể cho stop −15%
+  stop = Math.max(stop, entry * (1 - MAX_STOP_PCT));
+
+  const target = nearestRes && nearestRes.price > entry * 1.02
+    ? nearestRes.price
+    : entry * 1.08;
+
+  const riskPct = (entry - stop) / entry * 100;
+  const gainPct = (target - entry) / entry * 100;
   const rr = riskPct > 0.1 ? gainPct / riskPct : 0;
 
-  return { entry, stop, target, riskPct, gainPct, rr };
+  return {
+    entry, stop, target, riskPct, gainPct, rr, mode, entryNote,
+    acceptable: rr >= MIN_ACCEPTABLE_RR,
+    rejectReason: rr < MIN_ACCEPTABLE_RR
+      ? `R:R chỉ ${rr.toFixed(1)} — dưới ngưỡng ${MIN_ACCEPTABLE_RR}, không đáng vào lệnh`
+      : null,
+  };
 }
 
 // ── Main analyzer entry point ──
@@ -1662,11 +1967,25 @@ function renderAnalyzer(ticker, signal, perStrategy, passCount, rec, levels) {
   // Entry levels
   let levelsHtml = '';
   if (levels && passCount >= 2) {
-    levelsHtml = `<div class="rec-levels">
+    // Nói rõ đang dùng kịch bản nào — trước đây UI im lặng đưa ra một mức giá
+    // mà không cho biết đó là "mua ngay khi vượt đỉnh" hay "chờ chỉnh mới mua",
+    // hai việc hoàn toàn khác nhau.
+    const modeBadge = levels.mode === 'breakout'
+      ? '<span class="plan-mode plan-breakout">KỊCH BẢN BREAKOUT</span>'
+      : '<span class="plan-mode plan-pullback">KỊCH BẢN CHỜ CHỈNH</span>';
+
+    const rejectBanner = levels.acceptable ? '' :
+      `<div class="plan-reject">⚠ ${escapeAttr(levels.rejectReason)} —
+       thà bỏ lỡ còn hơn vào một lệnh có tỷ lệ lời/lỗ xấu.</div>`;
+
+    levelsHtml = `<div class="rec-plan${levels.acceptable ? '' : ' rec-plan-rejected'}">
+      <div class="plan-head">${modeBadge}<span class="plan-note">${levels.entryNote}</span></div>
+      ${rejectBanner}
+      <div class="rec-levels">
       <div class="rec-level rec-level-entry">
         <div class="rec-level-label">VÀO LỆNH</div>
         <div class="rec-level-value">${levels.entry.toFixed(2).replace('.',',')}</div>
-        <div class="rec-level-sub">${levels.entry < signal.close ? '↓ Đợi pullback' : '≈ Giá hiện tại'}</div>
+        <div class="rec-level-sub">${fmtPriceUnit()}</div>
       </div>
       <div class="rec-level rec-level-stop">
         <div class="rec-level-label">CẮT LỖ</div>
@@ -1681,7 +2000,8 @@ function renderAnalyzer(ticker, signal, perStrategy, passCount, rec, levels) {
       <div class="rec-level rec-level-rr">
         <div class="rec-level-label">R:R</div>
         <div class="rec-level-value">1 : ${levels.rr.toFixed(1)}</div>
-        <div class="rec-level-sub">${levels.rr >= 2 ? 'Tốt' : levels.rr >= 1.5 ? 'Khá' : 'Trung bình'}</div>
+        <div class="rec-level-sub">${levels.rr >= 2 ? 'Tốt' : levels.rr >= 1.5 ? 'Khá' : 'Không đạt'}</div>
+      </div>
       </div>
     </div>`;
   }
@@ -1815,4 +2135,49 @@ function bindAnalyzerEvents() {
       analyzeTicker(t);
     });
   });
+}
+
+// ════════════════════════════════════════════════════════════
+// BỐI CẢNH THỊ TRƯỜNG (market regime + breadth)
+// ════════════════════════════════════════════════════════════
+// Vì sao quan trọng: phần lớn tín hiệu breakout thất bại khi VN-Index dưới
+// MA50/MA200. Trước đây dashboard hiển thị "MUA MẠNH 8-12% NAV" giống hệt nhau
+// bất kể thị trường đang uptrend hay downtrend.
+function renderMarketContext(ctx, isIntraday) {
+  const el = document.getElementById('market-context');
+  if (!el || !ctx || !ctx.available) return;
+
+  const cls = {
+    risk_on: 'mc-on',
+    neutral: 'mc-neutral',
+    risk_off: 'mc-off',
+  }[ctx.regime] || 'mc-neutral';
+
+  const icon = { risk_on: '🟢', neutral: '🟡', risk_off: '🔴' }[ctx.regime] || '⚪';
+  const breadth = ctx.breadth && ctx.breadth.pct_above_ma50 != null
+    ? `${ctx.breadth.pct_above_ma50}% mã trên MA50`
+    : 'độ rộng: —';
+
+  const sizing = ctx.position_size_multiplier < 1
+    ? `<span class="mc-warn">Gợi ý giảm tỷ trọng còn ~${Math.round(ctx.position_size_multiplier * 100)}% mức thường</span>`
+    : '';
+
+  const intradayTag = isIntraday
+    ? '<span class="mc-intraday">Bản giữa phiên — khối lượng chưa đủ ngày</span>'
+    : '';
+
+  el.className = `market-context ${cls}`;
+  el.innerHTML = `
+    <span class="mc-icon">${icon}</span>
+    <span class="mc-label">${ctx.label}</span>
+    <span class="mc-stats">
+      VN-Index ${Number(ctx.close).toLocaleString('vi-VN')}
+      · MA50 ${ctx.ma50 ? Number(ctx.ma50).toLocaleString('vi-VN') : '—'}
+      · 20 phiên ${ctx.change_20d_pct > 0 ? '+' : ''}${ctx.change_20d_pct}%
+      · ${breadth}
+    </span>
+    ${sizing}
+    ${intradayTag}
+  `;
+  el.style.display = 'flex';
 }

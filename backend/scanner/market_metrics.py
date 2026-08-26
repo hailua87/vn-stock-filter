@@ -19,6 +19,8 @@ from typing import Dict, Any, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
+from .price_units import quote_to_vnd
+
 log = logging.getLogger(__name__)
 
 # Cache OHLCV ở cùng nơi với data_fetcher
@@ -301,11 +303,15 @@ def calculate_historical_multiples(ticker: str, fundamentals_raw: Dict,
         if year is None:
             continue
 
-        # Lookup giá ở cuối năm (31/12) hoặc gần nhất
+        # Lookup giá ở cuối năm (31/12) hoặc gần nhất.
+        # Cache OHLCV theo đơn vị quote (nghìn VND) còn EPS/BVPS theo VND →
+        # phải quy đổi, nếu không mọi P/E rơi ra ngoài sanity filter bên dưới
+        # và historical multiples luôn im lặng fallback về proxy.
         year_end = pd.Timestamp(year=year, month=12, day=31)
         price = _get_price_at_or_near(price_df, year_end, window_days=45)
         if price is None:
             continue
+        price = quote_to_vnd(price)
 
         if eps and eps > 0:
             pe = price / eps
@@ -319,7 +325,7 @@ def calculate_historical_multiples(ticker: str, fundamentals_raw: Dict,
                                   'bvps': bvps, 'pb': round(pb, 2)})
 
     # Thêm điểm hiện tại (TTM) để median phản ánh cả giá hiện tại
-    current_price = float(price_df['Close'].iloc[-1])
+    current_price = quote_to_vnd(float(price_df['Close'].iloc[-1]))
     current_eps = fundamentals_raw.get('ratio', [{}])[0].get('eps')
     current_bvps = fundamentals_raw.get('ratio', [{}])[0].get('bvps')
 

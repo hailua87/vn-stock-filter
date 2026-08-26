@@ -18,6 +18,21 @@ from scanner.peer_database import (
 )
 
 
+try:
+    import pytest
+
+    @pytest.fixture(name='db')
+    def _db_fixture():
+        """
+        Cho phép pytest chạy test_save_load/test_lookup — hai hàm này vốn viết
+        theo kiểu script (nhận `db` từ main()). Không có fixture này, pytest coi
+        `db` là fixture thiếu và báo ERROR khi CI quét cả thư mục backend.
+        """
+        return test_build_peer_db()
+except ImportError:      # chạy bằng `python test_peer_database.py`
+    pytest = None
+
+
 def test_build_peer_db():
     print("=" * 70)
     print("TEST: BUILD PEER DATABASE")

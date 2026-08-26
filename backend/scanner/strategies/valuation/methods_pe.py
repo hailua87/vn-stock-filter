@@ -26,6 +26,16 @@ from .methods_pb_roe import (
 )
 
 
+# Dải P/E mục tiêu hợp lý cho cổ phiếu VN. Dùng để kẹp cấu phần PEG và để kẹp
+# target khi không có historical band thật.
+PE_FLOOR = 6.0
+PE_CEILING = 25.0
+
+
+def _clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
+
+
 def calculate_eps_stability(eps_history: List[float]) -> Dict[str, float]:
     """Đo độ ổn định của EPS - kiểm tra xem P/E có phù hợp không.
 
@@ -107,14 +117,24 @@ def calculate_pe_valuation(data: Dict[str, Any]) -> ValuationResult:
     notes.append(f"Justified P/E = {payout:.0%} / ({coe:.1%} - {g:.1%}) = {justified_pe:.1f}x")
 
     # --- 3. Historical P/E ---
-    pe_hist_median = ratios.get("pe_5y_median", justified_pe)
-    pe_hist_p25 = ratios.get("pe_5y_p25", pe_hist_median * 0.85)
-    pe_hist_p75 = ratios.get("pe_5y_p75", pe_hist_median * 1.15)
-    notes.append(f"Historical P/E 5y: median={pe_hist_median:.1f}x [P25={pe_hist_p25:.1f}, P75={pe_hist_p75:.1f}]")
+    # Có thể là None: normalizer KHÔNG còn suy historical median từ pe_ttm nữa
+    # (fix circularity). Thiếu thì loại cấu phần này khỏi blend, chứ không thay
+    # bằng một con số dính giá thị trường.
+    pe_hist_median = ratios.get("pe_5y_median")
+    pe_hist_p25 = ratios.get("pe_5y_p25")
+    pe_hist_p75 = ratios.get("pe_5y_p75")
+    if pe_hist_median:
+        notes.append(f"Historical P/E 5y: median={pe_hist_median:.1f}x "
+                     f"[P25={pe_hist_p25:.1f}, P75={pe_hist_p75:.1f}]")
+    else:
+        notes.append("Không có historical P/E thực → loại cấu phần lịch sử khỏi blend")
+        warnings.append("Thiếu historical P/E (cần OHLCV cache >= 3 năm) — "
+                        "định giá dựa nhiều hơn vào peer và justified P/E")
 
     # --- 4. Peer comparison ---
     # Ưu tiên peer database thực, fallback VN-Index nếu chưa có
     peer_pe = None
+    peer_backed = False
     try:
         from ...peer_database import get_peer_band
         industry = data.get('_industry')
@@ -131,6 +151,7 @@ def calculate_pe_valuation(data: Dict[str, Any]) -> ValuationResult:
                 else:
                     quality_factor = 1.0
                 peer_pe = peer_median * quality_factor
+                peer_backed = True
                 notes.append(
                     f"Peer P/E (ngành {industry}, n={peer_band.get('n', '?')}): "
                     f"median={peer_median:.1f}x, quality={quality_factor:.2f} → {peer_pe:.1f}x"
@@ -158,22 +179,45 @@ def calculate_pe_valuation(data: Dict[str, Any]) -> ValuationResult:
     else:
         peg_target = 0.5  # Doanh nghiệp suy giảm
 
-    forward_pe = peg_target * (growth_fwd * 100) if growth_fwd > 0 else pe_hist_p25
-    notes.append(f"Forward P/E (PEG): growth={growth_fwd:.1%}, PEG target={peg_target}, P/E={forward_pe:.1f}x")
+    # FIX ĐIỂM GIÁN ĐOẠN: `peg_target × (g × 100)` cho P/E = 0.4x khi g = 0,5%
+    # rồi NHẢY sang pe_hist_p25 (~10x) khi g = 0. Một thay đổi 0,5% trong giả
+    # định tăng trưởng làm target P/E đổi 25 lần. Nay kẹp trong dải hợp lý.
+    forward_pe = _clamp(peg_target * (growth_fwd * 100), PE_FLOOR, PE_CEILING)
+    notes.append(f"Forward P/E (PEG): growth={growth_fwd:.1%}, PEG target={peg_target}, "
+                 f"P/E={forward_pe:.1f}x (kẹp trong {PE_FLOOR:.0f}-{PE_CEILING:.0f}x)")
 
     # --- 6. Blend final target P/E ---
-    target_pe = 0.35 * justified_pe + 0.40 * pe_hist_median + 0.25 * forward_pe
+    # FIX: peer_pe trước đây được tính đầy đủ (có quality adjustment theo ROE,
+    # có peer DB) rồi CHỈ ghi vào key_outputs mà KHÔNG vào công thức — dù
+    # docstring ghi "Peer/historical multiple — weight 40%". Toàn bộ
+    # peer_database.py gần như vô dụng với P/E.
+    # Trọng số tự chuẩn hoá khi một cấu phần vắng mặt.
+    components = {
+        'justified': (justified_pe, 0.30),
+        'historical': (pe_hist_median, 0.30),
+        'peer': (peer_pe, 0.25),
+        'forward_peg': (forward_pe, 0.15),
+    }
+    available = {k: (v, w) for k, (v, w) in components.items() if v and v > 0}
+    total_w = sum(w for _, w in available.values())
+    target_pe = sum(v * w for v, w in available.values()) / total_w
     notes.append(
-        f"Blend target P/E = 35%×{justified_pe:.1f} + 40%×{pe_hist_median:.1f} + 25%×{forward_pe:.1f} = {target_pe:.1f}x"
+        "Blend target P/E = " +
+        " + ".join(f"{w/total_w:.0%}×{k}({v:.1f})" for k, (v, w) in available.items()) +
+        f" = {target_pe:.1f}x"
     )
 
-    # Cap target P/E trong dải hợp lý (P25 - P75) của historical
-    if target_pe > pe_hist_p75 * 1.2:
-        notes.append(f"Cap target P/E từ {target_pe:.1f} về {pe_hist_p75*1.2:.1f} (1.2× P75)")
-        target_pe = pe_hist_p75 * 1.2
-    elif target_pe < pe_hist_p25 * 0.8:
-        notes.append(f"Floor target P/E từ {target_pe:.1f} lên {pe_hist_p25*0.8:.1f} (0.8× P25)")
-        target_pe = pe_hist_p25 * 0.8
+    # Cap target P/E trong dải hợp lý (P25 - P75) của historical — chỉ khi có
+    # historical thật; nếu không, kẹp trong dải P/E tuyệt đối.
+    if pe_hist_p75 and pe_hist_p25:
+        if target_pe > pe_hist_p75 * 1.2:
+            notes.append(f"Cap target P/E từ {target_pe:.1f} về {pe_hist_p75*1.2:.1f} (1.2× P75)")
+            target_pe = pe_hist_p75 * 1.2
+        elif target_pe < pe_hist_p25 * 0.8:
+            notes.append(f"Floor target P/E từ {target_pe:.1f} lên {pe_hist_p25*0.8:.1f} (0.8× P25)")
+            target_pe = pe_hist_p25 * 0.8
+    else:
+        target_pe = _clamp(target_pe, PE_FLOOR, PE_CEILING)
 
     # --- 7. Fair value ---
     # Dùng EPS forward = EPS_ttm × (1 + g_fwd) nếu g_fwd hợp lý, không thì dùng EPS_ttm
@@ -185,7 +229,7 @@ def calculate_pe_valuation(data: Dict[str, Any]) -> ValuationResult:
         notes.append(f"Growth bất thường → dùng EPS TTM = {fwd_eps:,.0f}")
 
     fair_value = target_pe * fwd_eps
-    upside = (fair_value - current_price) / current_price
+    upside = (fair_value - current_price) / current_price if current_price else 0
 
     # --- 8. Confidence ---
     confidence = 0.75
@@ -195,7 +239,14 @@ def calculate_pe_valuation(data: Dict[str, Any]) -> ValuationResult:
         confidence -= 0.15
     if stability["max_change"] > 1.0:
         confidence -= 0.10
-    confidence = max(0.1, min(1.0, confidence))
+    if not pe_hist_median:
+        confidence -= 0.10      # thiếu neo lịch sử
+    if not peer_backed:
+        confidence -= 0.10      # peer là VN-Index proxy, không phải cùng ngành
+    if eps_ttm <= 0:
+        confidence = 0.0        # P/E vô nghĩa khi EPS <= 0
+        warnings.append("EPS <= 0 → P/E không áp dụng được")
+    confidence = max(0.0, min(1.0, confidence))
 
     return ValuationResult(
         method="P/E Multiple",

@@ -1,0 +1,28 @@
+# ─────────────────────────────────────────────────────────────────────────
+# Dữ liệu do bot sinh ra (web/data/**)
+#
+# merge=ours : khi cả remote và workflow cùng sửa một file JSON, giữ bản của
+#              lần chạy hiện tại. File này được sinh lại mỗi phiên nên "bản mới
+#              nhất thắng" là đúng ngữ nghĩa. Nhờ có driver này, workflow KHÔNG
+#              cần dùng `merge -X ours` toàn nhánh hay `push --force` — hai thứ
+#              từng có thể ghi đè commit code.
+#              (Driver được đăng ký trong workflow: git config merge.ours.driver true)
+#
+# -diff      : không hiện diff của file dữ liệu trong `git log -p` / PR review.
+#              5.000 dòng JSON thay đổi mỗi ngày làm review code không đọc nổi.
+#
+# linguist-generated : GitHub ẩn các file này khỏi diff và khỏi thống kê ngôn ngữ.
+# ─────────────────────────────────────────────────────────────────────────
+web/data/**            merge=ours -diff linguist-generated=true
+web/data/**/*.json     merge=ours -diff linguist-generated=true
+
+# Parquet cache là nhị phân (đã .gitignore, khai báo phòng khi lọt vào)
+*.parquet              binary
+
+# Chuẩn hoá xuống dòng: repo phát triển trên Windows nhưng CI chạy Linux
+*.py                   text eol=lf
+*.js                   text eol=lf
+*.css                  text eol=lf
+*.html                 text eol=lf
+*.yml                  text eol=lf
+*.md                   text eol=lf

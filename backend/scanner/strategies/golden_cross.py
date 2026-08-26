@@ -31,6 +31,7 @@ from typing import Optional
 import pandas as pd
 
 from .indicators_ext import ma, detect_recent_cross_up
+from ..indicators import rsi_last
 
 log = logging.getLogger(__name__)
 
@@ -214,7 +215,7 @@ def evaluate(df: pd.DataFrame, ticker: str, preset: str = 'long',
         return None
 
     # Common metrics
-    rsi14_val = _compute_rsi(close, 14)
+    rsi14_val = rsi_last(close, 14)
     vol_ma20 = float(df['Volume'].tail(20).mean())
     vol_ratio = last_volume / vol_ma20 if vol_ma20 > 0 else 0
 
@@ -226,7 +227,15 @@ def evaluate(df: pd.DataFrame, ticker: str, preset: str = 'long',
     except Exception:
         sr = {'supports': [], 'resistances': [], 'swing': None}
 
+    from ..price_limits import classify_price_limit
+    _exch = df['Exchange'].iloc[-1] if 'Exchange' in df.columns else None
+    limit_info = classify_price_limit(df, _exch)
+
     metrics = {
+        'change_1d_pct': limit_info['change_1d_pct'],
+        'limit_status': limit_info['limit_status'],
+        'limit_locked': limit_info['limit_locked'],
+        'tradable_warning': limit_info['tradable_warning'],
         'preset_name': p['name'],
         'cross_days_ago': cross_info['days_ago'],
         'fast_ma': round(float(fast_ma.iloc[-1]), 2),
@@ -252,12 +261,3 @@ def evaluate(df: pd.DataFrame, ticker: str, preset: str = 'long',
         scores=scores,
         metrics=metrics,
     )
-
-
-def _compute_rsi(close: pd.Series, period: int = 14) -> float:
-    delta = close.diff()
-    gains = delta.where(delta > 0, 0).rolling(period).mean()
-    losses = -delta.where(delta < 0, 0).rolling(period).mean()
-    rs = gains / losses
-    rsi = 100 - 100 / (1 + rs)
-    return float(rsi.iloc[-1]) if not rsi.empty and rsi.iloc[-1] == rsi.iloc[-1] else 50.0

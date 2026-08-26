@@ -148,14 +148,21 @@ def fetch_financial_statements(ticker: str, source: str = 'vci',
 
 
 def fetch_current_price(ticker: str, source: str = 'vci') -> Optional[float]:
-    """Fetch latest close price for valuation."""
+    """
+    Giá đóng cửa gần nhất, trả về theo **VND/cp** (đã nhân 1.000).
+
+    vnstock trả giá theo nghìn VND (ACB = 24.30) trong khi EPS/BVPS của bảng
+    ratio theo VND (EPS = 3.500). Toàn bộ valuation engine làm việc bằng VND nên
+    quy đổi phải xảy ra ở đây — xem `scanner/price_units.py`.
+    """
     from .data_fetcher import fetch_ohlcv
+    from .price_units import quote_to_vnd
     end = datetime.now().strftime('%Y-%m-%d')
     start = (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%d')
     df = fetch_ohlcv(ticker, start, end, source=source)
     if df is None or df.empty:
         return None
-    return float(df['Close'].iloc[-1])
+    return quote_to_vnd(float(df['Close'].iloc[-1]))
 
 
 def fetch_fundamentals(ticker: str, period: str = 'year',

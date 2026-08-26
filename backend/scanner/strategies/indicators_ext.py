@@ -68,7 +68,8 @@ def compute_ichimoku(df: pd.DataFrame) -> dict:
     """
     Compute all Ichimoku components for a price dataframe.
 
-    Returns dict with series: tenkan, kijun, senkou_a, senkou_b, chikou
+    Returns dict with series: tenkan, kijun, senkou_a, senkou_b, chikou,
+    future_senkou_a, future_senkou_b.
     All series are aligned to the dataframe's index.
     """
     tk = tenkan_sen(df, period=9)
@@ -77,12 +78,22 @@ def compute_ichimoku(df: pd.DataFrame) -> dict:
     sb = senkou_span_b(df, period=52, shift=26)
     ch = chikou_span(df['Close'], shift=26)
 
+    # MÂY TƯƠNG LAI (Kumo phía trước) = senkou A/B TRƯỚC khi dịch 26 bar.
+    # Đây là thành phần dự báo đặc trưng nhất của Ichimoku, và độc lập với trạng
+    # thái TK hiện tại — dùng nó để chấm điểm thay vì đếm hai lần cùng một sự
+    # kiện TK cross (xem ichimoku.py).
+    future_sa = (tk + kj) / 2
+    future_sb = (df['High'].rolling(window=52).max()
+                 + df['Low'].rolling(window=52).min()) / 2
+
     return {
         'tenkan': tk,
         'kijun': kj,
         'senkou_a': sa,
         'senkou_b': sb,
         'chikou': ch,
+        'future_senkou_a': future_sa,
+        'future_senkou_b': future_sb,
     }
 
 
@@ -90,38 +101,57 @@ def compute_ichimoku(df: pd.DataFrame) -> dict:
 
 def detect_recent_cross_up(fast: pd.Series, slow: pd.Series, lookback: int = 5) -> dict:
     """
-    Detect if `fast` crossed above `slow` within the last `lookback` bars.
+    Phát hiện `fast` cắt lên `slow` trong `lookback` phiên gần nhất.
+
+    HAI LỖI ĐÃ SỬA:
+      1. Bản cũ quét XUÔI và `break` ở lần cắt ĐẦU TIÊN (tức lần CŨ NHẤT) trong
+         cửa sổ. Khi có whipsaw (cắt lên → cắt xuống → cắt lên) trong 5 phiên,
+         hệ thống báo lần cắt cũ và bỏ qua lần cắt mới. Nay quét NGƯỢC để lấy
+         lần cắt gần nhất.
+      2. Bản cũ không kiểm tra trạng thái hiện tại: mã cắt lên ở T-5 rồi cắt
+         xuống lại ở T-1 vẫn được tính `crossed = True` và lọt vào danh sách
+         Golden Cross. Nay `crossed` yêu cầu fast vẫn đang nằm trên slow.
 
     Returns:
         {
-            'crossed': bool,
-            'days_ago': int or None,  # 0 = today, 1 = yesterday, ...
+            'crossed': bool,        # cắt lên gần đây VÀ hiện vẫn còn hiệu lực
+            'crossed_raw': bool,    # có xảy ra cắt lên trong cửa sổ (kể cả đã đảo)
+            'reverted': bool,       # đã cắt lên nhưng nay fast <= slow
+            'days_ago': int|None,   # 0 = hôm nay, 1 = phiên trước...
             'fast_current': float,
             'slow_current': float,
-            'spread_pct': float,       # how far fast is above slow now
+            'spread_pct': float,    # fast đang trên slow bao nhiêu %
         }
     """
+    empty = {'crossed': False, 'crossed_raw': False, 'reverted': False,
+             'days_ago': None, 'fast_current': None, 'slow_current': None,
+             'spread_pct': 0}
     if len(fast) < lookback + 1 or len(slow) < lookback + 1:
-        return {'crossed': False, 'days_ago': None,
-                'fast_current': None, 'slow_current': None, 'spread_pct': 0}
+        return empty
 
-    # Look at last (lookback+1) bars; we need pairs (i-1, i)
-    recent_fast = fast.iloc[-(lookback + 1):].values
-    recent_slow = slow.iloc[-(lookback + 1):].values
+    # Cửa sổ (lookback+1) bar để có đủ các cặp (i-1, i)
+    recent_fast = fast.iloc[-(lookback + 1):].to_numpy(dtype=float)
+    recent_slow = slow.iloc[-(lookback + 1):].to_numpy(dtype=float)
 
+    # Quét NGƯỢC: lấy lần cắt lên gần nhất.
     crossed_at = None
-    for i in range(1, len(recent_fast)):
+    for i in range(len(recent_fast) - 1, 0, -1):
         if recent_fast[i - 1] <= recent_slow[i - 1] and recent_fast[i] > recent_slow[i]:
-            # Cross happened at position i (counting from -(lookback+1))
-            crossed_at = lookback - i  # days_ago from current
+            crossed_at = lookback - i   # đổi vị trí mảng → số phiên trước
             break
 
     fast_current = float(recent_fast[-1])
     slow_current = float(recent_slow[-1])
+    if pd.isna(fast_current) or pd.isna(slow_current):
+        return empty
+
+    still_above = fast_current > slow_current
     spread_pct = ((fast_current - slow_current) / slow_current * 100) if slow_current > 0 else 0
 
     return {
-        'crossed': crossed_at is not None,
+        'crossed': crossed_at is not None and still_above,
+        'crossed_raw': crossed_at is not None,
+        'reverted': crossed_at is not None and not still_above,
         'days_ago': crossed_at,
         'fast_current': round(fast_current, 2),
         'slow_current': round(slow_current, 2),

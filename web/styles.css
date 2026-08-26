@@ -2174,3 +2174,289 @@ kbd {
   border-radius: 3px;
   border-left: 2px solid var(--up);
 }
+
+/* ─── Miễn trừ trách nhiệm (bắt buộc: UI có đưa ra gợi ý tỷ trọng NAV) ─── */
+.site-disclaimer {
+  padding: 14px 20px 20px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-dim, #8b93a7);
+  background: var(--bg-base);
+  border-top: 1px solid var(--border, #2a3040);
+  text-align: center;
+}
+
+.site-disclaimer strong { color: var(--text, #e6e9ef); }
+
+/* ─── Băng bối cảnh thị trường ─── */
+.market-context {
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 16px;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border, #2a3040);
+  background: var(--bg-elev-1, #1f242e);
+}
+
+.market-context .mc-icon { font-size: 13px; }
+.market-context .mc-label { font-weight: 600; color: var(--text, #e6e9ef); }
+.market-context .mc-stats { color: var(--text-dim, #8b93a7); font-family: var(--font-mono); }
+
+.market-context.mc-on      { border-left: 3px solid #00c853; }
+.market-context.mc-neutral { border-left: 3px solid #ffb300; }
+.market-context.mc-off     { border-left: 3px solid #ef5350; }
+
+.market-context .mc-warn {
+  color: #ffcc80;
+  background: rgba(255, 179, 0, .12);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.market-context .mc-intraday {
+  color: #90caf9;
+  background: rgba(33, 150, 243, .12);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   KHẢ NĂNG TIẾP CẬN
+   Trước đây toàn bộ file có 0 lần :focus-visible và 3 lần `outline: none`
+   không thay thế — người dùng bàn phím hoàn toàn không thấy mình đang ở đâu.
+   Điều này đặc biệt vô lý vì dashboard đã có phím tắt cho power user, mà
+   power user thì thao tác bằng bàn phím.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Vòng focus dùng chung. :focus-visible chỉ hiện khi điều hướng bằng bàn phím,
+   không hiện khi click chuột — nên không ảnh hưởng thẩm mỹ với người dùng chuột. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Hàng bảng focus được: bàn phím ↑↓ đã có sẵn, nay có phản hồi thị giác */
+.signal-table tbody tr:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+/* Bỏ qua tới nội dung chính — phần tử đầu tiên nhận focus khi nhấn Tab */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 999;
+  padding: 10px 16px;
+  background: var(--focus);
+  color: #06121a;
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+/* Chỉ dành cho trình đọc màn hình */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Tôn trọng lựa chọn giảm chuyển động của hệ điều hành.
+   Quan trọng với người bị rối loạn tiền đình — và dashboard này có chấm nhấp
+   nháy, transition trên mọi hàng bảng. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Tương phản: --rating-c #546e7a trên nền #0e1117 chỉ đạt ~2,9:1, dưới chuẩn
+   WCAG AA (4,5:1). Nâng lên mức đọc được mà vẫn giữ vai trò "mờ nhất". */
+:root {
+  --rating-c: #7d8b96;
+}
+
+/* Vùng cảm ứng tối thiểu 44×44px theo khuyến nghị của Apple/WCAG 2.5.5.
+   Chip lọc hiện cao ~24px — khó bấm trúng trên điện thoại. */
+@media (pointer: coarse) {
+  .chip,
+  .dp-nav,
+  .icon-btn,
+  .strat-tab {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   QUY ƯỚC MÀU BẢNG ĐIỆN VIỆT NAM
+   Nhà đầu tư VN đọc bảng điện theo quy ước: TÍM = trần, XANH LAM = sàn,
+   VÀNG = tham chiếu. Không hiển thị lớp thông tin này là bỏ mất một tầng dữ
+   liệu mà mọi người dùng bản địa đều mong đợi — và quan trọng hơn: mã dư mua
+   trần thì KHÔNG MUA ĐƯỢC, nên tín hiệu breakout ở đó là tín hiệu không thực
+   hiện được.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  /* Màu lấy theo bảng điện thật (SSI/VNDirect/VPS), KHÔNG dùng sắc pastel:
+     ở cỡ chữ 12px trên nền đen, tím lavender nhạt (#c77dff) đọc ra gần như
+     trắng — mất hẳn ý nghĩa cảnh báo. */
+  --limit-up:   #e040fb;   /* tím đậm — giá trần */
+  --limit-down: #22d3ee;   /* xanh lơ — giá sàn (tách khỏi --focus xanh dương) */
+  --limit-ref:  #ffca28;   /* vàng — giá tham chiếu */
+}
+
+/* Trần/sàn hiển thị dạng "chip" có nền mờ, giống bảng điện tô cả ô.
+   Chỉ đổi màu chữ là chưa đủ nổi khi cột nằm cạnh nhiều số khác. */
+.limit-up,
+.limit-down {
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.limit-up {
+  color: var(--limit-up);
+  background: rgba(224, 64, 251, .16);
+  box-shadow: inset 0 0 0 1px rgba(224, 64, 251, .35);
+}
+
+.limit-down {
+  color: var(--limit-down);
+  background: rgba(34, 211, 238, .16);
+  box-shadow: inset 0 0 0 1px rgba(34, 211, 238, .35);
+}
+
+.limit-ref { color: var(--limit-ref); }
+
+.limit-lock {
+  font-size: 9px;
+  margin-left: 3px;
+  opacity: .85;
+  cursor: help;
+}
+
+.legend-inline .lg-sep {
+  opacity: .35;
+  margin: 0 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ƯU TIÊN CỘT TRÊN MÀN HÌNH HẸP
+   Bảng 15 cột trên màn 375px là cuộn ngang vô tận. Thay vì đổi sang card
+   layout (phá vỡ khả năng quét nhanh theo cột — thứ khiến bảng có giá trị),
+   ta giấu dần các cột ít quan trọng theo 4 mức ưu tiên:
+
+     (không nhãn) — luôn hiện : MÃ · GIÁ · ĐIỂM · HẠNG
+     prio-1       — ẩn cuối   : ±1D  (trần/sàn — thông tin giao dịch cốt lõi)
+     prio-2                   : KLGD
+     prio-3                   : SÀN · ±5D · GTGD · VOL× · RSI
+     prio-4       — ẩn trước  : # · S · R · TIÊU CHÍ
+
+   Chi tiết đầy đủ vẫn xem được ở panel bên phải khi chạm vào hàng.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .signal-table .prio-4 { display: none; }
+}
+
+@media (max-width: 860px) {
+  .signal-table .prio-3 { display: none; }
+}
+
+@media (max-width: 600px) {
+  .signal-table .prio-2 { display: none; }
+}
+
+/* Dưới 420px chỉ còn: MÃ · GIÁ · ±1D · ĐIỂM · HẠNG — vừa đúng một màn điện thoại */
+@media (max-width: 420px) {
+  .signal-table { font-size: 12px; }
+  .signal-table th,
+  .signal-table td { padding-left: 6px; padding-right: 6px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THỐNG KÊ CHUYỂN TỪ TOPBAR XUỐNG ĐẦU BẢNG
+   Topbar cũ chứa ~15 phần tử trên một hàng (brand + LIVE + 3 chỉ số + 6 tab +
+   ô tìm + link + help + trạng thái + đồng hồ) — chen chúc ở màn 1366px vốn rất
+   phổ biến. Ba chỉ số A+/mã quét/ngày thuộc về NGỮ CẢNH KẾT QUẢ nên đặt ngay
+   cạnh "N tín hiệu" là đúng chỗ hơn, và giải phóng topbar cho điều hướng.
+   ═══════════════════════════════════════════════════════════════════════ */
+.head-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 14px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.head-stats b {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.head-stats .hs-sep { opacity: .3; }
+
+@media (max-width: 700px) {
+  .head-stats { display: none; }
+}
+
+/* ─── Kế hoạch vào lệnh: nói rõ kịch bản, từ chối khi R:R xấu ─── */
+.rec-plan { margin: 10px 0; }
+
+.plan-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px; flex-wrap: wrap;
+}
+
+.plan-mode {
+  font-size: 10px; font-weight: 700; letter-spacing: .04em;
+  padding: 3px 8px; border-radius: 3px;
+}
+
+.plan-breakout { background: rgba(38,166,154,.18); color: var(--up); }
+.plan-pullback { background: rgba(79,195,247,.16); color: var(--focus); }
+.plan-note     { font-size: 11px; color: var(--text-dim); }
+
+/* Kế hoạch R:R kém: làm mờ số liệu để mắt không bị hút vào một lệnh xấu */
+.rec-plan-rejected .rec-levels { opacity: .45; }
+
+.plan-reject {
+  font-size: 11px; line-height: 1.5;
+  color: #ffcc80;
+  background: rgba(255,179,0,.10);
+  border-left: 3px solid #ffb300;
+  padding: 8px 10px; margin-bottom: 8px; border-radius: 0 3px 3px 0;
+}
+
+/* Đơn vị giá ở tiêu đề cột — cùng gốc với bug sai 1000× ở module định giá:
+   đơn vị ngầm định mà không ai viết ra. */
+.th-unit {
+  font-size: 9px; font-weight: 400;
+  color: var(--text-mute); text-transform: none;
+}
+
+/* Trạng thái lỗi có lối thoát, thay vì là ngõ cụt */
+.error-state { padding: 32px 16px !important; }
+.error-title  { font-size: 14px; color: var(--down); margin-bottom: 6px; font-weight: 600; }
+.error-detail { font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
+.error-state .btn-ghost { margin-top: 12px; }

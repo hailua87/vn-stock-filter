@@ -596,6 +596,24 @@ input[type=range]::-moz-range-thumb {
   border-bottom: 1px solid var(--border-strong);
 }
 
+/* Demo = dữ liệu bịa → cảnh báo mạnh nhất, không được để lẫn với data thật */
+.demo-banner--danger {
+  background: #7f1d1d;
+  color: #fff;
+  border-bottom: 1px solid #b91c1c;
+}
+
+.demo-banner--danger code { background: rgba(0, 0, 0, .35); color: #fff; }
+
+/* Stale = data thật nhưng cũ */
+.demo-banner--warn {
+  background: #78350f;
+  color: #fff;
+  border-bottom: 1px solid #b45309;
+}
+
+.demo-banner--warn code { background: rgba(0, 0, 0, .35); color: #fff; }
+
 .demo-banner code {
   background: var(--bg-base);
   padding: 2px 6px;
@@ -621,3 +639,16 @@ input[type=range]::-moz-range-thumb {
     display: none;
   }
 }
+
+/* ─── Miễn trừ trách nhiệm ─── */
+.site-disclaimer {
+  padding: 14px 20px 20px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-dim, #8b93a7);
+  background: var(--bg-base);
+  border-top: 1px solid var(--border, #2a3040);
+  text-align: center;
+}
+
+.site-disclaimer strong { color: var(--text, #e6e9ef); }

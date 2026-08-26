@@ -64,7 +64,8 @@ def test_kijun_sen_formula():
 def test_compute_ichimoku_returns_all_components():
     df = make_strong_uptrend_df()
     ich = compute_ichimoku(df)
-    assert set(ich.keys()) == {'tenkan', 'kijun', 'senkou_a', 'senkou_b', 'chikou'}
+    assert set(ich.keys()) == {'tenkan', 'kijun', 'senkou_a', 'senkou_b', 'chikou',
+                               'future_senkou_a', 'future_senkou_b'}
     # All should be Series of same length
     for k, v in ich.items():
         assert len(v) == len(df)
@@ -97,16 +98,33 @@ def test_low_volume_returns_none():
 
 
 def test_strong_uptrend_detected():
-    """Strong uptrend should hit all 4 Ichimoku bullish criteria."""
+    """Xu hướng tăng mạnh phải đạt cả 5 tiêu chí bullish có tính điểm."""
     df = make_strong_uptrend_df()
     res = ichimoku.evaluate(df, 'TEST')
     assert res is not None
-    assert res.total_score == 4
+    assert res.total_score == 5
+    assert res.max_score == 5
     assert res.rating == 'A+'
     assert res.scores['tk_bullish'] == 1
     assert res.scores['price_above_cloud'] == 1
     assert res.scores['cloud_bullish'] == 1
     assert res.scores['chikou_free'] == 1
+    assert res.scores['future_cloud_bullish'] == 1
+
+
+def test_recent_tk_cross_does_not_add_score():
+    """
+    recent_tk_cross hàm ý tk_bullish → không được cộng điểm lần hai.
+    Đây là bug đếm trùng: mã vừa cross tự động có 2/5 từ MỘT sự kiện.
+    """
+    from scanner.strategies.ichimoku import ICHIMOKU_WEIGHTS
+    assert ICHIMOKU_WEIGHTS['recent_tk_cross'] == 0.0
+
+    df = make_strong_uptrend_df()
+    res = ichimoku.evaluate(df, 'TEST')
+    assert res is not None
+    scored = {k: v for k, v in res.scores.items() if k != 'recent_tk_cross'}
+    assert res.total_score == sum(scored.values())
 
 
 def test_downtrend_rejected_by_flexible_filter():
@@ -157,16 +175,17 @@ def test_recent_tk_cross_in_scores():
         assert res.scores['recent_tk_cross'] in (0, 1)
 
 
-def test_5_criteria_total():
-    """Ichimoku now has exactly 5 criteria."""
+def test_criteria_keys():
+    """5 tiêu chí tính điểm + 1 nhãn recent_tk_cross (trọng số 0)."""
     df = make_strong_uptrend_df()
     res = ichimoku.evaluate(df, 'TEST')
     if res:
         expected_keys = {
             'tk_bullish', 'recent_tk_cross', 'price_above_cloud',
-            'cloud_bullish', 'chikou_free'
+            'cloud_bullish', 'chikou_free', 'future_cloud_bullish',
         }
         assert set(res.scores.keys()) == expected_keys
+        assert res.max_score == 5
 
 
 def test_result_dict_exposes_recent_tk_cross():

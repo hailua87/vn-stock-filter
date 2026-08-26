@@ -1,0 +1,156 @@
+name: Weekly Valuation
+
+# Vì sao cần workflow này:
+#   Module định giá đã hoàn chỉnh nhưng KHÔNG có lịch chạy nào — file
+#   web/data/valuation/latest.json trên production vẫn là dữ liệu DEMO sinh tay,
+#   trong khi dashboard hiển thị như kết quả thật.
+#
+# Tần suất: 1 lần/tuần là đủ — BCTC ra theo quý. Giá thị trường thay đổi hàng
+# ngày nhưng fair value thì không; frontend đã có cảnh báo khi dữ liệu quá
+# STALE_AFTER_DAYS ngày.
+#
+# Lịch: 07:00 ICT Chủ Nhật (00:00 UTC) — ngoài giờ giao dịch, không đụng
+# concurrency với daily-scan.
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Số mã định giá (sort theo thanh khoản)'
+        required: false
+        default: '100'
+      period:
+        description: 'Kỳ báo cáo'
+        required: false
+        default: 'year'
+        type: choice
+        options: [year, quarter]
+
+jobs:
+  valuation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    concurrency:
+      group: valuation
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      # Dùng CHUNG cache OHLCV với daily-scan: beta 2 năm và historical P/E - P/B
+      # đều tính từ cache này. Không có cache → beta fallback 1.0 và historical
+      # multiples không khả dụng, độ tin cậy tụt hẳn.
+      - name: Restore OHLCV cache
+        uses: actions/cache/restore@v4
+        with:
+          path: backend/data/cache
+          key: ohlcv-cache-v3-valuation
+          restore-keys: |
+            ohlcv-cache-v3-
+
+      - name: Cache fundamentals
+        uses: actions/cache@v4
+        with:
+          path: backend/data/fundamentals_cache
+          key: fundamentals-v1-${{ github.run_id }}
+          restore-keys: |
+            fundamentals-v1-
+
+      - name: Run valuation
+        env:
+          VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
+          PYTHONIOENCODING: utf-8
+        run: |
+          python backend/run_valuation.py \
+            --limit ${{ github.event.inputs.limit || '100' }} \
+            --period ${{ github.event.inputs.period || 'year' }}
+        timeout-minutes: 90
+
+      # Chặn dữ liệu hỏng lọt lên production. Kiểm tra cụ thể lỗi đơn vị giá
+      # 1000× từng làm mọi upside thành +98.000%.
+      - name: Verify valuation output
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+
+          p = Path('web/data/valuation/latest.json')
+          if not p.exists():
+              sys.exit('❌ Không sinh được latest.json')
+
+          d = json.loads(p.read_text(encoding='utf-8'))
+          signals = d.get('signals', [])
+          print(f"generated_at: {d.get('generated_at')}")
+          print(f"total signals: {len(signals)}")
+          print(f"verdicts: {d.get('metadata', {}).get('verdict_counts')}")
+
+          if d.get('metadata', {}).get('demo'):
+              sys.exit('❌ Output vẫn mang cờ demo')
+          if not signals:
+              sys.exit('❌ Không có mã nào định giá được')
+
+          bad_price, bad_upside = [], []
+          for s in signals:
+              # Giá phải theo VND/cp (vài nghìn tới vài trăm nghìn)
+              if not (300 <= s['current_price'] <= 2_000_000):
+                  bad_price.append((s['ticker'], s['current_price']))
+              # Upside ngoài ±300% gần như chắc chắn là lỗi dữ liệu
+              if abs(s['upside_pct']) > 300:
+                  bad_upside.append((s['ticker'], s['upside_pct']))
+
+          if bad_price:
+              sys.exit(f'❌ Giá sai đơn vị (xem scanner/price_units.py): {bad_price[:5]}')
+          if bad_upside:
+              sys.exit(f'❌ Upside bất thường: {bad_upside[:5]}')
+
+          conflict = sum(1 for s in signals if s.get('methods_conflict'))
+          print(f"✓ Hợp lệ. {conflict}/{len(signals)} mã có các phương pháp mâu thuẫn (đã hạ về HOLD)")
+          PY
+
+      - name: Run backtest (nếu đã đủ lịch sử)
+        env:
+          PYTHONIOENCODING: utf-8
+        continue-on-error: true
+        run: |
+          python backend/backtest.py --horizon 90 --min-confidence 40
+
+      - name: Commit valuation output
+        run: |
+          git config user.name "VN Scanner Bot"
+          git config user.email "bot@vn-scanner.local"
+
+          git add web/data/valuation/
+          if git diff --staged --quiet; then
+            echo "ℹ️  Không có thay đổi"
+            exit 0
+          fi
+
+          git commit -m "chore: cập nhật định giá $(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')"
+
+          # Chỉ rebase + retry. KHÔNG dùng `-X ours` hay force-push ở đây: khác
+          # với daily-scan, dữ liệu định giá chạy 90 phút, ghi đè commit của
+          # người khác là rủi ro không đáng.
+          for i in 1 2 3; do
+            git pull --rebase origin ${{ github.ref_name }} && \
+              git push origin HEAD:${{ github.ref_name }} && exit 0
+            echo "Lần $i thất bại, thử lại..."
+            sleep 5
+          done
+          echo "❌ Không push được sau 3 lần thử"
+          exit 1

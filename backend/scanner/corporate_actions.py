@@ -76,82 +76,148 @@ class CorporateAction:
         return 0
 
 
+# Tên cột có thể gặp ở các source/phiên bản vnstock khác nhau.
+_EX_DATE_KEYS = ('ex_date', 'exdate', 'exrightdate', 'rightsexdate', 'exercise_date',
+                 'ngay_gdkhq', 'date', 'public_date', 'issue_date')
+_TYPE_KEYS = ('event_type', 'eventtype', 'event_name', 'event_title', 'type',
+              'dividend_type', 'issue_method', 'title')
+_VALUE_KEYS = ('ratio', 'value', 'exercise_ratio', 'cash_dividend_percentage',
+               'issue_ratio', 'cash_year', 'price')
+_DESC_KEYS = ('description', 'event_desc', 'note', 'event_list_name', 'title')
+
+
+def _pick(row: dict, keys: tuple, default=None):
+    """Lấy giá trị đầu tiên khớp một trong `keys` (không phân biệt hoa thường)."""
+    lower = {str(k).lower().replace(' ', '_'): v for k, v in row.items()}
+    for k in keys:
+        if k in lower:
+            v = lower[k]
+            if v is not None and not (isinstance(v, float) and pd.isna(v)):
+                return v
+    return default
+
+
+def _read_cache(cache_file: Path, max_age_hours: float = 24) -> Optional[list]:
+    if not cache_file.exists():
+        return None
+    age = (datetime.now().timestamp() - cache_file.stat().st_mtime) / 3600
+    if age >= max_age_hours:
+        return None
+    try:
+        with open(cache_file, encoding='utf-8') as f:
+            return [CorporateAction(**e) for e in json.load(f)]
+    except Exception:
+        return None
+
+
 def fetch_events(ticker: str, lookback_days: int = 365,
                  lookahead_days: int = 30) -> list[CorporateAction]:
     """
-    Fetch corporate actions for a ticker.
-    Returns events in [today - lookback_days, today + lookahead_days].
-    Uses vnstock company.events().
+    Lấy sự kiện quyền của một mã, trong [today - lookback, today + lookahead].
+
+    FIX (vnstock 4.x): bản cũ gọi `Vnstock().stock(source='TCBS').company` —
+    class `Vnstock` đã deprecated 31/08/2025 và source TCBS bị GỠ khỏi vnstock
+    4.x. Mọi lần gọi đều ném exception, bị `except` nuốt và trả về [] rồi cache
+    lại danh sách rỗng 24h ⇒ toàn bộ bộ lọc sự kiện quyền chưa từng chạy.
+
+    Nay dùng `vnstock.api.company.Company(source='vci')`, thử `events()` trước
+    rồi `dividends()` (một số mã chỉ có bảng cổ tức).
     """
     cache_file = EVENTS_CACHE / f'{ticker}.json'
     today = date.today()
 
-    # Use cache if < 24h old
-    if cache_file.exists():
-        age = (datetime.now().timestamp() - cache_file.stat().st_mtime) / 3600
-        if age < 24:
-            try:
-                with open(cache_file) as f:
-                    cached = json.load(f)
-                return [CorporateAction(**e) for e in cached]
-            except Exception:
-                pass
+    cached = _read_cache(cache_file)
+    if cached is not None:
+        return cached
 
-    events = []
+    events: list[CorporateAction] = []
     try:
-        from vnstock import Vnstock
-        company = Vnstock().stock(symbol=ticker, source='TCBS').company
-        # TCBS has the most complete events API for Vietnamese stocks
-        df = company.events()
-        if df is None or df.empty:
-            _save_cache(cache_file, [])
-            return []
+        from vnstock.api.company import Company
+        company = Company(symbol=ticker, source='vci')
 
-        # Normalise columns — vnstock columns may vary by version
-        col_map = {}
-        for c in df.columns:
-            c_lower = c.lower()
-            if 'date' in c_lower and 'rights' in c_lower or c_lower == 'rightsexdate' or c_lower == 'ex_date':
-                col_map[c] = 'ex_date'
-            elif 'type' in c_lower or 'event' in c_lower:
-                col_map[c] = 'event_type'
-            elif 'ratio' in c_lower or 'value' in c_lower:
-                col_map[c] = 'value'
-            elif 'description' in c_lower or 'note' in c_lower:
-                col_map[c] = 'description'
-        df = df.rename(columns=col_map)
-
-        for _, row in df.iterrows():
-            ex_date_raw = row.get('ex_date')
-            if pd.isna(ex_date_raw):
+        frames = []
+        for method in ('events', 'dividends'):
+            fn = getattr(company, method, None)
+            if fn is None:
                 continue
             try:
-                ex_date = pd.to_datetime(ex_date_raw).date()
-            except Exception:
-                continue
+                df = fn()
+                if df is not None and not df.empty:
+                    frames.append(df)
+            except Exception as e:
+                log.debug(f"  {ticker}.{method}(): {type(e).__name__}: {str(e)[:100]}")
 
-            if ex_date < today - timedelta(days=lookback_days):
-                continue
-            if ex_date > today + timedelta(days=lookahead_days):
-                continue
+        for df in frames:
+            for row in df.to_dict(orient='records'):
+                ex_date_raw = _pick(row, _EX_DATE_KEYS)
+                if ex_date_raw is None:
+                    continue
+                try:
+                    ex_date = pd.to_datetime(ex_date_raw).date()
+                except Exception:
+                    continue
 
-            event_type, ratio = _classify(
-                str(row.get('event_type', '')),
-                row.get('value', 0),
-                str(row.get('description', '')),
-            )
-            events.append(CorporateAction(
-                ticker=ticker,
-                ex_date=str(ex_date),
-                event_type=event_type,
-                ratio=float(ratio) if ratio else 0.0,
-                description=str(row.get('description', ''))[:200],
-            ))
+                if not (today - timedelta(days=lookback_days)
+                        <= ex_date
+                        <= today + timedelta(days=lookahead_days)):
+                    continue
+
+                description = str(_pick(row, _DESC_KEYS, '') or '')
+                event_type, ratio = _classify(
+                    str(_pick(row, _TYPE_KEYS, '') or ''),
+                    _pick(row, _VALUE_KEYS, 0),
+                    description,
+                )
+                events.append(CorporateAction(
+                    ticker=ticker,
+                    ex_date=str(ex_date),
+                    event_type=event_type,
+                    ratio=float(ratio) if ratio else 0.0,
+                    description=description[:200],
+                ))
+
+        # Khử trùng lặp khi events() và dividends() cùng trả một sự kiện
+        seen = set()
+        deduped = []
+        for e in events:
+            key = (e.ex_date, e.event_type, round(e.ratio, 4))
+            if key not in seen:
+                seen.add(key)
+                deduped.append(e)
+        events = deduped
+
+    except ImportError:
+        log.warning("  vnstock chưa cài hoặc quá cũ — bỏ qua corporate actions")
+        return []
     except Exception as e:
-        log.warning(f"  events {ticker}: {e}")
+        log.warning(f"  events {ticker}: {type(e).__name__}: {str(e)[:120]}")
+        # KHÔNG cache khi lỗi: cache rỗng 24h sẽ che mất sự kiện thật.
+        return []
 
     _save_cache(cache_file, events)
     return events
+
+
+def fetch_events_batch(tickers, delay: float = 1.0,
+                       lookback_days: int = 365,
+                       lookahead_days: int = 30) -> dict:
+    """
+    Lấy sự kiện cho nhiều mã, tôn trọng rate limit của vnstock.
+
+    Chỉ nên gọi cho danh sách mã ĐÃ có tín hiệu (vài chục mã) chứ không phải cả
+    universe 500 mã — sự kiện quyền chỉ dùng để loại/ghi chú kết quả cuối.
+    """
+    import time
+    out = {}
+    for i, tk in enumerate(tickers, 1):
+        cached = _read_cache(EVENTS_CACHE / f'{tk}.json')
+        if cached is not None:
+            out[tk] = cached
+            continue
+        if i > 1:
+            time.sleep(delay)
+        out[tk] = fetch_events(tk, lookback_days, lookahead_days)
+    return out
 
 
 def _classify(event_str: str, value, description: str) -> tuple[str, float]:
@@ -162,9 +228,16 @@ def _classify(event_str: str, value, description: str) -> tuple[str, float]:
     except (ValueError, TypeError):
         v = 0.0
 
+    # Thứ tự kiểm tra quan trọng: "cổ tức bằng cổ phiếu" phải rơi vào
+    # stock_dividend chứ không phải cash_dividend.
+    # Dấu ngoặc ở nhánh stock_dividend là bắt buộc — bản cũ viết
+    # `... or 'cổ phiếu' in text and 'cổ tức' in text` dựa vào độ ưu tiên
+    # `and` > `or`, đúng về kết quả nhưng cực dễ hỏng khi sửa.
     if 'split' in text or 'tách' in text or 'chia tách' in text:
         return 'split', v if v > 1 else 2.0
-    if 'thưởng' in text or 'stock dividend' in text or 'stock div' in text or 'bằng cổ phiếu' in text or 'cổ phiếu' in text and 'cổ tức' in text:
+    if ('thưởng' in text or 'stock dividend' in text or 'stock div' in text
+            or 'bằng cổ phiếu' in text
+            or ('cổ phiếu' in text and 'cổ tức' in text)):
         # ratio in % form usually (e.g. 10 means 10%)
         return 'stock_dividend', v / 100 if v > 1 else v
     if 'phát hành' in text or 'rights' in text or 'chào bán' in text:
@@ -211,6 +284,51 @@ def has_upcoming_event(events: list[CorporateAction], days: int = 5) -> Optional
             upcoming.append(e)
     upcoming.sort(key=lambda x: x.ex_date)
     return upcoming[0] if upcoming else None
+
+
+def apply_event_filter(results: list, lookback_days: int = 5,
+                       lookahead_days: int = 5, delay: float = 1.0) -> list:
+    """
+    Áp bộ lọc sự kiện quyền lên KẾT QUẢ đã chấm điểm của bất kỳ strategy nào.
+
+    Vì sao lọc ở bước sau thay vì trong `evaluate()`:
+      - Sự kiện quyền chỉ có 2 tác dụng: (a) loại mã vừa có sự kiện pha loãng,
+        (b) gắn cảnh báo sự kiện sắp tới. Cả hai đều không đổi điểm số.
+      - Gọi API cho toàn universe 500 mã tốn ~17 phút và gần như toàn bộ là
+        lãng phí; sau khi lọc chỉ còn vài chục mã có tín hiệu.
+      - Quan trọng hơn: trước đây chỉ Pre-Breakout truyền `events`, còn
+        Golden Cross và Ichimoku gọi `evaluate()` KHÔNG có events ⇒ 3 strategy
+        hành xử khác nhau. Nay dùng chung một đường.
+
+    Trả về danh sách kết quả đã lọc, có ghi `metrics['upcoming_event']`.
+    """
+    if not results:
+        return results
+
+    tickers = sorted({r.ticker for r in results})
+    events_map = fetch_events_batch(tickers, delay=delay,
+                                    lookahead_days=max(lookahead_days, 30))
+
+    kept = []
+    dropped = 0
+    for r in results:
+        events = events_map.get(r.ticker) or []
+        if events and has_recent_event(events, days=lookback_days):
+            dropped += 1
+            continue
+        upcoming = has_upcoming_event(events, days=lookahead_days) if events else None
+        if upcoming is not None and isinstance(getattr(r, 'metrics', None), dict):
+            r.metrics['upcoming_event'] = {
+                'type': upcoming.event_type,
+                'ex_date': upcoming.ex_date,
+                'ratio': upcoming.ratio,
+            }
+        kept.append(r)
+
+    if dropped:
+        log.info(f"  Corporate actions: loại {dropped} mã có sự kiện pha loãng "
+                 f"trong {lookback_days} phiên gần nhất")
+    return kept
 
 
 def event_summary(events: list[CorporateAction]) -> dict:

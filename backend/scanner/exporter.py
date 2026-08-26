@@ -86,18 +86,32 @@ def _add_guide_sheet(writer):
     guide.to_excel(writer, sheet_name='Hướng dẫn', index=False)
 
 
-def to_json(df: pd.DataFrame, output_path: str | Path, metadata: dict | None = None):
-    """Export to JSON for web consumption."""
+def write_json(payload: dict, output_path: str | Path, compact: bool = False):
+    """
+    Ghi JSON, có tuỳ chọn nén không gian.
+
+    `compact=True` bỏ indent và khoảng trắng thừa → giảm ~35% dung lượng. Dùng
+    cho file archive: chúng chỉ được máy đọc, tích luỹ mỗi ngày và là nguồn phình
+    repo chính (~90MB/năm ở dạng indent). File latest.json giữ định dạng dễ đọc
+    để còn mở tay khi debug.
+    """
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    dump_kwargs = ({'separators': (',', ':')} if compact else {'indent': 2})
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(payload, f, ensure_ascii=False, default=str, **dump_kwargs)
+
+
+def to_json(df: pd.DataFrame, output_path: str | Path, metadata: dict | None = None,
+            compact: bool = False):
+    """Export to JSON for web consumption."""
     payload = {
         'generated_at': datetime.now().isoformat(),
         'total': len(df),
         'metadata': metadata or {},
         'signals': df.to_dict('records'),
     }
-    with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2, default=str)
+    write_json(payload, output_path, compact=compact)
 
 
 def to_html(df: pd.DataFrame, output_path: str | Path, title: str = "Pre-Breakout Signals"):

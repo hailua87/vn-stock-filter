@@ -31,10 +31,17 @@ htmlcov/
 
 # Data cache (large, regenerable)
 backend/data/cache/*.parquet
+backend/data/vnindex_cache.parquet
+backend/data/fundamentals_cache/
+backend/data/peer_multiples.json
 backend/data/results/*.xlsx
 backend/data/results/*.html
 backend/data/results/*.json
 !backend/data/results/.gitkeep
+
+# NGOAI LE: trong so da hieu chinh PHAI duoc commit — production doc file nay
+# va moi tin hieu mang weights_version de tai lap duoc ve sau.
+!backend/data/criteria_weights.json
 
 # Log
 *.log

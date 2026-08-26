@@ -9,7 +9,7 @@ import pandas as pd
 
 from .criteria import evaluate, CriteriaResult, DEFAULT_CONFIG
 from .data_fetcher import get_ticker_universe, fetch_universe, fetch_vnindex
-from .corporate_actions import fetch_events
+from .corporate_actions import apply_event_filter
 
 log = logging.getLogger(__name__)
 
@@ -27,22 +27,34 @@ class BreakoutScanner:
         """
         Scan a pre-loaded DataFrame with columns:
         Ticker, Exchange, Date, Open, High, Low, Close, Volume
+
+        Bộ lọc sự kiện quyền chạy SAU khi chấm điểm, chỉ trên các mã có tín hiệu
+        — xem corporate_actions.apply_event_filter (trước đây gọi API cho từng
+        mã trong vòng lặp: 500 request mỗi lần chạy, và tất cả đều fail).
         """
         self.results = []
-        tickers = df_all['Ticker'].unique()
-        log.info(f"Scanning {len(tickers)} tickers...")
+        # groupby thay cho boolean-mask trong vòng lặp: tránh quét lại toàn bộ
+        # DataFrame N lần (O(N²) trên universe 500 mã × 400 phiên).
+        groups = dict(tuple(df_all.groupby('Ticker', sort=False)))
+        log.info(f"Scanning {len(groups)} tickers...")
 
-        for i, tk in enumerate(tickers, 1):
-            df_tk = df_all[df_all['Ticker'] == tk].sort_values('Date').reset_index(drop=True)
+        for i, (tk, df_tk) in enumerate(groups.items(), 1):
+            df_tk = df_tk.sort_values('Date').reset_index(drop=True)
             try:
-                events = fetch_events(tk) if self.fetch_corporate_actions else None
-                res = evaluate(df_tk, tk, self.config, events=events)
+                res = evaluate(df_tk, tk, self.config)
                 if res is not None:
                     self.results.append(res)
             except Exception as e:
                 log.warning(f"  {tk}: {e}")
             if i % 100 == 0:
-                log.info(f"  Processed {i}/{len(tickers)}")
+                log.info(f"  Processed {i}/{len(groups)}")
+
+        if self.fetch_corporate_actions:
+            self.results = apply_event_filter(
+                self.results,
+                lookback_days=self.config['corporate_action_lookback_days'],
+                lookahead_days=self.config['corporate_action_lookahead_days'],
+            )
 
         return self.to_dataframe()
 
