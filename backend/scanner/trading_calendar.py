@@ -96,6 +96,31 @@ def last_trading_session(today: date) -> date:
     return cur
 
 
+def trading_sessions_between(start: date, end: date, cap: int = 400) -> int:
+    """
+    Số phiên giao dịch nằm trong khoảng (start, end] — tức KHÔNG tính `start`,
+    có tính `end` nếu nó là ngày giao dịch.
+
+    Dùng để đo độ trễ dữ liệu bằng ĐƠN VỊ PHIÊN thay vì ngày lịch. Đếm bằng ngày
+    lịch sẽ báo động sai mỗi sáng Thứ Hai (dữ liệu Thứ Sáu trễ 3 ngày lịch nhưng
+    0 phiên) và ngược lại im lặng suốt kỳ nghỉ Tết dài.
+
+    `cap` chặn vòng lặp khi dữ liệu cũ tới mức vô lý (hoặc ngày hỏng); trả về
+    đúng `cap` — caller chỉ cần biết "rất trễ", không cần con số chính xác.
+    """
+    if end <= start:
+        return 0
+    count = 0
+    cur = start + timedelta(days=1)
+    while cur <= end:
+        if is_trading_day(cur):
+            count += 1
+            if count >= cap:
+                return cap
+        cur += timedelta(days=1)
+    return count
+
+
 def infer_last_session_from_dates(dates, today: date | None = None) -> date | None:
     """
     Suy phiên gần nhất TỪ DỮ LIỆU THẬT (thường là chuỗi ngày của VN-Index).

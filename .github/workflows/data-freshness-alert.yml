@@ -1,0 +1,174 @@
+name: Data Freshness Alert
+
+# CHUONG BAO DONG DOC LAP
+# =============================================================================
+# Vì sao workflow này tồn tại tách riêng:
+#
+#   17-20/08/2026, daily-scan fail cả 8 ca liên tiếp — mỗi ca chạy hết 60 phút
+#   rồi bị timeout giết TRƯỚC bước ghi file. latest.json giữ nguyên phiên 14/08:
+#   JSON hợp lệ, đọc được, không cờ lỗi. Dashboard chạy 5 phiên bằng dữ liệu cũ
+#   mà không ai hay. Ca EOD 26/08 còn tệ hơn — GitHub bỏ hẳn tick cron nên
+#   KHÔNG CÓ run nào được tạo, tức không có cả dòng đỏ để mà nhìn thấy.
+#
+#   Cả hai đều là lỗi VẮNG MẶT. Không một bước nào bên trong daily-scan bắt được
+#   chúng, vì daily-scan chính là thứ đã chết hoặc chưa từng khởi động.
+#
+# Ba ràng buộc độc lập, cố ý:
+#
+#   1. Trigger riêng bằng `schedule`. KHÔNG dùng `workflow_run` bám vào
+#      daily-scan: workflow_run chỉ fire khi run kia THỰC SỰ chạy xong, nên đúng
+#      cái ca bị bỏ tick sẽ không kích hoạt được gì cả.
+#   2. Không cài `backend/requirements.txt`, không restore cache OHLCV, không gọi
+#      mạng. Chỉ đọc file JSON đã commit + module lịch thuần Python. vnstock sập
+#      hay pip hỏng thì chuông vẫn kêu.
+#   3. Không dùng `concurrency` chung nhóm với daily-scan — không bao giờ phải
+#      xếp hàng sau chính cái job mà nó đang canh.
+#
+# Lịch: 01:07 UTC = 08:07 ICT hằng ngày (kể cả T7/CN — cuối tuần thì phiên kỳ
+# vọng là Thứ Sáu, xem check_freshness.expected_session).
+# Phút 07 chứ không phải 00: mốc đầu giờ là khung nghẽn nhất của scheduler
+# GitHub, đúng lý do vừa làm ca EOD 26/08 bốc hơi. Chuông báo cháy thì càng
+# không được đặt vào khung dễ bị bỏ tick nhất.
+on:
+  schedule:
+    - cron: '7 1 * * *'
+  workflow_dispatch:
+    inputs:
+      max_lag:
+        description: 'Số phiên được phép trễ mà không báo động'
+        required: false
+        default: '1'
+      today:
+        description: 'Ghi đè ngày kiểm (YYYY-MM-DD) — để thử tay'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Không cache pip, không cài dependency: check_freshness.py chỉ dùng thư
+      # viện chuẩn + scanner/trading_calendar.py (cũng chỉ thư viện chuẩn). Mỗi
+      # dependency thêm vào đây là một đường để chính cái chuông tự hỏng.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # Mã thoát: 0 = tươi, 2 = lệch, khác = script tự hỏng.
+      # continue-on-error để mã 2 không giết job — phân loại ở bước sau.
+      - name: Check data freshness
+        id: check
+        continue-on-error: true
+        env:
+          PYTHONIOENCODING: utf-8
+          INPUT_MAX_LAG: ${{ github.event.inputs.max_lag || '1' }}
+          INPUT_TODAY: ${{ github.event.inputs.today }}
+        run: |
+          ARGS="--repo-root . --body-out /tmp/issue-body.md"
+          ARGS="$ARGS --recovery-out /tmp/recovery.md --json-out /tmp/freshness.json"
+          ARGS="$ARGS --max-lag $INPUT_MAX_LAG"
+          if [ -n "$INPUT_TODAY" ]; then
+            ARGS="$ARGS --today $INPUT_TODAY"
+          fi
+          python backend/check_freshness.py $ARGS
+
+      # Script chỉ ghi `stale` vào $GITHUB_OUTPUT trên hai đường thoát sạch (0 và
+      # 2). Nếu nó nổ giữa chừng thì output RỖNG — và một chuông báo cháy im lặng
+      # vì tự nó cháy là kiểu hỏng tệ nhất. Bước này biến rỗng thành báo động.
+      #
+      # Không đọc `steps.check.conclusion` để phân biệt: `continue-on-error: true`
+      # ép conclusion luôn bằng 'success' bất kể mã thoát, nên nó vô dụng ở đây.
+      - name: Normalize result
+        id: alarm
+        env:
+          RAW_STALE: ${{ steps.check.outputs.stale }}
+          RAW_TITLE: ${{ steps.check.outputs.title }}
+        run: |
+          STALE="$RAW_STALE"
+          TITLE="$RAW_TITLE"
+          if [ -z "$STALE" ]; then
+            echo "::error::check_freshness.py thoat bat thuong, khong sinh duoc bao cao."
+            STALE=true
+            TITLE="[data] chuong bao do tuoi tu hong — check_freshness.py exit bat thuong"
+            {
+              echo '## Chuông báo độ tươi tự hỏng'
+              echo ''
+              echo '`backend/check_freshness.py` thoát với mã lỗi bất thường và không'
+              echo 'sinh được báo cáo. Đây KHÔNG phải kết luận dữ liệu tươi hay cũ —'
+              echo 'nghĩa là hiện không đo được. Xem log run này để biết lý do.'
+              echo ''
+              echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            } > /tmp/issue-body.md
+          fi
+          echo "stale=$STALE" >> "$GITHUB_OUTPUT"
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          echo "Ket qua: stale=$STALE"
+
+      - name: Ensure label exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create data-freshness \
+            --color B60205 \
+            --description "Du lieu dashboard tre so voi lich giao dich" \
+            2>/dev/null || echo "label da ton tai"
+
+      - name: Find open alert issue
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NUM=$(gh issue list --label data-freshness --state open \
+                  --limit 1 --json number --jq '.[0].number // empty')
+          echo "number=$NUM" >> "$GITHUB_OUTPUT"
+          echo "Issue dang mo: ${NUM:-khong co}"
+
+      # Đã có issue mở → comment vào đó thay vì mở issue mới mỗi sáng. Sự cố
+      # 17-20/08 kéo 4 ngày; bốn issue rời rạc thì lần nào cũng phải đọc lại từ
+      # đầu, còn một chuỗi comment cho thấy ngay nó đã trễ được bao lâu.
+      - name: Comment on existing alert
+        if: steps.alarm.outputs.stale == 'true' && steps.existing.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUM: ${{ steps.existing.outputs.number }}
+        run: |
+          gh issue comment "$NUM" --body-file /tmp/issue-body.md
+          echo "::warning::Du lieu van tre — da comment vao issue #$NUM"
+
+      - name: Open new alert issue
+        if: steps.alarm.outputs.stale == 'true' && steps.existing.outputs.number == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: ${{ steps.alarm.outputs.title }}
+        run: |
+          gh issue create \
+            --title "$TITLE" \
+            --body-file /tmp/issue-body.md \
+            --label data-freshness
+          echo "::error::Du lieu tre qua nguong — da mo issue moi."
+
+      # Chuông tự tắt khi hết cháy. Không có bước này thì issue tồn đọng và lần
+      # sau người đọc sẽ mặc định coi nó là nhiễu.
+      - name: Close alert when data recovers
+        if: steps.alarm.outputs.stale == 'false' && steps.existing.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUM: ${{ steps.existing.outputs.number }}
+        run: |
+          gh issue comment "$NUM" --body-file /tmp/recovery.md
+          gh issue close "$NUM" --reason completed
+          echo "Da dong issue #$NUM — du lieu bat kip lich giao dich."
+
+      # Để ca hỏng hiện thành dòng đỏ trong `gh run list`, không chỉ nằm trong issue.
+      - name: Fail the run when stale
+        if: steps.alarm.outputs.stale == 'true'
+        run: |
+          echo "Du lieu tre qua nguong cho phep."
+          exit 1

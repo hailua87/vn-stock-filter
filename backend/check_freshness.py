@@ -1,0 +1,375 @@
+#!/usr/bin/env python3
+"""
+CANH GAC DO TUOI DU LIEU - chay DOC LAP voi daily-scan.
+================================================================================
+Vì sao tồn tại file này:
+
+Ngày 17-20/08/2026, `daily-scan` fail cả 8 ca liên tiếp: mỗi run chạy hết 60
+phút rồi bị `timeout-minutes` giết. Vì nó chết TRƯỚC bước ghi file, `latest.json`
+vẫn giữ nguyên nội dung phiên 14/08 — hợp lệ về cú pháp, đọc được, không mang cờ
+lỗi nào. Dashboard hiển thị bình thường suốt 5 phiên bằng dữ liệu cũ, và không ai
+biết cho đến khi ngồi soi `gh run list` bằng tay.
+
+Đó là lỗi VẮNG MẶT, không phải lỗi phát ra tiếng. Không một bước nào bên trong
+`daily-scan` bắt được nó, vì `daily-scan` chính là thứ đã chết.
+
+Nguyên tắc thiết kế — file này KHÔNG được phụ thuộc vào bất cứ thứ gì đã hỏng:
+
+  - KHÔNG `needs:` hay `workflow_run:` trên daily-scan. Nếu daily-scan không bao
+    giờ khởi động (như ca EOD 26/08 bị GitHub bỏ hẳn tick cron), một trigger phụ
+    thuộc cũng sẽ không bao giờ chạy — im lặng nhân đôi.
+  - KHÔNG gọi mạng, KHÔNG đụng vnstock, KHÔNG dùng cache OHLCV. Chỉ đọc file JSON
+    đã commit trong repo. vnstock sập thì cái chuông vẫn phải kêu được.
+  - KHÔNG tin đồng hồ của bên ghi dữ liệu. Mốc so sánh là lịch giao dịch
+    (`scanner/trading_calendar.py`), không phải `generated_at` trong file — một
+    file dữ liệu cũ vẫn có thể mang `generated_at` mới nếu có ai chạy tay.
+
+Cách đo: so `metadata.session_date` với phiên ĐÁNG LẼ đã phải có, đếm bằng ĐƠN VỊ
+PHIÊN. Đo bằng ngày lịch thì sáng Thứ Hai nào cũng kêu oan (dữ liệu Thứ Sáu trễ 3
+ngày lịch nhưng 0 phiên), và ngược lại im thin thít suốt kỳ nghỉ Tết.
+
+Mã thoát:
+    0 — dữ liệu tươi trong ngưỡng cho phép
+    2 — LỆCH: cần báo động
+    1 — script tự nó hỏng (tham số sai...); workflow cũng phải coi là báo động
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+from datetime import date
+from pathlib import Path
+from typing import Optional
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from scanner.trading_calendar import (
+    has_holiday_table,
+    is_trading_day,
+    previous_trading_day,
+    trading_sessions_between,
+)
+
+EXIT_FRESH = 0
+EXIT_STALE = 2
+
+# Bốn file mà daily-scan ghi trong cùng một run. `latest.json` là file được chấm
+# điểm; ba file kia chỉ đi kèm trong báo cáo để biết hỏng toàn cục hay cục bộ.
+PRIMARY = 'web/data/latest.json'
+COMPANIONS = (
+    'web/data/golden_cross_long/latest.json',
+    'web/data/golden_cross_short/latest.json',
+    'web/data/ichimoku/latest.json',
+)
+# Nguồn dự phòng cho ngày phiên. `index.json` mang khoá `latest` được ghi từ
+# CHÍNH `session_date` (xem run_daily.write_strategy_outputs), nên nó cũng suy từ
+# dữ liệu chứ không phải đồng hồ của runner.
+ARCHIVE_INDEX = 'web/data/archive/index.json'
+
+
+def expected_session(today: date) -> date:
+    """
+    Phiên mà dữ liệu ĐÁNG LẼ phải có, tính tại thời điểm kiểm buổi sáng sớm.
+
+    Luôn là phiên giao dịch gần nhất TRƯỚC `today`, kể cả khi `today` là ngày
+    giao dịch: lúc job này chạy (~08:00 ICT) HOSE còn chưa mở cửa (09:00), nên
+    phiên hôm nay chưa tồn tại. Dùng `last_trading_session` (có tính cả hôm nay)
+    sẽ đòi một phiên chưa diễn ra và báo động sai mỗi sáng.
+
+    Cuối tuần và nghỉ lễ rơi vào cùng một công thức: sáng Thứ Bảy → Thứ Sáu,
+    sáng Thứ Hai → Thứ Sáu, sáng đầu tiên sau Tết → phiên cuối trước Tết.
+    """
+    return previous_trading_day(today)
+
+
+def read_session_date(path: Path) -> tuple[Optional[str], dict]:
+    """
+    Đọc `metadata.session_date`. Trả về (session_date | None, ngữ cảnh để in).
+
+    Mọi đường hỏng đều trả None — file mất, JSON vỡ, thiếu khoá, ngày không phải
+    ISO. Cả bốn đều nghĩa là "không chứng minh được dữ liệu tươi", và cái chuông
+    này FAIL CLOSED: không chứng minh được thì kêu.
+    """
+    ctx: dict = {'path': str(path), 'readable': False}
+    if not path.exists():
+        ctx['error'] = 'file không tồn tại'
+        return None, ctx
+    try:
+        with open(path, encoding='utf-8') as f:
+            payload = json.load(f)
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError) as e:
+        ctx['error'] = f'không đọc được JSON: {type(e).__name__}: {e}'
+        return None, ctx
+
+    if not isinstance(payload, dict):
+        ctx['error'] = f'JSON không phải object mà là {type(payload).__name__}'
+        return None, ctx
+
+    ctx['readable'] = True
+    meta = payload.get('metadata') or {}
+    ctx['generated_at'] = payload.get('generated_at')
+    ctx['total'] = payload.get('total')
+    ctx['run_type'] = meta.get('run_type')
+    ctx['written_at_ict'] = meta.get('written_at_ict')
+    ctx['session_complete'] = meta.get('session_complete')
+    ctx['fetch_stop_reason'] = meta.get('fetch_stop_reason')
+    ctx['fetch_coverage'] = meta.get('fetch_coverage')
+
+    raw = meta.get('session_date')
+    if not raw:
+        ctx['error'] = 'metadata.session_date rỗng hoặc thiếu'
+        return None, ctx
+    try:
+        date.fromisoformat(str(raw))
+    except ValueError:
+        ctx['error'] = f'metadata.session_date không phải ngày ISO: {raw!r}'
+        return None, ctx
+    return str(raw), ctx
+
+
+def read_archive_latest(path: Path) -> Optional[str]:
+    """
+    Ngày phiên dự phòng, lấy từ `archive/index.json` khoá `latest`.
+
+    Vì sao cần dự phòng: các file `latest.json` sinh ra TRƯỚC khi
+    `build_metadata` có khoá `session_date` (tức mọi file commit trước 27/08/2026)
+    chỉ mang `run_type` / `run_date_ict`. Không có dự phòng thì cái chuông sẽ kêu
+    ngay lần chạy đầu vì LỆCH SCHEMA chứ không phải vì dữ liệu cũ — mà một cái
+    chuông kêu oan ngay hôm đầu thì hôm sau không còn ai nghe.
+
+    Chọn `index.json` chứ KHÔNG chọn `run_date_ict` hay `generated_at`: hai cái
+    sau là đồng hồ của runner, và bản EOD chạy 23:05 ICT vắt qua nửa đêm UTC sẽ
+    cho ngày lệch một hôm — đúng lỗi mà `session_date_from_data` đã sửa. `latest`
+    trong index thì được ghi từ chính `session_date`, vẫn suy từ dữ liệu.
+
+    Điểm yếu đã biết: index chỉ được cập nhật khi cổng archive mở (sau 15:15
+    ICT), nên ngày nào chỉ có ca intraday chạy được thì nó đứng yên. Chấp nhận
+    được vì đây chỉ là đường lùi tạm thời; ca scan thành công kế tiếp sẽ ghi
+    `session_date` vào latest.json và đường lùi này không còn được dùng nữa.
+    """
+    if not path.exists():
+        return None
+    try:
+        with open(path, encoding='utf-8') as f:
+            idx = json.load(f)
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+        return None
+    if not isinstance(idx, dict):
+        return None
+    raw = idx.get('latest')
+    if not raw:
+        return None
+    try:
+        date.fromisoformat(str(raw))
+    except (ValueError, TypeError):
+        return None
+    return str(raw)
+
+
+def evaluate(repo_root: Path, today: date, max_lag: int = 1) -> dict:
+    """
+    Chấm độ tươi. `max_lag` là số phiên được phép trễ mà KHÔNG báo động.
+
+    max_lag = 1 (mặc định): một ca hỏng đơn lẻ thì im lặng — GitHub thỉnh thoảng
+    bỏ tick cron, và một phiên trễ sẽ được ca sau vá lại. Trễ từ 2 phiên trở lên
+    nghĩa là hỏng có hệ thống, không tự lành. Trong sự cố 17-20/08, ngưỡng này
+    kêu vào sáng 19/08.
+    """
+    primary = repo_root / PRIMARY
+    session_date, ctx = read_session_date(primary)
+    expected = expected_session(today)
+    source = 'metadata.session_date'
+
+    # File đọc được nhưng thiếu `session_date` (schema cũ) → lùi về archive index.
+    # File MẤT hoặc VỠ thì không lùi: dashboard đọc chính latest.json, nên trạng
+    # thái đó vẫn phải kêu.
+    if session_date is None and ctx.get('readable'):
+        fallback = read_archive_latest(repo_root / ARCHIVE_INDEX)
+        if fallback is not None:
+            session_date = fallback
+            source = f'{ARCHIVE_INDEX}:latest (dự phòng — latest.json thiếu session_date)'
+
+    result = {
+        'today': today.isoformat(),
+        'expected': expected.isoformat(),
+        'today_is_trading_day': is_trading_day(today),
+        'holiday_table_known': has_holiday_table(today.year),
+        'max_lag': max_lag,
+        'session_date': session_date,
+        'session_date_source': source,
+        'primary': ctx,
+        'companions': [],
+    }
+
+    for rel in COMPANIONS:
+        sd, cctx = read_session_date(repo_root / rel)
+        result['companions'].append({'file': rel, 'session_date': sd,
+                                     'error': cctx.get('error')})
+
+    if session_date is None:
+        result['stale'] = True
+        result['lag'] = None
+        result['session_date_source'] = None
+        result['reason'] = ctx.get('error', 'không xác định được ngày phiên')
+        return result
+
+    sd = date.fromisoformat(session_date)
+    # sd >= expected: dữ liệu tươi bằng hoặc hơn kỳ vọng (job chạy muộn hơn dự
+    # tính và đã có phiên mới). trading_sessions_between trả 0, không phải lỗi.
+    lag = trading_sessions_between(sd, expected)
+    result['lag'] = lag
+    result['stale'] = lag > max_lag
+    result['reason'] = (
+        f'dữ liệu dừng ở phiên {session_date}, đáng lẽ phải có phiên {expected} '
+        f'— trễ {lag} phiên (ngưỡng {max_lag})'
+        if result['stale'] else
+        f'phiên {session_date} so với kỳ vọng {expected} — trễ {lag} phiên, '
+        f'trong ngưỡng {max_lag}'
+    )
+    return result
+
+
+def render_issue(result: dict) -> tuple[str, str]:
+    """Tiêu đề + thân issue báo động."""
+    lag = result['lag']
+    lag_txt = f"{lag} phiên" if lag is not None else 'không đo được'
+    title = (f"[data] latest.json trễ {lag_txt} — dừng ở "
+             f"{result['session_date'] or 'KHÔNG RÕ'}, kỳ vọng {result['expected']}")
+
+    ctx = result['primary']
+    lines = [
+        '## Dữ liệu dashboard không còn tươi',
+        '',
+        f"- **Ngày kiểm:** {result['today']}",
+        f"- **Phiên kỳ vọng:** {result['expected']}",
+        f"- **Phiên trong `{PRIMARY}`:** {result['session_date'] or '— không đọc được —'}",
+        f"- **Nguồn ngày phiên:** {result.get('session_date_source') or '— không có —'}",
+        f"- **Độ trễ:** {lag_txt} (ngưỡng cho phép: {result['max_lag']} phiên)",
+        f"- **Kết luận:** {result['reason']}",
+        '',
+        '### Bằng chứng trong file',
+        '',
+        f"- `generated_at`: {ctx.get('generated_at')}",
+        f"- `metadata.run_type`: {ctx.get('run_type')}",
+        f"- `metadata.written_at_ict`: {ctx.get('written_at_ict')}",
+        f"- `metadata.session_complete`: {ctx.get('session_complete')}",
+        f"- `total` tín hiệu: {ctx.get('total')}",
+    ]
+    if ctx.get('fetch_stop_reason'):
+        lines.append(f"- `metadata.fetch_stop_reason`: **{ctx['fetch_stop_reason']}** "
+                     f"(coverage {ctx.get('fetch_coverage')})")
+    if ctx.get('error'):
+        lines.append(f"- LỖI ĐỌC FILE: {ctx['error']}")
+
+    lines += ['', '### Ba file chiến lược còn lại', '',
+              '| file | session_date |', '| --- | --- |']
+    for c in result['companions']:
+        val = c['session_date'] or f"— {c['error']} —"
+        lines.append(f"| `{c['file']}` | {val} |")
+
+    lines += [
+        '',
+        '### Kiểm tiếp',
+        '',
+        '```',
+        'gh run list --workflow=daily-scan.yml --limit 10 \\',
+        '  --json databaseId,conclusion,createdAt,event',
+        'gh run view <id> --log | grep -E "ERROR|timed out"',
+        '```',
+        '',
+        'Ba nguyên nhân đã gặp trên repo này:',
+        '',
+        '1. step `Run daily scan` hết 60 phút vì upstream vnstock trả lỗi lai rai '
+        '(mỗi mã 3 lần thử rồi bỏ, ~26s/mã);',
+        '2. `trading.vietcap.com.vn` read-timeout 30s/lần;',
+        '3. GitHub bỏ hẳn tick cron nên KHÔNG có run nào được tạo — trường hợp này '
+        '`gh run list` sẽ không có dòng nào cho ca đó, không phải dòng đỏ.',
+        '',
+        '---',
+        '',
+        '_Issue này do `.github/workflows/data-freshness-alert.yml` mở tự động. '
+        'Nó chạy độc lập với `daily-scan`, không đụng mạng, và sẽ tự đóng issue '
+        'khi dữ liệu tươi trở lại._',
+    ]
+    return title, '\n'.join(lines)
+
+
+def render_recovery_comment(result: dict) -> str:
+    """Bình luận đóng issue khi dữ liệu tươi lại."""
+    return '\n'.join([
+        '## Dữ liệu đã tươi trở lại',
+        '',
+        f"- **Ngày kiểm:** {result['today']}",
+        f"- **Phiên kỳ vọng:** {result['expected']}",
+        f"- **Phiên hiện có:** {result['session_date']} "
+        f"(nguồn: {result.get('session_date_source')})",
+        f"- **Độ trễ:** {result['lag']} phiên (ngưỡng {result['max_lag']})",
+        '',
+        '_Tự đóng bởi `data-freshness-alert.yml`._',
+    ])
+
+
+def _emit_github_output(**kv) -> None:
+    """Ghi biến ra $GITHUB_OUTPUT nếu đang chạy trong Actions."""
+    path = os.environ.get('GITHUB_OUTPUT')
+    if not path:
+        return
+    with open(path, 'a', encoding='utf-8') as f:
+        for k, v in kv.items():
+            f.write(f'{k}={v}\n')
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(
+        description='Kiểm độ tươi của web/data/latest.json theo lịch giao dịch.')
+    parser.add_argument('--repo-root', default='.',
+                        help='Thư mục gốc repo (chứa web/data/)')
+    parser.add_argument('--max-lag', type=int, default=1,
+                        help='Số phiên được phép trễ mà không báo động (mặc định 1)')
+    parser.add_argument('--today', default=None,
+                        help='Ghi đè ngày kiểm dạng ISO — dùng khi thử tay')
+    parser.add_argument('--body-out', default=None,
+                        help='Ghi thân issue ra file này khi phát hiện lệch')
+    parser.add_argument('--recovery-out', default=None,
+                        help='Ghi bình luận hồi phục ra file này khi dữ liệu tươi')
+    parser.add_argument('--json-out', default=None,
+                        help='Ghi toàn bộ kết quả dạng JSON ra file này')
+    args = parser.parse_args(argv)
+
+    today = date.fromisoformat(args.today) if args.today else date.today()
+    result = evaluate(Path(args.repo_root), today, max_lag=args.max_lag)
+
+    if args.json_out:
+        Path(args.json_out).write_text(
+            json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
+
+    print(f"Ngay kiem        : {result['today']}")
+    print(f"Phien ky vong    : {result['expected']}")
+    print(f"Phien trong file : {result['session_date']}")
+    print(f"Nguon ngay phien : {result['session_date_source']}")
+    print(f"Do tre           : {result['lag']} phien (nguong {result['max_lag']})")
+    print(f"Ket luan         : {result['reason']}")
+    if not result['holiday_table_known']:
+        print(f"CHU Y: chua co bang nghi le cho nam {today.year} trong "
+              f"trading_calendar.HOLIDAYS - lich chi dua vao cuoi tuan.")
+
+    if result['stale']:
+        title, body = render_issue(result)
+        if args.body_out:
+            Path(args.body_out).write_text(body, encoding='utf-8')
+        _emit_github_output(stale='true', title=title)
+        print('\n=> LECH: can bao dong.')
+        return EXIT_STALE
+
+    if args.recovery_out:
+        Path(args.recovery_out).write_text(
+            render_recovery_comment(result), encoding='utf-8')
+    _emit_github_output(stale='false', title='')
+    print('\n=> Du lieu tuoi.')
+    return EXIT_FRESH
+
+
+if __name__ == '__main__':
+    sys.exit(main())
