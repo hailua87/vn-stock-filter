@@ -199,15 +199,28 @@ jobs:
           writ = meta.get('written_at_ict', '?')
           comp = meta.get('session_complete', '?')
           awrt = meta.get('archive_written', '?')
-          agat = meta.get('archive_gate', '?')
-          print('  ── cong archive ──')
+          print('  -- vong fetch --')
+          print(f'  fetch_truncated:  {meta.get(\"fetch_truncated\")}')
+          print(f'  fetch_stop_reason:{meta.get(\"fetch_stop_reason\")}')
+          print(f'  fetch_coverage:   {meta.get(\"fetch_coverage\")}')
+          print('  -- cong archive --')
           print(f'  session_date:     {sess}')
           print(f'  written_at_ict:   {writ}')
           print(f'  session_complete: {comp}   (co thong tin, khong dung de chan)')
-          print(f'  archive_written:  {awrt}')
-          print(f'  archive_gate:     {agat}')
+          # Liet ke MOI cong da cham, ke ca cong da pass. Ban cu chi in mot dong
+          # ly do cua cong hong dau tien, nen khi ca hai cung chan thi chi thay
+          # mot — sua xong cai do lai tuong da xong.
+          gates = meta.get('archive_gates') or []
+          if gates:
+              for g in gates:
+                  mark = 'PASS' if g.get('passed') else 'FAIL'
+                  print(f'  {g.get(\"name\",\"?\"):14} : {mark}  ({g.get(\"detail\")})')
+          else:
+              print(f'  archive_gate:     {meta.get(\"archive_gate\", \"?\")}')
+          failed = meta.get('archive_gates_failed') or []
+          print(f'  archive_written:  {awrt}' + (f'   (hong o: {\", \".join(failed)})' if failed else ''))
           if meta.get('archive_forced'):
-              print('  ARCHIVE BI EP GHI bang --force-archive')
+              print(f'  ARCHIVE BI EP GHI bang --force-archive qua: {\", \".join(failed)}')
           "
             else
               echo "  ❌ MISSING: $f"

@@ -124,69 +124,118 @@ def session_completeness(by_ticker: dict) -> Optional[float]:
     return round(float(pd.Series(ratios).median()), 3)
 
 
+def evaluate_archive_gates(now: datetime, fetch_summary: Optional[dict] = None,
+                           min_coverage: Optional[float] = None) -> list:
+    """
+    Chấm TỪNG cổng archive độc lập, không dừng ở cái đầu tiên hỏng.
+
+    Vì sao không đoản mạch: bản cũ trả về đúng một câu lý do, nên khi độ phủ
+    mỏng thì log chỉ nói về độ phủ và không ai biết cổng giờ đã pass hay chưa —
+    phải suy ngược từ `written_at_ict`. Với ca intraday có vòng fetch bị cắt,
+    hai cổng cùng chặn mà chỉ thấy một; sửa xong cái này lại tưởng đã xong.
+
+    Mỗi phần tử: {'name', 'passed', 'detail'}. `passed` là bool để tổng hợp;
+    `detail` mang con số thật để đọc log không phải tra lại.
+
+    Thứ tự trong danh sách là thứ tự trình bày, KHÔNG phải thứ tự ưu tiên — mọi
+    cổng đều được chấm, kết quả không phụ thuộc thứ tự.
+    """
+    cutoff_str = ARCHIVE_CUTOFF_ICT.strftime('%H:%M')
+    min_coverage = (MIN_COVERAGE_FOR_ARCHIVE if min_coverage is None
+                    else min_coverage)
+
+    # ── Cổng 1: đồng hồ tại lúc ghi ──────────────────────────────────────
+    after_cutoff = now.time() >= ARCHIVE_CUTOFF_ICT
+    gates = [{
+        'name': 'gate_time',
+        'passed': after_cutoff,
+        'detail': (f'{now:%H:%M} ICT >= {cutoff_str} — khối lượng đã chốt'
+                   if after_cutoff else
+                   f'{now:%H:%M} ICT < {cutoff_str} — khối lượng chưa chốt'),
+    }]
+
+    # ── Cổng 2: độ phủ vòng fetch ────────────────────────────────────────
+    coverage = (fetch_summary or {}).get('coverage')
+    truncated = bool((fetch_summary or {}).get('truncated'))
+    stop = (fetch_summary or {}).get('stop_reason')
+
+    if coverage is None:
+        # Không có số liệu thì cổng này không chặn được gì. Đánh dấu passed để
+        # không chặn oan, nhưng nói thẳng trong detail là KHÔNG ĐO ĐƯỢC — khác
+        # hẳn với "đã đo và đạt".
+        gates.append({'name': 'gate_coverage', 'passed': True,
+                      'detail': 'không có số liệu vòng fetch — cổng không đo được'})
+    else:
+        thin = coverage < min_coverage
+        cov_str = f'{coverage:.0%}'
+        thr_str = f'{min_coverage:.0%}'
+        if truncated or thin:
+            why = f'{cov_str} < {thr_str}' if thin else f'{cov_str} >= {thr_str}'
+            gates.append({
+                'name': 'gate_coverage', 'passed': False,
+                'detail': (f'{why}, vòng fetch dừng sớm ({stop})' if truncated
+                           else f'{why} — bản quét không đại diện cho phiên'),
+            })
+        else:
+            gates.append({'name': 'gate_coverage', 'passed': True,
+                          'detail': f'{cov_str} >= {thr_str}, vòng fetch chạy trọn'})
+
+    return gates
+
+
+def format_gates(gates: list) -> str:
+    """`gate_time: pass (...) | gate_coverage: fail (...)` — một dòng cho log."""
+    return ' | '.join(
+        f"{g['name']}: {'pass' if g['passed'] else 'fail'} ({g['detail']})"
+        for g in gates
+    )
+
+
 def archive_decision(force: bool = False, now: Optional[datetime] = None,
                      fetch_summary: Optional[dict] = None,
                      min_coverage: Optional[float] = None) -> dict:
     """
-    Có được ghi archive không — quyết định bằng ĐỒNG HỒ TẠI LÚC GHI.
+    Có được ghi archive không — tổng hợp từ TẤT CẢ các cổng đã chấm.
 
-    Ba đường vào đều đi qua đúng cổng này:
-      - chạy theo lịch  → chỉ giờ ICT mới mở được cổng
-      - `workflow_dispatch` chọn tay 'eod' → KHÔNG mở được cổng, phải thêm cờ
-      - thiếu `SCAN_RUN_TYPE` (chạy tay, script khác) → cũng KHÔNG mở được cổng
+    Hai cổng, chặn hai thứ khác nhau:
 
-    Điểm cuối cùng là thay đổi quan trọng nhất về mặt an toàn: bản cũ hỏi
-    `env == 'intraday'`, nên thiếu biến sẽ trả False và archive được ghi vô điều
-    kiện — hỏng theo hướng MỞ. Nay thiếu thông tin thì đóng.
+      gate_time     — đồng hồ TẠI LÚC GHI, không phải nhãn `SCAN_RUN_TYPE` dán
+                      lúc job khởi động. Nhãn đó sai cả hai chiều: bản khởi động
+                      12:00 ICT mà ghi lúc 15:40 vẫn mang nhãn 'intraday' dù khối
+                      lượng đã chốt, còn `workflow_dispatch` chọn tay 'eod' lúc
+                      12:00 thì mở toang cổng cho dữ liệu nửa phiên.
+      gate_coverage — độ phủ vòng fetch. File archive là VĨNH VIỄN: không ca nào
+                      chạy lại phiên cũ để sửa, và backtest sau này đọc nó như dữ
+                      liệu thật. Bản quét 140/500 mã là một lát cắt, không phải
+                      phiên đó. latest.json thì khác, ca sau ghi đè được.
 
-    CỔNG THỨ HAI (2026-08-27): độ phủ. Khi vòng fetch dừng sớm vì hết ngân sách
-    thời gian hoặc vì cầu dao, `fetch_summary['coverage']` tụt xuống — quét 140
-    trên 500 mã không phải bản ghi của phiên đó, nó là một lát cắt. File archive
-    thì VĨNH VIỄN: không có ca nào chạy lại phiên cũ để sửa, và backtest sau này
-    sẽ đọc lát cắt đó như dữ liệu thật. latest.json thì khác, ca sau ghi đè được,
-    nên vẫn ghi bình thường.
+    Thiếu thông tin thì ĐÓNG. Bản cũ nhất hỏi `env == 'intraday'`, nên thiếu biến
+    môi trường sẽ trả False và archive được ghi vô điều kiện — hỏng theo hướng MỞ.
 
-    Cổng độ phủ đứng SAU `force`: `--force-archive` là để người biết rõ mình đang
-    làm gì ép ghi, và mọi lần ép đều bị đánh dấu `archive_forced=true`.
+    `--force-archive` ép qua mọi cổng đang hỏng, và mọi lần ép đều bị đánh dấu
+    `forced=True` kèm tên cổng bị ép trong `reason`. Không đánh dấu thì một file
+    archive dựng từ 140/500 mã trông y hệt file dựng từ 500/500.
     """
     now = now or now_ict()
-    run_type = get_run_type()
-    after_cutoff = now.time() >= ARCHIVE_CUTOFF_ICT
-    cutoff_str = ARCHIVE_CUTOFF_ICT.strftime('%H:%M')
+    gates = evaluate_archive_gates(now, fetch_summary, min_coverage)
+    failed = [g['name'] for g in gates if not g['passed']]
 
-    min_coverage = (MIN_COVERAGE_FOR_ARCHIVE if min_coverage is None
-                    else min_coverage)
-    coverage = (fetch_summary or {}).get('coverage')
-    truncated = bool((fetch_summary or {}).get('truncated'))
-    thin = (coverage is not None and coverage < min_coverage)
+    write = (not failed) or force
+    forced = bool(failed) and force
 
-    coverage_blocked = truncated or thin
-    stop = (fetch_summary or {}).get('stop_reason') or 'không rõ'
-    cov_str = f'{coverage:.1%}' if coverage is not None else '?'
-    thin_note = (f'vòng fetch dừng sớm ({stop}), độ phủ {cov_str} < '
-                 f'{min_coverage:.0%} — bản quét không đại diện cho phiên')
+    reason = format_gates(gates)
+    if forced:
+        reason += f" — ÉP GHI bằng --force-archive qua: {', '.join(failed)}"
 
-    if coverage_blocked and not force:
-        return {'write': False, 'forced': False, 'run_type': run_type,
-                'written_at_ict': now.strftime('%Y-%m-%d %H:%M:%S%z'),
-                'reason': thin_note}
-
-    if after_cutoff:
-        # `forced` phải bật kể cả khi cổng đồng hồ tự nó đã mở: thứ bị ép qua ở
-        # đây là cổng ĐỘ PHỦ. Không đánh dấu thì một file archive dựng từ 140/500
-        # mã trông y hệt file dựng từ 500/500 — đúng kiểu im lặng đang phải sửa.
-        return {'write': True, 'forced': coverage_blocked, 'run_type': run_type,
-                'written_at_ict': now.strftime('%Y-%m-%d %H:%M:%S%z'),
-                'reason': (f'{now:%H:%M} ICT >= {cutoff_str} — khối lượng đã chốt'
-                           + (f'; ÉP GHI qua cổng độ phủ: {thin_note}'
-                              if coverage_blocked else ''))}
-    if force:
-        return {'write': True, 'forced': True, 'run_type': run_type,
-                'written_at_ict': now.strftime('%Y-%m-%d %H:%M:%S%z'),
-                'reason': f'{now:%H:%M} ICT < {cutoff_str} nhưng có --force-archive'}
-    return {'write': False, 'forced': False, 'run_type': run_type,
-            'written_at_ict': now.strftime('%Y-%m-%d %H:%M:%S%z'),
-            'reason': f'{now:%H:%M} ICT < {cutoff_str} — khối lượng chưa chốt'}
+    return {
+        'write': write,
+        'forced': forced,
+        'run_type': get_run_type(),
+        'written_at_ict': now.strftime('%Y-%m-%d %H:%M:%S%z'),
+        'gates': gates,
+        'gates_failed': failed,
+        'reason': reason,
+    }
 
 
 def build_metadata(min_score, exchanges, total_scanned, market_context,
@@ -211,7 +260,13 @@ def build_metadata(min_score, exchanges, total_scanned, market_context,
         'session_complete': completeness,
         'archive_written': decision['write'],
         'archive_forced': decision['forced'],
+        # `archive_gate` giu nguyen la chuoi mot dong (web/app.js va buoc Verify
+        # cua workflow doc no); `archive_gates` la ban co cau truc, liet ke MOI
+        # cong da cham kem ket qua tung cai. Nhin mot file archive ba thang sau
+        # van biet duoc cong nao chan, cong nao pass, con so bao nhieu.
         'archive_gate': decision['reason'],
+        'archive_gates': decision.get('gates', []),
+        'archive_gates_failed': decision.get('gates_failed', []),
         # Bằng chứng về vòng fetch. `fetch_truncated` là trường mà chuông báo độ
         # tươi (check_freshness.py) và người đọc dashboard cần thấy: một file
         # sinh ra từ 140/500 mã trông y hệt file sinh ra từ 500/500 nếu không nói
@@ -379,13 +434,23 @@ def main():
              f"(cờ thông tin, không dùng để chặn)")
     log.info(f"  Độ phủ vòng fetch: {fetch_summary.get('coverage')} "
              f"(ngưỡng archive {MIN_COVERAGE_FOR_ARCHIVE})")
+    # In TỪNG cổng một dòng, kể cả cổng đã pass. Bản cũ chỉ in lý do của cổng
+    # hỏng đầu tiên, nên ca intraday có vòng fetch bị cắt sẽ chỉ thấy một trong
+    # hai cổng đang chặn — sửa xong cái đó lại tưởng đã xong.
+    log.info("  ── Cổng archive ──")
+    for g in decision['gates']:
+        line = f"  {g['name']:14} : {'PASS' if g['passed'] else 'FAIL'}  ({g['detail']})"
+        (log.info if g['passed'] else log.warning)(line)
     if decision['write']:
-        log.info(f"  Archive: GHI — {decision['reason']}")
+        log.info(f"  => Archive: GHI"
+                 + (f" (ÉP qua {', '.join(decision['gates_failed'])})"
+                    if decision['forced'] else ""))
         if decision['forced']:
             log.warning("  Archive bị ép ghi bằng --force-archive; "
                         "metadata.archive_forced = true")
     else:
-        log.warning(f"  Archive: BỎ QUA — {decision['reason']}")
+        log.warning(f"  => Archive: BỎ QUA — hỏng ở "
+                    f"{', '.join(decision['gates_failed'])}")
 
     # -------- Pre-Breakout --------
     log.info("Running Pre-Breakout strategy...")
