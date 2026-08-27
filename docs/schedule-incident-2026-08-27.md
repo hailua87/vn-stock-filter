@@ -65,6 +65,46 @@ hẳn.
 Khi đọc, so `createdAt` với giờ cron chứ đừng chỉ nhìn có/không — đúng cái
 bẫy đã suýt làm bỏ sót run 11:09Z.
 
+## Kết quả phép thử 27/08 16:05Z
+
+| | |
+| --- | --- |
+| run | `33092622907` |
+| `createdAt` | `2026-08-27T16:19:27Z` |
+| trễ so với cron 16:05Z | **14 phút** |
+| kết quả | `completed/success` |
+
+**Kết luận: (a) — scheduler trở lại hành vi thường ngày.**
+
+Ngưỡng 15 phút trong phép thử ban đầu là **tuỳ tiện**, tôi bịa ra chứ không
+dựa vào gì. Mốc đúng để so là **dải trễ thực tế của chính repo này**. Các ca
+EOD trước đó với cron `0 16`:
+
+```
+16:12   16:16   16:18   16:20   16:21     →  dải 12–21 phút
+```
+
+14 phút nằm giữa dải đó. Nên đọc chính xác là "quay lại hành vi bình thường",
+không phải "đúng giờ tuyệt đối" — GitHub chưa bao giờ giao tick đúng phút cho
+repo này. Lần sau đo trễ thì so với dải này, đừng so với một con số tròn.
+
+### Nhưng chưa đóng hồ sơ
+
+Ba khung đã trượt **vẫn không có lời giải**:
+
+```
+26/08 16:00Z   Daily Scan EOD
+27/08 01:07Z   Data Freshness Alert
+27/08 05:05Z   Daily Scan intraday
+```
+
+Việc khung 16:05Z chạy bình thường chứng minh `schedule` **hiện đang** hoạt
+động — nó không nói gì về việc ba khung kia đã đi đâu.
+
+Và run alert `33066152315` trễ **10 giờ 02 phút** vẫn chỉ có **(c)** giải
+thích được. (a) không giải thích nổi một tick tới muộn 10 tiếng thay vì mất
+hẳn. Nên (c) chưa bị loại, nó chỉ không áp dụng cho khung 16:05Z.
+
 ## Chẩn đoán cũ đã bị bác
 
 Ngày 27/08 tôi kết luận khung 26/08 16:00Z là **"GitHub bỏ tick"** — chuyện
@@ -101,7 +141,8 @@ có dữ liệu nửa vời. Chuông đo **ngày phiên**, không đo **chất l
 
 ## Việc còn treo
 
-- [ ] Đọc kết quả hai khung ở phép thử
+- [x] Khung 27/08 16:05Z — đã đọc, kết quả (a). Xem mục trên.
+- [ ] Khung 28/08 01:07Z — nửa còn lại của phép thử, chưa tới
 - [ ] Quyết định có chạy tay `gh workflow run daily-scan.yml` để lấy lại
       phiên 26/08–27/08 hay không (chạy tay trước 16:05Z sẽ che mất phép thử)
 - [ ] `f15fd55` — giữ hay revert, sau khi biết nguyên nhân thật
