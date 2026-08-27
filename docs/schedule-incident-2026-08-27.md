@@ -166,8 +166,21 @@ có dữ liệu nửa vời. Chuông đo **ngày phiên**, không đo **chất l
 
 - [x] Khung 27/08 16:05Z — đã đọc, kết quả (a). Xem mục trên.
 - [ ] Khung 28/08 01:07Z — nửa còn lại của phép thử, chưa tới
-- [ ] Quyết định có chạy tay `gh workflow run daily-scan.yml` để lấy lại
-      phiên 26/08–27/08 hay không (chạy tay trước 16:05Z sẽ che mất phép thử)
+- [x] **Phiên 26/08 KHÔNG lấy lại được.** `daily-scan` luôn quét phiên HIỆN
+      TẠI: `session_date` lấy từ `df_all['Date'].max()`, và `run_daily.py`
+      không có tham số nào chọn phiên cũ (12 tham số CLI, không cái nào là
+      ngày). Chạy tay bây giờ chỉ ghi đè bằng dữ liệu phiên mới nhất.
+
+      Giá đóng cửa 26/08 nằm trong cache OHLCV của runner — nến ngày 26/08 đã
+      chốt hẳn khi ca EOD 27/08 fetch trọn 500/500 mã. (Chưa xác minh trực
+      tiếp: `gh cache list` chỉ trả siêu dữ liệu, muốn đọc nội dung phải chạy
+      một job.) Nhưng **file archive của phiên đó vĩnh viễn là bản 13:00 ICT.**
+
+      `backend/rebuild_web_data.py` KHÔNG phải lối thoát, dù nghe có vẻ đúng
+      việc: nó sinh lại dashboard offline từ cache, nhưng giới hạn ghi ngay
+      trong docstring là "ngày dữ liệu là phiên cuối trong cache" — tức nó
+      cũng bám phiên mới nhất, không nhắm được vào một phiên chọn trước. Output
+      của nó còn bị đánh dấu `metadata.offline_rebuild = true`.
 - [x] **`f15fd55` — GIỮ.** Ca EOD 27/08 chạy sạch với cron mới: `16:19:27Z`,
       trễ 14 phút (trong dải 12–21 phút bình thường của repo), fetch trọn
       **500/500 mã** trong 1524.8s, cả hai cổng archive PASS, archive ghi
