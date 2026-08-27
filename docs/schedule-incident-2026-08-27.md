@@ -168,7 +168,21 @@ có dữ liệu nửa vời. Chuông đo **ngày phiên**, không đo **chất l
 - [ ] Khung 28/08 01:07Z — nửa còn lại của phép thử, chưa tới
 - [ ] Quyết định có chạy tay `gh workflow run daily-scan.yml` để lấy lại
       phiên 26/08–27/08 hay không (chạy tay trước 16:05Z sẽ che mất phép thử)
-- [ ] `f15fd55` — giữ hay revert, sau khi biết nguyên nhân thật
+- [x] **`f15fd55` — GIỮ.** Ca EOD 27/08 chạy sạch với cron mới: `16:19:27Z`,
+      trễ 14 phút (trong dải 12–21 phút bình thường của repo), fetch trọn
+      **500/500 mã** trong 1524.8s, cả hai cổng archive PASS, archive ghi
+      thành công. Không có lý do revert. Lưu ý: giữ commit này **không** có
+      nghĩa là tiền đề của nó đúng — tiền đề "GitHub bỏ tick" đã bị bác ở mục
+      trên; nó được giữ vì vô hại và vẫn giảm rủi ro nghẽn, không vì nó đã sửa
+      được gì.
+- [x] **Chuông đã có trục 2** (PR #4, merge `ac1c4d1`): kêu khi
+      `archive_written == False`, tức bắt được "phiên chưa chốt" mà trục ngày
+      phiên không thấy. **NHƯNG KHÔNG HỒI TỐ.** Chạy chính bản vá đó trên
+      `latest.json` thật của 26/08 (`git show 0e5d3b2a:web/data/latest.json`):
+      cả hai trục đều im — trục 1 vì ngày phiên đúng, trục 2 vì file thiếu
+      `archive_written` nên tự tắt. Chỉ hiệu lực **từ 27/08 trở đi**, khi mọi
+      `latest.json` đều mang khoá đó. Sự cố 26/08 vẫn sẽ lọt nếu tái hiện y
+      nguyên trên dữ liệu cũ.
 - [ ] Chuông báo độ tươi phụ thuộc cùng một scheduler với thứ nó đang canh.
       Nó độc lập với *code* và *dữ liệu* của daily-scan, nhưng **không** độc
       lập với `schedule`. Cả hai cùng câm vì cùng một nguyên nhân.
