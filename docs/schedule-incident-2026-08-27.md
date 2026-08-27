@@ -126,14 +126,37 @@ khung hỏng **không** do thay đổi cron gây ra.
 dữ liệu duy nhất của phiên đó là ảnh chụp intraday lúc 12:33 ICT.
 
 `web/data/archive/2026-08-26.json` do bản code cũ ghi (trước khi cổng archive
-và `session_date` lên `main`). `metadata` của nó chỉ có:
+và `session_date` lên `main`). **File TRUY ĐƯỢC** — nó tự khai đầy đủ:
 
 ```
-min_score, exchanges, total_scanned, data_quality, session_complete, data_quality_note
+"data_quality": "partial_session"
+"session_complete": null
+"data_quality_note": "Ghi luc 13:00 ICT — giua phien chieu (13:00-14:45),
+   truoc moc chot khoi luong ~15:08. CAN CU DANH DAU LA GIO GHI, khong phai
+   phep do. session_complete = null vi parquet cache dung o 2026-08-12 nen
+   khong co dong nao cua phien nay de so [...] Khong dung cho backtest."
 ```
 
-Thiếu `session_date`, `run_type`, `written_at_ict`, `archive_written`.
-**Không truy được nó là bản giữa phiên hay bản chốt.**
+Lỗ thật **chỉ là thiếu bốn khoá**: `session_date`, `run_type`,
+`written_at_ict`, `archive_written` — do code cũ ghi, trước khi cổng archive
+lên `main`. Thiếu bốn khoá đó không có nghĩa là không truy được nguồn gốc file.
+
+Xác nhận bằng **ba nguồn độc lập**, cùng chỉ một kết luận:
+
+| nguồn | nội dung |
+| --- | --- |
+| `gh run list` ngày 26/08 | đúng **một** run: `32934495261`, `05:33Z`, `schedule`, success |
+| commit dữ liệu duy nhất | `0e5d3b2` — nhãn `[intraday 13:00]` |
+| chính `data_quality_note` | `partial_session`, ghi lúc 13:00 ICT |
+
+**Phiên 26/08 không có bản chốt và sẽ không bao giờ có**, vì không ca nào
+chạy lại phiên cũ.
+
+> **Bài học.** Lượt trước tôi kết luận metadata rỗng nghĩa sau khi chỉ `get()`
+> bốn khoá mình mong đợi, thấy `None` cả bốn, rồi dừng — không in toàn bộ khối
+> ra xem. Kiểm sự **vắng mặt** của khoá mình mong đợi không thay được việc đọc
+> cái đang **có**. Nhận định sai đó đã kịp vào doc này và nằm trên `main` một
+> ngày.
 
 Hệ quả cho chuông báo: sáng 27/08 `latest.json` mang phiên 26/08, đúng bằng
 phiên kỳ vọng → trễ 0 phiên → chuông im, hợp lệ. Nhưng nó im về một phiên chỉ
