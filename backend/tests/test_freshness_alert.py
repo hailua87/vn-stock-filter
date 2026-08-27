@@ -402,3 +402,182 @@ def test_import_chain_stays_stdlib_only():
                           capture_output=True, text=True, encoding='utf-8')
     assert proc.returncode == 0, proc.stderr
     assert 'HEAVY []' in proc.stdout, proc.stdout
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# TRỤC 2 — phiên mới nhất đã chốt chưa
+#
+# Vì sao cần: sáng 27/08 latest.json mang phiên 26/08 đúng bằng phiên kỳ vọng
+# nên trục 1 im — hợp lệ. Nhưng phiên 26/08 đó chỉ có ảnh chụp 13:00 ICT vì ca
+# EOD không chạy. Trục 1 đo NGÀY phiên, không đo CHẤT LƯỢNG phiên.
+#
+# Mỗi test dưới đây phải ĐỎ được nếu logic sai — ghi rõ đỏ theo chiều nào.
+# ═══════════════════════════════════════════════════════════════════════
+from datetime import datetime
+
+from check_freshness import ICT, AXIS2_MISSING_KEY, evaluate_settled
+
+
+def at_ict(y, mo, d, h, mi):
+    return datetime(y, mo, d, h, mi, tzinfo=ICT)
+
+
+def _write_full(root, rel, session_date, **meta):
+    """latest.json theo schema SAU 27/08 — có archive_written."""
+    p = root / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    payload = {'generated_at': 'x', 'total': 7,
+               'metadata': {'session_date': session_date, **meta}, 'signals': []}
+    p.write_text(json.dumps(payload, ensure_ascii=False), encoding='utf-8')
+    return p
+
+
+# ── 1. EOD sạch 27/08 (số thật đã đo trên run 33092622907) ──────────────
+def test_axis2_silent_on_clean_eod(tmp_path):
+    """
+    Mẫu BÌNH THƯỜNG. Trục 2 tuyệt đối không được kêu với nó.
+    ĐỎ nếu: điều kiện trục 2 bị viết ngược, hoặc dùng session_complete làm mốc
+    (0.803 của ca sạch này nằm sát 0.64 của ca intraday — xem test cuối file).
+    """
+    _write_full(tmp_path, PRIMARY, '2026-08-27',
+                run_type='eod', written_at_ict='2026-08-27 23:45:44+0700',
+                session_complete=0.803, fetch_truncated=False, fetch_coverage=1.0,
+                archive_written=True, archive_forced=False, archive_gates_failed=[])
+    r = evaluate(tmp_path, date(2026, 8, 28), now_ict=at_ict(2026, 8, 28, 8, 7))
+    assert r['axis2_applies'] is True
+    assert r['axis2_stale'] is False
+    assert r['axis1_stale'] is False
+    assert r['stale'] is False
+
+
+# ── 2. intraday sạch, chuông chạy 08:07 → KÊU ───────────────────────────
+def test_axis2_alerts_on_unsettled_at_0807(tmp_path):
+    """
+    Đúng hình dạng sự cố 26/08: ca EOD không chạy, latest.json còn là bản
+    intraday. Lúc 08:07 ICT thì bản chưa chốt chỉ có một cách đọc.
+    ĐỎ nếu: trục 2 không được nối vào, hoặc khung giờ (c) bị viết quá rộng.
+    """
+    _write_full(tmp_path, PRIMARY, '2026-08-27',
+                run_type='intraday', written_at_ict='2026-08-27 12:35:00+0700',
+                session_complete=0.64, fetch_truncated=False, fetch_coverage=1.0,
+                archive_written=False, archive_gates_failed=['gate_time'])
+    r = evaluate(tmp_path, date(2026, 8, 28), now_ict=at_ict(2026, 8, 28, 8, 7))
+    assert r['axis2_applies'] is True
+    assert r['axis2_stale'] is True
+    assert r['stale'] is True
+    assert r['axis1_stale'] is False        # trục 1 im — chính là điểm mù cũ
+    assert r['archive_gates_failed'] == ['gate_time']
+
+
+# ── 3. cùng dữ liệu (2) nhưng chạy lúc 13:00 → IM ───────────────────────
+def test_axis2_silent_midsession(tmp_path):
+    """
+    13:00 ICT nằm trong 09:00-15:15: bản chưa chốt lúc này là ĐÚNG THIẾT KẾ.
+    ĐỎ nếu: bỏ mất khung (c) → chuông kêu mỗi trưa và bị tắt trong một tuần.
+    """
+    _write_full(tmp_path, PRIMARY, '2026-08-28',
+                run_type='intraday', written_at_ict='2026-08-28 12:35:00+0700',
+                archive_written=False, archive_gates_failed=['gate_time'])
+    r = evaluate(tmp_path, date(2026, 8, 28), now_ict=at_ict(2026, 8, 28, 13, 0))
+    assert r['axis2_applies'] is False
+    assert r['axis2_stale'] is False
+    assert r['stale'] is False
+    assert '09:00' in r['axis2_note'] and '15:15' in r['axis2_note']
+
+
+@pytest.mark.parametrize('h,mi,applies', [
+    (8, 59, True),    # trước giờ mở cửa
+    (9, 0, False),    # đúng mốc mở cửa — trong khung
+    (15, 14, False),  # sát mốc chốt — vẫn trong khung
+    (15, 15, True),   # đúng mốc chốt — ra khỏi khung
+    (23, 45, True),   # ca EOD
+])
+def test_axis2_window_boundaries(h, mi, applies):
+    """Hai biên của khung (c). ĐỎ nếu dùng <= thay vì < hoặc lệch một phút."""
+    ctx = {'has_archive_written': True, 'archive_written': False,
+           'archive_gates_failed': []}
+    assert evaluate_settled(ctx, at_ict(2026, 8, 28, h, mi))['applies'] is applies
+
+
+# ── 4. thiếu archive_written → IM, nhưng lý do phải ghi rõ ──────────────
+def test_axis2_skipped_when_key_missing(tmp_path):
+    """
+    Mọi file do code trước 27/08 ghi đều thiếu khoá này. Vắng mặt khoá là lệch
+    schema, không phải bằng chứng chưa chốt — nên KHÔNG kêu. Nhưng cũng không
+    được im lặng hoàn toàn: lý do phải nói ra là trục 2 đã không chấm gì.
+    ĐỎ nếu: coi thiếu khoá như False (kêu oan trên toàn bộ lịch sử), hoặc bỏ
+    qua mà không để lại dấu vết.
+    """
+    _write_full(tmp_path, PRIMARY, '2026-08-27', run_type='eod')   # thiếu archive_written
+    r = evaluate(tmp_path, date(2026, 8, 28), now_ict=at_ict(2026, 8, 28, 8, 7))
+    assert r['axis2_applies'] is False
+    assert r['axis2_stale'] is False
+    assert r['stale'] is False
+    assert AXIS2_MISSING_KEY in r['axis2_note']
+    assert AXIS2_MISSING_KEY in r['reason']      # không im — có mặt trong lý do
+
+
+def test_axis2_false_is_not_treated_as_missing(tmp_path):
+    """
+    Chiều ngược của test 4: archive_written=False PHẢI kêu, không được coi như
+    thiếu khoá. ĐỎ nếu dùng `meta.get(...)` thay vì `'archive_written' in meta`.
+    """
+    _write_full(tmp_path, PRIMARY, '2026-08-27', archive_written=False)
+    r = evaluate(tmp_path, date(2026, 8, 28), now_ict=at_ict(2026, 8, 28, 8, 7))
+    assert r['axis2_applies'] is True and r['axis2_stale'] is True
+
+
+# ── 5. hai trục độc lập ─────────────────────────────────────────────────
+def test_axis1_alerts_even_when_axis2_clean(tmp_path):
+    """
+    archive_written=True nhưng ngày phiên lệch 2 phiên → vẫn KÊU.
+    ĐỎ nếu: hai trục bị nối bằng AND thay vì OR.
+    """
+    _write_full(tmp_path, PRIMARY, '2026-08-25',
+                run_type='eod', archive_written=True, archive_gates_failed=[])
+    r = evaluate(tmp_path, date(2026, 8, 28), now_ict=at_ict(2026, 8, 28, 8, 7))
+    assert r['lag'] == 2
+    assert r['axis1_stale'] is True
+    assert r['axis2_stale'] is False
+    assert r['stale'] is True
+
+
+def test_both_axes_can_fail_together(tmp_path):
+    _write_full(tmp_path, PRIMARY, '2026-08-25', archive_written=False,
+                archive_gates_failed=['gate_time', 'gate_coverage'])
+    r = evaluate(tmp_path, date(2026, 8, 28), now_ict=at_ict(2026, 8, 28, 8, 7))
+    assert r['axis1_stale'] is True and r['axis2_stale'] is True
+    assert r['stale'] is True
+
+
+# ── Thân issue ──────────────────────────────────────────────────────────
+def test_issue_body_prints_failed_gates(tmp_path):
+    """Biết CỔNG NÀO hỏng mới sửa được; chỉ biết 'chưa chốt' thì chưa đủ."""
+    _write_full(tmp_path, PRIMARY, '2026-08-27', archive_written=False,
+                archive_gates_failed=['gate_coverage'])
+    r = evaluate(tmp_path, date(2026, 8, 28), now_ict=at_ict(2026, 8, 28, 8, 7))
+    title, body = render_issue(r)
+    assert 'gate_coverage' in body
+    assert 'archive_gates_failed' in body
+    assert 'CHƯA CHỐT' in title           # tiêu đề phân biệt với sự cố trục 1
+
+
+def test_issue_title_still_says_late_when_axis1_fails(tmp_path):
+    _write_full(tmp_path, PRIMARY, '2026-08-25', archive_written=True)
+    title, _ = render_issue(evaluate(tmp_path, date(2026, 8, 28),
+                                     now_ict=at_ict(2026, 8, 28, 8, 7)))
+    assert 'trễ' in title
+
+
+# ── Ghi chú: vì sao KHÔNG dùng session_complete làm mốc ─────────────────
+def test_session_complete_would_not_have_worked():
+    """
+    Không kiểm code — ghim lại lý do loại một phương án, để lần sau không ai
+    thử lại. Docstring session_completeness() nói phiên trọn vẹn cho ~1,0 và
+    giữa phiên chiều ~0,64. Nhưng ca EOD SẠCH thật (run 33092622907) đo được
+    0.803. Khoảng cách 0.64 <-> 0.803 quá hẹp để làm cổng: một phiên trầm lắng
+    thật sẽ chồng lấn. archive_written là phán quyết nhị phân của pipeline,
+    không phải một phép đo liên tục cần ngưỡng.
+    """
+    eod_thuc_te, intraday_du_kien = 0.803, 0.64
+    assert eod_thuc_te - intraday_du_kien < 0.2

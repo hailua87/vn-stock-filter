@@ -40,7 +40,7 @@ import importlib.util
 import json
 import os
 import sys
-from datetime import date
+from datetime import date, datetime, time as dtime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -99,6 +99,23 @@ COMPANIONS = (
 # dữ liệu chứ không phải đồng hồ của runner.
 ARCHIVE_INDEX = 'web/data/archive/index.json'
 
+# Việt Nam UTC+7, không DST từ 1975 — offset cố định là chính xác và không phụ
+# thuộc gói tzdata của máy chạy.
+ICT = timezone(timedelta(hours=7), name='ICT')
+
+# Hai mốc dưới đây LẶP LẠI giá trị của run_daily.ARCHIVE_CUTOFF_ICT và giờ mở
+# cửa HOSE. Cố ý không `from run_daily import ...`: run_daily kéo theo pandas và
+# cả gói scanner, mà chuông này chạy trên runner KHÔNG cài requirements.txt —
+# đúng lỗi đã giết run 32998375558. Trùng lặp ở đây rẻ hơn một dependency.
+# Nếu run_daily đổi mốc 15:15 thì phải đổi cả ở đây.
+MARKET_OPEN_ICT = dtime(9, 0)
+ARCHIVE_CUTOFF_ICT = dtime(15, 15)
+
+# Câu giải thích khi trục 2 không áp dụng vì thiếu khoá. Tách hằng số để test
+# ghim đúng chuỗi này thay vì ghim một mẩu văn bản dễ trôi.
+AXIS2_MISSING_KEY = ('trục 2 không áp dụng — latest.json thiếu archive_written, '
+                     'file do code trước 27/08 ghi')
+
 
 def expected_session(today: date) -> date:
     """
@@ -147,6 +164,12 @@ def read_session_date(path: Path) -> tuple[Optional[str], dict]:
     ctx['session_complete'] = meta.get('session_complete')
     ctx['fetch_stop_reason'] = meta.get('fetch_stop_reason')
     ctx['fetch_coverage'] = meta.get('fetch_coverage')
+    # Phân biệt THIẾU KHOÁ với GIÁ TRỊ False — hai thứ này dẫn tới hai kết luận
+    # ngược nhau ở trục 2, và `.get()` trả None cho cả hai.
+    ctx['has_archive_written'] = 'archive_written' in meta
+    ctx['archive_written'] = meta.get('archive_written')
+    ctx['archive_gates_failed'] = meta.get('archive_gates_failed') or []
+    ctx['archive_gate'] = meta.get('archive_gate')
 
     raw = meta.get('session_date')
     if not raw:
@@ -199,14 +222,85 @@ def read_archive_latest(path: Path) -> Optional[str]:
     return str(raw)
 
 
-def evaluate(repo_root: Path, today: date, max_lag: int = 1) -> dict:
+def evaluate_settled(ctx: dict, now_ict: datetime) -> dict:
+    """
+    TRỤC 2 — phiên mới nhất đã CHỐT chưa. Độc lập hoàn toàn với trục 1 (ngày
+    phiên), và không tha phiên nào: lệch là kêu ngay.
+
+    Vì sao không tha, khác trục 1: trục 1 tha 1 phiên vì một ca hỏng lẻ tự lành
+    ở ca sau. Trục 2 KHÔNG tự lành — nếu ca EOD đêm qua trượt, ca intraday trưa
+    nay sẽ ghi đè latest.json bằng dữ liệu giữa phiên và giá đóng cửa phiên
+    trước mất vĩnh viễn. Chờ thêm một vòng là mất luôn thứ đang cần cứu.
+
+    Đo bằng `archive_written` chứ không bằng `run_type`: `run_type` là nhãn dán
+    lúc job KHỞI ĐỘNG rồi đóng băng, sai cả hai chiều — chính run_daily
+    .get_run_type() cấm dùng nó làm cổng. `archive_written` là phán quyết của
+    pipeline dựa trên đồng hồ LÚC GHI cộng độ phủ, tức đã đi qua cả hai cổng.
+
+    Nó cũng bắt luôn ca EOD chạy nhưng độ phủ mỏng — vẫn là sự cố đáng kêu, chỉ
+    khác nguyên nhân; `archive_gates_failed` cho biết cổng nào hỏng.
+
+    Hai trường hợp trục này TỰ TẮT:
+
+      (c) Giờ chạy nằm trong 09:00–15:15 ICT. Lúc đó bản intraday chưa chốt là
+          ĐÚNG THIẾT KẾ, không phải sự cố. Đọc đồng hồ thật, không đọc nhãn.
+          Ở khung chạy theo lịch (08:07 ICT) điều kiện này không bao giờ chạm:
+          ca EOD đêm qua đáng lẽ xong từ 23:05, ca intraday hôm nay chưa xảy ra,
+          HOSE chưa mở cửa. Nên lúc 08:07 mà latest.json chưa chốt thì chỉ có
+          một cách đọc — ca EOD đã không chạy.
+
+      (b) latest.json thiếu hẳn khoá `archive_written` (mọi file do code trước
+          27/08 ghi). Vắng mặt khoá là lệch schema, không phải bằng chứng chưa
+          chốt — nên không kêu. Nhưng KHÔNG im: lý do được ghi lại để người đọc
+          biết trục này đã không chấm gì.
+    """
+    t = now_ict.timetz().replace(tzinfo=None)
+
+    if MARKET_OPEN_ICT <= t < ARCHIVE_CUTOFF_ICT:
+        return {
+            'applies': False, 'stale': False,
+            'note': (f"trục 2 bỏ qua — chuông chạy lúc {t:%H:%M} ICT, trong khung "
+                     f"{MARKET_OPEN_ICT:%H:%M}–{ARCHIVE_CUTOFF_ICT:%H:%M} giữa phiên; "
+                     f"bản chưa chốt lúc này là đúng thiết kế"),
+        }
+
+    if not ctx.get('has_archive_written'):
+        return {'applies': False, 'stale': False, 'note': AXIS2_MISSING_KEY}
+
+    written = ctx.get('archive_written')
+    failed = ctx.get('archive_gates_failed') or []
+    if written is True:
+        return {'applies': True, 'stale': False,
+                'note': 'trục 2: archive_written = true — phiên đã chốt'}
+
+    gates = f" — cổng hỏng: {', '.join(failed)}" if failed else ''
+    return {
+        'applies': True, 'stale': True,
+        'note': (f"trục 2: archive_written = {written!r} — phiên mới nhất CHƯA "
+                 f"CHỐT, mà lúc {t:%H:%M} ICT thì đáng lẽ đã chốt{gates}"),
+    }
+
+
+def evaluate(repo_root: Path, today: date, max_lag: int = 1,
+             now_ict: Optional[datetime] = None) -> dict:
     """
     Chấm độ tươi. `max_lag` là số phiên được phép trễ mà KHÔNG báo động.
 
-    max_lag = 1 (mặc định): một ca hỏng đơn lẻ thì im lặng — GitHub thỉnh thoảng
-    bỏ tick cron, và một phiên trễ sẽ được ca sau vá lại. Trễ từ 2 phiên trở lên
-    nghĩa là hỏng có hệ thống, không tự lành. Trong sự cố 17-20/08, ngưỡng này
-    kêu vào sáng 19/08.
+    HAI TRỤC PHÁN QUYẾT, ĐỘC LẬP. Kêu nếu BẤT KỲ trục nào lệch:
+
+      trục 1 — NGÀY PHIÊN. Tha tới `max_lag` phiên. max_lag = 1 (mặc định):
+               một ca hỏng đơn lẻ thì im — GitHub thỉnh thoảng bỏ tick cron, và
+               một phiên trễ sẽ được ca sau vá lại. Trễ từ 2 phiên trở lên là
+               hỏng có hệ thống. Trong sự cố 17-20/08, ngưỡng này kêu sáng 19/08.
+
+      trục 2 — PHIÊN ĐÃ CHỐT CHƯA. Không tha phiên nào. Xem evaluate_settled().
+
+    Vì sao cần trục 2: sáng 27/08 latest.json mang phiên 26/08 đúng bằng phiên
+    kỳ vọng nên trục 1 im — hợp lệ. Nhưng phiên 26/08 đó chỉ có ảnh chụp giữa
+    phiên lúc 13:00 ICT vì ca EOD không chạy. Trục 1 đo NGÀY phiên, không đo
+    CHẤT LƯỢNG phiên, nên nó không thể thấy lỗ đó.
+
+    `now_ict` chỉ dùng cho trục 2 (khung 09:00–15:15). None = đồng hồ thật.
     """
     primary = repo_root / PRIMARY
     session_date, ctx = read_session_date(primary)
@@ -239,11 +333,22 @@ def evaluate(repo_root: Path, today: date, max_lag: int = 1) -> dict:
         result['companions'].append({'file': rel, 'session_date': sd,
                                      'error': cctx.get('error')})
 
+    # ── TRỤC 2 — chấm độc lập, không phụ thuộc kết quả trục 1 ────────────
+    axis2 = evaluate_settled(ctx, now_ict or datetime.now(ICT))
+    result['axis2_applies'] = axis2['applies']
+    result['axis2_stale'] = axis2['stale']
+    result['axis2_note'] = axis2['note']
+    result['archive_written'] = ctx.get('archive_written')
+    result['archive_gates_failed'] = ctx.get('archive_gates_failed') or []
+    result['now_ict'] = (now_ict or datetime.now(ICT)).strftime('%Y-%m-%d %H:%M %Z')
+
     if session_date is None:
+        result['axis1_stale'] = True
         result['stale'] = True
         result['lag'] = None
         result['session_date_source'] = None
-        result['reason'] = ctx.get('error', 'không xác định được ngày phiên')
+        result['reason'] = (ctx.get('error', 'không xác định được ngày phiên')
+                            + ' | ' + axis2['note'])
         return result
 
     sd = date.fromisoformat(session_date)
@@ -251,14 +356,18 @@ def evaluate(repo_root: Path, today: date, max_lag: int = 1) -> dict:
     # tính và đã có phiên mới). trading_sessions_between trả 0, không phải lỗi.
     lag = trading_sessions_between(sd, expected)
     result['lag'] = lag
-    result['stale'] = lag > max_lag
-    result['reason'] = (
+    axis1_stale = lag > max_lag
+    result['axis1_stale'] = axis1_stale
+    axis1_note = (
         f'dữ liệu dừng ở phiên {session_date}, đáng lẽ phải có phiên {expected} '
         f'— trễ {lag} phiên (ngưỡng {max_lag})'
-        if result['stale'] else
+        if axis1_stale else
         f'phiên {session_date} so với kỳ vọng {expected} — trễ {lag} phiên, '
         f'trong ngưỡng {max_lag}'
     )
+    # HOẶC, không phải VÀ: mỗi trục bắt một kiểu hỏng khác nhau.
+    result['stale'] = axis1_stale or axis2['stale']
+    result['reason'] = axis1_note + ' | ' + axis2['note']
     return result
 
 
@@ -266,8 +375,12 @@ def render_issue(result: dict) -> tuple[str, str]:
     """Tiêu đề + thân issue báo động."""
     lag = result['lag']
     lag_txt = f"{lag} phiên" if lag is not None else 'không đo được'
-    title = (f"[data] latest.json trễ {lag_txt} — dừng ở "
-             f"{result['session_date'] or 'KHÔNG RÕ'}, kỳ vọng {result['expected']}")
+    if result.get('axis2_stale') and not result.get('axis1_stale'):
+        title = (f"[data] phiên {result['session_date']} CHƯA CHỐT — "
+                 f"archive_written = {result.get('archive_written')!r}")
+    else:
+        title = (f"[data] latest.json trễ {lag_txt} — dừng ở "
+                 f"{result['session_date'] or 'KHÔNG RÕ'}, kỳ vọng {result['expected']}")
 
     ctx = result['primary']
     lines = [
@@ -278,6 +391,21 @@ def render_issue(result: dict) -> tuple[str, str]:
         f"- **Phiên trong `{PRIMARY}`:** {result['session_date'] or '— không đọc được —'}",
         f"- **Nguồn ngày phiên:** {result.get('session_date_source') or '— không có —'}",
         f"- **Độ trễ:** {lag_txt} (ngưỡng cho phép: {result['max_lag']} phiên)",
+        '',
+        '### Hai trục phán quyết',
+        '',
+        '| trục | kết quả | |',
+        '| --- | --- | --- |',
+        (f"| 1 — ngày phiên | {'LỆCH' if result.get('axis1_stale') else 'đạt'} "
+         f"| trễ {lag_txt}, ngưỡng {result['max_lag']} |"),
+        (f"| 2 — phiên đã chốt | "
+         f"{'LỆCH' if result.get('axis2_stale') else ('đạt' if result.get('axis2_applies') else 'không áp dụng')} "
+         f"| `archive_written` = {result.get('archive_written')!r} |"),
+        '',
+        f"- `archive_gates_failed`: **{result.get('archive_gates_failed') or '(rỗng)'}**",
+        f"- giờ chuông chạy: {result.get('now_ict')}",
+        f"- ghi chú trục 2: {result.get('axis2_note')}",
+        '',
         f"- **Kết luận:** {result['reason']}",
         '',
         '### Bằng chứng trong file',
@@ -360,7 +488,12 @@ def main(argv=None) -> int:
     parser.add_argument('--max-lag', type=int, default=1,
                         help='Số phiên được phép trễ mà không báo động (mặc định 1)')
     parser.add_argument('--today', default=None,
-                        help='Ghi đè ngày kiểm dạng ISO — dùng khi thử tay')
+                        help='Ghi đè ngày kiểm dạng ISO — dùng khi thử tay. Kéo '
+                             'theo giờ 08:07 ICT (đúng khung chạy theo lịch) cho '
+                             'trục 2, trừ khi có --now-ict.')
+    parser.add_argument('--now-ict', default=None,
+                        help='Ghi đè ĐỒNG HỒ dạng "YYYY-MM-DD HH:MM" giờ ICT. '
+                             'Chỉ ảnh hưởng trục 2 (khung 09:00-15:15).')
     parser.add_argument('--body-out', default=None,
                         help='Ghi thân issue ra file này khi phát hiện lệch')
     parser.add_argument('--recovery-out', default=None,
@@ -378,8 +511,19 @@ def main(argv=None) -> int:
         except (AttributeError, ValueError):
             pass
 
-    today = date.fromisoformat(args.today) if args.today else date.today()
-    result = evaluate(Path(args.repo_root), today, max_lag=args.max_lag)
+    if args.now_ict:
+        now_ict = datetime.strptime(args.now_ict, '%Y-%m-%d %H:%M').replace(tzinfo=ICT)
+    elif args.today:
+        # `--today X` nghĩa là "giả lập lần kiểm theo lịch của ngày X", mà lịch
+        # chạy 08:07 ICT. Dùng đồng hồ thật ở đây sẽ cho kết quả đổi theo lúc gõ
+        # lệnh — thử tay mà không tái lập được thì vô dụng.
+        now_ict = datetime.strptime(args.today + ' 08:07', '%Y-%m-%d %H:%M').replace(tzinfo=ICT)
+    else:
+        now_ict = datetime.now(ICT)
+
+    today = date.fromisoformat(args.today) if args.today else now_ict.date()
+    result = evaluate(Path(args.repo_root), today, max_lag=args.max_lag,
+                      now_ict=now_ict)
 
     if args.json_out:
         Path(args.json_out).write_text(
@@ -390,6 +534,11 @@ def main(argv=None) -> int:
     print(f"Phien trong file : {result['session_date']}")
     print(f"Nguon ngay phien : {result['session_date_source']}")
     print(f"Do tre           : {result['lag']} phien (nguong {result['max_lag']})")
+    print(f"Truc 1 ngay phien: {'LECH' if result.get('axis1_stale') else 'dat'}")
+    print(f"Truc 2 da chot   : "
+          f"{'LECH' if result.get('axis2_stale') else ('dat' if result.get('axis2_applies') else 'khong ap dung')}"
+          f"  (archive_written={result.get('archive_written')!r})")
+    print(f"  {result.get('axis2_note')}")
     print(f"Ket luan         : {result['reason']}")
     if not result['holiday_table_known']:
         print(f"CHU Y: chua co bang nghi le cho nam {today.year} trong "
