@@ -28,13 +28,19 @@
   --n-hover:      #E4E8EC;  /* hàng hover / hàng chọn */
   --n-line:       #D3D8DE;  /* kẻ, viền */
   --n-line-soft:  #E3E7EB;  /* kẻ phụ, hairline trong bảng */
-  --n-line-strong:#848E9A;  /* bậc đậm — đích của --border-strong.
-                               3.21 trên --n-block: ĐẠT WCAG 1.4.11
-                               (ngưỡng 3.0 cho thành phần giao diện
-                               phi chữ mang nghĩa). Cần mức này vì mục
-                               9 giao cho nó việc phân biệt cảnh báo
-                               mà không dùng màu — đó là vai trò mang
-                               nghĩa, không phải kẻ trang trí.       */
+  --n-line-strong:#78828F;  /* bậc đậm — đích của --border-strong.
+                               3.76 trên --n-block, 3.41 trên
+                               --n-paper, 3.16 trên --n-hover. Đạt
+                               WCAG 1.4.11 (3.0) trên CẢ BA nền,
+                               không chỉ nền tốt nhất.
+
+                               Giá trị phải chọn theo nền TỆ NHẤT vì
+                               banner cảnh báo có thể nằm trên nền
+                               trang hoặc trên hàng đang hover, không
+                               chỉ trong khối nội dung.
+
+                               #848E9A (hover 2.70) và #7C8794
+                               (hover 2.97) đều hụt.                */
   --n-ink:        #1A1F26;  /* chữ chính            15.99 / block */
   --n-ink-soft:   #4B5563;  /* chữ phụ               7.29 / block */
   --n-ink-mute:   #5D6773;  /* chú thích, nhãn cột   5.55 / block
