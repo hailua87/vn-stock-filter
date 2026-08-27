@@ -52,7 +52,19 @@
        -fg    : màu chữ, đặt trên --n-block hoặc --n-hover
        -tint  : nền chip
        -on    : màu chữ đặt trên chip
-     Kèm --mark-* : dấu hiệu phi màu sắc, bắt buộc đi cùng.
+
+     DẤU HIỆU PHI MÀU SẮC — quyết định đã chốt, đừng đảo lại.
+     Không dùng icon. Ba lớp thay thế:
+       1. dấu + / − đặt trước số ở cột ± và % (tách nhóm tăng
+          khỏi nhóm giảm khỏi tham chiếu = 0)
+       2. có nền / không nền (trần, sàn, tham chiếu có nền;
+          tăng, giảm để chữ màu)
+       3. màu, chỉ để phân biệt TRONG nhóm
+
+     Đo dưới mù màu đỏ-lục (CIELAB): chữ tăng / chữ giảm ΔE 37,
+     chữ tăng / nền trần ΔE 64 — đều phân biệt được. Nhưng nền
+     tăng / nền giảm chỉ ΔE 2.6, nên KHÔNG được tô nền cho
+     tăng/giảm. Xem design/mau-huong-2.html.
 
      Contrast đã đo (WCAG 2.1):
        fg / block | fg / hover | on / tint                       */
@@ -61,25 +73,21 @@
   --px-up-fg:     #166534;
   --px-up-tint:   #DCF0E3;
   --px-up-on:     #166534;
-  --mark-up:      "▲";
 
   /* giảm — đỏ        6.24 | 5.25 | 5.29 */
   --px-down-fg:   #B91C1C;
   --px-down-tint: #FBE3E1;
   --px-down-on:   #B91C1C;
-  --mark-down:    "▼";
 
   /* trần — tím       6.86 | 5.77 | 7.46 */
   --px-ceil-fg:   #6D28D9;
   --px-ceil-tint: #EDE7FD;
   --px-ceil-on:   #5B21B6;
-  --mark-ceil:    "▲▲";
 
   /* sàn — xanh lam   7.30 | 6.14 | 6.37 */
   --px-floor-fg:  #075985;
   --px-floor-tint:#DEEEF7;
   --px-floor-on:  #075985;
-  --mark-floor:   "▼▼";
 
   /* tham chiếu / đứng giá — vàng
      KHÔNG có biến -fg: vàng bão hòa không thể đạt 4.5 dạng chữ
@@ -87,7 +95,6 @@
      chip: nền vàng + chữ tối = 14.43.                            */
   --px-ref-tint:  #FBEFC9;
   --px-ref-on:    #1A1F26;
-  --mark-ref:     "=";
 
   /* ---------- 3. ALIAS TƯƠNG THÍCH ---------------------------
      Giữ tên cũ để component chưa sửa vẫn chạy. Xoá dần ở bước
@@ -100,13 +107,14 @@
      giữ các dòng đó và còn được nạp sau, mọi alias ở đây bị vô
      hiệu — kể cả khi tokens.css đã được nạp.
 
-     Tên bị trùng và nơi ghi đè:
-       --up         styles.css:26     --text-dim   styles.css:22
-       --down       styles.css:28     --text-mute  styles.css:23
-       --limit-up   styles.css:2321   --bg-base    styles.css:8
-       --limit-down styles.css:2322   --bg-zebra   styles.css:13
-       --limit-ref  styles.css:2323   --border     styles.css:16
-       --text       styles.css:21     --bg-elev-3  styles.css:11
+     Tên bị trùng và nơi ghi đè (styles.css):
+       --up         :26    --text          :21    --bg-elev-1  :9
+       --down       :28    --text-dim      :22    --bg-elev-2  :10
+       --limit-up   :2321  --text-mute     :23    --bg-elev-3  :11
+       --limit-down :2322  --bg-base       :8     --bg-elev-4  :12
+       --limit-ref  :2323  --bg-zebra      :13    --border     :16
+       --up-soft    :27    --border-strong :17    --font-sans  :50
+       --down-soft  :29    --border-accent :18
                                                                  */
 
   /* 3a. Trạng thái giá */
@@ -121,47 +129,60 @@
   --text-dim:    var(--n-ink-mute);
   --text-mute:   var(--n-ink-mute);
 
-  /* 3c. Nền và kẻ
-     Chỉ map những cái khớp NGHĨA một-một với thang --n-*. Bốn
-     token nền còn lại của styles.css không có chỗ tương ứng và
-     cố ý KHÔNG được map — xem mục 3d. */
-  --bg-base:     var(--n-paper);   /* body{background} — nền trang */
-  --bg-zebra:    var(--n-block-alt);
-  --bg-elev-3:   var(--n-hover);   /* styles.css:11 ghi "active/selected row, hover" */
-  --border:      var(--n-line);
+  /* 3c. Nền, kẻ và nền mờ theo giá
+     Nền sáng phân tầng bằng VIỀN và --sh-md, không bằng bậc độ
+     sáng như bản tối. Nên 5 bậc độ cao của bản tối
+     (base → elev-1 → 2 → 3 → 4) gộp còn 3 vai trò: nền trang,
+     nền khối, nền nhấn. Đó là lý do elev-1 và elev-4 cùng trỏ về
+     --n-block — chúng khác nhau ở bản tối bằng độ sáng, còn ở
+     bản sáng thì khác nhau bằng bóng đổ và viền, tức bằng CSS
+     của component chứ không bằng token. */
+  --bg-base:      var(--n-paper);      /* body{background} — nền trang */
+  --bg-elev-1:    var(--n-block);      /* side panels */
+  --bg-elev-2:    var(--n-block-alt);  /* table header, panel headers */
+  --bg-elev-3:    var(--n-hover);      /* active/selected row, hover */
+  --bg-elev-4:    var(--n-block);      /* modals, focused inputs — nổi bằng --sh-lg */
+  --bg-zebra:     var(--n-block-alt);
+  --border:       var(--n-line);
+  --border-strong:var(--n-line-strong);
+  --border-accent:var(--n-ink);        /* viền nhấn: phi sắc, không dùng màu focus cũ */
+  --up-soft:      var(--px-up-tint);
+  --down-soft:    var(--px-down-tint);
 
-  /* 3d. KHÔNG MAP ĐƯỢC — cần quyết định ở bước dọn component,
-         không phải quyết định ở tầng token. Liệt kê nguyên trạng
-         thay vì đoán bừa.
+  /* 3d. CHƯA CÓ ĐÍCH — liệt kê nguyên trạng, KHÔNG đoán.
 
-     --bg-elev-1  #1f242e  "SIDE PANELS (filters + detail)"
-     --bg-elev-2  #2a3040  "table header, panel headers"
-     --bg-elev-4  #424859  "modals, focused inputs"
-         Nền tối xếp 5 bậc độ cao (base→elev-1→2→3→4); thang sáng
-         chỉ có paper/block/block-alt/hover. Gộp elev-1 và elev-2
-         cùng về --n-block sẽ xoá một khác biệt mà giao diện tối
-         đang dùng thật, nên để trống.
+     valuation.css: hết token mồ côi (7/7 đã có đích).
+     styles.css: còn 11, chia hai nhóm.
 
-     --n-block    KHÔNG có token nào của styles.css tương ứng.
-         Nghịch lý của việc lật sáng-tối: ở bản tối, vùng bảng là
-         chỗ TỐI NHẤT (--bg-base, chú thích "TABLE area (deepest)"),
-         tức bảng dùng chung token với nền trang. Ở thang sáng,
-         nền trang (--n-paper) và nền bảng (--n-block) là hai token
-         khác nhau. Tách chúng ra là sửa selector, không phải sửa
-         alias.
+     (a) Thang phân loại + xếp hạng — 9 biến. Đây là hai thang
+         NGỮ NGHĨA nữa, ngang hàng với thang khuyến nghị ở mục
+         10, chứ không phải màu nền hay mực. Cần quyết định
+         giống hệt: bỏ màu và phân biệt bằng mực + chữ, hay giữ
+         màu riêng. Chưa quyết thì chưa map.
 
-     --border-strong  rgba(255,255,255,0.22)
-         Đậm hơn --border. Thang sáng chỉ có --n-line và
-         --n-line-soft (nhạt hơn), không có bậc đậm hơn.
+           --cat-squeeze   #ec407a  hồng   — Nén
+           --cat-flow      #5c6bc0  chàm   — Dòng tiền
+           --cat-trend     #66bb6a  lục    — Xu hướng
+           --cat-event     #b0bec5  xám    — Sự kiện
+           --rating-aplus  #26a69a  teal   — mạnh nhất
+           --rating-a      #66bb6a  lục
+           --rating-b      #b0bec5  xám
+           --rating-c      #546e7a  mờ  (styles.css:2294 nâng lên #7d8b96)
+           --system        #78909c         — nền nút
+           --system-active #b0bec5         — nút đang bật
 
-     --border-accent  rgba(79,195,247,0.5)
-         Viền theo màu focus, không phải màu phi sắc.
+         Lưu ý va chạm đã có: --cat-trend và --rating-a cùng là
+         #66bb6a, trùng đúng mã với --v-buy cũ. Và --rating-aplus
+         #26a69a trùng đúng mã với --up cũ. Tức "xu hướng",
+         "hạng A", "nên mua" và "tăng giá" hiện là cùng một màu.
+         Thang khuyến nghị đã thoát ra ở mục 10; hai thang này
+         thì chưa.
 
-     --up-soft   rgba(38,166,154,0.12)
-     --down-soft rgba(239,83,80,0.12)
-         Là nền, nhưng mang nghĩa GIÁ nên đích đúng là
-         --px-up-tint / --px-down-tint chứ không phải thang --n-*.
-         Để bước dọn component đổi thẳng sang tên mới.           */
+     (b) --focus #4fc3f7 — màu viền focus của bản tối.
+         Mục 9 đã có --focus-ring/-width/-offset phi sắc thay
+         thế, nhưng KHÔNG đặt alias --focus: đổi nó là đổi hành
+         vi hiển thị focus ở mọi component, phải làm cùng lúc
+         với việc sửa selector chứ không lặng lẽ qua alias.     */
 
   /* 3e. TRANG ĐỊNH GIÁ (web/valuation/valuation.css)
          KHÔNG có alias nào ở đây, và đó là kết luận chứ không
@@ -299,34 +320,35 @@
 
      Kênh màu chỉ đủ chỗ cho MỘT thang, và quy ước bảng điện VN
      đã chiếm chỗ đó. Thang khuyến nghị vì thế chuyển sang phân
-     biệt bằng độ đậm của mực + dấu --rec-*-mark. Trả kênh màu
-     về cho giá.
+     biệt bằng ĐỘ ĐẬM CỦA MỰC + NHÃN CHỮ đầy đủ. Trả kênh màu về
+     cho giá.
 
-     Ba bậc mực, đo trên --n-block / --n-hover:
-       --n-ink       15.99 / 13.45   hai bậc mạnh
-       --n-ink-soft   7.29 /  6.14   hai bậc vừa
-       --n-ink-mute   5.55 /  4.67   hold                        */
-  --rec-strong-buy-fg:    var(--n-ink);
-  --rec-strong-buy-mark:  "++";
-  --rec-buy-fg:           var(--n-ink-soft);
-  --rec-buy-mark:         "+";
-  --rec-hold-fg:          var(--n-ink-mute);
-  --rec-hold-mark:        "·";
-  --rec-sell-fg:          var(--n-ink-soft);
-  --rec-sell-mark:        "−";
-  --rec-strong-sell-fg:   var(--n-ink);
-  --rec-strong-sell-mark: "−−";
+     Không có --rec-*-mark: mockup viết thẳng "Rất tích cực /
+     Tích cực / Trung tính / Tiêu cực / Rất tiêu cực" chứ không
+     dùng ký hiệu. Chữ đã tự nó là dấu hiệu phi màu sắc, thêm
+     ký hiệu nữa là thừa.                                        */
+  /* Ba bậc mực, khớp đúng ba lớp của mockup:
+       .rec-strong  n-ink       15.99 / 13.45   Rất tích cực, Rất tiêu cực
+       .rec-mid     n-ink-soft   7.29 /  6.14   Tích cực, Tiêu cực
+       .rec-neutral n-ink-mute   5.55 /  4.67   Trung tính                */
+  --rec-strong-fg:  var(--n-ink);
+  --rec-mid-fg:     var(--n-ink-soft);
+  --rec-neutral-fg: var(--n-ink-mute);
 
   /* Alias tên cũ của valuation.css. Điều kiện áp dụng KHÁC mục 3:
      bị ghi đè bởi valuation.css:7-11 (không phải styles.css), và
      valuation/index.html nạp ../styles.css rồi mới tới
      valuation.css — nên tokens.css phải nạp sau CẢ HAI, hoặc gỡ
-     khối :root ở valuation.css:5-12. */
-  --v-strong-buy:  var(--rec-strong-buy-fg);
-  --v-buy:         var(--rec-buy-fg);
-  --v-hold:        var(--rec-hold-fg);
-  --v-sell:        var(--rec-sell-fg);
-  --v-strong-sell: var(--rec-strong-sell-fg);
+     khối :root ở valuation.css:5-12.
+
+     Năm bậc cũ gộp về ba: hai bậc "rất" dùng chung --rec-strong-fg,
+     hai bậc thường dùng chung --rec-mid-fg. Chiều mua/bán KHÔNG do
+     mực phân biệt — nó do CHỮ ("Rất tích cực" vs "Rất tiêu cực"). */
+  --v-strong-buy:  var(--rec-strong-fg);
+  --v-buy:         var(--rec-mid-fg);
+  --v-hold:        var(--rec-neutral-fg);
+  --v-sell:        var(--rec-mid-fg);
+  --v-strong-sell: var(--rec-strong-fg);
 
   /* ---------- 11. LAYOUT -------------------------------------
      Gom 5 biến kích thước về một chỗ, GIỮ NGUYÊN giá trị px đang
