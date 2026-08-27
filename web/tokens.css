@@ -28,17 +28,13 @@
   --n-hover:      #E4E8EC;  /* hàng hover / hàng chọn */
   --n-line:       #D3D8DE;  /* kẻ, viền */
   --n-line-soft:  #E3E7EB;  /* kẻ phụ, hairline trong bảng */
-  --n-line-strong:#AEB6BF;  /* bậc đậm — đích của --border-strong.
-                               CẢNH BÁO ĐO ĐƯỢC: 1.98 trên --n-block,
-                               1.66 trên --n-hover. WCAG 1.4.11 đòi 3.0
-                               cho thành phần giao diện phi chữ MANG
-                               NGHĨA. Làm kẻ phân tách thì đủ; nhưng
-                               mục 9 giao cho nó việc phân biệt cảnh
-                               báo mà không dùng màu — ở vai trò đó nó
-                               KHÔNG đạt. Muốn đạt phải tối tới #848E9A
-                               (3.21) hoặc #7C8794 (3.52). Giữ nguyên
-                               giá trị được chỉ định, ghi lại để quyết
-                               riêng.                                */
+  --n-line-strong:#848E9A;  /* bậc đậm — đích của --border-strong.
+                               3.21 trên --n-block: ĐẠT WCAG 1.4.11
+                               (ngưỡng 3.0 cho thành phần giao diện
+                               phi chữ mang nghĩa). Cần mức này vì mục
+                               9 giao cho nó việc phân biệt cảnh báo
+                               mà không dùng màu — đó là vai trò mang
+                               nghĩa, không phải kẻ trang trí.       */
   --n-ink:        #1A1F26;  /* chữ chính            15.99 / block */
   --n-ink-soft:   #4B5563;  /* chữ phụ               7.29 / block */
   --n-ink-mute:   #5D6773;  /* chú thích, nhãn cột   5.55 / block
@@ -330,28 +326,47 @@
      Gom 5 biến kích thước về một chỗ, GIỮ NGUYÊN giá trị px đang
      chạy. Không đổi số nào.
 
-     ⚠ BẪY KHI NẠP — đọc trước khi đưa file này vào HTML:
-     --col-filter-w và --col-detail-w được khai báo LẠI trong hai
-     khối @media của styles.css:
+     Đã kiểm toàn bộ @media của styles.css (9 khối) và
+     valuation.css (2 khối): CHỈ --col-filter-w và --col-detail-w
+     bị khai báo lại. --topbar-h, --val-filter-w, --val-detail-w
+     không xuất hiện trong bất kỳ @media nào, nên giá trị đơn
+     dưới đây là đủ cho chúng.
 
-         @media (max-width:1280px) :root{ 200px / 340px }  (:1328)
-         @media (max-width:1024px) :root{ 200px / 320px }  (:1335)
+     Hai khối @media ở cuối mục này sao đúng giá trị hiện có của
+     styles.css:1328 và :1335.
 
-     @media KHÔNG cộng thêm độ ưu tiên. Nên nếu tokens.css nạp
-     SAU styles.css — đúng thứ tự mà đầu file này khuyến nghị —
-     thì 240px/380px dưới đây sẽ THẮNG cả hai khối trên và layout
-     đáp ứng chết ở mọi bề rộng màn hình.
+     ⚠ HAI KHỐI ĐÓ PHẢI ĐI CÙNG LÚC VỚI VIỆC GỠ :root Ở
+     styles.css:1328 VÀ :1335. Nếu chỉ thêm vào đây mà để nguyên
+     bên kia thì không gỡ được mâu thuẫn, chỉ đổi chiều nó:
 
-     Hai cách xử lý, đều là việc của bước dọn component chứ không
-     sửa được từ tầng token:
-       a) chuyển luôn hai khối @media đó sang tokens.css, hoặc
-       b) giữ chúng ở styles.css và nạp styles.css sau tokens.css
-          (nhưng khi đó mục 3 lại mất tác dụng — xem cảnh báo ở
-          mục 3, hai yêu cầu này NGƯỢC NHAU).
-     Chưa có cách nào đúng cho cả hai; cần quyết định.           */
-  --topbar-h:      52px;   /* styles.css:54 */
-  --col-filter-w: 240px;   /* styles.css:55 — xem bẫy @media trên */
-  --col-detail-w: 380px;   /* styles.css:56 — xem bẫy @media trên */
-  --val-filter-w: 260px;   /* valuation.css:14 */
-  --val-detail-w: 420px;   /* valuation.css:15 */
+       - tokens.css nạp SAU  -> khối ở đây thắng; đúng giá trị,
+         nhưng styles.css vẫn giữ hai bản sao chết, và lần sau ai
+         sửa breakpoint bên đó sẽ không hiểu vì sao không ăn.
+       - tokens.css nạp TRƯỚC -> khối của styles.css thắng; token
+         ở đây thành trang trí, và mục 3 mất tác dụng luôn.
+
+     Chỉ khi khối :root ở styles.css biến mất thì thứ tự nạp mới
+     hết là câu hỏi. Đó là việc của bước dọn component.          */
+  --topbar-h:      52px;   /* styles.css:54 — không có bản @media */
+  --col-filter-w: 240px;   /* styles.css:55 */
+  --col-detail-w: 380px;   /* styles.css:56 */
+  --val-filter-w: 260px;   /* valuation.css:14 — không có bản @media */
+  --val-detail-w: 420px;   /* valuation.css:15 — không có bản @media */
+}
+
+/* Layout đáp ứng — sao nguyên giá trị từ styles.css:1327-1338.
+   Ngoại lệ duy nhất của quy tắc "chỉ :root" ở đầu file: đây vẫn
+   chỉ là :root, chỉ bọc thêm @media. Không selector nào khác. */
+@media (max-width: 1280px) {
+  :root {
+    --col-filter-w: 200px;   /* styles.css:1329 */
+    --col-detail-w: 340px;   /* styles.css:1330 */
+  }
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --col-filter-w: 200px;   /* styles.css:1336 */
+    --col-detail-w: 320px;   /* styles.css:1337 */
+  }
 }
