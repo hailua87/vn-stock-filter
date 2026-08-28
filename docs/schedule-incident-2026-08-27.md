@@ -307,6 +307,32 @@ này chỉ chạm phiên 27/08.
   trong khi caller duy nhất từng nhận trách nhiệm đó vừa phải sửa vì đã không
   nhận. Xoá hẳn hoặc gắn cảnh báo, ở một lượt riêng.
 
+- **`daily-scan.yml:240` (*Tag JSON outputs*) dán `run_type` lên MỌI file trong
+  `web/data`, kể cả file mà run đó không hề ghi nội dung.** Bước jq này chỉ kiểm
+  `if [ -f "$f" ]` rồi vá metadata, không hỏi file đó có phải sản phẩm của chính
+  run này không.
+
+  Quan sát lúc 28/08 16:10Z, cả bốn file cùng `written_at_ict = 27/08 23:45:44`
+  (tức cùng do ca EOD 27/08 sinh ra) nhưng nhãn lại lệch:
+
+  | file | `run_type` |
+  | --- | --- |
+  | `latest.json` | `intraday` — sót lại từ ca 08:17 |
+  | ba file strategy | `eod` |
+
+  Nghĩa là: **`run_type` mô tả RUN, không mô tả FILE.** Hai thứ đó tách rời được,
+  và đã tách rời thật.
+
+  Chưa cổng nào đọc trường này — hiện nó chỉ nuôi badge độ tươi trên dashboard.
+  Nhưng nó **cùng một dạng với bài học `session_date`** đã ghi ở mục "Lỗ dữ
+  liệu": chuông đo *ngày phiên*, không đo *chất lượng phiên*. Một trường mang tên
+  như thể nó nói về file, trong khi thật ra nói về run, là loại nhầm lẫn chỉ chờ
+  có ai đó dựng cổng dựa lên nó.
+
+  Hai hướng, chọn một:
+  - chỉ tag đúng những file mà run vừa THỰC SỰ ghi, hoặc
+  - đổi tên trường thành `run_type_of_last_workflow_run` cho khỏi hiểu nhầm.
+
 - **`actions/cache@v4` khai `post-if: success()`** (chưa xác minh). Nếu đúng,
   run bị cổng stale chặn sẽ **không lưu cache OHLCV** — mất luôn checkpoint của
   vòng fetch, tức ~26 phút fetch bị vứt. Không ảnh hưởng tính đúng đắn của cổng,
