@@ -560,13 +560,23 @@ def main():
     def run_strategy(label, fn):
         """Chấm điểm toàn bộ mã → gắn RS → áp bộ lọc sự kiện quyền."""
         results = []
+        n_raised = 0
         for ticker, df_t in by_ticker.items():
             try:
                 res = fn(df_t, ticker)
                 if res:
                     results.append(res)
             except Exception as e:
-                log.debug(f"  {label} {ticker}: {e}")
+                # Trước đây là log.debug: ở mức INFO của workflow, mã hỏng biến
+                # mất không dấu vết, nên "0 candidates" đọc y hệt nhau dù là
+                # thị trường không có tín hiệu hay 500 mã cùng nổ.
+                n_raised += 1
+                log.warning(f"  {label} {ticker}: {type(e).__name__}: {e}")
+        if n_raised:
+            log.warning(f"  {label}: {n_raised}/{len(by_ticker)} mã raise exception "
+                        f"— không mã nào trong số đó vào được kết quả")
+        else:
+            log.info(f"  {label}: 0/{len(by_ticker)} mã raise exception")
         log.info(f"  {label}: {len(results)} candidates")
         annotate_results(results, rs_map)
         if not args.no_corporate_actions:
