@@ -42,6 +42,8 @@ import logging
 
 import pandas as pd
 
+from .trading_calendar import last_expected_session, now_ict
+
 log = logging.getLogger(__name__)
 
 CACHE_DIR = Path(__file__).resolve().parent.parent / 'data' / 'cache'
@@ -423,7 +425,7 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
 
     FIX: kiểm tra cache có chứa đúng phiên giao dịch gần nhất theo lịch không.
     Trước đây: last_date >= end - 1 day (sai trên thứ Hai + sau nghỉ lễ).
-    Bây giờ: last_date >= _last_trading_session(end).
+    Bây giờ: last_date >= last_expected_session(now_ict()) — xét cả giờ.
 
     FIX (2026-05-26 evening): STRICT SESSION VALIDATION ở cuối function.
     Triệu chứng: ACB hiển thị giá 24.30 / KL 22M trong khi SSI báo 24.80 / 58.82M
@@ -437,9 +439,16 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
     """
     suffix = '_adj' if adjusted else '_raw'
     cache_file = CACHE_DIR / f'{ticker}{suffix}.parquet'
-    end = datetime.now().date()
+    # Đồng hồ ICT, không phải đồng hồ runner. `datetime.now()` trần ở đây chạy
+    # giờ UTC trên GitHub Actions: ca EOD 23:05 ICT là 16:05 UTC, quét quá 8
+    # tiếng thì `end` lùi mất một ngày so với ngày phiên thật.
+    now = now_ict()
+    end = now.date()
     start = end - timedelta(days=lookback_days)
-    last_session = _last_trading_session(end)
+    # `last_expected_session` chứ không phải `last_trading_session`: mốc so phải
+    # xét GIỜ. Trước 09:15 thì phiên T chưa có nến nào, khai nó ra là đóng dấu
+    # STALE oan cho cả rổ — đúng chuyện đã xảy ra lúc 08:17 ICT ngày 28/08/2026.
+    last_session = last_expected_session(now)
 
     df: Optional[pd.DataFrame] = None
     refetch_explicit_failed = False  # True nếu refetch trả None/empty
