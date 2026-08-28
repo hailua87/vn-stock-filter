@@ -413,7 +413,8 @@ def _last_trading_session(today: 'date') -> 'date':
 
 
 def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
-                     force_refresh: bool = False, adjusted: bool = True) -> Optional[pd.DataFrame]:
+                     force_refresh: bool = False, adjusted: bool = True,
+                     last_session: Optional['date'] = None) -> Optional[pd.DataFrame]:
     """
     Fetch OHLCV using local parquet cache. Only pulls incremental data
     since last cached date.
@@ -448,7 +449,14 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
     # `last_expected_session` chứ không phải `last_trading_session`: mốc so phải
     # xét GIỜ. Trước 09:15 thì phiên T chưa có nến nào, khai nó ra là đóng dấu
     # STALE oan cho cả rổ — đúng chuyện đã xảy ra lúc 08:17 ICT ngày 28/08/2026.
-    last_session = last_expected_session(now)
+    #
+    # Caller truyền `last_session` vào để CẢ RỔ dùng chung một mốc: vòng fetch
+    # 500 mã chạy ~26 phút, tự tính trong từng mã thì rổ nào vắt qua 09:15 sẽ có
+    # mã so với phiên hôm qua, mã so với phiên hôm nay. `fetch_universe` chốt
+    # một lần rồi đóng dấu vào fetch_summary để cổng stale báo đúng con số đã
+    # dùng. Gọi lẻ (không qua fetch_universe) thì vẫn tự tính như cũ.
+    if last_session is None:
+        last_session = last_expected_session(now)
 
     df: Optional[pd.DataFrame] = None
     refetch_explicit_failed = False  # True nếu refetch trả None/empty
@@ -598,6 +606,13 @@ def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
 
     now = clock or time.monotonic
     started_at = now()
+    # Mốc phiên được chốt MỘT lần cho cả vòng, KHÔNG tính lại theo từng mã.
+    #
+    # Vòng fetch 500 mã kéo ~26 phút. Tính lẻ trong mỗi mã thì một vòng vắt qua
+    # 09:15 sẽ có mã đầu rổ so với phiên T-1 và mã cuối rổ so với phiên T —
+    # `StaleCache` mang hai nghĩa khác nhau trong cùng một frame, và không còn
+    # một con số nào để đóng dấu vào fetch_summary cho cổng stale đọc.
+    session_expected = last_expected_session(now_ict())
     started_wall = datetime.now().isoformat(timespec='seconds')
     deadline = (started_at + time_budget_s) if time_budget_s else None
 
@@ -620,6 +635,10 @@ def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
             'failed': len(failed_tickers),
             'skipped': len(skipped_tickers),
             'coverage': round(len(ok_tickers) / total, 4) if total else 0.0,
+            # Mốc StaleCache mà vòng fetch này THỰC SỰ đã dùng. Cổng stale trong
+            # run_daily đọc từ đây thay vì tự tính lại — hai phép tính rời nhau
+            # thì sửa một chỗ quên chỗ kia, thông báo lỗi sẽ báo sai mốc.
+            'last_session': session_expected.isoformat(),
             'stop_reason': stop_reason,
             'truncated': stop_reason is not None,
             'time_budget_s': time_budget_s,
@@ -659,7 +678,8 @@ def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
             return _SKIPPED
         if delay:
             time.sleep(delay)
-        return fetch_with_cache(row['ticker'], row['exchange'], lookback_days)
+        return fetch_with_cache(row['ticker'], row['exchange'], lookback_days,
+                                last_session=session_expected)
 
     with ThreadPoolExecutor(max_workers=max_workers) as ex:
         futures = {ex.submit(_worker, r): r['ticker']

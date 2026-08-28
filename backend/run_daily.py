@@ -30,7 +30,7 @@ from scanner.market_regime import (
     compute_regime, compute_breadth, compute_relative_strength, annotate_results,
 )
 from scanner.strategies import golden_cross, ichimoku
-from scanner.trading_calendar import ICT, last_trading_session, now_ict
+from scanner.trading_calendar import ICT, now_ict
 
 logging.basicConfig(
     level=logging.INFO,
@@ -147,6 +147,39 @@ def stale_ratio(by_ticker: dict):
             last_dates.add(pd.Timestamp(d['Date'].iloc[-1]).strftime('%Y-%m-%d'))
     ratio = (stale / total) if total else 0.0
     return round(ratio, 3), stale, total, sorted(last_dates, reverse=True)
+
+
+def check_stale_universe(by_ticker: dict, fetch_summary: Optional[dict] = None) -> float:
+    """
+    Chặn hẳn khi gần như cả rổ bị đóng dấu StaleCache. Trả tỷ lệ nếu qua.
+
+    Vì sao là cổng RIÊNG chứ không dùng decision['write']: cổng archive fail
+    theo thiết kế ở MỌI ca intraday (chưa qua 15:15 ICT), nên nó không phân
+    biệt nổi "ca intraday bình thường" với "tầng dữ liệu hỏng". Cổng này đo
+    một thứ khác hẳn.
+
+    Vì sao gọi ngay sau khi dựng `by_ticker`: nó phải chặn TRƯỚC mọi lệnh ghi,
+    kể cả latest.json — thứ duy nhất ca intraday được phép ghi, và cũng chính
+    là thứ đã bị đè bằng file rỗng ngày 28/08/2026. Dừng hẳn thì dữ liệu ca
+    trước còn nguyên.
+    """
+    ratio, n_stale, n_total, observed = stale_ratio(by_ticker)
+    log.info(f"  Tỷ lệ mã stale: {ratio:.1%} ({n_stale}/{n_total} mã)")
+    if ratio < MAX_STALE_RATIO:
+        return ratio
+
+    # Mốc do CHÍNH vòng fetch đóng dấu, không phải bản tính lại. Nếu thiếu
+    # (fetch_summary rỗng vì vòng fetch chưa kịp chạy) thì nói thẳng là không
+    # rõ, đừng đoán — thông báo lỗi mà đoán còn tệ hơn không có.
+    expected = (fetch_summary or {}).get('last_session') or '(không rõ)'
+    log.error(f"  GẦN NHƯ TOÀN BỘ UNIVERSE STALE: {ratio:.1%} "
+              f"({n_stale}/{n_total} mã) >= ngưỡng {MAX_STALE_RATIO:.0%}")
+    log.error(f"  df.last quan sát được: {', '.join(observed[:5])}"
+              + (f" (+{len(observed) - 5} ngày khác)" if len(observed) > 5 else "")
+              + f"  |  last_session kỳ vọng: {expected}")
+    log.error("  Mọi strategy sẽ reject sạch và ghi ra file RỖNG. Dừng tại "
+              "đây, không ghi gì cả, giữ nguyên dữ liệu ca trước.")
+    sys.exit(1)
 
 
 def evaluate_archive_gates(now: datetime, fetch_summary: Optional[dict] = None,
@@ -442,33 +475,7 @@ def main():
     by_ticker = {tk: g.sort_values('Date').reset_index(drop=True)
                  for tk, g in df_all_raw.groupby('Ticker', sort=False)}
 
-    # -------- Cổng chặn: gần như toàn bộ universe bị đóng dấu stale --------
-    # Vì sao là cổng RIÊNG chứ không dùng decision['write']: cổng archive fail
-    # theo thiết kế ở MỌI ca intraday (chưa qua 15:15 ICT), nên nó không phân
-    # biệt nổi "ca intraday bình thường" với "tầng dữ liệu hỏng". Cổng này đo
-    # một thứ khác hẳn.
-    #
-    # Vì sao đứng ở ĐÂY: nó phải chặn TRƯỚC mọi lệnh ghi, kể cả latest.json —
-    # thứ duy nhất ca intraday được phép ghi, và cũng chính là thứ đã bị đè
-    # bằng file rỗng ngày 28/08. Dừng hẳn thì dữ liệu ca trước còn nguyên.
-    ratio, n_stale, n_total, observed = stale_ratio(by_ticker)
-    log.info(f"  Tỷ lệ mã stale: {ratio:.1%} ({n_stale}/{n_total} mã)")
-    if ratio >= MAX_STALE_RATIO:
-        # TRÙNG LẶP CÓ CHỦ Ý với data_fetcher.py:440-442. Dựng lại
-        # đúng phép tính đã gây STALE để thông báo lỗi không nói dối.
-        # Bước sau sẽ xoá bản sao này: data_fetcher đóng dấu
-        # last_session vào fetch_summary, cổng đọc từ đó. Sửa
-        # data_fetcher mà quên chỗ này => thông báo lỗi báo sai
-        # expected.
-        expected = last_trading_session(datetime.now().date())
-        log.error(f"  GẦN NHƯ TOÀN BỘ UNIVERSE STALE: {ratio:.1%} "
-                  f"({n_stale}/{n_total} mã) >= ngưỡng {MAX_STALE_RATIO:.0%}")
-        log.error(f"  df.last quan sát được: {', '.join(observed[:5])}"
-                  + (f" (+{len(observed) - 5} ngày khác)" if len(observed) > 5 else "")
-                  + f"  |  last_session kỳ vọng: {expected}")
-        log.error("  Mọi strategy sẽ reject sạch và ghi ra file RỖNG. Dừng tại "
-                  "đây, không ghi gì cả, giữ nguyên dữ liệu ca trước.")
-        sys.exit(1)
+    check_stale_universe(by_ticker, fetch_summary)
 
     breadth = compute_breadth(by_ticker)
     rs_map = compute_relative_strength(by_ticker, index_df)

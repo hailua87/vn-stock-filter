@@ -81,9 +81,11 @@ class Fetcher:
         self.fail_set = set(fail_set or ())
         self.fail_all = fail_all
         self.calls: list[str] = []
+        self.last_sessions: list = []
 
-    def __call__(self, ticker, exchange, lookback_days):
+    def __call__(self, ticker, exchange, lookback_days, last_session=None):
         self.calls.append(ticker)
+        self.last_sessions.append(last_session)
         if self.clock is not None:
             self.clock.advance(self.cost_s)
         if self.fail_all or ticker in self.fail_set:
