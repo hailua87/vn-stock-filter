@@ -165,7 +165,7 @@ có dữ liệu nửa vời. Chuông đo **ngày phiên**, không đo **chất l
 ## Việc còn treo
 
 - [x] Khung 27/08 16:05Z — đã đọc, kết quả (a). Xem mục trên.
-- [ ] Khung 28/08 01:07Z — nửa còn lại của phép thử, chưa tới
+- [x] Khung 28/08 01:07Z — **đã đọc, kết quả (c).** Xem mục "Kết luận" cuối file.
 - [x] **Phiên 26/08 KHÔNG lấy lại được.** `daily-scan` luôn quét phiên HIỆN
       TẠI: `session_date` lấy từ `df_all['Date'].max()`, và `run_daily.py`
       không có tham số nào chọn phiên cũ (12 tham số CLI, không cái nào là
@@ -196,9 +196,11 @@ có dữ liệu nửa vời. Chuông đo **ngày phiên**, không đo **chất l
       `archive_written` nên tự tắt. Chỉ hiệu lực **từ 27/08 trở đi**, khi mọi
       `latest.json` đều mang khoá đó. Sự cố 26/08 vẫn sẽ lọt nếu tái hiện y
       nguyên trên dữ liệu cũ.
-- [ ] Chuông báo độ tươi phụ thuộc cùng một scheduler với thứ nó đang canh.
+- [x] Chuông báo độ tươi phụ thuộc cùng một scheduler với thứ nó đang canh.
       Nó độc lập với *code* và *dữ liệu* của daily-scan, nhưng **không** độc
       lập với `schedule`. Cả hai cùng câm vì cùng một nguyên nhân.
+      **Đã xác nhận bằng số đo, chưa có hướng vá** — xem mục "Kết luận" cuối
+      file. Đóng ô này là đóng phần CHẨN ĐOÁN, không phải phần sửa.
 
 ## Đã vá — 28/08/2026
 
@@ -274,6 +276,29 @@ Checkpoint được ghi từ vòng lặp chính trong lúc worker vẫn đang ch
 Đã xác minh trên **bản gốc**: `git stash` toàn bộ thay đổi rồi chạy 11 lượt
 (282 test) — lượt 5 đỏ, cùng test đó. Có sẵn từ trước.
 
+### Đã khôi phục dữ liệu
+
+Commit **`2eafb00`**. Ba file về đúng blob của `4e02c08` — khớp từng byte, không
+phải chỉ khớp kích thước:
+
+| file | kích thước blob | `total` |
+| --- | --- | --- |
+| `golden_cross_long/latest.json` | 5479 B | 2 |
+| `golden_cross_short/latest.json` | 49441 B | 23 |
+| `ichimoku/latest.json` | 186255 B | 79 |
+
+Cả ba `metadata.session_date = 2026-08-27`. `web/data/latest.json` không đụng:
+pre-breakout thoát nạn nhờ `if not df_pb.empty:` nên nội dung của nó vẫn là bản
+EOD 27/08.
+
+> Lưu ý khi tự kiểm lại: con số đối chiếu là **kích thước blob trong git**, không
+> phải kích thước trên đĩa. Checkout trên Windows đổi LF → CRLF nên file trên đĩa
+> phình thêm đúng bằng số dòng. Đo bằng `git cat-file -s` chứ đừng `ls -l`.
+
+**Lỗ dữ liệu còn lại vẫn nguyên: giá đóng cửa phiên 26/08.** Xem mục "Lỗ dữ
+liệu" ở trên — phiên đó không có bản chốt và sẽ không bao giờ có. Việc khôi phục
+này chỉ chạm phiên 27/08.
+
 ### Ngoài phạm vi, còn nợ
 
 - **`_last_trading_session` (`data_fetcher.py:397`) giờ chết trong code chạy
@@ -286,3 +311,54 @@ Checkpoint được ghi từ vòng lặp chính trong lúc worker vẫn đang ch
   run bị cổng stale chặn sẽ **không lưu cache OHLCV** — mất luôn checkpoint của
   vòng fetch, tức ~26 phút fetch bị vứt. Không ảnh hưởng tính đúng đắn của cổng,
   nhưng là cái giá cần biết. Muốn xác nhận phải có một run đỏ thật.
+
+
+## Kết luận: (c) — tick bị hoãn, không bị bỏ
+
+Ba lần đo liên tiếp, cùng một dạng, trên hai workflow khác nhau:
+
+| tick (cron) | chạy lúc | trễ |
+| --- | --- | --- |
+| 27/08 01:07Z — Data Freshness Alert (`7 1 * * *`) | 11:09Z | **10h02** |
+| 27/08 05:05Z — Daily Scan intraday (`5 5 * * 1-5`) | 28/08 00:50Z | **19h45** |
+| 28/08 01:07Z — Data Freshness Alert (`7 1 * * *`) | 12:42Z | **11h35** |
+
+**Tick không mất. Tick tới rất muộn.** Hai cách đọc ban đầu đều bị bác:
+
+- **(a) Trễ đăng ký, lành tính** — không giải thích nổi một tick tới sau 10-19
+  tiếng thay vì mất hẳn, và càng không giải thích nổi việc nó lặp lại ba lần
+  trên hai workflow đã đăng ký từ lâu.
+- **(b) Hỏng có hệ thống ở sự kiện `schedule`** — sai, vì `schedule` vẫn giao
+  hàng, chỉ giao muộn.
+
+Kết luận (a) ghi ở mục "Kết quả phép thử 27/08 16:05Z" **chỉ đúng cho riêng
+khung 16:05Z đó** — khung ấy trễ 14 phút, nằm trong dải bình thường 12-21 phút
+của repo. Nó không nói gì về ba khung trên, và mục "Nhưng chưa đóng hồ sơ" đã
+lưu ý đúng điều đó.
+
+Hệ quả thực dụng: **giờ chạy không đoán được**. Mọi thứ đọc đồng hồ lúc chạy
+phải giả định nó có thể chạy vào bất kỳ giờ nào trong ngày, kể cả trước giờ mở
+cửa — đúng cái đã làm nổ 500/500 mã STALE ngày 28/08. Đây là lý do cổng
+`check_stale_universe` và `last_expected_session` cần thiết, chứ không phải chỉ
+là phòng xa.
+
+### Chuông báo không phát hiện được cái làm nó im
+
+Mục treo thứ hai, nay đóng phần chẩn đoán.
+
+`data-freshness-alert.yml` chạy bằng **chính scheduler mà nó canh**. Nó độc lập
+với *code* và *dữ liệu* của daily-scan — nhưng không độc lập với `schedule`.
+
+Số đo ngày 28/08 cho thấy hậu quả cụ thể: chuông lẽ ra kêu lúc 01:07Z, thực tế
+chạy 12:42Z. **Suốt 11 tiếng 35 phút đó không ai biết dữ liệu có tươi hay
+không.** Và nếu daily-scan cũng đang bị hoãn trong cùng khoảng — đúng điều đã
+xảy ra — thì cả hai cùng câm, vì cùng một nguyên nhân.
+
+Nói gọn: **chuông đo được dữ liệu cũ, nhưng không đo được việc chính nó không
+chạy.** Một cơ chế canh chừng chạy trên thứ nó đang canh thì không có điểm mù
+nào tệ hơn thế.
+
+Chưa có hướng vá. Mọi lối thoát đều phải ra khỏi `schedule` của GitHub Actions
+(cron ngoài gọi `workflow_dispatch`, hoặc một dịch vụ canh chừng bên ngoài đọc
+`web/data/latest.json`), tức là thêm một hạ tầng phải nuôi. Ghi lại đây để lượt
+sau không phải chẩn đoán lại từ đầu.
