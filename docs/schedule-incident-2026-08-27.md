@@ -199,3 +199,90 @@ có dữ liệu nửa vời. Chuông đo **ngày phiên**, không đo **chất l
 - [ ] Chuông báo độ tươi phụ thuộc cùng một scheduler với thứ nó đang canh.
       Nó độc lập với *code* và *dữ liệu* của daily-scan, nhưng **không** độc
       lập với `schedule`. Cả hai cùng câm vì cùng một nguyên nhân.
+
+## Đã vá — 28/08/2026
+
+Sự cố lịch chạy ở trên chưa đóng, nhưng nó đã lôi ra một lỗi khác, nặng hơn và
+đã vá xong. Ghi lại đây vì hai chuyện dính vào nhau: nếu tick không tới muộn thì
+lỗi này còn nằm im không biết đến bao giờ.
+
+### Nguyên nhân gốc
+
+`last_trading_session` (`scanner/trading_calendar.py`) chỉ nhận `date`, **không
+xét giờ trong ngày**, nên nó luôn khai phiên T là "phiên gần nhất" miễn hôm nay
+là ngày giao dịch. Tick intraday 27/08 tới muộn 19h45, chạy lúc **08:17 ICT ngày
+28/08** — trước giờ mở cửa. HOSE khớp ATO trong khung 09:00-09:15; trước đó
+phiên T chưa có cây nến nào, không nguồn dữ liệu nào trả về được.
+
+Dây chuyền:
+
+```
+last_session = 2026-08-28  (phiên chưa mở)
+    → df.last (27/08) < last_session  → StaleCache = True cho 500/500 mã
+    → criteria.py:176, golden_cross.py:139, ichimoku.py:143 reject sạch
+    → cả 4 bộ quét trả 0
+    → 3 file web/data/*/latest.json bị ghi đè bằng kết quả rỗng
+```
+
+404 trong 500 mã đó có dữ liệu **hoàn toàn tươi** cho phiên đã chốt. Mức stale
+thật chỉ là 96/500 ≈ 0,19.
+
+### Ba khiếm khuyết độc lập
+
+Khiếm khuyết 1 gây ra sự cố; 2 và 3 quyết định nó phá được tới đâu.
+
+| # | khiếm khuyết | commit vá |
+| --- | --- | --- |
+| 1 | `last_trading_session` không xét giờ | `93695ba` (hàm `last_expected_session` + mốc 09:15), `cf106ff` (data_fetcher dùng nó, kèm sửa `datetime.now()` trần → giờ ICT) |
+| 2 | `write_strategy_outputs` ghi `latest.json` **trước** cổng archive (`run_daily.py`) | `f450b9f` — cổng `check_stale_universe` chặn trước MỌI lệnh ghi |
+| 3 | Lá chắn bất đối xứng: pre-breakout thoát nhờ `if not df_pb.empty:`, ba strategy kia không có gì | `f450b9f` |
+
+Kèm theo: `91b969a` (run_strategy không nuốt exception nữa — "0 candidates" giờ
+luôn có một dòng đứng cạnh nói vì sao), `026768a` (cổng đọc `last_session` từ
+`fetch_summary` thay vì tự tính lại, xoá bản sao phép tính).
+
+### Bẫy đã gặp: `if:` ngầm AND `success()`
+
+GitHub tự AND `success()` vào **mọi** biểu thức `if:` không chứa hàm kiểm trạng
+thái. Nên `daily-scan.yml:259` (`if: steps.runtype.outputs.run_type == 'eod'`)
+thực chất là `success() && ...`.
+
+Quan trọng hơn: bước **Commit latest.json + archive** (`daily-scan.yml:266`)
+**không có dòng `if:` nào**, và nó bị skip khi job đỏ **nhờ đúng mặc định đó** —
+không nhờ điều gì được viết ra trong file. Cổng `sys.exit(1)` có hiệu lực là vì
+vậy.
+
+> **Thêm `if: always()` vào bước commit đó sẽ THÁO cổng stale.** Job đỏ mà vẫn
+> commit thì file rỗng vẫn lên `main`. Nếu có ngày cần commit khi hỏng, phải
+> dựng cổng khác thay chỗ, đừng chỉ thêm `always()`.
+
+Bước duy nhất mang `always()` hiện nay là *Report fetch checkpoint* (dòng 145) —
+nó chỉ đọc và in, không ghi gì.
+
+### Flake có sẵn, không do các commit này
+
+`backend/tests/test_fetch_budget.py::test_checkpoint_records_what_was_fetched`
+đỏ ngẫu nhiên khoảng 1/10 lượt, tại:
+
+```python
+assert data['ok_tickers'] == ['T000', 'T001', 'T002', 'T003']
+```
+
+Checkpoint được ghi từ vòng lặp chính trong lúc worker vẫn đang chạy, nên số mã
+đã `ok` tại đúng thời điểm ghi là một cuộc đua.
+
+Đã xác minh trên **bản gốc**: `git stash` toàn bộ thay đổi rồi chạy 11 lượt
+(282 test) — lượt 5 đỏ, cùng test đó. Có sẵn từ trước.
+
+### Ngoài phạm vi, còn nợ
+
+- **`_last_trading_session` (`data_fetcher.py:397`) giờ chết trong code chạy
+  thật** — chỉ còn `test_trading_calendar.py:91` gọi. Docstring của nó vẫn hứa
+  *"Caller vẫn có trách nhiệm hiểu phiên T có thể CHƯA đóng cửa (intraday)"*,
+  trong khi caller duy nhất từng nhận trách nhiệm đó vừa phải sửa vì đã không
+  nhận. Xoá hẳn hoặc gắn cảnh báo, ở một lượt riêng.
+
+- **`actions/cache@v4` khai `post-if: success()`** (chưa xác minh). Nếu đúng,
+  run bị cổng stale chặn sẽ **không lưu cache OHLCV** — mất luôn checkpoint của
+  vòng fetch, tức ~26 phút fetch bị vứt. Không ảnh hưởng tính đúng đắn của cổng,
+  nhưng là cái giá cần biết. Muốn xác nhận phải có một run đỏ thật.
