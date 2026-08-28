@@ -19,13 +19,38 @@ phụ thuộc hoàn toàn vào việc cập nhật bảng mỗi năm.
 BẢO TRÌ: bổ sung HOLIDAYS mỗi năm khi HOSE công bố (thường tháng 12).
 Nếu năm hiện tại chưa có trong bảng, hàm sẽ tự động chỉ dựa vào cuối tuần và
 ghi cảnh báo — an toàn hơn là đoán bừa.
+
+RÀNG BUỘC: FILE NÀY CHỈ ĐƯỢC DÙNG THƯ VIỆN CHUẨN Ở MỨC MODULE.
+`check_freshness.py:48-79` nạp lẻ chính file này bằng `importlib`, trong một
+môi trường CỐ Ý không cài `requirements.txt` — chuông báo độ tươi phải chạy được
+kể cả khi vòng scan hỏng. Thêm một dòng `import` ngoài thư viện chuẩn ở đây
+(pandas, numpy, ...) sẽ làm gãy chuông đó, và gãy im lặng: máy phát triển nào
+cũng có sẵn pandas nên test local không thấy. Đã xảy ra thật — run 32998375558
+(26/08/2026) chết với `ModuleNotFoundError: No module named 'pandas'`.
+`test_runs_without_pandas` ghim điều này; pandas chỉ được import MUỘN, bên trong
+`infer_last_session_from_dates`.
 """
 from __future__ import annotations
 
 import logging
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 
 log = logging.getLogger(__name__)
+
+
+# Việt Nam ở UTC+7 và không có DST từ 1975, nên offset cố định là chính xác và
+# không phụ thuộc gói tzdata của máy chạy. `datetime.now()` trần KHÔNG dùng được:
+# runner của GitHub Actions chạy giờ UTC, nên nó lệch 7 tiếng.
+#
+# Đặt ở đây chứ không ở run_daily (nơi nó ra đời) vì data_fetcher cũng cần, mà
+# `data_fetcher -> run_daily` là import vòng: run_daily nạp data_fetcher ngay ở
+# thân module. File này không import ngược lên đâu cả nên ai cũng gọi được.
+ICT = timezone(timedelta(hours=7), name='ICT')
+
+
+def now_ict() -> datetime:
+    """Giờ ICT tại THỜI ĐIỂM GỌI — không phải nhãn dán lúc job khởi động."""
+    return datetime.now(timezone.utc).astimezone(ICT)
 
 
 # Ngày nghỉ giao dịch (không tính T7/CN). Định dạng ISO.
@@ -94,6 +119,37 @@ def last_trading_session(today: date) -> date:
             return cur
         cur -= timedelta(days=1)
     return cur
+
+
+# Nến của phiên T chỉ tồn tại từ mốc này trở đi. HOSE khớp lệnh mở cửa (ATO)
+# trong khung 09:00-09:15; trước khi ATO khớp xong, phiên T CHƯA có cây nến nào —
+# không nguồn dữ liệu nào trả về được, kể cả một nguồn hoàn hảo.
+SESSION_BARS_AVAILABLE_FROM = time(9, 15)
+
+
+def last_expected_session(now_ict: datetime) -> date:
+    """
+    Phiên gần nhất mà dữ liệu ĐÃ PHẢI tồn tại — xét cả ngày LẪN giờ.
+
+    Khác `last_trading_session` ở đúng một chỗ, và đó là chỗ quan trọng:
+    hàm kia trả lời "theo lịch, phiên gần nhất là ngày nào"; hàm này trả lời
+    "tới thời điểm này thì phiên nào đã có nến". Trước 09:15 của một ngày giao
+    dịch, hai câu trả lời khác nhau — và chính khoảng chênh đó gây sự cố
+    08:17 ICT ngày 28/08/2026: `last_trading_session` khai phiên T, không mã nào
+    có nến phiên T, cả 500 mã bị đóng dấu StaleCache oan.
+
+    Dùng làm mốc so `df['Date'].max()` khi đóng dấu StaleCache.
+    `last_trading_session` giữ nguyên — nó chỉ nhận `date`, không có giờ để xét,
+    và nhiều chỗ đang gọi nó đúng nghĩa "phiên gần nhất theo lịch".
+    """
+    # Nhận nhầm đồng hồ UTC vào đây là tái hiện đúng lớp lỗi đang sửa, nên quy
+    # đổi thay vì tin tên tham số. Datetime naive coi như đã là ICT.
+    if now_ict.tzinfo is not None:
+        now_ict = now_ict.astimezone(ICT)
+    d = now_ict.date()
+    if is_trading_day(d) and now_ict.time() >= SESSION_BARS_AVAILABLE_FROM:
+        return d
+    return previous_trading_day(d)
 
 
 def trading_sessions_between(start: date, end: date, cap: int = 400) -> int:

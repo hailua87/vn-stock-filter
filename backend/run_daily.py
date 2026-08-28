@@ -12,7 +12,7 @@ import json
 import os
 import logging
 import sys
-from datetime import datetime, time as dtime, timedelta, timezone
+from datetime import datetime, time as dtime
 from pathlib import Path
 from typing import Optional
 
@@ -30,7 +30,7 @@ from scanner.market_regime import (
     compute_regime, compute_breadth, compute_relative_strength, annotate_results,
 )
 from scanner.strategies import golden_cross, ichimoku
-from scanner.trading_calendar import last_trading_session
+from scanner.trading_calendar import ICT, last_trading_session, now_ict
 
 logging.basicConfig(
     level=logging.INFO,
@@ -39,12 +39,6 @@ logging.basicConfig(
 )
 log = logging.getLogger('daily')
 
-
-# Việt Nam ở UTC+7 và không có DST từ 1975, nên offset cố định là chính xác và
-# không phụ thuộc gói tzdata của máy chạy. `datetime.now()` trần KHÔNG dùng được:
-# runner của GitHub Actions chạy giờ UTC, nên nó vừa lệch 7 tiếng vừa đặt sai tên
-# file archive mỗi khi bản EOD chạy qua nửa đêm ICT.
-ICT = timezone(timedelta(hours=7), name='ICT')
 
 # Vì sao 15:15 ICT: HOSE khớp ATC lúc 14:45, nhưng khối lượng chỉ chốt hẳn sau đó
 # ~20-25 phút (thoả thuận + báo cáo muộn). Đo trên 223 quan sát tháng 7-8/2026,
@@ -78,11 +72,6 @@ MIN_COVERAGE_FOR_ARCHIVE = float(os.environ.get('MIN_COVERAGE_FOR_ARCHIVE', 0.8)
 # Khoảng 0,19 → 0,95 đủ rộng để không ca bình thường nào chạm tới; để dưới 1,0
 # để vài mã lẻ tình cờ có nến hôm nay không vô hiệu hoá được cổng chặn.
 MAX_STALE_RATIO = float(os.environ.get('MAX_STALE_RATIO', 0.95))
-
-
-def now_ict() -> datetime:
-    """Giờ ICT tại THỜI ĐIỂM GỌI — không phải nhãn dán lúc job khởi động."""
-    return datetime.now(timezone.utc).astimezone(ICT)
 
 
 def get_run_type() -> str:
