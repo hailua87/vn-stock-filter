@@ -17,7 +17,13 @@ export async function runFunctional(page, isMobile, base) {
   // `so`: cac tri so LIEN TUC di kem phep kiem. Nguong nhi phan (ok/khong)
   // vut mat do lon; giu so lai de diff.mjs con canh gac duoc muc da chap nhan.
   const rec = (name, ok, detail = '', so = null) => out.push({ name, ok, detail, ...(so ? { so } : {}) });
-  const load = async () => { await page.goto(URL_(base), { waitUntil: 'networkidle', timeout: 20000 }); await settle(page); };
+  // Cung ly do nhu check.mjs: trang co dong ho va polling nen `networkidle`
+  // la dieu kien co the khong bao gio den. Cho DUNG thu can thay vi cho mang im.
+  const load = async () => {
+    await page.goto(URL_(base), { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await page.waitForSelector('.table-wrap tbody tr', { timeout: 15000 });
+    await settle(page);
+  };
   const box = sel => page.$eval(sel, el => {
     const r = el.getBoundingClientRect(), s = getComputedStyle(el);
     return { x: r.x, y: r.y, w: r.width, h: r.height, display: s.display, vw: innerWidth,
