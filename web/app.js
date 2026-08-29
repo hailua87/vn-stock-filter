@@ -247,32 +247,42 @@ function startClock() {
  * một họ lỗi với bug banner demo: giao diện hứa nhiều hơn dữ liệu thực có.
  * Với sản phẩm tài chính, đó không phải chuyện thẩm mỹ.
  */
-function updateDataFreshness(generatedAt, runType) {
+function updateDataFreshness(meta) {
   const dot = document.getElementById('live-dot');
   const text = document.getElementById('live-text');
   if (!text) return;
 
-  if (!generatedAt) {
-    text.textContent = 'CHƯA CÓ DỮ LIỆU';
+  // Doc run_time_ict / run_date_ict, KHONG doc generated_at.
+  //
+  // generated_at la `datetime.now().isoformat()` cua runner — gio UTC. Cho nay
+  // in ra "EOD 29/08 03:28" trong khi #run-badge ngay ben duoi in "EOD 10:28"
+  // tu run_time_ict. CUNG MOT SU KIEN, hai con so lech 7 tieng, hien cung luc
+  // tren mot man hinh. Nguoi doc khong co cach nao biet cai nao dung.
+  // run_time_ict la mui gio nguoi dung dang song, nen no la cai dung.
+  const hhmm = meta?.run_time_ict;
+  const ymd  = meta?.run_date_ict;
+  const runType = meta?.run_type || (meta?.intraday ? 'intraday' : 'eod');
+
+  if (!hhmm || !ymd) {
+    // Thieu thi noi KHONG BIET, KHONG quay ve generated_at: mot con so sai mui
+    // gio con te hon mot dau gach. Cung nguyen tac voi statNumber().
+    text.textContent = STAT_UNKNOWN;
+    text.title = 'Khong ro thoi diem ghi du lieu';
     if (dot) dot.className = 'live-dot stale';
     return;
   }
 
-  const t = new Date(generatedAt);
-  if (Number.isNaN(t.getTime())) return;
-
-  const ageHours = (Date.now() - t.getTime()) / 3600000;
-  const stamp = t.toLocaleString('vi-VN', {
-    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
-  });
-
+  const [y, mo, da] = ymd.split('-');
   const label = runType === 'intraday' ? 'GIỮA PHIÊN' : 'EOD';
-  text.textContent = `${label} ${stamp}`;
-  text.title = `Dữ liệu quét lúc ${t.toLocaleString('vi-VN')} — không phải realtime`;
+  text.textContent = `${label} ${da}/${mo} ${hhmm}`;
+  text.title = `Dữ liệu ghi lúc ${hhmm} ICT ngày ${da}/${mo}/${y} — không phải realtime`;
 
   if (dot) {
-    // > 30 giờ nghĩa là đã lỡ ít nhất một phiên
-    dot.className = 'live-dot' + (ageHours > 30 ? ' stale' : '');
+    // Tuoi du lieu dung chinh moc ICT do, dung lai gio UTC.
+    // > 30 gio nghia la da lo it nhat mot phien.
+    const wroteAt = new Date(`${ymd}T${hhmm}:00+07:00`);
+    const ageHours = (Date.now() - wroteAt.getTime()) / 3600000;
+    dot.className = 'live-dot' + (Number.isFinite(ageHours) && ageHours > 30 ? ' stale' : '');
   }
 }
 
@@ -472,7 +482,7 @@ function applyExchangeOverrides(signals) {
 function extractRunMetadata(data) {
   const m = data?.metadata || {};
   // Cập nhật luôn chỉ báo độ tươi ở header — thay cho nhãn "LIVE" gây hiểu nhầm
-  updateDataFreshness(data?.generated_at, m.run_type || (m.intraday ? 'intraday' : 'eod'));
+  updateDataFreshness(m);
   return {
     runType: m.run_type || null,          // 'intraday' | 'eod' | null
     runTimeIct: m.run_time_ict || null,    // 'HH:MM' | null
