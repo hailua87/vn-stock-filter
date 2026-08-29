@@ -1090,7 +1090,7 @@ function renderRow(s, idx) {
       <td class="th-idx">${idx}</td>
       <td class="ticker-with-badges"><span class="ticker-cell">${s.ticker}</span>${eventFlag}<span class="ticker-badges">${badgesInline}</span></td>
       <td><span class="exchange-cell">${s.exchange}</span></td>
-      <td class="num">${fmtPrice(s.close)}</td>
+      <td class="num td-price">${fmtPrice(s.close)}</td>
       <td class="num prio-1">${renderChange1D(s)}</td>
       <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
       <td class="num">${fmtVolume(s.volume)}</td>
@@ -1128,7 +1128,7 @@ function renderRow(s, idx) {
     <td class="th-idx">${idx}</td>
     <td><span class="ticker-cell">${s.ticker}</span>${tkCrossFlag}${turnaroundFlag}${eventFlag}</td>
     <td><span class="exchange-cell">${s.exchange}</span></td>
-    <td class="num">${fmtPrice(s.close)}</td>
+    <td class="num td-price">${fmtPrice(s.close)}</td>
     <td class="num prio-1">${renderChange1D(s)}</td>
     <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
     <td class="num">${fmtVolume(s.volume)}</td>
