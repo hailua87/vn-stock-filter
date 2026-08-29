@@ -100,6 +100,12 @@ Mot phep kiem chua tung do chua chung minh duoc no bat duoc gi.
 | `tab:cuoi-toi-duoc-sau-khi-cuon` | XANH — w=72 hit=chinh no | XAC NHAN |
 | `textWrap` tren nhan `.topbar` | **DO** — 4 nhan vo dong o 1281-1600px | **PHAT HIEN** |
 
+Dai 1281-1600px o tren la truoc commit 5 (`832fd9c`). Sau khi sua `[hidden]`,
+hop phan tich khong con chiem cho nen dai thu hep con **1281-1299px** (19px).
+Con 16 muc o hai khung bp-1281, da danh dau trong `accepted.json`.
+Giu nguyen so cu trong bang vi no ghi lai luc phep kiem CHUNG MINH duoc no
+bat duoc loi — do moi la y nghia cua cot "PHAT HIEN".
+
 **Ba trong bon phep kiem cuon dai tab la XAC NHAN, khong phai PHAT HIEN.**
 
 VI SAO chung xanh — va day la cho de doc nham. KHONG phai vi chung khong lien

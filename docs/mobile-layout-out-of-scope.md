@@ -18,8 +18,9 @@ Muc (g) cua audit dong o day.
 Day cung la ly do anh chup goc thay 10 hang con do trong Chromium (gia dinh
 874px) ra 11.
 
-Nen can nhac them khung `402x714` ("safari-ios-thuc") vao dai viewport, vi no
-la chieu cao NGUOI DUNG THAT SU THAY.
+DA THEM khung `safari-ios-thuc-402x714` vao dai viewport (`cc9bc34`), vi day la
+chieu cao NGUOI DUNG THAT SU THAY. Giu ca `m-402x874` — cai do la chieu cao MAN
+HINH, ung voi trang thai da cuon khi Safari thu thanh dia chi. Dai gio 45 khung.
 
 Phan LOI da sua o hai commit:
 - commit 1 (`f0aafbb`): `min-height` tuong minh thay san `auto` cua Flexbox 4.5
