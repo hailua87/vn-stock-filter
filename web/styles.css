@@ -1830,6 +1830,19 @@ kbd {
   align-items: center;
 }
 .analyzer-input {
+  /* PLACEHOLDER LA RANG BUOC BE RONG DUY NHAT cua o nay.
+     `maxlength="10"` trong index.html, ma ma co phieu VN dai 3 ky tu, nen noi
+     dung nguoi dung go khong bao gio quyet dinh be rong. Dung di do lai no.
+
+     Do 29/08/2026, font 12px JetBrains Mono, padding+border ngang 26px:
+       "🔍 Nhập mã để phân tích (vd: FPT, VNM, HPG)..."  45 ky tu -> 359px
+       "Nhập mã, vd: FPT"                               16 ky tu -> 141px
+     Chuoi cu can 359px trong o khai bao `width: 280px` — no TRAN 79px o MOI
+     be rong, ke ca 1920px. Tuc no chua bao gio doc het duoc. Do la loi doc lap,
+     co tu truoc, khong lien quan viec flex ep co.
+
+     Bo emoji: be rong U+1F50D render khac nhau giua Safari va Chromium nen so
+     do tren Chromium se hut tren Safari. Icon kinh lup da co o nhan tab. */
   width: 100%;
   height: 32px;
   background: var(--bg-elev-2);
