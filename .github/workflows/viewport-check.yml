@@ -1,0 +1,99 @@
+# Cong kiem bo cuc — so ket qua do voi moc chuan da chot.
+#
+# HAI CHE DO:
+#   workflow_dispatch : chay va TAI KET QUA LEN artifact, KHONG so sanh.
+#                       Dung de sinh baseline-ci.json.
+#   pull_request      : so voi baseline-ci.json, do neu phat sinh loi moi.
+#
+# VI SAO CO MOC CHUAN RIENG CHO CI:
+# baseline.json do tren Chromium/Windows voi font Windows. Cong chay ubuntu.
+# Font khac thi be rong chu khac, ma textOverflow va textWrap do CHINH be rong
+# chu. Dung chung mot moc chuan thi cong do ngay luot dau, khong phai vi trang
+# sai. Hai moc chuan, moi cai dung cho moi truong cua no — xem README.
+name: Kiem bo cuc (viewport)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    # Dung `!` phu dinh NGAY TRONG `paths`, khong dung `paths-ignore`:
+    # GitHub khong cho dat ca hai cho cung mot su kien. Thu tu quan trong —
+    # mau phu dinh phai dung SAU mau khang dinh no loai tru.
+    #
+    # web/data/** la du lieu bot day len hai lan/ngay. No khong dung toi
+    # bo cuc nen khong duoc kich hoat cong. ci.yml da lam dieu tuong tu.
+    paths:
+      - 'web/**'
+      - '!web/data/**'
+      - 'tools/viewport-check/**'
+      - '.github/workflows/viewport-check.yml'
+
+concurrency:
+  group: viewport-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  kiem:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: tools/viewport-check
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: tools/viewport-check/package-lock.json
+
+      # `npm ci` chu khong phai `npm install`: doc dung package-lock.json nen
+      # Chromium moi luot chay la mot ban. `npm install` co the nang phien ban
+      # va lam moc chuan troi.
+      - name: Cai phu thuoc (ghim theo lock)
+        run: npm ci
+
+      - name: Cai Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Ghi phien ban vao nhat ky
+        run: |
+          echo "playwright: $(node -p "require('playwright/package.json').version")"
+          node -e "import('playwright').then(async({chromium})=>{const b=await chromium.launch();console.log('chromium:',b.version());await b.close();})"
+
+      # May chu va bo do trong CUNG MOT step. Tach ra thi tien trinh nen co the
+      # nhan SIGHUP khi shell cua step truoc thoat — dung duoc nhung mong manh.
+      - name: Khoi dong may chu roi chay bo do
+        run: |
+          (cd ../../web && python3 -m http.server 8765 --bind 127.0.0.1 >/dev/null 2>&1) &
+          MAYCHU=$!
+          trap 'kill $MAYCHU 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            curl -sf -o /dev/null http://127.0.0.1:8765/index.html && break
+            sleep 1
+            if [ "$i" = 30 ]; then echo "MAY CHU KHONG LEN sau 30s"; exit 1; fi
+          done
+          echo "may chu san sang"
+          node check.mjs ket-qua-ci.json
+
+      # Tai len TRUOC khi so sanh, va ca khi so sanh that bai — de con doc duoc
+      # ket qua ma chan doan.
+      - name: Tai ket qua len artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ket-qua-viewport-${{ github.run_id }}
+          path: tools/viewport-check/ket-qua-ci.json
+          retention-days: 14
+
+      - name: So voi moc chuan CI
+        if: github.event_name == 'pull_request'
+        run: |
+          if [ ! -f baseline-ci.json ]; then
+            echo "THIEU baseline-ci.json."
+            echo "Sinh no bang: chay workflow nay o che do workflow_dispatch,"
+            echo "tai artifact ve, doi ten thanh baseline-ci.json va commit."
+            exit 1
+          fi
+          node diff.mjs baseline-ci.json ket-qua-ci.json
