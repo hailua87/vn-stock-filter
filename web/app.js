@@ -443,13 +443,9 @@ async function loadCombinedData(silent = false) {
   if (!silent) {
     document.getElementById('stat-scanned').textContent = statNumber(universeSize);
     const demoBanner = document.getElementById('demo-banner');
-    if (demoFlag) {
-      demoBanner.style.display = 'block';
-      document.getElementById('dashboard').classList.add('has-banner');
-    } else {
-      demoBanner.style.display = 'none';
-      document.getElementById('dashboard').classList.remove('has-banner');
-    }
+    // `has-banner` da bo: .dashboard dung flex: 1 nen no tu co lai khi banner
+    // chiem cho, khong con hang 33px nao de bat/tat.
+    demoBanner.style.display = demoFlag ? 'block' : 'none';
     render();
   }
 }
@@ -498,13 +494,8 @@ async function loadLatestFirst() {
     document.getElementById('stat-scanned').textContent =
       statNumber(data.metadata?.total_scanned);
     const demoBanner = document.getElementById('demo-banner');
-    if (data.metadata?.demo) {
-      demoBanner.style.display = 'block';
-      document.getElementById('dashboard').classList.add('has-banner');
-    } else {
-      demoBanner.style.display = 'none';
-      document.getElementById('dashboard').classList.remove('has-banner');
-    }
+    // Xem ghi chu ve `has-banner` o loadCombinedData.
+    demoBanner.style.display = data.metadata?.demo ? 'block' : 'none';
 
     render();
   } catch (e) {
