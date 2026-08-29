@@ -73,6 +73,9 @@ html, body {
 }
 
 body {
+  /* Cot doc: topbar + cac thanh phu + dashboard. Xem chu thich o .dashboard. */
+  display: flex;
+  flex-direction: column;
   font-family: var(--font-sans);
   background: var(--bg-base);
   color: var(--text);
@@ -96,7 +99,9 @@ input { font-family: inherit; }
    TOP BAR
    ═══════════════════════════════════════════════════ */
 .topbar {
-  height: var(--topbar-h);
+  /* min-height chu khong phai height: topbar phai CAO THEO NOI DUNG khi wrap
+     xuong hai dong. Ep `height` thi dong thu hai bi cat. */
+  min-height: var(--topbar-h);
   background: linear-gradient(180deg, var(--bg-elev-2) 0%, var(--bg-elev-1) 100%);
   border-bottom: 2px solid var(--border-strong);
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
@@ -338,11 +343,24 @@ input { font-family: inherit; }
      xong, trong khi ba cot cuoi cua bang (TIEU CHI, DIEM, HANG) bi day ra ngoai
      man hinh — nguoi dung dang loc theo XEP LOAI ma khong nhin thay cot HANG. */
   grid-template-columns: var(--col-filter-w) 1fr;
-  height: calc(100vh - var(--topbar-h));
+
+  /* KHONG dung calc(100vh - X). Co BA phan tu canh tranh chieu cao doc, khong
+     phai mot:
+       - .topbar          co gian khi wrap xuong hai dong
+       - #demo-banner     ~33px, chi hien khi metadata.demo
+       - #market-context  ~35px (padding 8px x2 + font 12px + border), hien moi
+                          khi market_context.available — tuc GAN NHU LUON HIEN
+     Ban cu tru --topbar-h va mot hang 33px chep cung cho demo-banner, KHONG tru
+     market-context. Ket qua: .dashboard cao hon cho con lai ~35px, day bang bi
+     day ra ngoai viewport, va `overflow: hidden` tren body giau chuyen do di
+     thay vi cho cuon. Loi nay co san truoc thay doi nay.
+
+     flex: 1 + min-height: 0 tu dung voi MOI to hop, khong hang so nao phai bao
+     tri. min-height: 0 la bat buoc — thieu no thi flex item khong co duoc duoi
+     kich thuoc noi dung va bang lai tran. */
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
-}
-.dashboard.has-banner {
-  height: calc(100vh - var(--topbar-h) - 33px);
 }
 .dashboard.filters-collapsed {
   grid-template-columns: 36px 1fr;
@@ -1410,7 +1428,10 @@ kbd {
   }
   .strat-tab { padding: 5px 10px; font-size: 11px; white-space: nowrap; }
   
-  .dashboard { display: block; height: auto; }
+  /* flex: none — BAT BUOC. body la flex column nen `flex: 1` o pham vi chung
+     se ep .dashboard chiem phan con lai thay vi gian theo noi dung, pha hanh vi
+     cuon doc cua mobile (html,body { overflow: auto } ngay tren). */
+  .dashboard { display: block; height: auto; flex: none; }
   
   /* Filters as left drawer overlay */
   .col-filters {
