@@ -55,7 +55,8 @@ def test_both_gates_always_reported():
              (at(23, 12), None),
              (at(12, 0), summary(1.0))]
     for now, fs in cases:
-        names = [g['name'] for g in evaluate_archive_gates(now, fs, session_date='2026-08-27')]
+        names = [g['name'] for g in evaluate_archive_gates(
+            now, fs, session_date=now.date().isoformat())]
         assert names == ['gate_time', 'gate_coverage'], (now, fs)
 
 
