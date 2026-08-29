@@ -5,7 +5,25 @@
 // MOI NHOM TU TAI LAI TRANG. Khong lam vay thi trang thai ro ri: drawer bo loc
 // con mo se che dai tab, va phep kiem tab bao hong oan.
 const URL_ = base => base + '/index.html';
-const settle = p => p.waitForTimeout(600);
+// Cho BO CUC THOI DOI thay vi cho mot khoang doan mo. 600ms co luc du co
+// luc khong: cung mot trang o 1281px co luc bao 0 nhan vo dong, co luc 4.
+// Do hai lan cach nhau 250ms, bang nhau va font da nap xong thi coi la xong.
+// Xem chu thich day du o choOnDinh() trong check.mjs.
+const settle = async (p) => {
+  const chup = () => p.evaluate(() => {
+    const q = s => { const e = document.querySelector(s); if (!e) return '-';
+                     const r = e.getBoundingClientRect(); return `${r.width.toFixed(1)}x${r.height.toFixed(1)}`; };
+    return [q('.topbar'), q('.topbar-left'), q('.topbar-right'),
+            q('.strategy-tabs'), q('.table-wrap'), document.fonts.status].join('|');
+  });
+  let truoc = await chup();
+  for (let i = 0; i < 32; i++) {
+    await p.waitForTimeout(250);
+    const nay = await chup();
+    if (nay === truoc && nay.endsWith('loaded')) return;
+    truoc = nay;
+  }
+};
 
 export async function runFunctional(page, isMobile, base) {
   // Nhanh mobile chon theo BE RONG, khong theo co isMobile cua context.

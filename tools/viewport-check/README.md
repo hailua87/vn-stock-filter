@@ -186,3 +186,45 @@ To hop dung de bom:
 dinh: cung mot trang chay bon lan cho 57.38 roi 57.92 ba lan, lam tron thanh
 57 vs 58. Truoc khi ket luan mot thay doi CSS gay ra chenh lech 1px, do lai
 NHIEU LAN o cung dieu kien. Da mot lan doc nham nhieu nay thanh hoi quy.
+
+## HAI MOC CHUAN — dung cai nao o dau
+
+| tep | do o dau | ai dung |
+| --- | --- | --- |
+| `baseline.json` | Chromium tren **Windows**, font Windows | do tai may khi phat trien |
+| `baseline-ci.json` | Chromium tren **ubuntu-latest**, font Linux | cong CI (`.github/workflows/viewport-check.yml`) |
+
+**KHONG DUNG CHUNG DUOC.** Font Windows va font Linux cho be rong chu khac
+nhau, ma `textOverflow` va `textWrap` do CHINH be rong chu. Lay moc chuan
+Windows di so tren Linux thi cong do ngay luot dau, khong phai vi trang sai.
+
+Khong the do khac biet nay tai may neu may khong co Docker/WSL — nen moc chuan
+CI phai SINH TRONG CI, khong doan ra duoc.
+
+### Sinh / dung lai `baseline-ci.json`
+
+1. Chay workflow o che do `workflow_dispatch` (khong so sanh, chi tai ket qua
+   len artifact).
+2. Tai artifact `ket-qua-viewport-<run_id>` ve.
+3. Doi ten `ket-qua-ci.json` thanh `baseline-ci.json`, commit.
+4. Chay `workflow_dispatch` lan thu hai va so voi ban vua commit. **Phai xanh.**
+   Khong xanh nghia la co gi do khong tat dinh trong chinh moi truong CI —
+   dieu tra, dung va cho qua.
+
+### Dung lai `baseline.json` (tai may) khi DOM doi HOP LE
+
+Doi DOM hop le (them cot, doi nhan, them phan tu) lam moc chuan cu het nghia:
+moi khoa deu "da sua" hoac "moi phat sinh" ma khong noi len dieu gi.
+
+1. Xac nhan thay doi la CO Y, khong phai hoi quy — doc ba cot trong lan chay
+   cuoi truoc khi doi.
+2. Khoi dong DUNG MOT may chu: `cd web && python -m http.server 8765 --bind 127.0.0.1`
+   (hai tien trinh cung cong tren Windows chia yeu cau bat dinh va gay treo).
+3. `node check.mjs baseline-moi.json` roi doi ten thanh `baseline.json`.
+4. Chay lai mot luot va so voi moc chuan vua chot: phai ra 0 muc moi. Neu
+   khong, bo do co cho khong tat dinh — sua bo do truoc, dung chot moc chuan.
+5. Ghi trong commit message: doi cai gi, vi sao, va so khung truoc/sau.
+
+`accepted.json` KHONG bi anh huong khi dung lai moc chuan — no doc lap, va do
+la chu y: muc da can nhac khong sua van phai duoc in ra va canh gac du moc
+chuan co doi.

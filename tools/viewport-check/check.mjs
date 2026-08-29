@@ -38,11 +38,39 @@ async function kiemMayChu() {
   } catch { return false; } finally { clearTimeout(h); }
 }
 
+// Cho BO CUC THOI DOI, khong cho mot khoang thoi gian doan mo.
+//
+// Bo `networkidle` xong toi thay bang `waitForTimeout(600)` — va do la mot loi:
+// 600ms co luc du co luc khong, nen phep do lat qua lat lai. Do that o 1281px:
+// cung mot trang, cung mot chu, cung be rong hop (left=223 right=306), ma so
+// nhan vo dong khi thi 0 khi thi 4. Voi 1500ms thi on dinh tuyet doi qua 6 luot
+// (brand w=88.4 h=36, tuc hai dong — vo dong o day la THAT).
+// Nhung so 1500 cung chi la doan mo, chi la doan mo to hon.
+//
+// Cach dung: do hai lan cach nhau 250ms, bang nhau thi coi la xong. Vua tat
+// dinh vua khong cho thua — va van co tran de khong treo.
+async function choOnDinh(page) {
+  const chup = () => page.evaluate(() => {
+    const q = s => { const e = document.querySelector(s); if (!e) return '-';
+                     const r = e.getBoundingClientRect(); return `${r.width.toFixed(1)}x${r.height.toFixed(1)}`; };
+    return [q('.topbar'), q('.topbar-left'), q('.topbar-right'),
+            q('.strategy-tabs'), q('.table-wrap'), document.fonts.status].join('|');
+  });
+  let truoc = await chup();
+  for (let i = 0; i < 32; i++) {          // tran 32 x 250ms = 8s
+    await page.waitForTimeout(250);
+    const nay = await chup();
+    if (nay === truoc && nay.endsWith('loaded')) return true;
+    truoc = nay;
+  }
+  return false;                            // het tran: bao de ghi vao ket qua
+}
+
 async function moTrang(page) {
   await page.goto(BASE + '/index.html', { waitUntil: 'domcontentloaded', timeout: HAN_MS });
   // Cho DUNG thu can chu khong cho mang im: hang dau tien cua bang da render.
   await page.waitForSelector('.table-wrap tbody tr', { timeout: HAN_MS });
-  await page.waitForTimeout(600);
+  return await choOnDinh(page);
 }
 
 if (!(await kiemMayChu())) {
@@ -85,7 +113,8 @@ MAY CHU CHET giua chung tai khung ${v.name}. Dung ngay.`);
   }
 
   try {
-    await moTrang(page);
+    const onDinh = await moTrang(page);
+    if (!onDinh) entry.errors.push('BO CUC KHONG ON DINH sau 8s — so do khung nay dang ngo');
 
     // Lan 1: dau trang
     entry.runs.top = await page.evaluate(PROBE);
