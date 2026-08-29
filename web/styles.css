@@ -102,6 +102,19 @@ input { font-family: inherit; }
   /* min-height chu khong phai height: topbar phai CAO THEO NOI DUNG khi wrap
      xuong hai dong. Ep `height` thi dong thu hai bi cat. */
   min-height: var(--topbar-h);
+  /* KHONG BAO GIO bi flex ep co.
+     body la flex column (6bb88fb). `min-height` tuong minh THAY THE san `auto`
+     cua Flexbox 4.5, tuc xoa san kich thuoc noi dung — topbar co the bi ep
+     xuong tan 48px trong khi noi dung da wrap can 168px, va 120px do TRAN RA
+     NGOAI hop, ve de len .mobile-bar (z-30) ngay duoi.
+     Do that o 402x874 truoc khi sua: h=48, scrollHeight=168.
+     Chi lo o <=768px: tren nguong do .dashboard con flex-shrink 1 nen no hap
+     thu het ap luc (bp-769: topbar h=104, scrollH=102, khong tran); tu 768
+     tro xuong .dashboard chuyen flex: none nen ap luc dồn sang topbar
+     (bp-767: h=48, scrollH=107).
+     Chan o day chu khong go min-height: go se tra san ve auto nhung bo luon y
+     dinh "topbar gon 48px" cua khoi 768px. */
+  flex-shrink: 0;
   background: linear-gradient(180deg, var(--bg-elev-2) 0%, var(--bg-elev-1) 100%);
   border-bottom: 2px solid var(--border-strong);
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
