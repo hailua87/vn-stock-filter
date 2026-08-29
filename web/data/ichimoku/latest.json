@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-29T00:50:38.383728",
+  "generated_at": "2026-08-29T03:28:12.956056",
   "strategy": "ichimoku",
   "total": 83,
   "metadata": {
@@ -29,17 +29,17 @@
       }
     },
     "session_date": "2026-08-28",
-    "written_at_ict": "2026-08-29 07:50:29+0700",
-    "run_type": "intraday",
+    "written_at_ict": "2026-08-29 10:28:01+0700",
+    "run_type": "eod",
     "session_complete": 0.943,
-    "archive_written": false,
+    "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: fail (07:50 ICT < 15:15 — khối lượng chưa chốt) | gate_coverage: pass (97% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên 2026-08-28 đã đóng dứt khoát (hôm nay 2026-08-29)) | gate_coverage: pass (97% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
-        "passed": false,
-        "detail": "07:50 ICT < 15:15 — khối lượng chưa chốt"
+        "passed": true,
+        "detail": "phiên 2026-08-28 đã đóng dứt khoát (hôm nay 2026-08-29)"
       },
       {
         "name": "gate_coverage",
@@ -47,15 +47,13 @@
         "detail": "97% >= 80%, vòng fetch chạy trọn"
       }
     ],
-    "archive_gates_failed": [
-      "gate_time"
-    ],
+    "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
     "fetch_coverage": 0.97,
-    "fetch_elapsed_s": 1096.1,
-    "intraday": true,
-    "run_time_ict": "07:50",
+    "fetch_elapsed_s": 1078.0,
+    "intraday": false,
+    "run_time_ict": "10:28",
     "run_date_ict": "2026-08-29"
   },
   "signals": [
