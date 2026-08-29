@@ -71,6 +71,45 @@ export const PROBE = () => {
     }
   }
 
+  // ── CHU VO DONG TRONG TOPBAR ──
+  //
+  // Bo do `textOverflow` chi xet phan tu co `white-space: nowrap`. Nhung nhan
+  // trong topbar deu la `normal`, nen khi bi flex ep co chung KHONG tran —
+  // chung XUONG DONG. Do that o 1281px voi tab phan tich mo:
+  //   .brand-name  w=66 h=36  (1920px: w=92 h=18)  -> vo 2 dong
+  //   #live-text   w=37 h=45  (1920px: w=95 h=15)  -> vo 3 dong
+  //   #clock       w=61 h=33  (1920px: w=86 h=17)  -> vo 2 dong
+  //
+  // PHAM VI: chi trong .topbar. Nhan o day deu co y la MOT DONG (ten san pham,
+  // trang thai, dong ho). Cho khac chu xuong dong la binh thuong.
+  const textWrap = [];
+  const topbarEl = document.querySelector('.topbar');
+  if (topbarEl) {
+    for (const el of topbarEl.querySelectorAll('*')) {
+      if (!vis(el)) continue;
+      const t = [...el.childNodes].filter(n => n.nodeType === 3 && n.textContent.trim());
+      if (!t.length) continue;
+      // Do CHI cac nut van ban TRUC TIEP, khong do ca noi dung phan tu.
+      //
+      // getClientRects() tra ve MANH rect chu khong phai dong. Hai lop nhieu:
+      //   - <span>emoji</span> + chu cho nhieu rect NAM CUNG MOT DONG
+      //   - phan tu inline-flex cho mot rect moi flex item, lech `top` vi
+      //     chieu cao khac nhau — "💰 VALUATION" bao 2 dong ngay o 1920px du
+      //     no co `white-space: nowrap` va khong the xuong dong.
+      // Do rieng tung nut van ban roi hop cac vi tri `top` thi tranh duoc ca hai.
+      const tops = new Set();
+      for (const n of t) {
+        const rg = document.createRange();
+        rg.selectNodeContents(n);
+        for (const r of rg.getClientRects()) if (r.width > 0) tops.add(Math.round(r.top));
+        rg.detach?.();
+      }
+      const lines = tops.size;
+      if (lines > 1) textWrap.push({ el: id(el), text: (el.textContent || '').trim().slice(0, 24),
+                                     soDong: lines, w: Math.round(el.getBoundingClientRect().width) });
+    }
+  }
+
   // ── CHONG LAN ──
   // Bo qua phan tu da bi to tien CAT (nam ngoai vung cuon cua no). Vi du:
   // mot o trong bang da cuon khuat khoi .table-wrap van co rect hop le va tam
@@ -179,5 +218,5 @@ export const PROBE = () => {
   };
 
   return { vw, vh, env, metrics, cols, scrollY: Math.round(window.scrollY),
-           overflowRawCount: overflowRaw.length, overflow, textOverflow, overlap, axis, listHead };
+           overflowRawCount: overflowRaw.length, overflow, textOverflow, textWrap, overlap, axis, listHead };
 };

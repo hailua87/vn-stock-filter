@@ -14,7 +14,9 @@ export async function runFunctional(page, isMobile, base) {
   const vpw = page.viewportSize().width;
   const drawerMode = vpw <= 768;
   const out = [];
-  const rec = (name, ok, detail = '') => out.push({ name, ok, detail });
+  // `so`: cac tri so LIEN TUC di kem phep kiem. Nguong nhi phan (ok/khong)
+  // vut mat do lon; giu so lai de diff.mjs con canh gac duoc muc da chap nhan.
+  const rec = (name, ok, detail = '', so = null) => out.push({ name, ok, detail, ...(so ? { so } : {}) });
   const load = async () => { await page.goto(URL_(base), { waitUntil: 'networkidle', timeout: 20000 }); await settle(page); };
   const box = sel => page.$eval(sel, el => {
     const r = el.getBoundingClientRect(), s = getComputedStyle(el);
@@ -139,8 +141,14 @@ export async function runFunctional(page, isMobile, base) {
                boxW: Math.round(box.w || box.width), right: Math.round(b.right), vw: innerWidth };
     }).catch(() => null);
     rec('analyzer:input-khong-bi-che', !!r && r.self, r ? `w=${r.w} h=${r.h} hit=${r.hit}` : 'khong tim thay');
-    // Placeholder day du can ~300px o 12px mono. Duoi 200px la khong doc noi.
-    rec('analyzer:o-nhap-du-rong', !!r && r.w >= 200, r ? `w=${r.w} (khai 280px)` : 'loi');
+    // NGUONG 200px LA CON SO AP DAT, khong buoc vao yeu cau nao — ghi ro de
+    // khong ai tuong no co co so. Do that: placeholder "Nhap ma, vd: FPT" rong
+    // 115px, lot tu 1340px tro len; chu go vao "FPT" chi 22px, lot o moi khung.
+    // Nen hai khung 1366 do (w=167, w=149) tuy KHONG co gi sai tren man hinh.
+    // Nguong dung nghia hon la "placeholder co lot khong". Chua doi vi doi luc
+    // nay la sua phep kiem cho no xanh, khong phai sua trang.
+    // Xem docs/mobile-layout-out-of-scope.md muc 5.
+    rec('analyzer:o-nhap-du-rong', !!r && r.w >= 200, r ? `w=${r.w} (khai 280px)` : 'loi', r ? { w: Math.round(r.w) } : null);
     rec('analyzer:khong-tran-mep', !!r && r.right <= r.vw + 1, r ? `right=${r.right} vw=${r.vw}` : 'loi');
   } catch (e) { rec('analyzer:input-khong-bi-che', false, String(e).slice(0, 70)); }
 

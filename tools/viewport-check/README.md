@@ -41,6 +41,23 @@ co clientWidth = 0 theo spec nen phep so vo nghia (208 `<span>` bao nham o lan
 chay dau).
 **Day la bo do DUY NHAT bat duoc loi dai tab dinh chu.**
 
+### `textWrap` — chu VO DONG (khac han `textOverflow`)
+Chi xet con chau cua `.topbar`. Do rieng tung NUT VAN BAN TRUC TIEP, dem so vi
+tri `top` khac nhau; >1 la vo dong.
+
+`textOverflow` MU voi loai loi nay: no chi xet phan tu `white-space: nowrap`.
+Nhan trong topbar deu `white-space: normal`, nen chung khong tran — chung XUONG
+DONG, va truoc dot nay khong bo do nao thay.
+
+Hai bay da dinh, ghi lai de khoi lap:
+- `getClientRects()` tra ve MANH rect chu khong phai dong. Dem tho `.length`
+  cho ba bao nham o 1920px, vi `<span>emoji</span> + chu` cho nhieu rect cung
+  mot dong.
+- Do ca noi dung phan tu thi phan tu `inline-flex` cho moi flex item mot rect,
+  lech `top` vi chieu cao khac nhau — `💰 VALUATION` bao 2 dong o 1920px du no
+  co `white-space: nowrap` va khong the xuong dong.
+Do rieng tung nut van ban tranh duoc ca hai. Sau khi sua: 1920px = 0.
+
 ### `overlap` — bi phan tu khac che
 `elementFromPoint` tai TAM phan tu co text truc tiep.
 Da loai phan tu bi to tien CAT (tam roi ra ngoai client rect cua mot to tien
@@ -81,6 +98,7 @@ Mot phep kiem chua tung do chua chung minh duoc no bat duoc gi.
 | `tab:khong-bi-bop-chu` (scrollW > clientW) | XANH — scrollW=412 clientW=386 | XAC NHAN |
 | `tab:cuon-den-cuoi-duoc` | XANH — dat=26 doc lai=26 | XAC NHAN |
 | `tab:cuoi-toi-duoc-sau-khi-cuon` | XANH — w=72 hit=chinh no | XAC NHAN |
+| `textWrap` tren nhan `.topbar` | **DO** — 4 nhan vo dong o 1281-1600px | **PHAT HIEN** |
 
 **Ba trong bon phep kiem cuon dai tab la XAC NHAN, khong phai PHAT HIEN.**
 
