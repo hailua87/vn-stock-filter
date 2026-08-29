@@ -157,3 +157,32 @@ dia chi thu lai, va o ca hai chieu xoay.
 Cai bo do o day LAM DUOC la kiem HE QUA: bom gia tri gia vao dung cac khai bao
 ma khoi @supports dat, roi xem bo cuc co chiu duoc khong. Xem chu thich khoi
 `@supports (padding: env(...))` o cuoi `web/styles.css`.
+
+### Bom gia tri gia vao safe-area: hai kieu do SAI da mac
+
+Do mot to hop KHONG XAY RA THAT la tu bia ra thiet hai. Hai lan da mac:
+
+**1. Bom ca bon canh cung luc.** Khong bao gio xay ra. Tren iPhone:
+  - DOC : trai/phai = 0 (khong co gi che hai ben), tren/duoi khac 0
+  - NGANG: tren = 0 (Dynamic Island nam mot ben), trai/phai va duoi khac 0
+Bom ca bon canh o che do doc lam topbar mat 118px be ngang va bao 2 nhan vo
+dong — mot ket qua khong co that. Bom theo to hop dung: 0 muc.
+
+**2. Bom inset khac 0 ma giu nguyen chieu cao cu.** Inset chi khac 0 khi Safari
+DA THU thanh dia chi, ma luc do khung nhin CAO HON (402x714 -> 402x874). Do voi
+714px roi bao "mat 2 hang" la sai: thuc te duoc 15 hang, nhieu hon ca truoc.
+
+To hop dung de bom:
+| che do | tren | phai | duoi | trai | khung |
+| --- | ---: | ---: | ---: | ---: | --- |
+| doc, thanh da thu | 59 | 0 | 34 | 0 | 402x874 |
+| ngang | 0 | 59 | 21 | 59 | 874x402 |
+
+(Cac so tren la gia tri DO, khong phai so do duoc — xem muc safe-area o tren.)
+
+### Nhieu lam tron cua flex o 1281px
+
+`.chip-row` o 1281px la flex; chip `flex: 1 1 auto` chia sub-pixel khong on
+dinh: cung mot trang chay bon lan cho 57.38 roi 57.92 ba lan, lam tron thanh
+57 vs 58. Truoc khi ket luan mot thay doi CSS gay ra chenh lech 1px, do lai
+NHIEU LAN o cung dieu kien. Da mot lan doc nham nhieu nay thanh hoi quy.
