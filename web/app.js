@@ -855,9 +855,37 @@ function bindHelp() {
 
 // ──────────── Collapse filters column ────────────
 function bindCollapseFilters() {
-  document.getElementById('collapse-filters').addEventListener('click', () => {
-    document.getElementById('dashboard').classList.toggle('filters-collapsed');
-  });
+  const btn  = document.getElementById('collapse-filters');
+  const title = document.querySelector('.col-filters .col-title');
+  const dash = document.getElementById('dashboard');
+  if (!btn || !dash) return;
+
+  // Trang thai duoc phan anh vao ARIA, khong chi vao ky tu mui ten.
+  // Ban cu doi huong mui ten bang `transform: rotate(180deg)` — hinh hoc thuan
+  // tuy, trinh doc man hinh khong thay gi, nen aria-label van doc "Thu gon cot
+  // bo loc" ke ca khi cot DA thu gon.
+  const apply = () => {
+    const collapsed = dash.classList.contains('filters-collapsed');
+    btn.textContent = collapsed ? '›' : '‹';
+    btn.title = collapsed ? 'Mở lại bộ lọc' : 'Thu gọn bộ lọc';
+    btn.setAttribute('aria-label', collapsed ? 'Mở lại cột bộ lọc' : 'Thu gọn cột bộ lọc');
+    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+  };
+
+  const toggle = () => { dash.classList.toggle('filters-collapsed'); apply(); };
+
+  btn.setAttribute('aria-controls', 'col-filters');
+  btn.addEventListener('click', toggle);
+
+  // Ca dai chu "BỘ LỌC" xoay doc cung mo lai duoc: o trang thai thu gon no la
+  // thu to nhat trong 36px, nguoi dung bam vao do theo ban nang.
+  if (title) {
+    title.addEventListener('click', () => {
+      if (dash.classList.contains('filters-collapsed')) toggle();
+    });
+  }
+
+  apply();
 }
 
 
