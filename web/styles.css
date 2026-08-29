@@ -183,47 +183,6 @@ input { font-family: inherit; }
   font-family: var(--font-mono);
   margin-left: 4px;
 }
-
-/* FIX (2026-05-26): badge cho INTRADAY vs EOD run.
-   Hai variant màu để user phân biệt nhanh độ tươi data:
-   - .intraday: vàng cam (data đang trong phiên, chưa đóng cửa cuối ngày)
-   - .eod: teal (data đóng cửa, chốt phiên) */
-.run-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 3px 7px;
-  border-radius: 3px;
-  margin-left: 6px;
-  border: 1px solid transparent;
-  cursor: help;          /* hint: hover for tooltip */
-  user-select: none;
-}
-.run-badge.intraday {
-  background: rgba(255, 167, 38, 0.14);
-  color: #ffa726;
-  border-color: rgba(255, 167, 38, 0.35);
-}
-.run-badge.eod {
-  background: rgba(38, 166, 154, 0.14);
-  color: var(--up);
-  border-color: rgba(38, 166, 154, 0.35);
-}
-.run-badge::before {
-  content: '●';
-  font-size: 8px;
-  line-height: 1;
-}
-.run-badge.intraday::before { animation: pulse-intraday 2s ease-in-out infinite; }
-@keyframes pulse-intraday {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
 .stat-sep {
   color: var(--text-mute);
   font-size: 12px;
@@ -2387,10 +2346,17 @@ kbd {
 }
 
 /* ─── Miễn trừ trách nhiệm (bắt buộc: UI có đưa ra gợi ý tỷ trọng NAV) ─── */
+/* Mien tru trach nhiem: MOT DONG luon hien, mo rong duoc.
+   Ban cu la 383 ky tu chay lien, o 11px thanh 2 dong tren man rong va 3 dong khi
+   cot hep (hoac khi nguoi dung zoom) — 70-88px an vao chieu cao ma flex: 1 chia
+   cho .dashboard. Nay cau chot nam trong <summary> (mot dong), phan con lai
+   trong <details> chi mo khi bam.
+   KHONG dua vao #help-modal: van ban phap ly phai o tren trang, khong giau sau
+   mot nut bam. */
 .site-disclaimer {
-  padding: 14px 20px 20px;
+  padding: 8px 20px;
   font-size: 11px;
-  line-height: 1.6;
+  line-height: 1.4;
   color: var(--text-dim, #8b93a7);
   background: var(--bg-base);
   border-top: 1px solid var(--border, #2a3040);
@@ -2398,6 +2364,22 @@ kbd {
 }
 
 .site-disclaimer strong { color: var(--text, #e6e9ef); }
+
+.site-disclaimer summary {
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  list-style-position: inside;
+}
+.site-disclaimer summary::marker { color: var(--text-dim, #8b93a7); }
+.site-disclaimer p {
+  margin-top: 6px;
+  text-align: left;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 /* ─── Băng bối cảnh thị trường ─── */
 .market-context {

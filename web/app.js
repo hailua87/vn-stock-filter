@@ -247,32 +247,57 @@ function startClock() {
  * một họ lỗi với bug banner demo: giao diện hứa nhiều hơn dữ liệu thực có.
  * Với sản phẩm tài chính, đó không phải chuyện thẩm mỹ.
  */
-function updateDataFreshness(generatedAt, runType) {
+function updateDataFreshness() {
   const dot = document.getElementById('live-dot');
   const text = document.getElementById('live-text');
   if (!text) return;
 
-  if (!generatedAt) {
-    text.textContent = 'CHƯA CÓ DỮ LIỆU';
+  // Doc state.runMetadata, KHONG doc thang metadata cua mot nguon.
+  // O che do Tong hop co 4 nguon; vong lap o loadCombinedData chon nguon co
+  // run_time_ict MOI NHAT roi gan vao state.runMetadata. Doc thang tung nguon
+  // se hien nguon CUOI CUNG trong vong lap, khong phai nguon moi nhat.
+  const meta = state.runMetadata || {};
+
+  // Doc run_time_ict / run_date_ict, KHONG doc generated_at.
+  //
+  // generated_at la `datetime.now().isoformat()` cua runner — gio UTC. Cho nay
+  // in ra "EOD 29/08 03:28" trong khi #run-badge ngay ben duoi in "EOD 10:28"
+  // tu run_time_ict. CUNG MOT SU KIEN, hai con so lech 7 tieng, hien cung luc
+  // tren mot man hinh. Nguoi doc khong co cach nao biet cai nao dung.
+  // run_time_ict la mui gio nguoi dung dang song, nen no la cai dung.
+  const hhmm = meta.runTimeIct;
+  const ymd  = meta.runDateIct;
+  const runType = meta.runType;
+
+  if (!hhmm || !ymd) {
+    // Thieu thi noi KHONG BIET, KHONG quay ve generated_at: mot con so sai mui
+    // gio con te hon mot dau gach. Cung nguyen tac voi statNumber().
+    text.textContent = STAT_UNKNOWN;
+    text.title = 'Khong ro thoi diem ghi du lieu';
     if (dot) dot.className = 'live-dot stale';
     return;
   }
 
-  const t = new Date(generatedAt);
-  if (Number.isNaN(t.getTime())) return;
-
-  const ageHours = (Date.now() - t.getTime()) / 3600000;
-  const stamp = t.toLocaleString('vi-VN', {
-    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
-  });
-
+  const [y, mo, da] = ymd.split('-');
   const label = runType === 'intraday' ? 'GIỮA PHIÊN' : 'EOD';
-  text.textContent = `${label} ${stamp}`;
-  text.title = `Dữ liệu quét lúc ${t.toLocaleString('vi-VN')} — không phải realtime`;
+  text.textContent = `${label} ${da}/${mo} ${hhmm}`;
+
+  // Tooltip phan biet intraday/eod — chuyen tu renderRunBadge (da go). Do la
+  // phan duy nhat cua badge noi dieu ma nhan van ban khong noi duoc.
+  // Ban cu ghi "Lan update tiep theo: 17:00 ICT" — SAI tu khi doi cron; lich
+  // that la 12:05 ICT (intraday) va 23:05 ICT (EOD), xem daily-scan.yml:34-35.
+  text.title = runType === 'intraday'
+    ? `Ghi lúc ${hhmm} ICT ngày ${da}/${mo}/${y} (giữa phiên). Giá khớp tại thời `
+      + `điểm quét — chưa phải giá đóng cửa. Ca EOD chạy 23:05 ICT.`
+    : `Ghi lúc ${hhmm} ICT ngày ${da}/${mo}/${y} (sau đóng cửa). Đây là giá đóng `
+      + `cửa chính thức của phiên. Không phải realtime.`;
 
   if (dot) {
-    // > 30 giờ nghĩa là đã lỡ ít nhất một phiên
-    dot.className = 'live-dot' + (ageHours > 30 ? ' stale' : '');
+    // Tuoi du lieu dung chinh moc ICT do, dung lai gio UTC.
+    // > 30 gio nghia la da lo it nhat mot phien.
+    const wroteAt = new Date(`${ymd}T${hhmm}:00+07:00`);
+    const ageHours = (Date.now() - wroteAt.getTime()) / 3600000;
+    dot.className = 'live-dot' + (Number.isFinite(ageHours) && ageHours > 30 ? ' stale' : '');
   }
 }
 
@@ -471,8 +496,9 @@ function applyExchangeOverrides(signals) {
 // Data cũ (chưa có tag) → trả null cho các field → badge không hiển thị.
 function extractRunMetadata(data) {
   const m = data?.metadata || {};
-  // Cập nhật luôn chỉ báo độ tươi ở header — thay cho nhãn "LIVE" gây hiểu nhầm
-  updateDataFreshness(data?.generated_at, m.run_type || (m.intraday ? 'intraday' : 'eod'));
+  // KHONG goi updateDataFreshness o day: ham nay chay trong VONG LAP o che do
+  // Tong hop (mot lan moi nguon), nen goi tu day se hien nguon cuoi cung. Chi
+  // bao do tuoi duoc cap nhat mot lan trong render(), doc state.runMetadata.
   return {
     runType: m.run_type || null,          // 'intraday' | 'eod' | null
     runTimeIct: m.run_time_ict || null,    // 'HH:MM' | null
@@ -834,38 +860,6 @@ function bindCollapseFilters() {
   });
 }
 
-// FIX (2026-05-26): Render badge "INTRADAY 12:00" hoặc "EOD 17:00" ở topbar.
-// Cho user biết data từ run giữa ngày (giá chưa final) hay sau đóng cửa (chốt phiên).
-// Đọc state.runMetadata được set bởi loadLatestFirst / loadDateData / loadCombinedData.
-function renderRunBadge() {
-  const badge = document.getElementById('run-badge');
-  if (!badge) return;
-
-  const meta = state.runMetadata || {};
-  if (!meta.runType || !meta.runTimeIct) {
-    // Không có metadata → ẩn badge (data cũ trước khi workflow tag, hoặc tải thất bại)
-    badge.hidden = true;
-    return;
-  }
-
-  // Set class, text, tooltip
-  badge.hidden = false;
-  badge.className = `run-badge ${meta.runType}`;
-  if (meta.runType === 'intraday') {
-    badge.textContent = `INTRADAY ${meta.runTimeIct}`;
-    badge.title = `Cập nhật lúc ${meta.runTimeIct} ICT (giữa phiên). `
-                + `Giá khớp tại thời điểm scan — chưa phải giá đóng cửa cuối ngày. `
-                + `Lần update tiếp theo: 17:00 ICT (EOD).`;
-  } else if (meta.runType === 'eod') {
-    badge.textContent = `EOD ${meta.runTimeIct}`;
-    badge.title = `Cập nhật lúc ${meta.runTimeIct} ICT (sau đóng cửa). `
-                + `Đây là giá đóng cửa chính thức của phiên ${meta.runDateIct || ''}.`;
-  } else {
-    // Unknown run_type — hiển thị neutral
-    badge.textContent = meta.runTimeIct;
-    badge.title = `Cập nhật lúc ${meta.runTimeIct} ICT`;
-  }
-}
 
 // ──────────── Render table ────────────
 function render() {
@@ -881,18 +875,29 @@ function render() {
   if (state.currentDate) {
     const [y, m, day] = state.currentDate.split('-');
     const isLatest = state.currentDate === state.latestDate;
-    statDate.textContent = isLatest ? `· LIVE ${day}/${m}` : `· ${day}/${m}`;
-    statDate.style.color = isLatest ? 'var(--up)' : 'var(--text-mute)';
+    // Ky hieu phien moi nhat la "•", GIONG #date-select trong panel bo loc.
+    //
+    // Truoc day cho nay dung chu "LIVE" con o chon ngay dung "•" — hai ky hieu
+    // cho cung mot y, tren cung mot man hinh. Chon "•" chu khong phai "LIVE":
+    // chinh chu thich cua updateDataFreshness da ghi rang nhan "LIVE" bi go khoi
+    // header vi no hua realtime trong khi du lieu cap nhat 2 lan/ngay. Giu no o
+    // day la dua lai dung loi do vao.
+    //
+    // Bo luon dau "· " dan dau: da co <span class="hs-sep">·</span> ngay truoc
+    // trong index.html, nen chuoi cu hien ra HAI dau cham lien nhau.
+    statDate.textContent = isLatest ? `• ${day}/${m}` : `${day}/${m}`;
+    // --text-dim chu khong phai --text-mute: mute chi 3.34x khi hover, duoi AA.
+    statDate.style.color = isLatest ? 'var(--up)' : 'var(--text-dim)';
   } else {
     // Không có ngày phiên thì nói KHÔNG BIẾT, đừng để nguyên giá trị lần trước:
     // một ngày cũ nằm lại trên màn hình còn tệ hơn một dấu gạch.
     statDate.textContent = STAT_UNKNOWN;
-    statDate.style.color = 'var(--text-mute)';
+    statDate.style.color = 'var(--text-dim)';
   }
 
-  // FIX (2026-05-26): render badge intraday/eod theo runMetadata.
-  // Ẩn nếu data không có metadata (data cũ trước khi workflow tag).
-  renderRunBadge();
+  // Chi bao do tuoi o topbar. Goi tu day, mot lan, sau khi state.runMetadata da
+  // duoc chot — ke ca o che do Tong hop noi co nhieu nguon.
+  updateDataFreshness();
 
   // Event warning count
   const eventCount = state.raw.filter(s => s.m_upcoming_event).length;
