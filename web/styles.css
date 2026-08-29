@@ -523,6 +523,10 @@ input { font-family: inherit; }
 /* Chip rows */
 .chip-row {
   display: flex;
+  /* Cho xuong hang thay vi cat chu. Truoc day mac dinh nowrap, ma .chip co
+     `white-space: nowrap`, nen khi het cho chu bi CAT — o cot 200px thi hang
+     "Tất cả · HOSE · HNX · UPCOM" (can 181px) mat chu UPCOM. */
+  flex-wrap: wrap;
   gap: 2px;
   background: var(--bg-base);
   border-radius: 4px;
@@ -530,7 +534,14 @@ input { font-family: inherit; }
   border: 1px solid var(--border-strong);
 }
 .chip {
-  flex: 1;
+  /* `flex: 1 1 auto` chu khong phai `flex: 1`.
+     `flex: 1` co flex-basis 0, nen khi wrap thi MOI HANG chia deu rieng: o
+     172px hang hai chi con "UPCOM" va no gian full be rong hang — mot nut to
+     bang ca hang nam duoi ba nut nho. flex-basis: auto cho nut bat dau tu be
+     rong chu that roi moi gian, nen ti le giua cac nut giu duoc.
+     min-width chan not truong hop nut don doc van gian qua rong. */
+  flex: 1 1 auto;
+  min-width: 44px;
   background: transparent;
   border: none;
   color: var(--text-dim);
