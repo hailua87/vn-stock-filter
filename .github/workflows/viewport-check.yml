@@ -15,8 +15,15 @@ name: Kiem bo cuc (viewport)
 on:
   workflow_dispatch:
   pull_request:
+    # Dung `!` phu dinh NGAY TRONG `paths`, khong dung `paths-ignore`:
+    # GitHub khong cho dat ca hai cho cung mot su kien. Thu tu quan trong —
+    # mau phu dinh phai dung SAU mau khang dinh no loai tru.
+    #
+    # web/data/** la du lieu bot day len hai lan/ngay. No khong dung toi
+    # bo cuc nen khong duoc kich hoat cong. ci.yml da lam dieu tuong tu.
     paths:
       - 'web/**'
+      - '!web/data/**'
       - 'tools/viewport-check/**'
       - '.github/workflows/viewport-check.yml'
 
