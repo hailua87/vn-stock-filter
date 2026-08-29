@@ -73,6 +73,9 @@ html, body {
 }
 
 body {
+  /* Cot doc: topbar + cac thanh phu + dashboard. Xem chu thich o .dashboard. */
+  display: flex;
+  flex-direction: column;
   font-family: var(--font-sans);
   background: var(--bg-base);
   color: var(--text);
@@ -96,7 +99,9 @@ input { font-family: inherit; }
    TOP BAR
    ═══════════════════════════════════════════════════ */
 .topbar {
-  height: var(--topbar-h);
+  /* min-height chu khong phai height: topbar phai CAO THEO NOI DUNG khi wrap
+     xuong hai dong. Ep `height` thi dong thu hai bi cat. */
+  min-height: var(--topbar-h);
   background: linear-gradient(180deg, var(--bg-elev-2) 0%, var(--bg-elev-1) 100%);
   border-bottom: 2px solid var(--border-strong);
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
@@ -338,11 +343,27 @@ input { font-family: inherit; }
      xong, trong khi ba cot cuoi cua bang (TIEU CHI, DIEM, HANG) bi day ra ngoai
      man hinh — nguoi dung dang loc theo XEP LOAI ma khong nhin thay cot HANG. */
   grid-template-columns: var(--col-filter-w) 1fr;
-  height: calc(100vh - var(--topbar-h));
+
+  /* KHONG dung calc(100vh - X). Co BA phan tu canh tranh chieu cao doc, khong
+     phai mot:
+       - .topbar          co gian khi wrap xuong hai dong
+       - #demo-banner     ~33px, chi hien khi metadata.demo
+       - #market-context  ~35px (padding 8px x2 + font 12px + border), hien moi
+                          khi market_context.available — tuc GAN NHU LUON HIEN
+     Ban cu tru --topbar-h va mot hang 33px chep cung cho demo-banner, KHONG tru
+     market-context. Ket qua: .dashboard cao hon cho con lai ~35px, day bang bi
+     day ra ngoai viewport, va `overflow: hidden` tren body giau chuyen do di
+     thay vi cho cuon. Loi nay co san truoc thay doi nay.
+
+     flex: 1 + min-height: 0 tu dung voi MOI to hop, khong hang so nao phai bao
+     tri. min-height: 0 la bat buoc — thieu no thi flex item khong co duoc duoi
+     kich thuoc noi dung va bang lai tran. */
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
-}
-.dashboard.has-banner {
-  height: calc(100vh - var(--topbar-h) - 33px);
+  /* Lam containing block cho drawer .col-detail (position: absolute). Nho vay
+     drawer bat dau ngay duoi topbar ma KHONG can biet topbar cao bao nhieu. */
+  position: relative;
 }
 .dashboard.filters-collapsed {
   grid-template-columns: 36px 1fr;
@@ -502,6 +523,10 @@ input { font-family: inherit; }
 /* Chip rows */
 .chip-row {
   display: flex;
+  /* Cho xuong hang thay vi cat chu. Truoc day mac dinh nowrap, ma .chip co
+     `white-space: nowrap`, nen khi het cho chu bi CAT — o cot 200px thi hang
+     "Tất cả · HOSE · HNX · UPCOM" (can 181px) mat chu UPCOM. */
+  flex-wrap: wrap;
   gap: 2px;
   background: var(--bg-base);
   border-radius: 4px;
@@ -509,7 +534,14 @@ input { font-family: inherit; }
   border: 1px solid var(--border-strong);
 }
 .chip {
-  flex: 1;
+  /* `flex: 1 1 auto` chu khong phai `flex: 1`.
+     `flex: 1` co flex-basis 0, nen khi wrap thi MOI HANG chia deu rieng: o
+     172px hang hai chi con "UPCOM" va no gian full be rong hang — mot nut to
+     bang ca hang nam duoi ba nut nho. flex-basis: auto cho nut bat dau tu be
+     rong chu that roi moi gian, nen ti le giua cac nut giu duoc.
+     min-width chan not truong hop nut don doc van gian qua rong. */
+  flex: 1 1 auto;
+  min-width: 44px;
   background: transparent;
   border: none;
   color: var(--text-dim);
@@ -755,7 +787,16 @@ input { font-family: inherit; }
   background: var(--bg-elev-3);
   box-shadow: inset 5px 0 0 var(--focus), 0 0 0 1px rgba(79,195,247,0.3);
 }
-.signal-table tbody tr.selected td { color: var(--text); font-weight: 500; }
+/* Hang chon KHONG lam phang phan cap bac.
+   Ban cu: `tr.selected td { color: var(--text); font-weight: 500 }`. Do cu the
+   (0,3,2) cao hon moi quy tac bac (0,2,2) nen tren hang duoc chon: bac 3 mat
+   mau --text-dim, va MA TUT TU 600 XUONG 500 — ma co phieu o hang dang chon
+   mong hon o cac hang khac, dung nguoc voi y do.
+   Hang chon da co du tin hieu ma khong can dong toi chu:
+     - vach 5px trai  inset 5px 0 0 var(--focus)
+     - vien xanh nhat 0 0 0 1px rgba(79,195,247,.3)
+     - nen toi hon    --bg-elev-3 (#1A1F29)
+   Nen bo han quy tac do. */
 .signal-table tbody td {
   padding: 9px 8px;
   white-space: nowrap;
@@ -767,10 +808,52 @@ input { font-family: inherit; }
   color: var(--text-mute);
   font-size: 11px;
 }
-.th-idx, .th-exch { color: var(--text-mute); width: 1%; }
-.signal-table tbody td.th-idx { color: var(--text-mute); font-family: var(--font-mono); font-size: 10px; }
+.th-idx, .th-exch { width: 1%; }
+
+/* ─── PHAN CAP THI GIAC TRONG BANG ─────────────────────────────────────────
+   Truoc day moi o deu 12px, chi khac font-weight (ma 600, so 400). Quet 105
+   dong khong co cho bam mat.
+
+   Ba bac, phan cap bang CO CHU va DO DAM, dung thang --fs-* cua tokens.css:
+
+     bac 1  MA co phieu                 13px / 600 / --text
+     bac 2  GIA, ±1D, DIEM, HANG        12px / 500 / --text
+     bac 3  KLGD, GTGD, VOL×, RSI,      11px / 400 / --text-dim
+            S/R, SAN, #
+
+   Mau: CHI --text va --text-dim. KHONG dung --text-mute o bat ky bac nao —
+   no chi 4.19x tren nen hang chon (#1A1F29), duoi AA 4.5. `.th-idx` va
+   `.th-exch` truoc day dung --text-mute, nay chuyen sang --text-dim.
+
+   THU TU KHOI QUAN TRONG: bac 3 dat TRUOC bac 2 vi o GIA mang ca hai class
+   (`num td-price`) va hai bo chon cung do cu the (0,2,2) — ban dung sau thang.
+   Va ca hai khoi dat TRUOC cac quy tac mau gia ngu nghia ben duoi
+   (td.up/.down/.flat, .score-cell.high) de nhung quy tac do van ghi de duoc
+   mau bac. Cung bai hoc cascade da gap o b1668df. */
+
+/* bac 3 — so lieu tham chieu */
+.signal-table tbody td.num,
+.signal-table tbody td.th-idx {
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-regular);
+  color: var(--text-dim);
+}
+.signal-table tbody td.th-idx { font-family: var(--font-mono); }
+
+/* bac 2 — so lieu quyet dinh */
+.signal-table tbody td.td-price,
+.signal-table tbody td.prio-1,
+.signal-table tbody td.score-cell {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  color: var(--text);
+}
+
+/* bac 1 — ma co phieu */
 .ticker-cell {
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--text);
   letter-spacing: 0.02em;
 }
 .exchange-cell {
@@ -892,13 +975,14 @@ input { font-family: inherit; }
    ban dung SAU thang. Dat truoc thi `position: relative` va `z-index: 2` cua khoi
    kia ghi de, drawer khong bao gio truot vao. */
 .col-detail {
-  position: fixed;
-  /* Bat dau DUOI topbar, khong phai top: 0.
-     Drawer co z-index 50 > topbar 10, nen top: 0 se che goc phai topbar —
-     nut VALUATION, dong ho, trang thai phien. Tren mobile khong ai thay vi
-     topbar o do wrap thanh nhieu dong va co bo cuc khac han; o desktop thi
-     thay ro. Backdrop van giu inset: 0, phu ca topbar la dung — no chi lam mo. */
-  top: var(--topbar-h); right: 0; bottom: 0;
+  /* absolute trong .dashboard (no co position: relative), KHONG phai fixed.
+     Nho vay drawer bat dau ngay duoi topbar ma khong can hang --topbar-h nao —
+     tu dung ca khi topbar wrap hai dong, ca khi #demo-banner hay
+     #market-context xuat hien.
+     Trang thai dong (translateX(100%)) nam ngoai mep phai .dashboard va bi
+     `overflow: hidden` cua no cat di — dung y muon, khong sinh thanh cuon. */
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
   width: 100%;
   max-width: 420px;
   z-index: 50;
@@ -1379,6 +1463,42 @@ kbd {
     --col-filter-w: 200px;
     --col-detail-w: 340px;
   }
+
+  /* Cot bo loc con 200px => 172px kha dung. .date-picker can 204px
+     (select 148px + hai nut 24px + hai gap 4px) nen tran, ma .col-body co
+     overflow-y: auto => overflow-x tu thanh auto => thanh cuon ngang keo lech
+     ca panel. Cho xuong hang.
+     `order: -1` + `flex-basis: 100%` la BAT BUOC, khong du flex-wrap:
+     thu tu DOM la ‹ select ›, ma <select> co min-width: auto chan no co duoi
+     min-content 148px. Wrap tran se cho BA hang — ‹ mot minh, select, roi ›.
+     Dua select len truoc va chiem tron hang thi con dung hai hang:
+       hang 1  [select]  172px
+       hang 2  [‹ ›]      52px   (dp-nav giu flex-grow 0 nen khong gian full) */
+  .date-picker { flex-wrap: wrap; }
+  .dp-select   { order: -1; flex-basis: 100%; }
+
+  /* TABS XUONG HANG RIENG tu 1280px, khong co nhet mot dong.
+     Do that o viewport 709px: topbar-left 234 + strategy-tabs 693 +
+     topbar-right 242 + padding 32 + gap 72 = 1273px. Khoa cung
+     (flex-shrink: 0) khong giai duoc — phai giam be rong that hoac xuong hang.
+     Cat nhan mua duoc nhieu nhat 184px roi het; xuong hang dung o moi be rong.
+
+     Co che nay VON DA CO trong khoi 768px va da chay. O day chi nang nguong
+     len 1280px, giu nguyen gia tri. Khoi 768px sau do chi con phan compact
+     (padding, font-size nho hon) — khong lap lai flex-wrap/order/flex-basis.
+
+     Dieu kien tien quyet da xong o 6bb88fb: .dashboard dung flex: 1 nen topbar
+     cao bao nhieu cung khong lam lech chieu cao; va .col-detail da bo
+     top: var(--topbar-h) o e4f5a7a nen drawer cung khong phu thuoc. */
+  .topbar { flex-wrap: wrap; row-gap: 6px; }
+  .strategy-tabs {
+    order: 10;
+    flex-basis: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .strat-tab { white-space: nowrap; }
 }
 @media (max-width: 1024px) {
   /* On narrower screens, collapse filters by default */
@@ -1393,24 +1513,20 @@ kbd {
 @media (max-width: 768px) {
   html, body { overflow: auto; }
   
+  /* flex-wrap / order / flex-basis / overflow-x da khai o khoi 1280px, khong
+     lap lai. O day chi con phan COMPACT rieng cho mobile. */
   .topbar {
-    flex-wrap: wrap;
     padding: 6px 8px;
-    height: auto;
     min-height: 48px;
     gap: 6px;
   }
   .topbar-center { display: none; }   /* hide stats on mobile */
-  .strategy-tabs {
-    order: 10;
-    flex-basis: 100%;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    -webkit-overflow-scrolling: touch;
-  }
-  .strat-tab { padding: 5px 10px; font-size: 11px; white-space: nowrap; }
+  .strat-tab { padding: 5px 10px; font-size: 11px; }
   
-  .dashboard { display: block; height: auto; }
+  /* flex: none — BAT BUOC. body la flex column nen `flex: 1` o pham vi chung
+     se ep .dashboard chiem phan con lai thay vi gian theo noi dung, pha hanh vi
+     cuon doc cua mobile (html,body { overflow: auto } ngay tren). */
+  .dashboard { display: block; height: auto; flex: none; }
   
   /* Filters as left drawer overlay */
   .col-filters {
@@ -1425,11 +1541,13 @@ kbd {
   }
   .col-filters.mobile-open { transform: translateX(0); }
   
-  /* .col-detail: drawer khai o pham vi chung, khong lap lai o day.
-     TRU `top`: o day topbar co `height: auto; flex-wrap: wrap; min-height: 48px`
-     nen chieu cao that KHONG con bang --topbar-h (52px). Dung bien do se dat
-     drawer sai cho. Giu top: 0 nhu hanh vi mobile von co. */
-  .col-detail { top: 0; }
+  /* .col-detail PHAI quay ve `fixed` o day, khong dung `absolute` nhu pham vi
+     chung. Ly do: o mobile `.dashboard` co `display: block; height: auto` va
+     `html, body { overflow: auto }` — trang CUON DOC. Mot phan tu absolute neo
+     theo .dashboard se cuon di theo trang va cao bang ca noi dung bang, thay vi
+     dung yen phu man hinh. `fixed` neo theo viewport, dung hanh vi drawer von
+     co. Kem theo top: 0 vi topbar o day wrap nhieu dong. */
+  .col-detail { position: fixed; top: 0; }
 
   .col-list { width: 100%; }
   

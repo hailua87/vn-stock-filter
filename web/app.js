@@ -443,13 +443,9 @@ async function loadCombinedData(silent = false) {
   if (!silent) {
     document.getElementById('stat-scanned').textContent = statNumber(universeSize);
     const demoBanner = document.getElementById('demo-banner');
-    if (demoFlag) {
-      demoBanner.style.display = 'block';
-      document.getElementById('dashboard').classList.add('has-banner');
-    } else {
-      demoBanner.style.display = 'none';
-      document.getElementById('dashboard').classList.remove('has-banner');
-    }
+    // `has-banner` da bo: .dashboard dung flex: 1 nen no tu co lai khi banner
+    // chiem cho, khong con hang 33px nao de bat/tat.
+    demoBanner.style.display = demoFlag ? 'block' : 'none';
     render();
   }
 }
@@ -498,13 +494,8 @@ async function loadLatestFirst() {
     document.getElementById('stat-scanned').textContent =
       statNumber(data.metadata?.total_scanned);
     const demoBanner = document.getElementById('demo-banner');
-    if (data.metadata?.demo) {
-      demoBanner.style.display = 'block';
-      document.getElementById('dashboard').classList.add('has-banner');
-    } else {
-      demoBanner.style.display = 'none';
-      document.getElementById('dashboard').classList.remove('has-banner');
-    }
+    // Xem ghi chu ve `has-banner` o loadCombinedData.
+    demoBanner.style.display = data.metadata?.demo ? 'block' : 'none';
 
     render();
   } catch (e) {
@@ -561,7 +552,7 @@ function renderDateOptions() {
   sel.innerHTML = state.availableDates.map(d => {
     const isLatest = d === state.latestDate;
     return `<option value="${d}" ${d === state.currentDate ? 'selected' : ''}>
-      ${formatDateLong(d)}${isLatest ? '  (mới nhất)' : ''}
+      ${isLatest ? '• ' : ''}${formatDateLong(d)}
     </option>`;
   }).join('');
 
@@ -1099,7 +1090,7 @@ function renderRow(s, idx) {
       <td class="th-idx">${idx}</td>
       <td class="ticker-with-badges"><span class="ticker-cell">${s.ticker}</span>${eventFlag}<span class="ticker-badges">${badgesInline}</span></td>
       <td><span class="exchange-cell">${s.exchange}</span></td>
-      <td class="num">${fmtPrice(s.close)}</td>
+      <td class="num td-price">${fmtPrice(s.close)}</td>
       <td class="num prio-1">${renderChange1D(s)}</td>
       <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
       <td class="num">${fmtVolume(s.volume)}</td>
@@ -1137,7 +1128,7 @@ function renderRow(s, idx) {
     <td class="th-idx">${idx}</td>
     <td><span class="ticker-cell">${s.ticker}</span>${tkCrossFlag}${turnaroundFlag}${eventFlag}</td>
     <td><span class="exchange-cell">${s.exchange}</span></td>
-    <td class="num">${fmtPrice(s.close)}</td>
+    <td class="num td-price">${fmtPrice(s.close)}</td>
     <td class="num prio-1">${renderChange1D(s)}</td>
     <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
     <td class="num">${fmtVolume(s.volume)}</td>
@@ -1554,7 +1545,12 @@ function fmtValue(price, volume) {
 function formatDateLong(d) {
   if (!d) return '—';
   const date = new Date(d);
-  const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  // Dang ngan T2..T7/CN thay vi "Thứ Sáu". Ly do la be rong: <select> trong
+  // panel bo loc chi co ~168px cho chu, ma "Thứ Sáu · 28/08/2026" can 168px va
+  // "Thứ Sáu · 28/08/2026  (mới nhất)" can ~248px — tran ra ngoai cot 240px,
+  // sinh thanh cuon ngang keo lech moi khoi khac trong panel.
+  // T2..T7/CN la quy uoc quen thuoc o VN, khong mat thong tin nao.
+  const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
   const day = days[date.getDay()];
   const dd = String(date.getDate()).padStart(2, '0');
   const mm = String(date.getMonth() + 1).padStart(2, '0');
