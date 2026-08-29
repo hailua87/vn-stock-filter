@@ -10,9 +10,27 @@ const keys = (v) => {
     (r.overflow || []).forEach(o => out.add(`${run}|tran|${o.el}`));
     (r.textOverflow || []).forEach(o => out.add(`${run}|tranChu|${o.el}|${o.text}`));
     (r.overlap || []).forEach(o => out.add(`${run}|che|${o.covered}<-${o.cover}`));
+    if (r.cols && !r.cols.khop) out.add(`${run}|cotLech|th=${r.cols.thHien} td=${r.cols.tdHien}`);
   }
   (v.functional || []).filter(f => !f.ok).forEach(f => out.add(`fn|${f.name}`));
   return out;
+};
+
+// So SO DO, khong chi so co. Mot truong so nam im trong baseline ma khong ai so
+// thi no khong khac gi khong co.
+// Nguong 8px: du de bo qua sai lech lam tron / khac font metrics giua may, du
+// chat de bat mot tab bi bop (412 vs 560 la lech 148px).
+const NGUONG_PX = 8;
+const METRIC_KEYS = ['tabsScrollWidth', 'tabsClientWidth', 'tabCount'];
+const metricDiffs = [];
+const cmpMetrics = (n, a, b) => {
+  const ma = a?.runs?.top?.metrics, mb = b?.runs?.top?.metrics;
+  if (!ma || !mb) return;
+  for (const k of METRIC_KEYS) {
+    const d = Math.abs((mb[k] ?? 0) - (ma[k] ?? 0));
+    const nguong = k === 'tabCount' ? 0 : NGUONG_PX;
+    if (d > nguong) metricDiffs.push({ n, k, truoc: ma[k], sau: mb[k], lech: d });
+  }
 };
 
 let fixed = 0, left = 0, neu = 0;
@@ -26,6 +44,7 @@ for (const n of names) {
   const x = [...b].filter(k => !a.has(k));
   fixed += f.length; left += l.length; neu += x.length;
   if (x.length) NEW.push([n, x]);
+  cmpMetrics(n, A.viewports[n], B.viewports[n]);
   if (f.length || x.length)
     console.log(`${n.padEnd(21)} DA SUA ${String(f.length).padStart(3)}  CON LAI ${String(l.length).padStart(3)}  MOI ${String(x.length).padStart(3)}`);
 }

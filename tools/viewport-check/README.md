@@ -84,14 +84,26 @@ Mot phep kiem chua tung do chua chung minh duoc no bat duoc gi.
 
 **Ba trong bon phep kiem cuon dai tab la XAC NHAN, khong phai PHAT HIEN.**
 
-Vi sao chung xanh o trang thai loi: nut da bi ep co xuong 43px, nhung 6 nut x
-43px + gap van la 412px > 386px cho co, nen "dai tab co cuon duoc khong" VAN
-DUNG. Cai sai khong nam o cho cuon — nam o cho nut bi bop va chu tran ra ngoai.
-Chi so scrollWidth phan anh gian tiep: 412px (hong) so voi 560px (dung).
+VI SAO chung xanh — va day la cho de doc nham. KHONG phai vi chung khong lien
+quan toi loi. Chung rat lien quan:
 
-Chung van dang giu: chung khoa lai hanh vi sau khi sua, de mot thay doi sau nay
-lam mat kha nang cuon thi bi bat. Nhung DUNG tin chung se bao dong khi dai tab
-hong lai theo dung kieu cu.
+```
+hong:  scrollWidth 412  /  clientWidth 386     (nut bi bop xuong 43px)
+dung:  scrollWidth 560  /  clientWidth 386     (nut giu be rong that)
+```
+
+O trang thai hong dai tab VAN cuon duoc, chi 26px thay vi 174px. `scrollWidth`
+phan anh loi RAT RO — lech 148px. Phep kiem xanh vi no dat cau hoi NHI PHAN
+(`scrollW > clientW ?`) cho mot dai luong LIEN TUC, roi vut bo chinh tin hieu do
+khi rut ve true/false.
+
+Khac biet nay quan trong: phep kiem khong lien quan thi bo di cung duoc; phep
+kiem dung sai nguong thi SUA DUOC thanh phat hien.
+
+Vi vay `scrollWidth`, `clientWidth`, `tabCount` va be rong tung tab duoc ghi vao
+baseline duoi dang SO DO (`runs.top.metrics`), va `diff.mjs` so chung voi nguong
+8px (tabCount: 0). So do doi khong lam fail build — no la thong tin — nhung no
+KHONG con nam im trong baseline ma khong ai doc.
 
 ## Gioi han khong khac phuc duoc
 

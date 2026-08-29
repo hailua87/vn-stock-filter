@@ -124,13 +124,24 @@ export async function runFunctional(page, isMobile, base) {
   try {
     await page.click('.strat-tab[data-strategy="analyzer"]', { timeout: 4000 });
     await settle(page);
+    // .topbar-analyzer mac dinh `hidden`, CHI hien o tab "Phan tich ma". Do ma
+    // khong mo tab do truoc thi phan tu khong ton tai va phep kiem xanh gia.
+    const shown = await page.$eval('.topbar-analyzer', el => !el.hidden).catch(() => false);
+    rec('analyzer:o-nhap-hien-ra', shown, shown ? 'hidden=false' : 'van hidden — phep kiem duoi vo nghia');
+
     const r = await page.$eval('#analyzer-search', el => {
       const b = el.getBoundingClientRect();
       const h = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+      const box = el.parentElement.getBoundingClientRect();
       return { self: h === el, hit: h ? (h.tagName.toLowerCase() + '.' + String(h.className).split(' ')[0]) : null,
-               w: Math.round(b.width), h: Math.round(b.height) };
+               w: Math.round(b.width), h: Math.round(b.height),
+               // Tran ra ngoai viewport hay bi ep co duoi be rong khai bao
+               boxW: Math.round(box.w || box.width), right: Math.round(b.right), vw: innerWidth };
     }).catch(() => null);
     rec('analyzer:input-khong-bi-che', !!r && r.self, r ? `w=${r.w} h=${r.h} hit=${r.hit}` : 'khong tim thay');
+    // Placeholder day du can ~300px o 12px mono. Duoi 200px la khong doc noi.
+    rec('analyzer:o-nhap-du-rong', !!r && r.w >= 200, r ? `w=${r.w} (khai 280px)` : 'loi');
+    rec('analyzer:khong-tran-mep', !!r && r.right <= r.vw + 1, r ? `right=${r.right} vw=${r.vw}` : 'loi');
   } catch (e) { rec('analyzer:input-khong-bi-che', false, String(e).slice(0, 70)); }
 
   return out;

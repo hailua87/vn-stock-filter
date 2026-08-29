@@ -129,6 +129,34 @@ export const PROBE = () => {
              zIndex: s.zIndex, overflowsY: el.scrollHeight > Math.round(r.height) + 1 };
   });
 
+  // ── SO DO (khong phai co true/false) ──
+  // scrollWidth cua dai tab phan anh loi ep co RAT RO: 412px khi nut bi bop
+  // xuong 43px, 560px khi nut giu be rong that. Nhung phep kiem nhi phan
+  // "scrollW > clientW?" DUNG o ca hai trang thai, nen no vut bo chinh tin hieu
+  // do. Ghi ra day duoi dang SO de diff so duoc, dung de no chi song trong mot
+  // cai co.
+  const tabs = document.querySelector('.strategy-tabs');
+  const metrics = tabs ? {
+    tabsScrollWidth: tabs.scrollWidth,
+    tabsClientWidth: tabs.clientWidth,
+    tabCount: tabs.querySelectorAll('.strat-tab').length,
+    tabWidths: [...tabs.querySelectorAll('.strat-tab')].map(t => Math.round(t.getBoundingClientRect().width)),
+  } : null;
+
+  // ── COT BANG: so o tieu de hien PHAI BANG so o than bang hien ──
+  // Khoi @media an cot bang `.signal-table .prio-N { display: none }`. Quy tac
+  // do ap cho ca <th> lan <td>, nhung neu <td> THIEU class prio thi chi hang
+  // tieu de mat o — hang du lieu giu nguyen 15 o. Bang lech cot ma khong co gi
+  // bao loi.
+  const table = document.querySelector('.signal-table');
+  let cols = null;
+  if (table) {
+    const vth = [...table.querySelectorAll('thead th')].filter(vis).length;
+    const row = table.querySelector('tbody tr[data-ticker]');
+    const vtd = row ? [...row.querySelectorAll('td')].filter(vis).length : null;
+    cols = { thHien: vth, tdHien: vtd, khop: vtd === null || vth === vtd };
+  }
+
   // ── .list-head bi KEP hay bi CAT ──
   const lh = document.querySelector('.list-head');
   let listHead = null;
@@ -150,6 +178,6 @@ export const PROBE = () => {
     maxTouchPoints: navigator.maxTouchPoints,
   };
 
-  return { vw, vh, env, scrollY: Math.round(window.scrollY),
+  return { vw, vh, env, metrics, cols, scrollY: Math.round(window.scrollY),
            overflowRawCount: overflowRaw.length, overflow, textOverflow, overlap, axis, listHead };
 };

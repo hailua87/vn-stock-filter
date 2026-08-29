@@ -1080,6 +1080,12 @@ function escapeAttr(str) {
   ));
 }
 
+// LUU Y KHI SUA BANG: moi <td> phai mang DUNG class prio-* nhu <th> tuong ung
+// trong index.html. Khoi @media an cot bang `.signal-table .prio-N { display: none }`
+// — quy tac do ap cho CA th LAN td, nhung neu td thieu class thi chi HANG TIEU DE
+// mat o, con hang du lieu giu nguyen => bang LECH COT.
+// Truoc 29/08/2026 co 9/15 cot thieu, nen o 402px tieu de chi con 5 cot ma moi
+// hang du lieu van 15 o: nguoi dung thay HOSE va KLGD duoi tieu de GIA va DIEM.
 function renderRow(s, idx) {
   const change = s.m_change_5d_pct || 0;
   const changeClass = change > 0 ? 'up' : change < 0 ? 'down' : 'flat';
@@ -1120,19 +1126,19 @@ function renderRow(s, idx) {
     const passCls = passCount === totalStrats ? 'full' : passCount >= 2 ? 'high' : 'low';
 
     return `<tr data-ticker="${s.ticker}" class="${selectedClass}">
-      <td class="th-idx">${idx}</td>
+      <td class="th-idx prio-4">${idx}</td>
       <td class="ticker-with-badges"><span class="ticker-cell">${s.ticker}</span>${eventFlag}<span class="ticker-badges">${badgesInline}</span></td>
-      <td><span class="exchange-cell">${s.exchange}</span></td>
+      <td class="prio-3"><span class="exchange-cell">${s.exchange}</span></td>
       <td class="num td-price">${fmtPrice(s.close)}</td>
       <td class="num prio-1">${renderChange1D(s)}</td>
       <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
-      <td class="num">${fmtVolume(s.volume)}</td>
-      <td class="num">${fmtValue(s.close, s.volume)}</td>
-      <td class="num">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
-      <td class="num">${(s.m_rsi14 || 0).toFixed(0)}</td>
-      <td class="num">${supCell}</td>
-      <td class="num">${resCell}</td>
-      <td class="combined-criteria-cell" style="display:none;"></td>
+      <td class="num prio-2">${fmtVolume(s.volume)}</td>
+      <td class="num prio-3">${fmtValue(s.close, s.volume)}</td>
+      <td class="num prio-3">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
+      <td class="num prio-3">${(s.m_rsi14 || 0).toFixed(0)}</td>
+      <td class="num prio-4">${supCell}</td>
+      <td class="num prio-4">${resCell}</td>
+      <td class="combined-criteria-cell prio-4" style="display:none;"></td>
       <td class="num"><span class="combined-pass ${passCls}">${passCount}/${totalStrats}</span></td>
       <td><span class="rating-tag ${ratingClass}">${s.rating}</span></td>
     </tr>`;
@@ -1158,19 +1164,19 @@ function renderRow(s, idx) {
     : '';
 
   return `<tr data-ticker="${s.ticker}" class="${selectedClass}">
-    <td class="th-idx">${idx}</td>
+    <td class="th-idx prio-4">${idx}</td>
     <td><span class="ticker-cell">${s.ticker}</span>${tkCrossFlag}${turnaroundFlag}${eventFlag}</td>
-    <td><span class="exchange-cell">${s.exchange}</span></td>
+    <td class="prio-3"><span class="exchange-cell">${s.exchange}</span></td>
     <td class="num td-price">${fmtPrice(s.close)}</td>
     <td class="num prio-1">${renderChange1D(s)}</td>
     <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
-    <td class="num">${fmtVolume(s.volume)}</td>
-    <td class="num">${fmtValue(s.close, s.volume)}</td>
-    <td class="num">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
-    <td class="num">${(s.m_rsi14 || 0).toFixed(0)}</td>
-    <td class="num">${supCell}</td>
-    <td class="num">${resCell}</td>
-    <td><div class="criteria-pills">${pills}</div></td>
+    <td class="num prio-2">${fmtVolume(s.volume)}</td>
+    <td class="num prio-3">${fmtValue(s.close, s.volume)}</td>
+    <td class="num prio-3">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
+    <td class="num prio-3">${(s.m_rsi14 || 0).toFixed(0)}</td>
+    <td class="num prio-4">${supCell}</td>
+    <td class="num prio-4">${resCell}</td>
+    <td class="prio-4"><div class="criteria-pills">${pills}</div></td>
     <td class="num score-cell ${scoreClass}">${s.total_score}/${currentMaxScore()}</td>
     <td><span class="rating-tag ${ratingClass}">${s.rating}</span></td>
   </tr>`;
