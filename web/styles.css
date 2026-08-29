@@ -1425,6 +1425,29 @@ kbd {
        hang 2  [‹ ›]      52px   (dp-nav giu flex-grow 0 nen khong gian full) */
   .date-picker { flex-wrap: wrap; }
   .dp-select   { order: -1; flex-basis: 100%; }
+
+  /* TABS XUONG HANG RIENG tu 1280px, khong co nhet mot dong.
+     Do that o viewport 709px: topbar-left 234 + strategy-tabs 693 +
+     topbar-right 242 + padding 32 + gap 72 = 1273px. Khoa cung
+     (flex-shrink: 0) khong giai duoc — phai giam be rong that hoac xuong hang.
+     Cat nhan mua duoc nhieu nhat 184px roi het; xuong hang dung o moi be rong.
+
+     Co che nay VON DA CO trong khoi 768px va da chay. O day chi nang nguong
+     len 1280px, giu nguyen gia tri. Khoi 768px sau do chi con phan compact
+     (padding, font-size nho hon) — khong lap lai flex-wrap/order/flex-basis.
+
+     Dieu kien tien quyet da xong o 6bb88fb: .dashboard dung flex: 1 nen topbar
+     cao bao nhieu cung khong lam lech chieu cao; va .col-detail da bo
+     top: var(--topbar-h) o e4f5a7a nen drawer cung khong phu thuoc. */
+  .topbar { flex-wrap: wrap; row-gap: 6px; }
+  .strategy-tabs {
+    order: 10;
+    flex-basis: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .strat-tab { white-space: nowrap; }
 }
 @media (max-width: 1024px) {
   /* On narrower screens, collapse filters by default */
@@ -1439,22 +1462,15 @@ kbd {
 @media (max-width: 768px) {
   html, body { overflow: auto; }
   
+  /* flex-wrap / order / flex-basis / overflow-x da khai o khoi 1280px, khong
+     lap lai. O day chi con phan COMPACT rieng cho mobile. */
   .topbar {
-    flex-wrap: wrap;
     padding: 6px 8px;
-    height: auto;
     min-height: 48px;
     gap: 6px;
   }
   .topbar-center { display: none; }   /* hide stats on mobile */
-  .strategy-tabs {
-    order: 10;
-    flex-basis: 100%;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    -webkit-overflow-scrolling: touch;
-  }
-  .strat-tab { padding: 5px 10px; font-size: 11px; white-space: nowrap; }
+  .strat-tab { padding: 5px 10px; font-size: 11px; }
   
   /* flex: none — BAT BUOC. body la flex column nen `flex: 1` o pham vi chung
      se ep .dashboard chiem phan con lai thay vi gian theo noi dung, pha hanh vi
