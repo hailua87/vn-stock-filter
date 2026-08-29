@@ -552,7 +552,7 @@ function renderDateOptions() {
   sel.innerHTML = state.availableDates.map(d => {
     const isLatest = d === state.latestDate;
     return `<option value="${d}" ${d === state.currentDate ? 'selected' : ''}>
-      ${formatDateLong(d)}${isLatest ? '  (mới nhất)' : ''}
+      ${isLatest ? '• ' : ''}${formatDateLong(d)}
     </option>`;
   }).join('');
 
@@ -1545,7 +1545,12 @@ function fmtValue(price, volume) {
 function formatDateLong(d) {
   if (!d) return '—';
   const date = new Date(d);
-  const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  // Dang ngan T2..T7/CN thay vi "Thứ Sáu". Ly do la be rong: <select> trong
+  // panel bo loc chi co ~168px cho chu, ma "Thứ Sáu · 28/08/2026" can 168px va
+  // "Thứ Sáu · 28/08/2026  (mới nhất)" can ~248px — tran ra ngoai cot 240px,
+  // sinh thanh cuon ngang keo lech moi khoi khac trong panel.
+  // T2..T7/CN la quy uoc quen thuoc o VN, khong mat thong tin nao.
+  const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
   const day = days[date.getDay()];
   const dd = String(date.getDate()).padStart(2, '0');
   const mm = String(date.getMonth() + 1).padStart(2, '0');
