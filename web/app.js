@@ -207,10 +207,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   // `if (!STRATEGIES[strategy]) return`. Ca hai truong hop deu roi ve nhanh
   // duoi — tab mac dinh pre_breakout — chu khong bao gio de trang trang.
   //
-  // LOAI TRU 'analyzer'. Roi trang o tab phan tich hau nhu luon vi vua tra xong
-  // MOT MA, khong phai vi muon do la man hinh khoi dau. Mo len thay man phan
-  // tich rong la trang trang ve mat cam nhan — khong bang, khong tin hieu, chi
-  // mot o tim kiem. 'combined' thi giu: no van la mot bang day du.
+  // Cua chan 'analyzer' o day la LOP PHONG THU cho ban ghi cu — tu commit sau,
+  // switchStrategy khong ghi khoa nay khi vao tab phan tich nua, nen gia tri
+  // 'analyzer' chi con co the den tu localStorage luu truoc do (hoac sua tay).
+  // Mo len thay man phan tich rong la trang trang ve mat cam nhan — khong bang,
+  // khong tin hieu, chi mot o tim kiem. 'combined' thi giu: van la bang day du.
   const savedStrategy = prefGet('strategy');
   if (savedStrategy && savedStrategy !== 'analyzer'
       && savedStrategy !== activeStrategy && STRATEGIES[savedStrategy]) {
@@ -363,7 +364,13 @@ function bindStrategyTabs() {
 async function switchStrategy(strategy) {
   if (!STRATEGIES[strategy]) return;
   activeStrategy = strategy;
-  prefSet('strategy', strategy);
+  // KHONG ghi khi la tab phan tich: giu nguyen khoa cu.
+  //
+  // Nguoi ta ghe tab do de TRA MOT MA roi di. Lua chon tab that cua ho la cai
+  // TRUOC DO — ghi de len no bang mot lan ghe qua la lam mat dung cai minh
+  // dang co gang nho. Chan o cho GHI chu khong phai o cho doc, vi chi o day
+  // moi biet lua chon truoc do la gi de ma giu.
+  if (strategy !== 'analyzer') prefSet('strategy', strategy);
   document.querySelectorAll('.strat-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.strategy === strategy);
   });
