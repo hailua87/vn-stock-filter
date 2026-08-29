@@ -359,15 +359,15 @@ async function loadCombinedData(silent = false) {
 
   // Index signals by ticker per strategy
   const byTicker = {};      // ticker -> { strategies: Set, data: best signal record }
-  let universeSize = 0;
+  let universeSize = 0;   // = metadata.total_scanned, tên khoá backend thực ghi
   let demoFlag = false;
   let scanDate = null;
 
   for (const { key, signals, metadata } of results) {
     state.combined.sourceData[key] = { signals, metadata };
-    if (metadata.universe_size && metadata.universe_size > universeSize) universeSize = metadata.universe_size;
+    if (metadata.total_scanned && metadata.total_scanned > universeSize) universeSize = metadata.total_scanned;
     if (metadata.demo) demoFlag = true;
-    if (metadata.scan_date) scanDate = metadata.scan_date;
+    if (metadata.session_date) scanDate = metadata.session_date;
     if (metadata.market_context && metadata.market_context.available) {
       state.marketContext = metadata.market_context;
       renderMarketContext(metadata.market_context, metadata.intraday);
@@ -470,12 +470,12 @@ async function loadLatestFirst() {
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
     state.raw = applyExchangeOverrides(data.signals || []);
-    state.currentDate = data.metadata?.scan_date || null;
+    state.currentDate = data.metadata?.session_date || null;
     state.latestDate = state.currentDate;
     state.runMetadata = extractRunMetadata(data);
 
     document.getElementById('stat-scanned').textContent =
-      (data.metadata?.universe_size || 0).toLocaleString();
+      (data.metadata?.total_scanned || 0).toLocaleString();
     const demoBanner = document.getElementById('demo-banner');
     if (data.metadata?.demo) {
       demoBanner.style.display = 'block';
@@ -521,10 +521,10 @@ async function loadDateData(date) {
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
     state.raw = applyExchangeOverrides(data.signals || []);
-    state.currentDate = data.metadata?.scan_date || date;
+    state.currentDate = data.metadata?.session_date || date;
     state.runMetadata = extractRunMetadata(data);
     document.getElementById('stat-scanned').textContent =
-      (data.metadata?.universe_size || 0).toLocaleString();
+      (data.metadata?.total_scanned || 0).toLocaleString();
     render();
   } catch (e) {
     console.error('Load date failed:', e);
