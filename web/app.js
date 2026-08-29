@@ -196,13 +196,15 @@ function bindMobileDrawers() {
 
   backdrop.addEventListener('click', closeDrawers);
 
-  // When row is clicked on mobile, open detail drawer
-  // (works because openDetail() adds .mobile-open via this listener)
+  // Click mot hang -> mo drawer chi tiet. O MOI be rong, khong chi mobile.
+  //
+  // Truoc day co cong `matchMedia('(max-width: 768px)')` o day. Bo di la thay
+  // doi BAT BUOC cho bo cuc moi: panel chi tiet khong con la track grid, nen
+  // tren desktop no chi hien khi co .mobile-open. Giu cong lai thi panel bien
+  // mat han o desktop ma khong co gi thay the.
   document.addEventListener('detail-opened', () => {
-    if (window.matchMedia('(max-width: 768px)').matches) {
-      detailCol.classList.add('mobile-open');
-      backdrop.classList.add('show');
-    }
+    detailCol.classList.add('mobile-open');
+    backdrop.classList.add('show');
   });
 }
 
