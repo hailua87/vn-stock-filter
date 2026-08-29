@@ -1829,6 +1829,19 @@ kbd {
   display: flex;
   align-items: center;
 }
+/* `display` cua tac gia DE LEN `[hidden] { display: none }` cua trinh duyet.
+   index.html khai <div class="topbar-analyzer" hidden>, app.js:335 dat
+   analyzerBox.hidden = (strategy !== 'analyzer') — ca hai deu dung. Nhung
+   `display: flex` o tren thang, nen o nhap ma HIEN O MOI TAB:
+     el.hidden = true, computed display = flex, w = 210px.
+   Da xac nhan tren Safari iPhone 16 Pro that: dang o tab "Pre-Breakout"
+   ma o nhap van hien.
+   Hop 280px luon chiem cho con ep .topbar-left / .topbar-right vo dong.
+   Do: an hop di thi so nhan vo dong o 1366/1440/1600px tu 4 xuong 0.
+   (#help-modal khong dinh loi nay vi no dat ca style.display noi tuyen.) */
+.topbar-analyzer[hidden] {
+  display: none;
+}
 .analyzer-input {
   /* PLACEHOLDER LA RANG BUOC BE RONG DUY NHAT cua o nay.
      `maxlength="10"` trong index.html, ma ma co phieu VN dai 3 ky tu, nen noi
