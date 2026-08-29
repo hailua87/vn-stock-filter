@@ -11,7 +11,9 @@ const SHOTS = process.env.SHOTS === '1';
 const browser = await chromium.launch();
 const report = { base: BASE, at: new Date().toISOString(), viewports: {} };
 
+const ONLY = process.env.ONLY ? process.env.ONLY.split(',') : null;
 for (const v of VIEWPORTS) {
+  if (ONLY && !ONLY.includes(v.name)) continue;
   const ctx = await browser.newContext({
     viewport: { width: v.w, height: v.h },
     deviceScaleFactor: 3,

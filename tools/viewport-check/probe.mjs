@@ -72,24 +72,40 @@ export const PROBE = () => {
   // mot o trong bang da cuon khuat khoi .table-wrap van co rect hop le va tam
   // cua no roi vao cho footer dang ve — elementFromPoint tra ve footer va bao
   // "bi che" oan. Lan chay dau cho 19 cap gia kieu nay o desktop 1366px.
-  const clipped = (el, x, y) => {
+  // Lay TAM CUA PHAN NHIN THAY, khong phai tam cua rect day du.
+  //
+  // Vi sao: mot phan tu vat qua bien vung cuon thi nua duoi bi cat, ma tam cua
+  // rect day du roi dung vao pixel bien — pixel do thuoc ve phan tu VE SAU
+  // (footer), nen elementFromPoint tra ve footer va bao "bi che" oan.
+  // Do that o iPad doc: .fib-label top=1329 bottom=1338, .table-wrap bottom=1334,
+  // footer top=1334. Tam = 1334 = dung bien. Dieu kien `y > bottom + 1` khong
+  // bat duoc vi 1334 khong lon hon 1335.
+  // Nguy hiem hon ca cai sai: bien do PHU THUOC SO HANG du lieu, nen hom khac
+  // du lieu khac thi so cap gia doi tu 2 thanh 0 hay 3 — va se hien o cot MOI
+  // PHAT SINH ma khong ai biet vi sao.
+  // Giao rect voi moi to tien cat; rong bang 0 nghia la khuat han -> bo qua.
+  const visibleBox = (el) => {
+    let r = el.getBoundingClientRect();
+    let box = { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
     for (let p = el.parentElement; p && p !== document.documentElement; p = p.parentElement) {
-      const s = getComputedStyle(p);
-      if (s.overflow === 'visible' && s.overflowX === 'visible' && s.overflowY === 'visible') continue;
+      const cs = getComputedStyle(p);
+      if (cs.overflow === 'visible' && cs.overflowX === 'visible' && cs.overflowY === 'visible') continue;
       const b = p.getBoundingClientRect();
-      if (x < b.left - 1 || x > b.right + 1 || y < b.top - 1 || y > b.bottom + 1) return true;
+      box.left = Math.max(box.left, b.left);   box.right = Math.min(box.right, b.right);
+      box.top = Math.max(box.top, b.top);      box.bottom = Math.min(box.bottom, b.bottom);
+      if (box.right - box.left < 1 || box.bottom - box.top < 1) return null;
     }
-    return false;
+    return box;
   };
   const overlap = [];
   for (const el of document.querySelectorAll('body *')) {
     if (!vis(el)) continue;
     const own = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
     if (!own) continue;
-    const r = el.getBoundingClientRect();
-    const x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const vb = visibleBox(el);
+    if (!vb) continue;                       // khuat han sau vung cuon
+    const x = (vb.left + vb.right) / 2, y = (vb.top + vb.bottom) / 2;
     if (x < 0 || y < 0 || x > vw || y > vh) continue;
-    if (clipped(el, x, y)) continue;
     const hit = document.elementFromPoint(x, y);
     if (!hit || hit === el || el.contains(hit) || hit.contains(el)) continue;
     const cs = getComputedStyle(el), ch = getComputedStyle(hit);
