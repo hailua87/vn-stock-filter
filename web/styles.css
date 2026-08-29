@@ -1558,7 +1558,7 @@ kbd {
      Grid 2 cot cho moi nut dung nua be rong, hang le de lai o trong can doi.
      `1fr 1fr` tu lo phan gap, khong phai tu tinh calc(50% - gap).
 
-     .chip bo `flex` (vo nghia voi grid item) va bo `min-width: 44px`. min-width
+     .chip bo `flex` (vo nghia voi grid item). min-width: 44px cua .chip goc
      khong xung dot o day (nua o la 81px > 44px) nhung trong grid no thua.
 
      KHONG ap o be rong day du (cot 240px, .chip-row trong 204px): o do ca nhom
@@ -1571,7 +1571,20 @@ kbd {
   }
   .chip-row .chip {
     flex: none;
-    min-width: 0;
+    /* `min-content` chu KHONG phai 0. Track `1fr` la `minmax(auto, 1fr)`, ma
+       san `auto` cua grid item bi min-width tuong minh THAY THE — dung mau
+       Flexbox 4.5 da gap o .topbar, .strat-tab, va day la lan thu tu. Dat 0
+       la xoa han san, cho nut co duoi be rong chu.
+       Chua lo o dieu kien thuong vi .chip-row con du cho. Lo khi .col-filters
+       bi them padding safe-area ben trai luc xoay ngang: chip-row 171px ->
+       112px, chip 81px -> 51px, chu "Tất cả" 42px trong hop 39px, tran 3px.
+       `min-content` tra lai dung cai san da bi xoa, khong hon:
+         truoc: chip=[51,51,51,51] tran chu 2 muc
+         sau  : chip=[54,48,54,48] tran chu 0, khong loi ra ngoai hop,
+                khong sinh cuon ngang
+       Do o moi viewport (1920 -> 375, ca hai che do flex va grid): KHONG DOI
+       cho nao khac. */
+    min-width: min-content;
   }
   /* Nhom Ichimoku xep DOC, khong phai luoi 2 cot — giu nguyen mot cot. */
   .chip-row-vertical { grid-template-columns: 1fr; }
