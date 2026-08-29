@@ -295,6 +295,37 @@ input { font-family: inherit; }
   border-color: var(--border-strong);
   background: var(--bg-elev-2);
 }
+
+/* Nut co CHU tren topbar. Cung chieu cao / vien / bo goc / hover voi .icon-btn,
+   nhung `width: auto` va padding ngang.
+   Vi sao can class rieng: the <a> VALUATION truoc day dung .icon-btn, ma class
+   do ep `width: 26px`. Style inline cua no chi ghi de padding/font, KHONG ghi de
+   width — nen no van rong 26px trong khi "💰 VALUATION" can ~90px. Flex tinh no
+   la 26px nen bo cuc NGHI la vua, con phan chu tran ra ve de len o tim ma ben
+   trai va #help-btn ben phai (justify-content: center chia deu hai ben).
+   .icon-btn giu nguyen — #help-btn, #detail-close, #help-close deu la ky tu don
+   va van can o vuong 26px. */
+.text-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 11px;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.12s;
+}
+.text-btn:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: var(--bg-elev-2);
+}
 .market-state {
   display: flex;
   align-items: center;
@@ -1499,6 +1530,31 @@ kbd {
     -webkit-overflow-scrolling: touch;
   }
   .strat-tab { white-space: nowrap; }
+
+  /* .chip-row thanh LUOI 2 COT o cot hep.
+     Voi flex-wrap (6afe5bf) bon nut khong con bi cat, nhung khi xuong hang thi
+     MOI HANG chia rieng: hang duoi chi con "UPCOM" (hoac "B") va no gian rong
+     gap doi cac nut hang tren, de lai khoang trong lech.
+     Grid 2 cot cho moi nut dung nua be rong, hang le de lai o trong can doi.
+     `1fr 1fr` tu lo phan gap, khong phai tu tinh calc(50% - gap).
+
+     .chip bo `flex` (vo nghia voi grid item) va bo `min-width: 44px`. min-width
+     khong xung dot o day (nua o la 81px > 44px) nhung trong grid no thua.
+
+     KHONG ap o be rong day du (cot 240px, .chip-row trong 204px): o do ca nhom
+     San (172.8px) lan Xep loai (120px) deu vua MOT HANG, va mot hang doc tot
+     hon 2x2. */
+  .chip-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+  .chip-row .chip {
+    flex: none;
+    min-width: 0;
+  }
+  /* Nhom Ichimoku xep DOC, khong phai luoi 2 cot — giu nguyen mot cot. */
+  .chip-row-vertical { grid-template-columns: 1fr; }
 }
 @media (max-width: 1024px) {
   /* On narrower screens, collapse filters by default */
