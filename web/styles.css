@@ -787,7 +787,16 @@ input { font-family: inherit; }
   background: var(--bg-elev-3);
   box-shadow: inset 5px 0 0 var(--focus), 0 0 0 1px rgba(79,195,247,0.3);
 }
-.signal-table tbody tr.selected td { color: var(--text); font-weight: 500; }
+/* Hang chon KHONG lam phang phan cap bac.
+   Ban cu: `tr.selected td { color: var(--text); font-weight: 500 }`. Do cu the
+   (0,3,2) cao hon moi quy tac bac (0,2,2) nen tren hang duoc chon: bac 3 mat
+   mau --text-dim, va MA TUT TU 600 XUONG 500 — ma co phieu o hang dang chon
+   mong hon o cac hang khac, dung nguoc voi y do.
+   Hang chon da co du tin hieu ma khong can dong toi chu:
+     - vach 5px trai  inset 5px 0 0 var(--focus)
+     - vien xanh nhat 0 0 0 1px rgba(79,195,247,.3)
+     - nen toi hon    --bg-elev-3 (#1A1F29)
+   Nen bo han quy tac do. */
 .signal-table tbody td {
   padding: 9px 8px;
   white-space: nowrap;
