@@ -891,13 +891,24 @@ function render() {
   if (state.currentDate) {
     const [y, m, day] = state.currentDate.split('-');
     const isLatest = state.currentDate === state.latestDate;
-    statDate.textContent = isLatest ? `· LIVE ${day}/${m}` : `· ${day}/${m}`;
-    statDate.style.color = isLatest ? 'var(--up)' : 'var(--text-mute)';
+    // Ky hieu phien moi nhat la "•", GIONG #date-select trong panel bo loc.
+    //
+    // Truoc day cho nay dung chu "LIVE" con o chon ngay dung "•" — hai ky hieu
+    // cho cung mot y, tren cung mot man hinh. Chon "•" chu khong phai "LIVE":
+    // chinh chu thich cua updateDataFreshness da ghi rang nhan "LIVE" bi go khoi
+    // header vi no hua realtime trong khi du lieu cap nhat 2 lan/ngay. Giu no o
+    // day la dua lai dung loi do vao.
+    //
+    // Bo luon dau "· " dan dau: da co <span class="hs-sep">·</span> ngay truoc
+    // trong index.html, nen chuoi cu hien ra HAI dau cham lien nhau.
+    statDate.textContent = isLatest ? `• ${day}/${m}` : `${day}/${m}`;
+    // --text-dim chu khong phai --text-mute: mute chi 3.34x khi hover, duoi AA.
+    statDate.style.color = isLatest ? 'var(--up)' : 'var(--text-dim)';
   } else {
     // Không có ngày phiên thì nói KHÔNG BIẾT, đừng để nguyên giá trị lần trước:
     // một ngày cũ nằm lại trên màn hình còn tệ hơn một dấu gạch.
     statDate.textContent = STAT_UNKNOWN;
-    statDate.style.color = 'var(--text-mute)';
+    statDate.style.color = 'var(--text-dim)';
   }
 
   // FIX (2026-05-26): render badge intraday/eod theo runMetadata.
