@@ -893,7 +893,12 @@ input { font-family: inherit; }
    kia ghi de, drawer khong bao gio truot vao. */
 .col-detail {
   position: fixed;
-  top: 0; right: 0; bottom: 0;
+  /* Bat dau DUOI topbar, khong phai top: 0.
+     Drawer co z-index 50 > topbar 10, nen top: 0 se che goc phai topbar —
+     nut VALUATION, dong ho, trang thai phien. Tren mobile khong ai thay vi
+     topbar o do wrap thanh nhieu dong va co bo cuc khac han; o desktop thi
+     thay ro. Backdrop van giu inset: 0, phu ca topbar la dung — no chi lam mo. */
+  top: var(--topbar-h); right: 0; bottom: 0;
   width: 100%;
   max-width: 420px;
   z-index: 50;
@@ -1420,7 +1425,11 @@ kbd {
   }
   .col-filters.mobile-open { transform: translateX(0); }
   
-  /* .col-detail: drawer khai o pham vi chung, khong lap lai o day. */
+  /* .col-detail: drawer khai o pham vi chung, khong lap lai o day.
+     TRU `top`: o day topbar co `height: auto; flex-wrap: wrap; min-height: 48px`
+     nen chieu cao that KHONG con bang --topbar-h (52px). Dung bien do se dat
+     drawer sai cho. Giu top: 0 nhu hanh vi mobile von co. */
+  .col-detail { top: 0; }
 
   .col-list { width: 100%; }
   
