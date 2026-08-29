@@ -109,6 +109,23 @@ function currentCriteria() { return currentConfig().criteria; }
 function currentMaxScore() { return currentConfig().maxScore; }
 function currentDataDir()  { return currentConfig().dataDir; }
 
+// ──────────── Thống kê: khoá thiếu phải hiện "—", không được hiện 0 ────────
+//
+// `|| 0` cũ biến khoá VẮNG thành một con số trông hợp lệ. Dashboard hiện
+// "0 mã quét" cạnh 105 tín hiệu — một điều kiện báo động mà không ai thấy vô
+// lý, vì 0 là một con số và con số thì trông như dữ liệu. Nếu chỗ đó hiện "—"
+// thì lỗi đọc sai tên khoá (`universe_size` vs `total_scanned`) đã lộ ngay ngày
+// đầu thay vì sống nhiều tháng.
+//
+// Số không phải là "không biết".
+const STAT_UNKNOWN = '—';
+
+function statNumber(v) {
+  if (v === null || v === undefined) return STAT_UNKNOWN;
+  const n = Number(v);
+  return Number.isFinite(n) ? n.toLocaleString() : STAT_UNKNOWN;
+}
+
 const state = {
   raw: [],
   filtered: [],
@@ -359,7 +376,9 @@ async function loadCombinedData(silent = false) {
 
   // Index signals by ticker per strategy
   const byTicker = {};      // ticker -> { strategies: Set, data: best signal record }
-  let universeSize = 0;   // = metadata.total_scanned, tên khoá backend thực ghi
+  // null chứ không phải 0: chưa file nào khai `total_scanned` thì đó là KHÔNG
+  // BIẾT, khác hẳn với đã biết và bằng 0.
+  let universeSize = null;   // = metadata.total_scanned, tên khoá backend thực ghi
   let demoFlag = false;
   let scanDate = null;
 
@@ -420,7 +439,7 @@ async function loadCombinedData(silent = false) {
   state.currentDate = scanDate;
   state.latestDate = scanDate;
   if (!silent) {
-    document.getElementById('stat-scanned').textContent = universeSize.toLocaleString();
+    document.getElementById('stat-scanned').textContent = statNumber(universeSize);
     const demoBanner = document.getElementById('demo-banner');
     if (demoFlag) {
       demoBanner.style.display = 'block';
@@ -475,7 +494,7 @@ async function loadLatestFirst() {
     state.runMetadata = extractRunMetadata(data);
 
     document.getElementById('stat-scanned').textContent =
-      (data.metadata?.total_scanned || 0).toLocaleString();
+      statNumber(data.metadata?.total_scanned);
     const demoBanner = document.getElementById('demo-banner');
     if (data.metadata?.demo) {
       demoBanner.style.display = 'block';
@@ -524,7 +543,7 @@ async function loadDateData(date) {
     state.currentDate = data.metadata?.session_date || date;
     state.runMetadata = extractRunMetadata(data);
     document.getElementById('stat-scanned').textContent =
-      (data.metadata?.total_scanned || 0).toLocaleString();
+      statNumber(data.metadata?.total_scanned);
     render();
   } catch (e) {
     console.error('Load date failed:', e);
@@ -871,6 +890,11 @@ function render() {
     const isLatest = state.currentDate === state.latestDate;
     statDate.textContent = isLatest ? `· LIVE ${day}/${m}` : `· ${day}/${m}`;
     statDate.style.color = isLatest ? 'var(--up)' : 'var(--text-mute)';
+  } else {
+    // Không có ngày phiên thì nói KHÔNG BIẾT, đừng để nguyên giá trị lần trước:
+    // một ngày cũ nằm lại trên màn hình còn tệ hơn một dấu gạch.
+    statDate.textContent = STAT_UNKNOWN;
+    statDate.style.color = 'var(--text-mute)';
   }
 
   // FIX (2026-05-26): render badge intraday/eod theo runMetadata.
