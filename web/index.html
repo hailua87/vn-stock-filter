@@ -4,6 +4,27 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VN Stock Scanner — Trading Dashboard</title>
+<!-- GIU NEN TOI. tokens.css nap TRUOC styles.css nen 24 bi danh mau cua no
+     (--bg-base, --text, --up, --down, --border, --limit-*, --rating-*, ...)
+     bi styles.css khai de va nam im. Day la CHU Y, khong phai trang thai tam.
+
+     DUNG DAO THU TU HAI THE NAY. Dao la lat toan bo bang mau sang nen sang,
+     va phep do ngay 29/08/2026 noi ro do la nuoc lui:
+
+       - chi 2/12 bien phu dat WCAG AA tren nen sang
+       - 8 trong so cac bien hong hien dang DAT tren nen toi
+         (vd --rating-b 5.91x -> 1.69x; --cat-event 8.16x -> 1.67x)
+       - --focus con 1.75x, duoi nguong 3.0 bat buoc cua WCAG 1.4.11
+
+     Lat khong sua loi cu — no TAO loi moi.
+
+     DUOC dung tu tokens.css: --fs-* (co chu), --sp-* (khoang cach),
+     --r-* (bo goc), --sh-* (do bong). Nhung nhom nay phi mau, an toan tren
+     moi nen.
+
+     KHONG duoc dung: --n-* va --px-*. Chung duoc chon cho nen sang #EEF0F2,
+     dung tren #0e1117 la sai muc dich. -->
+<link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="styles.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

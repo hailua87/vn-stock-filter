@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mẫu — Sổ tay phân tích</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Token — trích nguyên từ web/tokens.css (commit 3)
+   Không sửa giá trị nào. Đây là bản sao để trang chạy độc lập.
+   ============================================================ */
+:root {
+  /* phi sắc */
+  --n-paper:#EEF0F2; --n-block:#FAFBFC; --n-block-alt:#F3F5F7;
+  --n-hover:#E4E8EC; --n-line:#D3D8DE; --n-line-soft:#E3E7EB;
+  --n-line-strong:#78828F;
+  --n-ink:#1A1F26; --n-ink-soft:#4B5563; --n-ink-mute:#5D6773;
+  --n-ink-invert:#FAFBFC;
+
+  /* trạng thái giá — quy ước nghiệp vụ, không đổi vì thẩm mỹ */
+  --px-up-fg:#166534;   --px-up-tint:#DCF0E3;   --px-up-on:#166534;
+  --px-down-fg:#B91C1C; --px-down-tint:#FBE3E1; --px-down-on:#B91C1C;
+  --px-ceil-fg:#6D28D9; --px-ceil-tint:#EDE7FD; --px-ceil-on:#5B21B6;
+  --px-floor-fg:#075985;--px-floor-tint:#DEEEF7;--px-floor-on:#075985;
+  --px-ref-tint:#FBEFC9; --px-ref-on:#1A1F26;
+
+  /* chữ */
+  --font-display:"Newsreader",Georgia,serif;
+  --font-body:"Inter",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,monospace;
+  --fs-micro:11px; --fs-xs:12px; --fs-sm:13px; --fs-base:14px;
+  --fs-md:16px; --fs-lg:20px; --fs-xl:26px; --fs-2xl:34px;
+  --lh-tight:1.2; --lh-body:1.5;
+  --fw-regular:400; --fw-medium:500; --fw-semibold:600;
+
+  /* khoảng cách, bo góc, bóng */
+  --sp-1:2px; --sp-2:4px; --sp-3:6px; --sp-4:8px; --sp-5:12px;
+  --sp-6:16px; --sp-7:24px; --sp-8:32px; --sp-9:48px;
+  --r-none:0; --r-sm:2px; --r-md:4px; --r-lg:8px; --r-pill:999px;
+  --sh-sm:0 1px 2px rgba(26,31,38,.06);
+
+  /* số */
+  --num-font:var(--font-mono);
+  --num-variant:tabular-nums lining-nums;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; padding:var(--sp-7) var(--sp-6) var(--sp-9);
+  background:var(--n-paper); color:var(--n-ink);
+  font:var(--fw-regular) var(--fs-base)/var(--lh-body) var(--font-body);
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto}
+
+/* ---------- đầu trang ---------- */
+.eyebrow{
+  font-family:var(--font-mono); font-size:var(--fs-micro);
+  letter-spacing:.09em; text-transform:uppercase;
+  color:var(--n-ink-mute); margin-bottom:var(--sp-3);
+}
+h1{
+  font:var(--fw-regular) var(--fs-2xl)/var(--lh-tight) var(--font-display);
+  margin:0 0 var(--sp-3);
+}
+.sub{color:var(--n-ink-soft);font-size:var(--fs-sm);margin:0 0 var(--sp-7);max-width:56ch}
+
+/* ---------- banner cảnh báo — phi sắc, mục 9 ---------- */
+.warn{
+  background:var(--n-block); border:1px solid var(--n-line);
+  border-left:3px solid var(--n-line-strong);
+  border-radius:var(--r-sm);
+  padding:var(--sp-5) var(--sp-6);
+  margin-bottom:var(--sp-7);
+  font-size:var(--fs-sm); color:var(--n-ink-soft);
+  display:flex; gap:var(--sp-5);
+}
+.warn b{color:var(--n-ink);font-weight:var(--fw-semibold)}
+.warn-mark{font-size:var(--fs-md);line-height:1;color:var(--n-ink)}
+
+/* ---------- chú giải ---------- */
+.legend{
+  display:flex; flex-wrap:wrap; gap:var(--sp-3) var(--sp-6);
+  padding:var(--sp-5) 0 var(--sp-6);
+  border-bottom:1px solid var(--n-line);
+  margin-bottom:var(--sp-6);
+  font-size:var(--fs-micro); color:var(--n-ink-mute);
+}
+.legend span{display:inline-flex;align-items:center;gap:var(--sp-3)}
+.sw{
+  font-family:var(--font-mono); font-size:var(--fs-micro);
+  font-weight:var(--fw-semibold);
+  padding:var(--sp-1) var(--sp-3); border-radius:var(--r-sm);
+}
+
+/* ---------- bảng ---------- */
+.sheet{
+  background:var(--n-block); border:1px solid var(--n-line);
+  border-radius:var(--r-sm); box-shadow:var(--sh-sm); overflow:hidden;
+}
+table{width:100%;border-collapse:collapse}
+thead th{
+  font-family:var(--font-mono); font-size:var(--fs-micro);
+  font-weight:var(--fw-medium); letter-spacing:.06em;
+  text-transform:uppercase; color:var(--n-ink-mute);
+  text-align:right; padding:var(--sp-5) var(--sp-4);
+  border-bottom:1px solid var(--n-line);
+  white-space:nowrap;
+}
+thead th:first-child,thead th.l{text-align:left}
+tbody td{
+  padding:var(--sp-4);
+  border-bottom:1px solid var(--n-line-soft);
+  text-align:right; white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--n-hover)}
+.num{
+  font-family:var(--num-font); font-variant-numeric:var(--num-variant);
+  font-size:var(--fs-sm);
+}
+.sym{
+  text-align:left; font-family:var(--font-mono);
+  font-size:var(--fs-sm); font-weight:var(--fw-semibold);
+}
+.sym small{
+  display:block; font-family:var(--font-body);
+  font-size:var(--fs-micro); font-weight:var(--fw-regular);
+  color:var(--n-ink-mute); letter-spacing:0;
+}
+/* cột phụ nhạt hơn để mắt bám cột giá */
+.dim{color:var(--n-ink-mute)}
+
+/* ---------- 5 trạng thái giá ---------- */
+/* tăng & giảm: chữ màu + mũi tên */
+.up{color:var(--px-up-fg);font-weight:var(--fw-medium)}
+.down{color:var(--px-down-fg);font-weight:var(--fw-medium)}
+
+/* trần, sàn, tham chiếu: chip — trạng thái rời rạc, không phải
+   "tăng nhiều hơn". Vàng buộc phải ở dạng chip vì không đạt
+   AA khi làm màu chữ trên nền sáng. */
+.v{
+  display:inline-block; min-width:5.6em; text-align:right;
+  font-family:var(--num-font); font-variant-numeric:var(--num-variant);
+  font-size:var(--fs-sm); font-weight:var(--fw-medium);
+  padding:var(--sp-1) var(--sp-3); border-radius:var(--r-sm);
+}
+/* mặc định: chỉ ba trạng thái rời rạc có nền */
+.v.up  {color:var(--px-up-fg)}
+.v.down{color:var(--px-down-fg)}
+.v.ceil {background:var(--px-ceil-tint); color:var(--px-ceil-on);  font-weight:var(--fw-semibold)}
+.v.floor{background:var(--px-floor-tint);color:var(--px-floor-on); font-weight:var(--fw-semibold)}
+.v.ref  {background:var(--px-ref-tint);  color:var(--px-ref-on)}
+
+
+/* ---------- thang khuyến nghị — chữ, phi sắc ---------- */
+.rec{font-size:var(--fs-sm);white-space:nowrap}
+.rec-strong{color:var(--n-ink);font-weight:var(--fw-semibold)}
+.rec-mid{color:var(--n-ink-soft);font-weight:var(--fw-regular)}
+.rec-neutral{color:var(--n-ink-mute)}
+
+/* ---------- lề tiêu chí — điểm ký của hướng này ---------- */
+.marg{
+  text-align:left; border-left:1px solid var(--n-line);
+  padding-left:var(--sp-5) !important;
+  font-family:var(--font-mono); font-size:var(--fs-micro);
+  color:var(--n-ink-mute); letter-spacing:.04em;
+}
+.marg .score{
+  color:var(--n-ink); font-weight:var(--fw-semibold);
+  font-size:var(--fs-sm); margin-right:var(--sp-4);
+}
+.marg .miss{color:var(--n-ink-mute); font-family:var(--font-body)}
+.marg .more{color:var(--n-ink-mute); opacity:.7}
+
+/* ---------- chân ---------- */
+.note{
+  margin-top:var(--sp-6); font-size:var(--fs-micro);
+  color:var(--n-ink-mute); line-height:var(--lh-body);
+}
+.note code{
+  font-family:var(--font-mono); background:var(--n-block-alt);
+  padding:1px var(--sp-2); border-radius:var(--r-sm);
+}
+h2{
+  font:var(--fw-regular) var(--fs-lg)/var(--lh-tight) var(--font-display);
+  margin:var(--sp-9) 0 var(--sp-5);
+}
+
+/* ---------- sàn chất lượng ---------- */
+:focus-visible{outline:2px solid var(--n-ink);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:720px){
+  .hide-sm{display:none}
+  body{padding:var(--sp-6) var(--sp-4)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Phiên 27.08.2026 · đóng cửa · HOSE</div>
+  <h1>Kết quả lọc</h1>
+  <p class="sub">Hai mươi bốn mã thỏa tối thiểu hai trên bảy tiêu chí. Cột lề bên phải ghi điểm số và những tiêu chí còn chưa đạt.</p>
+
+  <div class="warn">
+    <span class="warn-mark">⚠</span>
+    <span><b>Dữ liệu mẫu.</b> Trang này chỉ để xem bảng màu và thang chữ chạy thật. Số liệu là bịa, không phải giá thị trường.</span>
+  </div>
+
+  <div class="sheet">
+  <table>
+    <thead>
+      <tr>
+        <th class="l">Mã</th>
+        <th class="hide-sm">TC</th>
+        <th class="hide-sm">Trần</th>
+        <th class="hide-sm">Sàn</th>
+        <th>Giá</th>
+        <th>±</th>
+        <th>%</th>
+        <th class="hide-sm">Khối lượng</th>
+        <th>KN</th>
+        <th class="l marg hide-sm">Tiêu chí</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="sym">FPT<small>Công nghệ</small></td>
+        <td class="num dim hide-sm">118,00</td>
+        <td class="num dim hide-sm">126,20</td>
+        <td class="num dim hide-sm">109,80</td>
+        <td><span class="v ceil">126,20</span></td>
+        <td class="num up">+8,20</td>
+        <td class="num up">+6,95</td>
+        <td class="num dim hide-sm">3.412.700</td>
+        <td class="rec rec-strong">Rất tích cực</td>
+        <td class="marg hide-sm"><b class="score">6/7</b><span class="miss">chưa đạt: KL đột biến<span class="more"></span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">HPG<small>Thép</small></td>
+        <td class="num dim hide-sm">26,50</td>
+        <td class="num dim hide-sm">28,35</td>
+        <td class="num dim hide-sm">24,65</td>
+        <td><span class="v up">27,20</span></td>
+        <td class="num up">+0,70</td>
+        <td class="num up">+2,64</td>
+        <td class="num dim hide-sm">18.204.500</td>
+        <td class="rec rec-mid">Tích cực</td>
+        <td class="marg hide-sm"><b class="score">5/7</b><span class="miss">chưa đạt: Giá &gt; MA20, KL đột biến<span class="more"></span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">MWG<small>Bán lẻ</small></td>
+        <td class="num dim hide-sm">54,80</td>
+        <td class="num dim hide-sm">58,60</td>
+        <td class="num dim hide-sm">51,00</td>
+        <td><span class="v up">56,10</span></td>
+        <td class="num up">+1,30</td>
+        <td class="num up">+2,37</td>
+        <td class="num dim hide-sm">6.887.100</td>
+        <td class="rec rec-neutral">Trung tính</td>
+        <td class="marg hide-sm"><b class="score">4/7</b><span class="miss">chưa đạt: MA20 &gt; MA50, KL đột biến<span class="more"> +1</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">DGW<small>Bán lẻ</small></td>
+        <td class="num dim hide-sm">43,15</td>
+        <td class="num dim hide-sm">46,15</td>
+        <td class="num dim hide-sm">40,15</td>
+        <td><span class="v ceil">46,15</span></td>
+        <td class="num up">+3,00</td>
+        <td class="num up">+6,95</td>
+        <td class="num dim hide-sm">2.109.400</td>
+        <td class="rec rec-mid">Tích cực</td>
+        <td class="marg hide-sm"><b class="score">5/7</b><span class="miss">chưa đạt: Thanh khoản, RSI 50–70<span class="more"></span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">VIX<small>Chứng khoán</small></td>
+        <td class="num dim hide-sm">14,20</td>
+        <td class="num dim hide-sm">15,15</td>
+        <td class="num dim hide-sm">13,25</td>
+        <td><span class="v up">14,80</span></td>
+        <td class="num up">+0,60</td>
+        <td class="num up">+4,23</td>
+        <td class="num dim hide-sm">31.882.000</td>
+        <td class="rec rec-mid">Tích cực</td>
+        <td class="marg hide-sm"><b class="score">5/7</b><span class="miss">chưa đạt: Nền chặt, KL đột biến<span class="more"></span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">SSI<small>Chứng khoán</small></td>
+        <td class="num dim hide-sm">32,40</td>
+        <td class="num dim hide-sm">34,65</td>
+        <td class="num dim hide-sm">30,15</td>
+        <td><span class="v ref">32,40</span></td>
+        <td class="num dim">0,00</td>
+        <td class="num dim">0,00</td>
+        <td class="num dim hide-sm">9.150.300</td>
+        <td class="rec rec-neutral">Trung tính</td>
+        <td class="marg hide-sm"><b class="score">4/7</b><span class="miss">chưa đạt: Giá &gt; MA20, MA20 &gt; MA50<span class="more"> +1</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">VND<small>Chứng khoán</small></td>
+        <td class="num dim hide-sm">18,65</td>
+        <td class="num dim hide-sm">19,95</td>
+        <td class="num dim hide-sm">17,35</td>
+        <td><span class="v up">18,90</span></td>
+        <td class="num up">+0,25</td>
+        <td class="num up">+1,34</td>
+        <td class="num dim hide-sm">14.203.800</td>
+        <td class="rec rec-neutral">Trung tính</td>
+        <td class="marg hide-sm"><b class="score">4/7</b><span class="miss">chưa đạt: Giá &gt; MA200, Nền chặt<span class="more"> +1</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">DGC<small>Hóa chất</small></td>
+        <td class="num dim hide-sm">102,50</td>
+        <td class="num dim hide-sm">109,60</td>
+        <td class="num dim hide-sm">95,40</td>
+        <td><span class="v down">99,90</span></td>
+        <td class="num down">&minus;2,60</td>
+        <td class="num down">&minus;2,54</td>
+        <td class="num dim hide-sm">1.973.800</td>
+        <td class="rec rec-neutral">Trung tính</td>
+        <td class="marg hide-sm"><b class="score">4/7</b><span class="miss">chưa đạt: Giá &gt; MA20, MA20 &gt; MA50<span class="more"> +1</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">GVR<small>Cao su</small></td>
+        <td class="num dim hide-sm">31,05</td>
+        <td class="num dim hide-sm">33,20</td>
+        <td class="num dim hide-sm">28,90</td>
+        <td><span class="v up">32,00</span></td>
+        <td class="num up">+0,95</td>
+        <td class="num up">+3,06</td>
+        <td class="num dim hide-sm">7.719.200</td>
+        <td class="rec rec-mid">Tích cực</td>
+        <td class="marg hide-sm"><b class="score">5/7</b><span class="miss">chưa đạt: KL đột biến, RSI 50–70<span class="more"></span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">VNM<small>Thực phẩm</small></td>
+        <td class="num dim hide-sm">61,20</td>
+        <td class="num dim hide-sm">65,40</td>
+        <td class="num dim hide-sm">57,00</td>
+        <td><span class="v down">59,80</span></td>
+        <td class="num down">&minus;1,40</td>
+        <td class="num down">&minus;2,29</td>
+        <td class="num dim hide-sm">4.821.300</td>
+        <td class="rec rec-mid">Tiêu cực</td>
+        <td class="marg hide-sm"><b class="score">3/7</b><span class="miss">chưa đạt: Giá &gt; MA20, MA20 &gt; MA50<span class="more"> +2</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">MSN<small>Thực phẩm</small></td>
+        <td class="num dim hide-sm">72,40</td>
+        <td class="num dim hide-sm">77,40</td>
+        <td class="num dim hide-sm">67,40</td>
+        <td><span class="v up">73,50</span></td>
+        <td class="num up">+1,10</td>
+        <td class="num up">+1,52</td>
+        <td class="num dim hide-sm">3.305.600</td>
+        <td class="rec rec-neutral">Trung tính</td>
+        <td class="marg hide-sm"><b class="score">4/7</b><span class="miss">chưa đạt: Nền chặt, KL đột biến<span class="more"> +1</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">SAB<small>Đồ uống</small></td>
+        <td class="num dim hide-sm">56,30</td>
+        <td class="num dim hide-sm">60,20</td>
+        <td class="num dim hide-sm">52,40</td>
+        <td><span class="v ref">56,30</span></td>
+        <td class="num dim">0,00</td>
+        <td class="num dim">0,00</td>
+        <td class="num dim hide-sm">842.900</td>
+        <td class="rec rec-neutral">Trung tính</td>
+        <td class="marg hide-sm"><b class="score">4/7</b><span class="miss">chưa đạt: Giá &gt; MA20, KL đột biến<span class="more"> +1</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">VCB<small>Ngân hàng</small></td>
+        <td class="num dim hide-sm">89,50</td>
+        <td class="num dim hide-sm">95,70</td>
+        <td class="num dim hide-sm">83,30</td>
+        <td><span class="v floor">83,30</span></td>
+        <td class="num down">&minus;6,20</td>
+        <td class="num down">&minus;6,93</td>
+        <td class="num dim hide-sm">12.045.600</td>
+        <td class="rec rec-strong">Rất tiêu cực</td>
+        <td class="marg hide-sm"><b class="score">2/7</b><span class="miss">chưa đạt: Thanh khoản, Giá &gt; MA20<span class="more"> +3</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">TCB<small>Ngân hàng</small></td>
+        <td class="num dim hide-sm">24,85</td>
+        <td class="num dim hide-sm">26,55</td>
+        <td class="num dim hide-sm">23,15</td>
+        <td><span class="v down">24,40</span></td>
+        <td class="num down">&minus;0,45</td>
+        <td class="num down">&minus;1,81</td>
+        <td class="num dim hide-sm">22.417.300</td>
+        <td class="rec rec-mid">Tiêu cực</td>
+        <td class="marg hide-sm"><b class="score">3/7</b><span class="miss">chưa đạt: Giá &gt; MA20, RSI 50–70<span class="more"> +2</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">MBB<small>Ngân hàng</small></td>
+        <td class="num dim hide-sm">22,10</td>
+        <td class="num dim hide-sm">23,60</td>
+        <td class="num dim hide-sm">20,60</td>
+        <td><span class="v up">22,55</span></td>
+        <td class="num up">+0,45</td>
+        <td class="num up">+2,04</td>
+        <td class="num dim hide-sm">19.883.400</td>
+        <td class="rec rec-mid">Tích cực</td>
+        <td class="marg hide-sm"><b class="score">5/7</b><span class="miss">chưa đạt: MA20 &gt; MA50, Nền chặt<span class="more"></span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">STB<small>Ngân hàng</small></td>
+        <td class="num dim hide-sm">35,75</td>
+        <td class="num dim hide-sm">38,25</td>
+        <td class="num dim hide-sm">33,25</td>
+        <td><span class="v up">36,35</span></td>
+        <td class="num up">+0,60</td>
+        <td class="num up">+1,68</td>
+        <td class="num dim hide-sm">15.602.100</td>
+        <td class="rec rec-neutral">Trung tính</td>
+        <td class="marg hide-sm"><b class="score">4/7</b><span class="miss">chưa đạt: KL đột biến, RSI 50–70<span class="more"> +1</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">ACB<small>Ngân hàng</small></td>
+        <td class="num dim hide-sm">25,40</td>
+        <td class="num dim hide-sm">27,15</td>
+        <td class="num dim hide-sm">23,65</td>
+        <td><span class="v ref">25,40</span></td>
+        <td class="num dim">0,00</td>
+        <td class="num dim">0,00</td>
+        <td class="num dim hide-sm">8.194.700</td>
+        <td class="rec rec-neutral">Trung tính</td>
+        <td class="marg hide-sm"><b class="score">4/7</b><span class="miss">chưa đạt: Giá &gt; MA20, Nền chặt<span class="more"> +1</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">VHM<small>Bất động sản</small></td>
+        <td class="num dim hide-sm">41,60</td>
+        <td class="num dim hide-sm">44,50</td>
+        <td class="num dim hide-sm">38,70</td>
+        <td><span class="v down">40,30</span></td>
+        <td class="num down">&minus;1,30</td>
+        <td class="num down">&minus;3,12</td>
+        <td class="num dim hide-sm">10.338.900</td>
+        <td class="rec rec-mid">Tiêu cực</td>
+        <td class="marg hide-sm"><b class="score">3/7</b><span class="miss">chưa đạt: Giá &gt; MA200, MA20 &gt; MA50<span class="more"> +2</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">NVL<small>Bất động sản</small></td>
+        <td class="num dim hide-sm">11,95</td>
+        <td class="num dim hide-sm">12,75</td>
+        <td class="num dim hide-sm">11,15</td>
+        <td><span class="v floor">11,15</span></td>
+        <td class="num down">&minus;0,80</td>
+        <td class="num down">&minus;6,69</td>
+        <td class="num dim hide-sm">28.776.400</td>
+        <td class="rec rec-strong">Rất tiêu cực</td>
+        <td class="marg hide-sm"><b class="score">2/7</b><span class="miss">chưa đạt: Thanh khoản, Giá &gt; MA20<span class="more"> +3</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">KDH<small>Bất động sản</small></td>
+        <td class="num dim hide-sm">33,20</td>
+        <td class="num dim hide-sm">35,50</td>
+        <td class="num dim hide-sm">30,90</td>
+        <td><span class="v down">32,85</span></td>
+        <td class="num down">&minus;0,35</td>
+        <td class="num down">&minus;1,05</td>
+        <td class="num dim hide-sm">4.067.300</td>
+        <td class="rec rec-neutral">Trung tính</td>
+        <td class="marg hide-sm"><b class="score">4/7</b><span class="miss">chưa đạt: KL đột biến, RSI 50–70<span class="more"> +1</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">PVD<small>Dầu khí</small></td>
+        <td class="num dim hide-sm">27,80</td>
+        <td class="num dim hide-sm">29,70</td>
+        <td class="num dim hide-sm">25,90</td>
+        <td><span class="v up">29,25</span></td>
+        <td class="num up">+1,45</td>
+        <td class="num up">+5,22</td>
+        <td class="num dim hide-sm">9.482.600</td>
+        <td class="rec rec-strong">Rất tích cực</td>
+        <td class="marg hide-sm"><b class="score">6/7</b><span class="miss">chưa đạt: RSI 50–70<span class="more"></span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">GAS<small>Dầu khí</small></td>
+        <td class="num dim hide-sm">76,10</td>
+        <td class="num dim hide-sm">81,40</td>
+        <td class="num dim hide-sm">70,80</td>
+        <td><span class="v down">74,50</span></td>
+        <td class="num down">&minus;1,60</td>
+        <td class="num down">&minus;2,10</td>
+        <td class="num dim hide-sm">2.251.800</td>
+        <td class="rec rec-mid">Tiêu cực</td>
+        <td class="marg hide-sm"><b class="score">3/7</b><span class="miss">chưa đạt: Giá &gt; MA20, Nền chặt<span class="more"> +2</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">POW<small>Điện</small></td>
+        <td class="num dim hide-sm">13,45</td>
+        <td class="num dim hide-sm">14,35</td>
+        <td class="num dim hide-sm">12,55</td>
+        <td><span class="v up">13,55</span></td>
+        <td class="num up">+0,10</td>
+        <td class="num up">+0,74</td>
+        <td class="num dim hide-sm">11.529.700</td>
+        <td class="rec rec-neutral">Trung tính</td>
+        <td class="marg hide-sm"><b class="score">4/7</b><span class="miss">chưa đạt: MA20 &gt; MA50, KL đột biến<span class="more"> +1</span></span></td>
+      </tr>
+      <tr>
+        <td class="sym">REE<small>Điện</small></td>
+        <td class="num dim hide-sm">64,90</td>
+        <td class="num dim hide-sm">69,40</td>
+        <td class="num dim hide-sm">60,40</td>
+        <td><span class="v down">64,00</span></td>
+        <td class="num down">&minus;0,90</td>
+        <td class="num down">&minus;1,39</td>
+        <td class="num dim hide-sm">1.338.500</td>
+        <td class="rec rec-mid">Tiêu cực</td>
+        <td class="marg hide-sm"><b class="score">3/7</b><span class="miss">chưa đạt: Giá &gt; MA20, MA200<span class="more"> +2</span></span></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="note">
+    Mặc định chỉ <b>trần / sàn / tham chiếu</b> có nền — ba trạng thái rời rạc. Tăng và giảm để chữ màu. Dấu <b>+ / &minus;</b> ở cột ± và % là dấu hiệu phi màu sắc duy nhất — nó tách nhóm tăng khỏi nhóm giảm khỏi tham chiếu, phần còn lại màu gánh được.
+    Cột <b>KN</b> ghi thẳng bằng chữ. Mọi số dùng <code>font-variant-numeric: tabular-nums</code>.
+  </p>
+
+  <h2>Bảy tiêu chí</h2>
+  <p class="note">
+    Thanh khoản · Giá &gt; MA20 · MA20 &gt; MA50 · KL đột biến · Giá &gt; MA200 · RSI 50–70 · Nền chặt<br>
+    <b>Tên đặt tạm.</b> Tên thật phải lấy từ engine của bạn, không bịa ở tầng giao diện.
+  </p>
+
+  <h2>Kiểm nhanh</h2>
+  <p class="note">
+    <b>Mù màu đỏ-lục:</b> DevTools &rarr; Rendering &rarr; Emulate vision deficiencies &rarr; Deuteranopia.
+    Nền xanh lá và nền đỏ sẽ gần trùng nhau (ΔE 2.6), nền trần và nền sàn cũng vậy (ΔE 2.7) — lúc đó
+    dấu + / &minus; là thứ duy nhất còn phân biệt được hướng. Bỏ dấu đi thì bảng mất thông tin.<br>
+    <b>Hover:</b> rê chuột qua các dòng — nền đổi sang <code>#E4E8EC</code>, đây là nền tệ nhất trong ba nền, mọi màu vẫn giữ ≥5.25.<br>
+    <b>Bàn phím:</b> nhấn Tab — viền focus 2px mực đậm, không dùng màu.
+  </p>
+
+</div>
+</body>
+</html>
