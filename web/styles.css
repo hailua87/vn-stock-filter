@@ -331,7 +331,13 @@ input { font-family: inherit; }
    ═══════════════════════════════════════════════════ */
 .dashboard {
   display: grid;
-  grid-template-columns: var(--col-filter-w) 1fr var(--col-detail-w);
+  /* HAI track, khong phai ba. Panel chi tiet la DRAWER phu len tren (xem
+     .col-detail ben duoi), khong con chiem cho trong luong.
+     Vi sao: cach dung that la quet ca danh sach TRUOC roi mo mot ma SAU. Panel
+     chi tiet giu 380px thuong truc de phuc vu thao tac chi xay ra sau khi quet
+     xong, trong khi ba cot cuoi cua bang (TIEU CHI, DIEM, HANG) bi day ra ngoai
+     man hinh — nguoi dung dang loc theo XEP LOAI ma khong nhin thay cot HANG. */
+  grid-template-columns: var(--col-filter-w) 1fr;
   height: calc(100vh - var(--topbar-h));
   overflow: hidden;
 }
@@ -339,7 +345,34 @@ input { font-family: inherit; }
   height: calc(100vh - var(--topbar-h) - 33px);
 }
 .dashboard.filters-collapsed {
-  grid-template-columns: 36px 1fr var(--col-detail-w);
+  grid-template-columns: 36px 1fr;
+}
+
+/* ─── COL 3: CHI TIET — drawer truot tu phai, MOI be rong ───
+   Khai bao nay truoc day chi song trong @media (max-width: 768px). Nay nang len
+   pham vi chung: hanh vi duoi 768px KHONG DOI, desktop dung chung mot duong.
+   Giu max-width 420px (gia tri von co cua drawer) chu khong ha ve --col-detail-w
+   380px: la overlay thi be rong khong con lay cho cua bang nua, nen rong hon la
+   mien phi va de doc hon.
+   z-index 50 > topbar 10 > .col-filters 2, nen drawer phu len ca hai. */
+.col-detail {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 100%;
+  max-width: 420px;
+  z-index: 50;
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.4);
+}
+.col-detail.mobile-open { transform: translateX(0); }
+
+/* Backdrop: dinh vi o pham vi chung, hien khi co .show (dong 1434-1437). */
+.mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 40;
 }
 
 .col {
@@ -1383,19 +1416,8 @@ kbd {
   }
   .col-filters.mobile-open { transform: translateX(0); }
   
-  /* Detail as right drawer overlay */
-  .col-detail {
-    position: fixed;
-    top: 0; right: 0; bottom: 0;
-    width: 100%;
-    max-width: 420px;
-    z-index: 50;
-    transform: translateX(100%);
-    transition: transform 0.25s ease;
-    box-shadow: -4px 0 20px rgba(0,0,0,0.4);
-  }
-  .col-detail.mobile-open { transform: translateX(0); }
-  
+  /* .col-detail: drawer khai o pham vi chung, khong lap lai o day. */
+
   .col-list { width: 100%; }
   
   /* Mobile bar with filter trigger */
@@ -1422,13 +1444,7 @@ kbd {
   
   .demo-banner { font-size: 10px; padding: 6px; }
   
-  /* Mobile backdrop */
-  .mobile-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 40;
-  }
+  /* .mobile-backdrop: dinh vi khai o pham vi chung, khong lap lai o day. */
 }
 
 /* Mobile-only elements hidden on desktop */
