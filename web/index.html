@@ -2,7 +2,11 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- viewport-fit=cover: BAT BUOC de env(safe-area-inset-*) tra ve khac 0.
+     Khong co no, Safari tra ve 0px cho ca bon canh — da do tren iPhone 16
+     Pro that va nhan dung bon so 0. Rieng the nay KHONG doi bo cuc; no chi
+     mo duong cho env() dung o buoc sau. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>VN Stock Scanner — Trading Dashboard</title>
 <!-- GIU NEN TOI. tokens.css nap TRUOC styles.css nen 24 bi danh mau cua no
      (--bg-base, --text, --up, --down, --border, --limit-*, --rating-*, ...)
