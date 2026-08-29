@@ -131,3 +131,29 @@ nhan tay tren may that:
   - thanh dia chi Safari che dong cuoi khi cuon
 
 Ket qua desktop dang tin hon ket qua mobile.
+
+## SAFE AREA — chi do duoc tren may that
+
+`env(safe-area-inset-*)` KHONG do duoc bang bat cu cong cu nao trong repo nay:
+
+- Chromium headless khong co thanh dia chi de an, va khong co API nao (ke ca
+  CDP) dat duoc safe-area inset khac 0.
+- WebKit cua Playwright la build headless tren desktop — khong notch, khong
+  home indicator, nen cung tra 0. Cai them no khong giai quyet duoc gi.
+
+Do tren iPhone 16 Pro that o ban `f2137be`: ca bon canh deu **0px**, va do la
+KET QUA HOP LE — khi Safari hien thanh dia chi o day, no thu vung noi dung con
+402x714 va tu chua cho Dynamic Island lan home indicator, nen vung do da nam
+tron trong safe area.
+
+Bon so chi khac 0 o hai luc:
+  (a) Safari thu thanh dia chi khi cuon xuong — vung noi dung gian ra sat mep
+  (b) chay standalone tu man hinh chinh — chua the xay ra: repo khong co
+      manifest.json lan the apple-mobile-web-app-capable
+
+**Khong tu do duoc (a). Phai do tren may that**, o trang thai da cuon cho thanh
+dia chi thu lai, va o ca hai chieu xoay.
+
+Cai bo do o day LAM DUOC la kiem HE QUA: bom gia tri gia vao dung cac khai bao
+ma khoi @supports dat, roi xem bo cuc co chiu duoc khong. Xem chu thich khoi
+`@supports (padding: env(...))` o cuoi `web/styles.css`.
