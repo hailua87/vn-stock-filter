@@ -388,3 +388,122 @@ Chưa có hướng vá. Mọi lối thoát đều phải ra khỏi `schedule` c�
 (cron ngoài gọi `workflow_dispatch`, hoặc một dịch vụ canh chừng bên ngoài đọc
 `web/data/latest.json`), tức là thêm một hạ tầng phải nuôi. Ghi lại đây để lượt
 sau không phải chẩn đoán lại từ đầu.
+
+## Đường mất dữ liệu thứ hai — rebase + `merge=ours`
+
+Phát hiện 29/08/2026, khi truy vì sao ca schedule `33193939016` chạy xong mà
+không để lại commit dữ liệu nào. **Chưa vá.**
+
+### Triệu chứng
+
+Run `33193939016` (khung 16:05Z, tới muộn 72 phút, kết thúc 17:37Z) commit local
+thành công rồi biến mất:
+
+```
+[main 33e2f99] chore(data): tin hieu 2026-08-28 [EOD 00:36] [skip ci]
+ 4 files changed, 0 insertions(+), 0 deletions(-)
+✓ Đã commit local
+   3d97022..1bad21b  main       -> origin/main
+Rebasing (1/1)
+dropping 33e2f990... chore(data): tin hieu 2026-08-28 [EOD 00:36] -- patch contents already upstream
+Successfully rebased and updated refs/heads/main.
+Everything up-to-date
+✓ Push thành công ở lần thử 1
+```
+
+`33e2f99` không tồn tại ở đâu cả. Workflow báo **thành công**.
+
+### Nguyên nhân
+
+`.gitattributes:16-17` khai `web/data/** merge=ours`, và workflow đăng ký driver
+bằng `git config merge.ours.driver true` (`daily-scan.yml:317`).
+
+Trong **rebase**, git đặt HEAD ở *upstream* rồi replay commit của mình lên. Nên:
+
+| | trong rebase |
+| --- | --- |
+| `ours` | bản **ĐÃ PUSH** (upstream) |
+| `theirs` | bản của **run hiện tại** |
+
+Driver giữ `ours` → giữ bản đã push, vứt bản run hiện tại → cây kết quả bằng cây
+upstream → commit rỗng → git bỏ với thông báo "patch contents already upstream".
+
+### Đã tái hiện tối thiểu — ma trận 2×2
+
+Repo tạm ngoài dự án: upstream tiến từ A lên B; runner còn ở A, ghi C khác hẳn B
+(999 vs 105 tín hiệu, metadata khác), commit local, rồi `git pull --rebase`.
+
+| thuộc tính `web/data/**` | kết quả | file cuối |
+| --- | --- | --- |
+| `merge=ours -diff linguist-generated` | **DROP im lặng** | B |
+| `merge=ours linguist-generated` | **DROP im lặng** | B |
+| `-diff linguist-generated` | CONFLICT | rebase dừng |
+| `linguist-generated` | CONFLICT | rebase dừng |
+| *(không có dòng nào)* | CONFLICT | rebase dừng |
+
+**`merge=ours` quyết định.** Bỏ `-diff` mà giữ `merge=ours` vẫn vứt; giữ `-diff`
+mà bỏ `merge=ours` thì CONFLICT.
+
+`-diff` **không** gây ra chuyện này — nó chỉ khiến `--stat` in `0 insertions(+),
+0 deletions(-)` cho **mọi** commit chạm `web/data`, kể cả commit đổi hàng chục
+nghìn byte:
+
+```
+web/data/ichimoku/latest.json  | Bin 186255 -> 195149 bytes
+ 4 files changed, 0 insertions(+), 0 deletions(-)
+```
+
+Nó che dấu vết, không tạo ra dấu vết. Ai đọc `0/0` mà kết luận "nội dung giống
+nhau" là đọc sai — lỗi đó đã xảy ra một lần trong chính cuộc điều tra này.
+
+### Mâu thuẫn giữa ý định và thực tế
+
+`.gitattributes:4-6` ghi nguyên văn:
+
+> `merge=ours` : khi cả remote và workflow cùng sửa một file JSON, **giữ bản của
+> lần chạy hiện tại**. File này được sinh lại mỗi phiên nên "bản mới nhất thắng"
+> là đúng ngữ nghĩa.
+
+Đúng với `merge`. Nhưng `daily-scan.yml:340` dùng `git pull --rebase`, ở đó
+nghĩa của `ours` **đảo chiều**. Cùng một `.gitattributes`, chỉ đổi cách hợp nhất:
+
+```
+git pull --rebase     ->  giữ bản CŨ  (B, đã push)
+git pull --no-rebase  ->  giữ bản MỚI (C, run hiện tại)
+```
+
+Hai thứ này ra đời trong cùng một lần sửa (kỷ luật push 13/08/2026) mà không
+khớp nhau.
+
+### Phạm vi
+
+Chỉ dính khi hai run cùng ngày kết thúc gần nhau. Lịch bình thường (intraday
+12:05, EOD 23:05 — cách 11 tiếng) không bao giờ chạm. Nó dính **đúng lúc lịch bị
+hoãn**, tức đúng lúc dữ liệu quý nhất.
+
+### Hôm nay vô hại — nhưng theo chiều không ai ngờ
+
+Hai run 28/08 cùng ra `105 / 2 / 26 / 83`. Thứ mất chỉ là metadata:
+
+| | bản bị vứt (`33e2f99`) | bản còn lại (`1bad21b`) |
+| --- | --- | --- |
+| số mã quét | 485 (15 hỏng) | **500** |
+| độ phủ fetch | 0.97 | **1.0** |
+
+**Bản bị vứt là bản KÉM hơn.** Tức nếu workflow làm đúng ý định đã ghi trong
+`.gitattributes` (`--no-rebase`, "bản mới nhất thắng"), bản tốt đã bị bản kém đè.
+
+Nên đừng vội kết luận cách vá là đổi sang `--no-rebase`. **"Bản mới nhất thắng"
+chưa chắc là chính sách đúng** — lần này "cũ hơn" lại là "đầy đủ hơn". Chính sách
+hợp nhất cần quyết riêng, dựa trên độ phủ hoặc `written_at_ict`, chứ không dựa
+trên thứ tự đến. **Chưa quyết.**
+
+### Chưa vá — và chưa có cổng nào bắt được
+
+`git diff --staged --quiet` (`daily-scan.yml:323`) **không cứu được**: commit
+local thành công thật, `4 files changed` là bằng chứng. Việc mất xảy ra ở bước
+rebase, sau đó.
+
+Cổng khả dĩ duy nhất: so `git rev-parse HEAD` **trước và sau** rebase — nếu HEAD
+sau rebase không chứa commit của mình thì bản quét này đã bị vứt, và đó phải là
+lỗi, không phải "✓ Push thành công". Hiện **không có** cổng nào như vậy.
