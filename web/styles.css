@@ -387,13 +387,36 @@ input { font-family: inherit; }
 .dashboard.filters-collapsed .col-filters .col-foot {
   display: none;
 }
+/* Trang thai THU GON: cot con 36px.
+   Loi cu: .col-head co `padding: 0 14px` (28px) nen chi con 8px cho noi dung,
+   trong khi .col-title xoay doc (~13px) + .collapse-btn (24px) can 37px. `.col`
+   co `overflow: hidden` nen phan tran bi cat, va `justify-content: space-between`
+   day cai nut ve sat mep phai — dung cho bi cat truoc. Nut van ton tai, van nhan
+   su kien, chi la khong nhin thay va khong bam duoc. Thu gon xong la ket.
+   Nay: .col-head xep DOC, bo padding ngang, nut nam tren, nhan BO LOC xoay doc
+   nam duoi va CUNG BAM DUOC (xem .col-title button-like ben duoi). */
+.dashboard.filters-collapsed .col-filters .col-head {
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 6px;
+  height: auto;
+  padding: 6px 0 10px;
+}
 .dashboard.filters-collapsed .col-filters .col-title {
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
   font-size: 9px;
+  /* Ca dai chu cung la vung bam — nguoi dung bam vao do theo ban nang. */
+  cursor: pointer;
+  padding: 4px 0;
+}
+.dashboard.filters-collapsed .col-filters .col-title:hover {
+  color: var(--up);
 }
 .dashboard.filters-collapsed .col-filters .collapse-btn {
-  transform: rotate(180deg);
+  /* KHONG dung transform: rotate. Huong mui ten do JS doi bang ky tu, di kem
+     aria-label va aria-expanded — xoay hinh hoc khong noi gi cho trinh doc
+     man hinh. */
+  flex-shrink: 0;
 }
 
 .col-head {
@@ -416,6 +439,10 @@ input { font-family: inherit; }
   background: transparent;
   border: none;
   color: var(--text-dim);
+  /* Vung bam toi thieu 24x24. min-* chu khong phai width/height co dinh de o
+     trang thai thu gon no khong bi flex ep nho lai. */
+  min-width: 24px;
+  min-height: 24px;
   width: 24px;
   height: 24px;
   border-radius: 3px;
