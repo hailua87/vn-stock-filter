@@ -507,3 +507,80 @@ rebase, sau đó.
 Cổng khả dĩ duy nhất: so `git rev-parse HEAD` **trước và sau** rebase — nếu HEAD
 sau rebase không chứa commit của mình thì bản quét này đã bị vứt, và đó phải là
 lỗi, không phải "✓ Push thành công". Hiện **không có** cổng nào như vậy.
+
+## Hợp đồng ngầm giữa backend và dashboard
+
+Kiểm 29/08/2026. Đối chiếu **mọi** khoá `web/app.js` đọc với **mọi** khoá
+`build_metadata()` ghi. **Chưa vá.**
+
+### Nhóm 1 — JS đọc, backend không ghi
+
+| khoá | JS đọc (dòng) | fallback | thứ người xem thấy |
+| --- | --- | --- | --- |
+| `metadata.universe_size` | 368, 423, 478, 527 | `\|\| 0` | **"0 mã quét"** cạnh 105 tín hiệu |
+| `metadata.scan_date` | 370, 473, 524 | `\|\| null` | `state.currentDate = null` → `stat-date` giữ **"—"**, không có "LIVE 28/08" |
+| `metadata.demo` | 369, 480 | `undefined` | banner demo ẩn — **falsy đúng ý muốn, vô hại** |
+
+Backend có sẵn dữ liệu tương đương, chỉ khác tên:
+
+```
+universe_size  (JS đọc)  ←→  total_scanned = 485    (backend ghi)
+scan_date      (JS đọc)  ←→  session_date  = 2026-08-28
+```
+
+**Hai lỗi này hỏng từ khi viết, không phải hỏng gần đây.** Backend đổi tên,
+frontend không đổi theo, và `?.` với `|| 0` nuốt trọn sự vắng mặt nên không bên
+nào báo lỗi.
+
+### Nhóm 2 — backend ghi, JS không đọc. Nặng hơn nhóm 1.
+
+```
+archive_gate          archive_gates         archive_gates_failed
+archive_written       fetch_truncated       fetch_stop_reason
+fetch_coverage        session_complete
+```
+
+Đây không phải khoá thừa. Comment trong `build_metadata()` ghi rõ hai trong số
+đó được thêm **để dashboard hiển thị**:
+
+> `archive_gate` giữ nguyên là chuỗi một dòng (**web/app.js** và bước Verify của
+> workflow đọc nó) […]
+
+> Bằng chứng về vòng fetch. `fetch_truncated` là trường mà chuông báo độ tươi và
+> **người đọc dashboard cần thấy**: một file sinh ra từ 140/500 mã trông y hệt
+> file sinh ra từ 500/500 nếu không nói ra.
+
+Phần backend đã làm. **Phần frontend chưa bao giờ có** — `grep` không ra dòng nào
+đọc `archive_gate` trong `web/`.
+
+Hệ quả cụ thể, đúng lúc viết mục này: trang đang hiện **105 tín hiệu** của một
+file mang `archive_written = False`, `fetch_coverage = 0.97`, sinh lúc **07:50
+ICT — trước giờ mở cửa**. Không một dấu hiệu nào cho người xem biết điều đó.
+
+Cùng hình dạng với bài học đã ghi ở mục "Lỗ dữ liệu" — *chuông đo ngày phiên,
+không đo chất lượng phiên* — lần này ở tầng giao diện.
+
+### `market_context`: không có vấn đề
+
+Backend ghi **lồng** (`metadata.market_context`, 13 khoá), JS dòng 371-373 đọc
+lồng, mọi khoá `renderMarketContext` cần đều có mặt. Nghi vấn "backend ghi phẳng"
+nêu ở lượt kiểm trước **đã kiểm và bác**. Đây là phần duy nhất của dashboard đang
+chạy đầy đủ.
+
+### Nguyên tắc rút ra
+
+`|| 0` và `?.` biến **khoá thiếu** thành **giá trị trông hợp lệ**.
+
+"0 mã quét" là một điều kiện báo động — không rổ nào quét 0 mã mà ra 105 tín
+hiệu. Nhưng không ai thấy nó vô lý, vì nó là **một con số**, và con số thì trông
+như dữ liệu. Nếu chỗ đó hiện "—" thì lỗi đã lộ ngay ngày đầu.
+
+**Khoá thiếu phải hiện "—", không được hiện 0.** Số không phải là "không biết".
+
+### Chưa vá
+
+Thuộc Phase B — thêm dải cảnh báo là thay đổi giao diện thật, không phải sửa một
+dòng bind.
+
+`web/` **không có test nào**. Không có gì bắt được lớp lỗi này, và cũng sẽ không
+có gì bắt được lần đổi tên khoá tiếp theo.
