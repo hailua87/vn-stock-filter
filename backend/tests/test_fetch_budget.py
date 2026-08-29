@@ -318,7 +318,7 @@ def test_archive_blocked_when_fetch_truncated(monkeypatch):
     from run_daily import ICT
     at_2330 = datetime(2026, 8, 26, 23, 30, tzinfo=ICT)
 
-    d = archive_decision(now=at_2330, fetch_summary=_summary(0.28, 'time_budget'))
+    d = archive_decision(now=at_2330, fetch_summary=_summary(0.28, 'time_budget'), session_date='2026-08-26')
     assert d['write'] is False
     assert 'time_budget' in d['reason'] and '28' in d['reason']
 
@@ -330,7 +330,7 @@ def test_archive_blocked_on_thin_coverage_even_without_stop(monkeypatch):
     at_2330 = datetime(2026, 8, 26, 23, 30, tzinfo=ICT)
 
     assert archive_decision(now=at_2330,
-                            fetch_summary=_summary(0.5))['write'] is False
+                            fetch_summary=_summary(0.5), session_date='2026-08-26')['write'] is False
 
 
 def test_archive_allowed_on_full_coverage(monkeypatch):
@@ -339,7 +339,7 @@ def test_archive_allowed_on_full_coverage(monkeypatch):
     from run_daily import ICT
     at_2330 = datetime(2026, 8, 26, 23, 30, tzinfo=ICT)
 
-    d = archive_decision(now=at_2330, fetch_summary=_summary(1.0))
+    d = archive_decision(now=at_2330, fetch_summary=_summary(1.0), session_date='2026-08-26')
     assert d['write'] is True
 
 
@@ -351,7 +351,7 @@ def test_force_archive_still_overrides_coverage_gate(monkeypatch):
     at_2330 = datetime(2026, 8, 26, 23, 30, tzinfo=ICT)
 
     d = archive_decision(force=True, now=at_2330,
-                         fetch_summary=_summary(0.28, 'circuit_breaker'))
+                         fetch_summary=_summary(0.28, 'circuit_breaker'), session_date='2026-08-26')
     assert d['write'] is True
     assert d['forced'] is True
 
@@ -361,8 +361,8 @@ def test_archive_gate_unchanged_without_fetch_summary(monkeypatch):
     monkeypatch.setenv('SCAN_RUN_TYPE', 'eod')
     from datetime import datetime
     from run_daily import ICT
-    assert archive_decision(now=datetime(2026, 8, 26, 23, 30, tzinfo=ICT))['write'] is True
-    assert archive_decision(now=datetime(2026, 8, 26, 13, 0, tzinfo=ICT))['write'] is False
+    assert archive_decision(now=datetime(2026, 8, 26, 23, 30, tzinfo=ICT), session_date='2026-08-26')['write'] is True
+    assert archive_decision(now=datetime(2026, 8, 26, 13, 0, tzinfo=ICT), session_date='2026-08-26')['write'] is False
 
 
 # ── Metadata: lát cắt phải tự khai báo ───────────────────────────────────
@@ -375,7 +375,7 @@ def test_metadata_stamps_truncation(monkeypatch):
     summary['elapsed_s'] = 2701.4
 
     meta = build_metadata(5, ('HOSE',), 140, {}, '2026-08-26',
-                          archive_decision(now=at_2330, fetch_summary=summary),
+                          archive_decision(now=at_2330, fetch_summary=summary, session_date='2026-08-26'),
                           0.31, summary)
     assert meta['fetch_truncated'] is True
     assert meta['fetch_stop_reason'] == 'time_budget'
@@ -392,7 +392,7 @@ def test_metadata_clean_run_has_no_stop_reason(monkeypatch):
     summary = _summary(1.0)
 
     meta = build_metadata(5, ('HOSE',), 500, {}, '2026-08-26',
-                          archive_decision(now=at_2330, fetch_summary=summary),
+                          archive_decision(now=at_2330, fetch_summary=summary, session_date='2026-08-26'),
                           0.98, summary)
     assert meta['fetch_truncated'] is False
     assert meta['fetch_stop_reason'] is None
@@ -411,7 +411,7 @@ def test_force_over_coverage_gate_is_recorded_in_metadata(monkeypatch):
     at_2330 = datetime(2026, 8, 26, 23, 30, tzinfo=ICT)
     summary = _summary(0.28, 'time_budget')
 
-    d = archive_decision(force=True, now=at_2330, fetch_summary=summary)
+    d = archive_decision(force=True, now=at_2330, fetch_summary=summary, session_date='2026-08-26')
     meta = build_metadata(5, ('HOSE',), 140, {}, '2026-08-26', d, 0.31, summary)
     assert meta['archive_written'] is True
     assert meta['archive_forced'] is True
@@ -425,6 +425,6 @@ def test_normal_full_run_is_not_marked_forced(monkeypatch):
     from run_daily import ICT
     at_2330 = datetime(2026, 8, 26, 23, 30, tzinfo=ICT)
 
-    d = archive_decision(force=True, now=at_2330, fetch_summary=_summary(1.0))
+    d = archive_decision(force=True, now=at_2330, fetch_summary=_summary(1.0), session_date='2026-08-26')
     assert d['write'] is True and d['forced'] is False
     assert 'ÉP GHI' not in d['reason']

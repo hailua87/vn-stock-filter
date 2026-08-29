@@ -12,7 +12,7 @@ import json
 import os
 import logging
 import sys
-from datetime import datetime, time as dtime
+from datetime import date, datetime, time as dtime
 from pathlib import Path
 from typing import Optional
 
@@ -183,7 +183,8 @@ def check_stale_universe(by_ticker: dict, fetch_summary: Optional[dict] = None) 
 
 
 def evaluate_archive_gates(now: datetime, fetch_summary: Optional[dict] = None,
-                           min_coverage: Optional[float] = None) -> list:
+                           min_coverage: Optional[float] = None,
+                           session_date: Optional[str] = None) -> list:
     """
     Chấm TỪNG cổng archive độc lập, không dừng ở cái đầu tiên hỏng.
 
@@ -197,20 +198,60 @@ def evaluate_archive_gates(now: datetime, fetch_summary: Optional[dict] = None,
 
     Thứ tự trong danh sách là thứ tự trình bày, KHÔNG phải thứ tự ưu tiên — mọi
     cổng đều được chấm, kết quả không phụ thuộc thứ tự.
+
+    `session_date` là NGÀY PHIÊN lấy từ chính dữ liệu (`df['Date'].max()`), không
+    phải ngày trên đồng hồ. Xem gate_time bên dưới để biết vì sao cổng thời gian
+    cần nó.
     """
     cutoff_str = ARCHIVE_CUTOFF_ICT.strftime('%H:%M')
     min_coverage = (MIN_COVERAGE_FOR_ARCHIVE if min_coverage is None
                     else min_coverage)
 
-    # ── Cổng 1: đồng hồ tại lúc ghi ──────────────────────────────────────
-    after_cutoff = now.time() >= ARCHIVE_CUTOFF_ICT
-    gates = [{
-        'name': 'gate_time',
-        'passed': after_cutoff,
-        'detail': (f'{now:%H:%M} ICT >= {cutoff_str} — khối lượng đã chốt'
-                   if after_cutoff else
-                   f'{now:%H:%M} ICT < {cutoff_str} — khối lượng chưa chốt'),
-    }]
+    # ── Cổng 1: PHIÊN đã chốt chưa ───────────────────────────────────────
+    #
+    # Câu hỏi đúng không phải "bây giờ mấy giờ" mà "phiên đang ghi đã đóng dứt
+    # khoát chưa". Hai câu đó chỉ trùng nhau khi ca chạy trong đúng ngày phiên.
+    #
+    # Bản cũ chỉ hỏi `now.time() >= 15:15`, nên mọi ca vắt qua nửa đêm ICT đều bị
+    # chặn oan: ca EOD 28/08 chạy 23:42 ICT, quét 35 phút, ghi lúc 00:07 ICT ngày
+    # 29/08 — phiên 28/08 đã đóng từ 9 tiếng trước, khối lượng không thể còn chạy
+    # vào, vậy mà cổng đọc "00:07 < 15:15" rồi chặn. Ca EOD theo lịch (23:05 ICT)
+    # chỉ cần quét quá 55 phút là dính; hôm đó quét 35 phút, tức biên an toàn chỉ
+    # còn 20 phút.
+    #
+    # Ba nhánh, và nhánh thiếu thông tin ĐÓNG — cùng nguyên tắc đã ghi ở
+    # archive_decision: hỏng theo hướng đóng, không hỏng theo hướng mở.
+    today_ict = now.date()
+    sess = None
+    if session_date:
+        try:
+            sess = date.fromisoformat(str(session_date))
+        except (TypeError, ValueError):
+            sess = None
+
+    if sess is None:
+        settled = False
+        detail = (f'không xác định được ngày phiên (session_date='
+                  f'{session_date!r}) — thiếu thông tin thì đóng')
+    elif sess < today_ict:
+        # Phiên của một ngày ĐÃ QUA. Không còn khối lượng nào chạy vào được nữa,
+        # bất kể đồng hồ đang chỉ mấy giờ.
+        settled = True
+        detail = f'phiên {sess} đã đóng dứt khoát (hôm nay {today_ict})'
+    elif sess == today_ict:
+        # Phiên HÔM NAY — luật cũ nguyên vẹn: phải qua mốc chốt khối lượng.
+        settled = now.time() >= ARCHIVE_CUTOFF_ICT
+        detail = (f'phiên hôm nay, {now:%H:%M} ICT >= {cutoff_str} — khối lượng đã chốt'
+                  if settled else
+                  f'phiên hôm nay, {now:%H:%M} ICT < {cutoff_str} — khối lượng chưa chốt')
+    else:
+        # Ngày phiên ở TƯƠNG LAI so với đồng hồ. Không có cách đọc lành nào —
+        # hoặc dữ liệu hỏng, hoặc đồng hồ sai. Đóng.
+        settled = False
+        detail = (f'ngày phiên {sess} ở tương lai so với hôm nay {today_ict} — '
+                  f'dữ liệu hoặc đồng hồ sai')
+
+    gates = [{'name': 'gate_time', 'passed': settled, 'detail': detail}]
 
     # ── Cổng 2: độ phủ vòng fetch ────────────────────────────────────────
     coverage = (fetch_summary or {}).get('coverage')
@@ -251,17 +292,22 @@ def format_gates(gates: list) -> str:
 
 def archive_decision(force: bool = False, now: Optional[datetime] = None,
                      fetch_summary: Optional[dict] = None,
-                     min_coverage: Optional[float] = None) -> dict:
+                     min_coverage: Optional[float] = None,
+                     session_date: Optional[str] = None) -> dict:
     """
     Có được ghi archive không — tổng hợp từ TẤT CẢ các cổng đã chấm.
 
     Hai cổng, chặn hai thứ khác nhau:
 
-      gate_time     — đồng hồ TẠI LÚC GHI, không phải nhãn `SCAN_RUN_TYPE` dán
-                      lúc job khởi động. Nhãn đó sai cả hai chiều: bản khởi động
-                      12:00 ICT mà ghi lúc 15:40 vẫn mang nhãn 'intraday' dù khối
-                      lượng đã chốt, còn `workflow_dispatch` chọn tay 'eod' lúc
-                      12:00 thì mở toang cổng cho dữ liệu nửa phiên.
+      gate_time     — PHIÊN đã chốt chưa, xét `session_date` cùng với đồng hồ
+                      TẠI LÚC GHI. Phiên của ngày đã qua thì luôn pass; phiên hôm
+                      nay thì phải qua mốc chốt khối lượng; thiếu ngày phiên hoặc
+                      ngày phiên ở tương lai thì đóng.
+                      Không dùng nhãn `SCAN_RUN_TYPE` dán lúc job khởi động: nhãn
+                      đó sai cả hai chiều — bản khởi động 12:00 ICT mà ghi lúc
+                      15:40 vẫn mang nhãn 'intraday' dù khối lượng đã chốt, còn
+                      `workflow_dispatch` chọn tay 'eod' lúc 12:00 thì mở toang
+                      cổng cho dữ liệu nửa phiên.
       gate_coverage — độ phủ vòng fetch. File archive là VĨNH VIỄN: không ca nào
                       chạy lại phiên cũ để sửa, và backtest sau này đọc nó như dữ
                       liệu thật. Bản quét 140/500 mã là một lát cắt, không phải
@@ -275,7 +321,7 @@ def archive_decision(force: bool = False, now: Optional[datetime] = None,
     archive dựng từ 140/500 mã trông y hệt file dựng từ 500/500.
     """
     now = now or now_ict()
-    gates = evaluate_archive_gates(now, fetch_summary, min_coverage)
+    gates = evaluate_archive_gates(now, fetch_summary, min_coverage, session_date)
     failed = [g['name'] for g in gates if not g['passed']]
 
     write = (not failed) or force
@@ -488,7 +534,8 @@ def main():
     session_date = session_date_from_data(df_all_raw)
     completeness = session_completeness(by_ticker)
     decision = archive_decision(force=args.force_archive,
-                                fetch_summary=fetch_summary)
+                                fetch_summary=fetch_summary,
+                                session_date=session_date)
     log.info(f"  Ngày phiên (từ dữ liệu): {session_date}")
     log.info(f"  Độ trọn vẹn phiên: {completeness} "
              f"(cờ thông tin, không dùng để chặn)")
