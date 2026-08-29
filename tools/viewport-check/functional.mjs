@@ -73,6 +73,12 @@ export async function runFunctional(page, isMobile, base) {
   await load();
   const tabs = await page.$$eval('.strat-tab', els => els.map(e => e.dataset.strategy));
   for (const t of tabs) {
+    // Cuon tab vao tam nhin TRUOC khi do. Sau khi .strategy-tabs cuon ngang
+    // duoc (dung nhu thiet ke), tab nam ngoai vung cuon tra ve hit=null — do la
+    // dung, khong phai bi che. Do ma khong cuon la trach trang vi da lam dung.
+    await page.$eval(`.strat-tab[data-strategy="${t}"]`,
+      el => el.scrollIntoView({ block: 'nearest', inline: 'nearest' })).catch(() => {});
+    await page.waitForTimeout(120);
     const hit = await page.$eval(`.strat-tab[data-strategy="${t}"]`, el => {
       const r = el.getBoundingClientRect();
       const h = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
@@ -81,6 +87,36 @@ export async function runFunctional(page, isMobile, base) {
                w: Math.round(r.width) };
     }).catch(() => null);
     rec(`tab:${t}:khong-bi-che`, !!hit && hit.self, hit ? `w=${hit.w} hit=${hit.hit}` : 'loi');
+  }
+
+  // ── 3b. Dai tab CO THUC SU CUON NGANG khong ──
+  // `overflow-x: auto` chi co nghia neu noi dung that su rong hon hop. Khi nut
+  // con bi ep co, scrollWidth == clientWidth va thuoc tinh do la lenh chet.
+  if (drawerMode) {
+    const sc = await page.$eval('.strategy-tabs', el => {
+      const before = el.scrollLeft;
+      const max = el.scrollWidth - el.clientWidth;
+      el.scrollLeft = max;
+      const after = el.scrollLeft;
+      return { scrollWidth: el.scrollWidth, clientWidth: el.clientWidth, max, after, before };
+    }).catch(() => null);
+    // Chi doi CUON DUOC khi noi dung that su rong hon hop. O 599px chuot sau tab
+    // vua khit (scrollW == clientW) nen khong co gi de cuon — do khong phai loi.
+    const canScroll = !!sc && sc.scrollWidth > sc.clientWidth + 1;
+    rec('tab:khong-bi-bop-chu', !!sc,
+        sc ? `scrollW=${sc.scrollWidth} clientW=${sc.clientWidth} ${canScroll ? '(can cuon)' : '(vua khit)'}` : 'loi');
+    if (canScroll)
+      rec('tab:cuon-den-cuoi-duoc', Math.abs(sc.after - sc.max) <= 1,
+          `dat=${sc.max} doc lai=${sc.after}`);
+    // Tab cuoi phai TOI DUOC bang cuon
+    const last = await page.$eval('.strat-tab[data-strategy="analyzer"]', el => {
+      const r = el.getBoundingClientRect();
+      const h = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return { self: h === el || el.contains(h), w: Math.round(r.width),
+               hit: h ? (h.tagName.toLowerCase() + '.' + String(h.className).split(' ')[0]) : null };
+    }).catch(() => null);
+    rec('tab:cuoi-toi-duoc-sau-khi-cuon', !!last && last.self,
+        last ? `w=${last.w} hit=${last.hit}` : 'loi');
   }
 
   // ── 4. Tab Phan tich ma: o nhap khong bi che ──

@@ -211,6 +211,22 @@ input { font-family: inherit; }
   margin-left: auto;
 }
 .strat-tab {
+  /* KHONG BAO GIO bi flex ep co — cung mau voi .topbar (xem chu thich o do).
+     `@media (pointer: coarse)` dat min-width: 44px cho nut nay. Gia tri tuong
+     minh THAY THE san `auto` cua Flexbox 4.5, tuc xoa san kich thuoc noi dung:
+     nut tu ~102px co xuong 43px, ma `white-space: nowrap` chan chu xuong dong,
+     nen chu TRAN RA NGOAI hop va dinh sang nut ben —
+     "Pre-BreakouGC dai hanGC ngan haIchimoku".
+     Do that o 402x874 truoc khi sua (chu / hop):
+       Pre-Breakout 74/43   GC dai han 60/35   GC ngan han 71/41
+       Ichimoku     50/29   Tong hop   71/41   Phan tich ma 90/52
+     Va vi nut co vua chieu ngang, `overflow-x: auto` cua .strategy-tabs (khoi
+     1280px) KHONG BAO GIO kich hoat — dai tab dang le phai cuon thi lai bop chu.
+     flex-shrink: 0 tra viec cuon lai cho no.
+     GIU min-width: 44px: no van dung muc dich vung cham cho nut NHO hon 44px
+     (.dp-nav, .icon-btn chi chua mot ky tu), chi la khong duoc lam san cho nut
+     lon hon 44px. */
+  flex-shrink: 0;
   background: transparent;
   border: none;
   color: var(--text-dim);

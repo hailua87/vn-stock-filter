@@ -49,6 +49,10 @@ export const PROBE = () => {
     if (!vis(el)) continue;
     const s = getComputedStyle(el);
     if (s.whiteSpace !== 'nowrap' && s.whiteSpace !== 'pre') continue;
+    // Bo qua phan tu CO CHU DICH cat chu: `text-overflow: ellipsis` di kem
+    // `overflow: hidden` la thiet ke, khong phai loi. Vd <summary> cua mien tru
+    // trach nhiem (692c38c) co y giu mot dong va cat bang dau ba cham.
+    if (s.textOverflow === 'ellipsis' && s.overflowX !== 'visible') continue;
     const t = [...el.childNodes].filter(n => n.nodeType === 3 && n.textContent.trim());
     if (!t.length) continue;
     // Bo qua hop INLINE: clientWidth cua chung luon = 0 theo spec, nen phep so
