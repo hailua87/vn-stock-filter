@@ -8,7 +8,15 @@
   --bg-base:    #0e1117;       /* main background — TABLE area (deepest) */
   --bg-elev-1:  #1f242e;       /* SIDE PANELS (filters + detail) — clearly lighter */
   --bg-elev-2:  #2a3040;       /* table header, panel headers */
-  --bg-elev-3:  #353b4c;       /* active/selected row, hover */
+  /* Nen hang CHON toi hon hover, CO CHU Y.
+     Do 29/08/2026: nen cu #353b4c la ca xau nhat cua moi mau trong bang, keo
+     --down, --up, --limit-up, .upside-neg va badge SELL xuong duoi AA.
+     Phan biet hover/chon dua vao vach 5px trai + font-weight 500
+     (styles.css:727-735), khong dua vao do sang nen — nen dao chieu khong mat
+     tin hieu nao.
+     #1A1F29 chon thay vi #1E2430 vi --down can L <= 0.0169 moi dat 4.5
+     (4.74x vs 4.46x). */
+  --bg-elev-3:  #1A1F29;       /* active/selected row, hover */
   --bg-elev-4:  #424859;       /* modals, focused inputs */
   --bg-zebra:   #131720;       /* alternating table rows - subtle */
 
