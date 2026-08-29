@@ -348,25 +348,6 @@ input { font-family: inherit; }
   grid-template-columns: 36px 1fr;
 }
 
-/* ─── COL 3: CHI TIET — drawer truot tu phai, MOI be rong ───
-   Khai bao nay truoc day chi song trong @media (max-width: 768px). Nay nang len
-   pham vi chung: hanh vi duoi 768px KHONG DOI, desktop dung chung mot duong.
-   Giu max-width 420px (gia tri von co cua drawer) chu khong ha ve --col-detail-w
-   380px: la overlay thi be rong khong con lay cho cua bang nua, nen rong hon la
-   mien phi va de doc hon.
-   z-index 50 > topbar 10 > .col-filters 2, nen drawer phu len ca hai. */
-.col-detail {
-  position: fixed;
-  top: 0; right: 0; bottom: 0;
-  width: 100%;
-  max-width: 420px;
-  z-index: 50;
-  transform: translateX(100%);
-  transition: transform 0.25s ease;
-  box-shadow: -4px 0 20px rgba(0,0,0,0.4);
-}
-.col-detail.mobile-open { transform: translateX(0); }
-
 /* Backdrop: dinh vi o pham vi chung, hien khi co .show (dong 1434-1437). */
 .mobile-backdrop {
   position: fixed;
@@ -898,6 +879,29 @@ input { font-family: inherit; }
   position: relative;
   z-index: 2;
 }
+
+/* ─── COL 3: CHI TIET — drawer truot tu phai, MOI be rong ───
+   Khai bao nay truoc day chi song trong @media (max-width: 768px). Nay nang len
+   pham vi chung: hanh vi duoi 768px KHONG DOI, desktop dung chung mot duong.
+   Giu max-width 420px (gia tri von co cua drawer) chu khong ha ve --col-detail-w
+   380px: la overlay thi be rong khong con lay cho cua bang nua, nen rong hon la
+   mien phi va de doc hon.
+   z-index 50 > topbar 10 > .col-filters 2, nen drawer phu len ca hai.
+
+   PHAI DUNG SAU khoi .col-detail ngay tren: hai khoi cung do cu the (0,1,0) nen
+   ban dung SAU thang. Dat truoc thi `position: relative` va `z-index: 2` cua khoi
+   kia ghi de, drawer khong bao gio truot vao. */
+.col-detail {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 100%;
+  max-width: 420px;
+  z-index: 50;
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.4);
+}
+.col-detail.mobile-open { transform: translateX(0); }
 
 .detail-empty {
   height: 100%;
