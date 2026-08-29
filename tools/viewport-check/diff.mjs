@@ -9,7 +9,14 @@ const A = JSON.parse(readFileSync(base, 'utf8')), B = JSON.parse(readFileSync(cu
 // nua ma la mot buoc lui moi.
 const ACC = existsSync('accepted.json')
   ? JSON.parse(readFileSync('accepted.json', 'utf8')).muc || [] : [];
-const laChapNhan = (n, k) => ACC.find(a => a.khoa === k && a.khung.includes(n));
+// Hai kieu muc chap nhan:
+//   khoa    — mot khoa cu the, canh gac bang `san` (tri so khong duoc tut)
+//   khoaMau — mot MAU regex, canh gac bang `soToiDa` + `khung`: so muc khong
+//             duoc tang va khong duoc lan sang khung ngoai danh sach.
+// Chap nhan 16 muc o hai khung KHONG co nghia chap nhan 20 muc, cung khong
+// co nghia chap nhan chung xuat hien o khung thu ba.
+const laChapNhan = (n, k) => ACC.find(a =>
+  (a.khoa ? a.khoa === k : new RegExp(a.khoaMau).test(k)) && a.khung.includes(n));
 
 // Che chu so trong khoa. Dong ho va nhan phien doi theo tung giay/tung ngay:
 // "21:16:55 ICT" o lan chay nay khac "20:01:32 ICT" o moc chuan, nen CUNG MOT
@@ -50,7 +57,7 @@ const cmpMetrics = (n, a, b) => {
 };
 
 let fixed = 0, left = 0, neu = 0;
-const NEW = [], ACCHIT = [], GAC = [], LEFT = new Map();
+const NEW = [], ACCHIT = [], GAC = [], LEFT = new Map(), TATCA = [];
 const names = [...new Set([...Object.keys(A.viewports), ...Object.keys(B.viewports)])];
 for (const n of names) {
   const a = A.viewports[n] ? keys(A.viewports[n]) : new Set();
@@ -61,6 +68,7 @@ for (const n of names) {
   // Gom tu TOAN BO b, khong chi tu cot "moi": muc da chap nhan thuong co san
   // trong moc chuan nen no roi vao CON LAI, ma van phai in ra moi lan chay.
   [...b].filter(k => laChapNhan(n, k)).forEach(k => ACCHIT.push([n, k]));
+  [...b].forEach(k => TATCA.push([n, k]));
   fixed += f.length; left += l.length; neu += x.length;
   l.forEach(k => LEFT.set(k, (LEFT.get(k) || 0) + 1));
   if (x.length) NEW.push([n, x]);
@@ -78,6 +86,18 @@ for (const n of names) {
   if (f.length || x.length)
     console.log(`${n.padEnd(21)} DA SUA ${String(f.length).padStart(3)}  CON LAI ${String(l.length).padStart(3)}  MOI ${String(x.length).padStart(3)}`);
 }
+// Canh gac cho muc kieu `khoaMau`: dem tren TOAN BO lan chay, khong theo
+// tung khung — vi thu can bat chinh la viec no LAN SANG khung khac.
+for (const a of ACC.filter(m => m.khoaMau)) {
+  const re = new RegExp(a.khoaMau);
+  const khop = TATCA.filter(([, k]) => re.test(k));
+  const ngoai = [...new Set(khop.filter(([n]) => !a.khung.includes(n)).map(([n]) => n))];
+  if (ngoai.length)
+    GAC.push({ msg: `LAN SANG KHUNG MOI: ${ngoai.join(', ')}  (chi chap nhan o ${a.khung.join(', ')})` });
+  if (khop.length > a.soToiDa)
+    GAC.push({ msg: `SO MUC TANG: ${khop.length} > soToiDa ${a.soToiDa}  (${a.taiLieu})` });
+}
+
 console.log(`\nTONG   DA SUA ${fixed}   CON LAI ${left}   MOI PHAT SINH ${neu}`);
 if (LEFT.size) {
   console.log('\n--- CON LAI (co o ca moc chuan lan lan chay nay) ---');
@@ -86,16 +106,26 @@ if (LEFT.size) {
 }
 if (ACCHIT.length) {
   console.log('\n--- DA CHAP NHAN (khong tinh la loi, nhung van in ra moi lan) ---');
-  const daIn = new Set();
+  // Gom theo MUC, khong theo khoa: mot muc kieu khoaMau khop nhieu khoa, in
+  // lai ly do cho tung khoa thi doc khong noi.
+  const nhom = new Map();
   for (const [n, k] of ACCHIT) {
-    const a = laChapNhan(n, k);
-    if (!daIn.has(k)) { console.log(`   ${k}\n      ly do : ${a.lyDo}\n      ho so : ${a.taiLieu}`); daIn.add(k); }
-    console.log(`      khung : ${n}`);
+    const a = laChapNhan(n, k); const ten = a.khoa || a.khoaMau;
+    if (!nhom.has(ten)) nhom.set(ten, { a, khoa: new Set(), khung: new Set(), so: 0 });
+    const g = nhom.get(ten); g.khoa.add(k); g.khung.add(n); g.so++;
+  }
+  for (const [ten, g] of nhom) {
+    console.log(`   ${ten}`);
+    console.log(`      ${g.so} muc / ${g.khoa.size} khoa / khung: ${[...g.khung].join(', ')}`);
+    console.log(`      ly do : ${g.a.lyDo}`);
+    console.log(`      ho so : ${g.a.taiLieu}`);
   }
 }
 if (GAC.length) {
   console.log('\n!!! MUC DA CHAP NHAN BI TE THEM — do:');
-  GAC.forEach(g => console.log(`   ${g.n.padEnd(21)} ${g.khoa}  ${g.truong}=${g.do} < san ${g.san}`));
+  GAC.forEach(g => console.log(g.msg
+    ? `   ${g.msg}`
+    : `   ${g.n.padEnd(21)} ${g.khoa}  ${g.truong}=${g.do} < san ${g.san}`));
 }
 if (neu || GAC.length) {
   if (neu) {

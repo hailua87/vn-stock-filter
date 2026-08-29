@@ -57,7 +57,9 @@ logs/
 tools/viewport-check/node_modules/
 tools/viewport-check/*.png
 tools/viewport-check/result*.json
-tools/viewport-check/package-lock.json
+# package-lock.json PHAI commit: khong ghim Playwright thi Chromium moi luot CI
+# mot khac va moc chuan troi. CI dung `npm ci`, khong dung `npm install`.
+# (dong loai tru cu da bo o day)
 tools/viewport-check/r*.json
 tools/viewport-check/d-*.json
 tools/viewport-check/*.log

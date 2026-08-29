@@ -34,4 +34,12 @@ for (const w of BOUNDARIES) {
 for (const [w, h] of [[375, 667], [402, 874], [440, 956]])
   list.push({ name: `m-${w}x${h}`, w, h, touch: true });
 
+// CHIEU CAO THAT NGUOI DUNG THAY tren iPhone 16 Pro, khong phai 874.
+// Do tren Safari that: visualViewport = 402x714, innerHeight = 714, man
+// hinh 874 — Safari lay 160px cho thanh dia chi duoi. Khung m-402x874 o
+// tren la chieu cao MAN HINH; khung nay la chieu cao KHUNG NHIN. Giu ca
+// hai: cai tren cho trang thai da cuon (thanh dia chi thu lai), cai nay
+// cho trang thai thuong.
+list.push({ name: 'safari-ios-thuc-402x714', w: 402, h: 714, touch: true });
+
 export const VIEWPORTS = list;
