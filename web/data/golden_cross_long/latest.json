@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-28T17:17:43.345360",
+  "generated_at": "2026-08-29T00:50:36.311580",
   "strategy": "golden_cross_long",
   "total": 2,
   "metadata": {
@@ -9,7 +9,7 @@
       "HNX",
       "UPCOM"
     ],
-    "total_scanned": 500,
+    "total_scanned": 485,
     "market_context": {
       "available": true,
       "close": 1832.12,
@@ -24,27 +24,27 @@
       "label": "Thị trường trung tính — tín hiệu mua nên vào với tỷ trọng nhỏ hơn",
       "position_size_multiplier": 0.6,
       "breadth": {
-        "pct_above_ma50": 34.6,
-        "sample_size": 500
+        "pct_above_ma50": 35.5,
+        "sample_size": 485
       }
     },
     "session_date": "2026-08-28",
-    "written_at_ict": "2026-08-29 00:07:10+0700",
-    "run_type": "eod",
-    "session_complete": 0.938,
+    "written_at_ict": "2026-08-29 07:50:29+0700",
+    "run_type": "intraday",
+    "session_complete": 0.943,
     "archive_written": false,
     "archive_forced": false,
-    "archive_gate": "gate_time: fail (00:07 ICT < 15:15 — khối lượng chưa chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: fail (07:50 ICT < 15:15 — khối lượng chưa chốt) | gate_coverage: pass (97% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": false,
-        "detail": "00:07 ICT < 15:15 — khối lượng chưa chốt"
+        "detail": "07:50 ICT < 15:15 — khối lượng chưa chốt"
       },
       {
         "name": "gate_coverage",
         "passed": true,
-        "detail": "100% >= 80%, vòng fetch chạy trọn"
+        "detail": "97% >= 80%, vòng fetch chạy trọn"
       }
     ],
     "archive_gates_failed": [
@@ -52,10 +52,10 @@
     ],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 1.0,
-    "fetch_elapsed_s": 1444.5,
-    "intraday": false,
-    "run_time_ict": "00:17",
+    "fetch_coverage": 0.97,
+    "fetch_elapsed_s": 1096.1,
+    "intraday": true,
+    "run_time_ict": "07:50",
     "run_date_ict": "2026-08-29"
   },
   "signals": [
