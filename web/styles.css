@@ -1412,6 +1412,19 @@ kbd {
     --col-filter-w: 200px;
     --col-detail-w: 340px;
   }
+
+  /* Cot bo loc con 200px => 172px kha dung. .date-picker can 204px
+     (select 148px + hai nut 24px + hai gap 4px) nen tran, ma .col-body co
+     overflow-y: auto => overflow-x tu thanh auto => thanh cuon ngang keo lech
+     ca panel. Cho xuong hang.
+     `order: -1` + `flex-basis: 100%` la BAT BUOC, khong du flex-wrap:
+     thu tu DOM la ‹ select ›, ma <select> co min-width: auto chan no co duoi
+     min-content 148px. Wrap tran se cho BA hang — ‹ mot minh, select, roi ›.
+     Dua select len truoc va chiem tron hang thi con dung hai hang:
+       hang 1  [select]  172px
+       hang 2  [‹ ›]      52px   (dp-nav giu flex-grow 0 nen khong gian full) */
+  .date-picker { flex-wrap: wrap; }
+  .dp-select   { order: -1; flex-basis: 100%; }
 }
 @media (max-width: 1024px) {
   /* On narrower screens, collapse filters by default */
