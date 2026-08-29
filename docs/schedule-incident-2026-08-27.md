@@ -202,7 +202,7 @@ có dữ liệu nửa vời. Chuông đo **ngày phiên**, không đo **chất l
       **Đã xác nhận bằng số đo, chưa có hướng vá** — xem mục "Kết luận" cuối
       file. Đóng ô này là đóng phần CHẨN ĐOÁN, không phải phần sửa.
 
-## Đã vá — 28/08/2026
+## Đã vá — 28-29/08/2026
 
 Sự cố lịch chạy ở trên chưa đóng, nhưng nó đã lôi ra một lỗi khác, nặng hơn và
 đã vá xong. Ghi lại đây vì hai chuyện dính vào nhau: nếu tick không tới muộn thì
@@ -299,7 +299,124 @@ EOD 27/08.
 liệu" ở trên — phiên đó không có bản chốt và sẽ không bao giờ có. Việc khôi phục
 này chỉ chạm phiên 27/08.
 
-### Ngoài phạm vi, còn nợ
+### Cổng archive: gate_time xét PHIÊN ĐÃ CHỐT (`50bcd7e`, `5abe94f`)
+
+**Lỗi.** `gate_time` chỉ so `now.time() >= 15:15` — nó không biết mình đang chấm
+phiên nào. Hệ quả: **mọi run rơi vào khung 00:00-15:15 ICT không bao giờ ghi
+được archive**, kể cả khi dữ liệu là phiên hôm trước đã đóng dứt khoát và khối
+lượng không thể còn chạy vào.
+
+Archive vì thế mất ngày mỗi lần tick tới muộn — tức đúng lúc lịch trục trặc, đúng
+lúc cần dữ liệu nhất. Ca EOD theo lịch (23:05 ICT) chỉ cần quét quá 55 phút là
+vắt qua nửa đêm và dính; ca 28/08 quét 35 phút, biên an toàn còn 20 phút.
+
+**Bốn nhánh mới:**
+
+| điều kiện | kết quả |
+| --- | --- |
+| `session_date < hôm nay` | **PASS** — phiên đã đóng dứt khoát |
+| `session_date == hôm nay` | luật cũ: `now.time() >= 15:15` |
+| `session_date` None / không parse được | **FAIL** — thiếu thông tin thì đóng |
+| `session_date` ở tương lai | **FAIL** — dữ liệu hoặc đồng hồ sai |
+
+**Dấu hiệu bug đã nằm sẵn trong test suite.**
+`test_archive_filename_uses_session_date_not_write_date` phải dùng `force=True`
+để đi vòng qua **chính chỗ chặn oan này** mới kiểm được phần đặt tên file. Tác
+giả đã đứng ngay trước cái lỗi và đi vòng qua nó.
+
+> **Bài học.** `force=True` trong test là **DẤU HIỆU**, không phải tiện ích. Mỗi
+> lần nó xuất hiện chỉ để test đi tiếp được, chỗ đó có một cổng chặn sai mà chưa
+> ai nhìn kỹ.
+
+**Xác minh thực địa** — run `33230679558`, chạy tay, ghi lúc **10:28 ICT thứ Bảy
+29/08**:
+
+```
+gate_time      : PASS  (phiên 2026-08-28 đã đóng dứt khoát (hôm nay 2026-08-29))
+gate_coverage  : PASS  (97% >= 80%, vòng fetch chạy trọn)
+=> Archive: GHI
+```
+
+`archive_forced = False` — không ép. Bản cũ sẽ chặn ở "10:28 < 15:15".
+`archive/2026-08-28.json` đã ghi ở **cả bốn** thư mục; `archive/index.json` từ
+82 lên **83** phiên, `latest = 2026-08-28`.
+
+### Hợp đồng backend-dashboard: nhóm 1 đã vá (`7ef3195`, `72f42e3`)
+
+Xem mục "Hợp đồng ngầm giữa backend và dashboard" ở cuối file để biết đầy đủ.
+
+Nhóm 1 — JS đọc khoá backend không ghi — **đã vá**:
+
+```
+metadata.scan_date      ->  metadata.session_date
+metadata.universe_size  ->  metadata.total_scanned
+```
+
+**Không thêm bí danh ở backend — một thứ một tên.** Kèm theo, bỏ fallback nuốt
+sự vắng mặt: `statNumber()` trả `"—"` cho `null`/`undefined`/không phải số,
+nhưng vẫn trả `"0"` cho **số 0 thật** — 0 là một phép đo, không phải "không
+biết". `universeSize` khởi tạo `null` thay vì `0`. `stat-date` có nhánh `else`
+đặt `"—"` thay vì để giá trị lần trước nằm lại trên màn hình.
+
+Trang giờ hiện `485 mã quét` và `· LIVE 28/08` thay vì `0` và `—`.
+
+**Nhóm 2 VẪN CHƯA VÁ** — `archive_gate`, `archive_gates`, `archive_written`,
+`fetch_truncated`, `fetch_stop_reason`, `fetch_coverage`, `session_complete`.
+Backend ghi đủ, dashboard không đọc cái nào. Thuộc Phase B.
+
+### Vercel: nghi vấn `[skip ci]` đã đóng
+
+**Ignored Build Step = Automatic.** Vercel **không** tự hiểu `[skip ci]` — khác
+GitHub Actions; muốn bỏ qua build phải đặt lệnh riêng ở ô đó. Ô đang để mặc
+định, nên **mọi commit đều deploy**, kể cả commit dữ liệu của bot.
+
+Dashboard vì vậy **luôn theo kịp `main`**. Nghi vấn nêu ở lượt kiểm Vercel đã
+đóng, và đóng theo hướng tốt.
+
+URL production: **https://vn-stock-filter.vercel.app** (nhánh `main`,
+`outputDirectory: web`, deploy tự động, ~3 giây).
+
+### Còn nợ — năm món chưa vá
+
+Danh sách hợp nhất, tính đến 29/08/2026. Mỗi món có mục riêng trong file này.
+
+| # | món nợ | ở đâu |
+| --- | --- | --- |
+| 1 | Chuông báo độ tươi chạy bằng chính scheduler nó canh — điểm mù kiến trúc | "Chuông báo không phát hiện được cái làm nó im" |
+| 2 | `run_type` mô tả RUN, không mô tả FILE | ngay dưới đây |
+| 3 | `rebase` + `merge=ours` vứt commit dữ liệu im lặng | "Đường mất dữ liệu thứ hai" |
+| 4 | Hợp đồng ngầm backend-dashboard, **nhóm 2** | "Hợp đồng ngầm…", mục Nhóm 2 |
+| 5 | `app.js` không có tham số chống cache | ngay dưới đây |
+
+**Không nằm trong danh sách này: phiên 26/08.** Đó là một **kết luận**, không
+phải việc treo — phiên đó không có bản chốt và sẽ không bao giờ có, vì
+`daily-scan` luôn quét phiên hiện tại và không có tham số chọn phiên cũ. Xem mục
+"Lỗ dữ liệu". Đừng mở lại nó như một việc chưa làm.
+
+Ngoài năm món trên còn **hai việc nhỏ hơn** cũng chưa làm, không đủ nặng để vào
+bảng nhưng đừng quên: `_last_trading_session` đã chết trong code chạy thật, và
+`post-if: success()` của `actions/cache@v4` vẫn chưa xác minh. Cả hai nằm cuối
+mục này.
+
+Bốn mục dưới đây ghi đầy đủ tại chỗ.
+
+- **`app.js` không có tham số chống cache.** Mọi lệnh `fetch` JSON đều gắn
+  `?_=${Date.now()}` (`web/app.js` các dòng nạp `latest.json`, `archive/*.json`,
+  `archive/index.json`), nhưng **chính `app.js` thì không** — nó được nạp bằng
+  thẻ `<script>` thường trong `index.html`.
+
+  Nghĩa là: **dữ liệu luôn tươi, còn code hiển thị dữ liệu thì có thể cũ.** Sau
+  mỗi lần sửa giao diện, người dùng có thể đang chạy JS cũ trên dữ liệu mới mà
+  không hề biết — và đó chính xác là kịch bản vừa gây nhầm lẫn khi kiểm bản vá
+  `7ef3195`/`72f42e3`.
+
+  Nguy hiểm hơn khi hai lớp lệch nhau về ngữ nghĩa: JS cũ đọc `universe_size`
+  trên dữ liệu mới chỉ có `total_scanned` sẽ hiện "0 mã quét" — đúng lỗi vừa vá,
+  tái hiện trên máy người dùng dù `main` đã sạch.
+
+  Hướng: gắn hash/version vào tên file hoặc query của `<script src>`, hoặc đặt
+  `Cache-Control` riêng cho `/app.js` trong `vercel.json` (hiện chỉ `/data/(.*)`
+  có header riêng).
 
 - **`_last_trading_session` (`data_fetcher.py:397`) giờ chết trong code chạy
   thật** — chỉ còn `test_trading_calendar.py:91` gọi. Docstring của nó vẫn hứa
