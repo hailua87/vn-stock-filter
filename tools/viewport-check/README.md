@@ -69,6 +69,30 @@ Nguoc lai o bp-767 chuot, tab rong 94px nen khong tran chu, nhung ca dai tab bi
 
 **Mot o xanh o `functional` KHONG co nghia la dai tab lanh.** Doc ca bon cot.
 
+## PHEP KIEM PHAT HIEN vs PHEP KIEM XAC NHAN
+
+Do bang cach chay chinh bo cong cu nay tren mot `git worktree` tai 0dce064 —
+trang thai TRUOC moi ban va — roi xem tung phep kiem co DO hay khong.
+Mot phep kiem chua tung do chua chung minh duoc no bat duoc gi.
+
+| phep kiem | o trang thai LOI GOC | loai |
+| --- | --- | --- |
+| `textOverflow` tren `.strat-tab` | **DO** — 6 tab, chu 74px / hop 43px | **PHAT HIEN** |
+| `tab:khong-bi-bop-chu` (scrollW > clientW) | XANH — scrollW=412 clientW=386 | XAC NHAN |
+| `tab:cuon-den-cuoi-duoc` | XANH — dat=26 doc lai=26 | XAC NHAN |
+| `tab:cuoi-toi-duoc-sau-khi-cuon` | XANH — w=72 hit=chinh no | XAC NHAN |
+
+**Ba trong bon phep kiem cuon dai tab la XAC NHAN, khong phai PHAT HIEN.**
+
+Vi sao chung xanh o trang thai loi: nut da bi ep co xuong 43px, nhung 6 nut x
+43px + gap van la 412px > 386px cho co, nen "dai tab co cuon duoc khong" VAN
+DUNG. Cai sai khong nam o cho cuon — nam o cho nut bi bop va chu tran ra ngoai.
+Chi so scrollWidth phan anh gian tiep: 412px (hong) so voi 560px (dung).
+
+Chung van dang giu: chung khoa lai hanh vi sau khi sua, de mot thay doi sau nay
+lam mat kha nang cuon thi bi bat. Nhung DUNG tin chung se bao dong khi dai tab
+hong lai theo dung kieu cu.
+
 ## Gioi han khong khac phuc duoc
 
 Chromium **khong phai** Safari iOS. Hai thu SE KHONG tai hien duoc, phai xac
