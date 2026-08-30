@@ -62,17 +62,28 @@ hang cao len. Commit do ha chieu cao hang 26% — ket qua truoc day chua ghi.
 Giam tiep 62px con lai (18+44) la QUYET DINH THIET KE — bo bot phan tu khoi
 topbar mobile — chu khong phai sua loi. Xem M1 o muc 6.
 
-## 2. `.chip { min-width: 44px }` — cung mau loi, CHUA LO
+## 2. `.chip` — DA LO VA DA SUA (`13d6ddd`), giu lai vi chan doan ban dau SAI
 
-`styles.css` dong 561, va lai o `@media (pointer: coarse)`. Cung co che voi
-`.topbar` va `.strat-tab`: gia tri tuong minh thay san `auto`, cho phep nut co
-duoi be rong noi dung.
+Ban ghi truoc o muc nay noi ".chip { min-width: 44px } — CHUA LO". Ca hai ve
+deu sai, giu lai de khong ai lap lai chan doan do.
 
-Chua lo vi `.chip-row` co 204px cho 173px noi dung — du 31px. Do thuc te tren
-iPad Pro 1366x1024 co cam ung (to hop nguy hiem nhat: tren 1280px nen
-`.chip-row` van la flex, va `pointer: coarse` bat): **0 chip tran chu**.
+**Da lo.** Commit 3b (`f5e6afc`) them `padding-left: env(safe-area-inset-left)`
+cho `.col-filters`. O che do NGANG voi inset 59px, cho du bien mat:
+`.chip-row` 171px -> 112px, chip 81px -> 51px, chu "Tất cả" 42px trong hop
+39px — **tran 3px**, dung hai chip.
 
-Se lo neu them mot nut vao hang San, hoac doi nhan dai hon "Tất cả" (52px).
+**Va khai bao co loi KHONG PHAI `min-width: 44px`.** O <=1280px `.chip-row` la
+GRID (`1fr 1fr`) chu khong phai flex, va `.chip` da co `flex: none`. Track `1fr`
+la `minmax(auto, 1fr)`; san `auto` cua grid item bi `min-width: 0` (trong khoi
+grid) xoa di. Dat 44px o day con TE HON: hop 32px cho chu 42px.
+Sua thanh `min-width: min-content` (styles.css:1587).
+
+`min-width: 44px` van con o hai cho va van dung: `.chip` goc (dong 595) va khoi
+`@media (pointer: coarse)` (dong 2601). Chung phuc vu vung cham cho nut NHO hon
+44px, khong phai lam san cho nut lon hon.
+
+Do hoi quy o moi viewport, ca hai che do cua `.chip-row` (flex >1280px, grid
+<=1280px): khong doi cho nao khac.
 
 ## 3. `.icon-btn` bi `min-width: 44px` de len `width: 26px`
 
@@ -85,7 +96,7 @@ thiet ke la o vuong.
 
 Phat sinh tu commit 2 (`ef88f16`). Truoc do tab bi bop cho vua man hinh nen
 nguoi dung thay het (du chu dinh vao nhau). Nay dai tab cuon dung cach —
-`scrollWidth=560` tren `clientWidth=386` o 402px — nhung khong co bong mo o
+`scrollWidth=542` tren `clientWidth=386` o 402px — nhung khong co bong mo o
 mep, mui ten, hay thanh cuon nhin thay duoc. Nguoi dung khong biet con hai tab
 nua ben phai.
 
