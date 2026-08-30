@@ -53,8 +53,17 @@ async function choOnDinh(page) {
   const chup = () => page.evaluate(() => {
     const q = s => { const e = document.querySelector(s); if (!e) return '-';
                      const r = e.getBoundingClientRect(); return `${r.width.toFixed(1)}x${r.height.toFixed(1)}`; };
+    // PHAI co ca hai drawer. Chung co `transition: transform 0.25s ease`
+    // (styles.css:1041 .col-detail, :1629 .col-filters). Thieu chung thi
+    // settle() tra ve trong khi drawer VAN DANG TRUOT, va moi so do ve
+    // chung deu la anh chup giua chung.
+    // KHONG lay mau .brand-mark: no co `animation: pulse 2s infinite`.
+    // May la pulse chi doi opacity nen khong doi hinh hoc — nhung neu lay
+    // mau mot phan tu co animation lap vo han thi settle() se KHONG BAO GIO
+    // on dinh.
     return [q('.topbar'), q('.topbar-left'), q('.topbar-right'),
-            q('.strategy-tabs'), q('.table-wrap'), document.fonts.status].join('|');
+            q('.strategy-tabs'), q('.table-wrap'),
+            q('.col-detail'), q('.col-filters'), document.fonts.status].join('|');
   });
   let truoc = await chup();
   for (let i = 0; i < 32; i++) {          // tran 32 x 250ms = 8s
