@@ -12,7 +12,11 @@ const URL_ = base => base + '/index.html';
 const settle = async (p) => {
   const chup = () => p.evaluate(() => {
     const q = s => { const e = document.querySelector(s); if (!e) return '-';
-                     const r = e.getBoundingClientRect(); return `${r.width.toFixed(1)}x${r.height.toFixed(1)}`; };
+                     const r = e.getBoundingClientRect();
+                     // PHAI co ca VI TRI, khong chi kich thuoc. Drawer truot NGANG
+                     // (`transform: translateX`) nen width/height BAT BIEN suot qua
+                     // trinh — lay mau kich thuoc khong the phat hien no dang chay.
+                     return `${r.x.toFixed(1)},${r.y.toFixed(1)} ${r.width.toFixed(1)}x${r.height.toFixed(1)}`; };
     // PHAI co ca hai drawer. Chung co `transition: transform 0.25s ease`
     // (styles.css:1041 .col-detail, :1629 .col-filters). Thieu chung thi
     // settle() tra ve trong khi drawer VAN DANG TRUOT, va moi so do ve
