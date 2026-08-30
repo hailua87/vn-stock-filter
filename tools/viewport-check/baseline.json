@@ -1,6 +1,6 @@
 {
   "base": "http://127.0.0.1:8765",
-  "at": "2026-08-29T23:11:36.344Z",
+  "at": "2026-08-30T01:22:52.487Z",
   "viewports": {
     "d-1440x900": {
       "w": 1440,
@@ -206,32 +206,32 @@
         {
           "name": "tab:pre_breakout:khong-bi-che",
           "ok": true,
-          "detail": "w=113 hit=button.strat-tab"
+          "detail": "w=110 hit=button.strat-tab"
         },
         {
           "name": "tab:golden_cross_long:khong-bi-che",
           "ok": true,
-          "detail": "w=97 hit=button.strat-tab"
+          "detail": "w=94 hit=button.strat-tab"
         },
         {
           "name": "tab:golden_cross_short:khong-bi-che",
           "ok": true,
-          "detail": "w=109 hit=button.strat-tab"
+          "detail": "w=105 hit=button.strat-tab"
         },
         {
           "name": "tab:ichimoku:khong-bi-che",
           "ok": true,
-          "detail": "w=87 hit=button.strat-tab"
+          "detail": "w=84 hit=button.strat-tab"
         },
         {
           "name": "tab:combined:khong-bi-che",
           "ok": true,
-          "detail": "w=112 hit=button.strat-tab"
+          "detail": "w=110 hit=button.strat-tab"
         },
         {
           "name": "tab:analyzer:khong-bi-che",
           "ok": true,
-          "detail": "w=130 hit=button.strat-tab"
+          "detail": "w=126 hit=button.strat-tab"
         },
         {
           "name": "analyzer:o-nhap-hien-ra",
@@ -1380,7 +1380,7 @@
             },
             {
               "el": "span#clock.time",
-              "text": "06:12:02 ICT",
+              "text": "08:23:24 ICT",
               "soDong": 2,
               "w": 81
             }
@@ -1492,7 +1492,7 @@
             },
             {
               "el": "span#clock.time",
-              "text": "06:12:03 ICT",
+              "text": "08:23:24 ICT",
               "soDong": 2,
               "w": 81
             }
@@ -1694,7 +1694,7 @@
             },
             {
               "el": "span#clock.time",
-              "text": "06:12:08 ICT",
+              "text": "08:23:29 ICT",
               "soDong": 2,
               "w": 74
             }
@@ -1806,7 +1806,7 @@
             },
             {
               "el": "span#clock.time",
-              "text": "06:12:09 ICT",
+              "text": "08:23:30 ICT",
               "soDong": 2,
               "w": 74
             }
@@ -3186,10 +3186,82 @@
           }
         }
       },
-      "functional": [],
-      "errors": [
-        "FATAL: TimeoutError: page.goto: Timeout 15000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:8765/index.html\", waiting until \"domcontentloaded\"\u001b[22m\n"
+      "functional": [
+        {
+          "name": "detail:mo",
+          "ok": true,
+          "detail": "x=679 w=420 vw=1099"
+        },
+        {
+          "name": "detail:trong-viewport",
+          "ok": true,
+          "detail": "679..1099"
+        },
+        {
+          "name": "detail:dong",
+          "ok": true,
+          "detail": "x=1099 vw=1099"
+        },
+        {
+          "name": "loc:cot-co-dinh-desktop",
+          "ok": true,
+          "detail": "position=relative w=200"
+        },
+        {
+          "name": "tab:pre_breakout:khong-bi-che",
+          "ok": true,
+          "detail": "w=113 hit=button.strat-tab"
+        },
+        {
+          "name": "tab:golden_cross_long:khong-bi-che",
+          "ok": true,
+          "detail": "w=97 hit=button.strat-tab"
+        },
+        {
+          "name": "tab:golden_cross_short:khong-bi-che",
+          "ok": true,
+          "detail": "w=109 hit=button.strat-tab"
+        },
+        {
+          "name": "tab:ichimoku:khong-bi-che",
+          "ok": true,
+          "detail": "w=87 hit=button.strat-tab"
+        },
+        {
+          "name": "tab:combined:khong-bi-che",
+          "ok": true,
+          "detail": "w=112 hit=button.strat-tab"
+        },
+        {
+          "name": "tab:analyzer:khong-bi-che",
+          "ok": true,
+          "detail": "w=130 hit=button.strat-tab"
+        },
+        {
+          "name": "analyzer:o-nhap-hien-ra",
+          "ok": true,
+          "detail": "hidden=false"
+        },
+        {
+          "name": "analyzer:input-khong-bi-che",
+          "ok": true,
+          "detail": "w=280 h=32 hit=input.analyzer-input"
+        },
+        {
+          "name": "analyzer:o-nhap-du-rong",
+          "ok": true,
+          "detail": "w=280 (khai 280px)",
+          "so": {
+            "w": 280
+          }
+        },
+        {
+          "name": "analyzer:khong-tran-mep",
+          "ok": true,
+          "detail": "right=567 vw=1099"
+        }
       ],
+      "errors": [],
       "env": {
         "coarse": false,
         "fine": true,
@@ -4802,12 +4874,12 @@
             "tabsClientWidth": 869,
             "tabCount": 6,
             "tabWidths": [
-              81,
-              67,
-              77,
-              60,
+              83,
+              70,
               80,
-              94
+              62,
+              81,
+              97
             ]
           },
           "cols": {
@@ -4816,7 +4888,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 221,
+          "overflowRawCount": 326,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -4889,12 +4961,12 @@
             "tabsClientWidth": 869,
             "tabCount": 6,
             "tabWidths": [
-              81,
-              67,
-              77,
-              60,
+              83,
+              70,
               80,
-              94
+              62,
+              81,
+              97
             ]
           },
           "cols": {
@@ -4903,7 +4975,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 221,
+          "overflowRawCount": 326,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -8090,12 +8162,12 @@
             "tabsClientWidth": 685,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -8142,8 +8214,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -8187,12 +8259,12 @@
             "tabsClientWidth": 685,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -8239,8 +8311,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -8698,12 +8770,12 @@
             "tabsClientWidth": 683,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -8750,8 +8822,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -8777,7 +8849,7 @@
             },
             "atTopEdge": "div.list-head",
             "atBottomEdge": "div.list-head",
-            "atCenter": "div.legend-inline"
+            "atCenter": "span.lg-dot"
           }
         },
         "scrolled": {
@@ -8795,12 +8867,12 @@
             "tabsClientWidth": 683,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -8847,8 +8919,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -8874,7 +8946,7 @@
             },
             "atTopEdge": "div.list-head",
             "atBottomEdge": "div.list-head",
-            "atCenter": "div.legend-inline"
+            "atCenter": "span.lg-dot"
           }
         }
       },
@@ -9002,12 +9074,12 @@
             "tabsClientWidth": 585,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -9054,8 +9126,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -9099,12 +9171,12 @@
             "tabsClientWidth": 585,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -9151,8 +9223,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -9306,12 +9378,12 @@
             "tabsClientWidth": 585,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -9358,8 +9430,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -9403,12 +9475,12 @@
             "tabsClientWidth": 585,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -9455,8 +9527,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -9610,12 +9682,12 @@
             "tabsClientWidth": 583,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -9662,8 +9734,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -9707,12 +9779,12 @@
             "tabsClientWidth": 583,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -9759,8 +9831,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -9824,32 +9896,32 @@
         {
           "name": "tab:pre_breakout:khong-bi-che",
           "ok": true,
-          "detail": "w=94 hit=button.strat-tab"
+          "detail": "w=91 hit=button.strat-tab"
         },
         {
           "name": "tab:golden_cross_long:khong-bi-che",
           "ok": true,
-          "detail": "w=80 hit=button.strat-tab"
+          "detail": "w=77 hit=button.strat-tab"
         },
         {
           "name": "tab:golden_cross_short:khong-bi-che",
           "ok": true,
-          "detail": "w=91 hit=button.strat-tab"
+          "detail": "w=87 hit=button.strat-tab"
         },
         {
           "name": "tab:ichimoku:khong-bi-che",
           "ok": true,
-          "detail": "w=70 hit=button.strat-tab"
+          "detail": "w=68 hit=button.strat-tab"
         },
         {
           "name": "tab:combined:khong-bi-che",
           "ok": true,
-          "detail": "w=92 hit=button.strat-tab"
+          "detail": "w=90 hit=button.strat-tab"
         },
         {
           "name": "tab:analyzer:khong-bi-che",
           "ok": true,
-          "detail": "w=110 hit=button.strat-tab"
+          "detail": "w=106 hit=button.strat-tab"
         },
         {
           "name": "tab:khong-bi-bop-chu",
@@ -9859,7 +9931,7 @@
         {
           "name": "tab:cuoi-toi-duoc-sau-khi-cuon",
           "ok": true,
-          "detail": "w=110 hit=button.strat-tab"
+          "detail": "w=106 hit=button.strat-tab"
         },
         {
           "name": "analyzer:o-nhap-hien-ra",
@@ -9882,7 +9954,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=541 vw=599"
+          "detail": "right=530 vw=599"
         }
       ],
       "errors": [],
@@ -9914,12 +9986,12 @@
             "tabsClientWidth": 583,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -9966,8 +10038,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10011,12 +10083,12 @@
             "tabsClientWidth": 583,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -10063,8 +10135,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10123,37 +10195,37 @@
         {
           "name": "loc:backdrop-dong",
           "ok": true,
-          "detail": "backdrop=none colX=-319"
+          "detail": "backdrop=none colX=-320"
         },
         {
           "name": "tab:pre_breakout:khong-bi-che",
           "ok": true,
-          "detail": "w=94 hit=button.strat-tab"
+          "detail": "w=91 hit=button.strat-tab"
         },
         {
           "name": "tab:golden_cross_long:khong-bi-che",
           "ok": true,
-          "detail": "w=80 hit=button.strat-tab"
+          "detail": "w=77 hit=button.strat-tab"
         },
         {
           "name": "tab:golden_cross_short:khong-bi-che",
           "ok": true,
-          "detail": "w=91 hit=button.strat-tab"
+          "detail": "w=87 hit=button.strat-tab"
         },
         {
           "name": "tab:ichimoku:khong-bi-che",
           "ok": true,
-          "detail": "w=70 hit=button.strat-tab"
+          "detail": "w=68 hit=button.strat-tab"
         },
         {
           "name": "tab:combined:khong-bi-che",
           "ok": true,
-          "detail": "w=92 hit=button.strat-tab"
+          "detail": "w=90 hit=button.strat-tab"
         },
         {
           "name": "tab:analyzer:khong-bi-che",
           "ok": true,
-          "detail": "w=110 hit=button.strat-tab"
+          "detail": "w=106 hit=button.strat-tab"
         },
         {
           "name": "tab:khong-bi-bop-chu",
@@ -10163,7 +10235,7 @@
         {
           "name": "tab:cuoi-toi-duoc-sau-khi-cuon",
           "ok": true,
-          "detail": "w=110 hit=button.strat-tab"
+          "detail": "w=106 hit=button.strat-tab"
         },
         {
           "name": "analyzer:o-nhap-hien-ra",
@@ -10214,16 +10286,16 @@
             "maxTouchPoints": 0
           },
           "metrics": {
-            "tabsScrollWidth": 560,
+            "tabsScrollWidth": 542,
             "tabsClientWidth": 405,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -10270,8 +10342,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10296,8 +10368,8 @@
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
-            "atBottomEdge": "div.list-head-right",
-            "atCenter": "span.lg-dot"
+            "atBottomEdge": "div.list-head",
+            "atCenter": "div.legend-inline"
           }
         },
         "scrolled": {
@@ -10311,16 +10383,16 @@
             "maxTouchPoints": 0
           },
           "metrics": {
-            "tabsScrollWidth": 560,
+            "tabsScrollWidth": 542,
             "tabsClientWidth": 405,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -10367,8 +10439,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10393,8 +10465,8 @@
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
-            "atBottomEdge": "div.list-head-right",
-            "atCenter": "span.lg-dot"
+            "atBottomEdge": "div.list-head",
+            "atCenter": "div.legend-inline"
           }
         }
       },
@@ -10432,47 +10504,47 @@
         {
           "name": "tab:pre_breakout:khong-bi-che",
           "ok": true,
-          "detail": "w=94 hit=button.strat-tab"
+          "detail": "w=91 hit=button.strat-tab"
         },
         {
           "name": "tab:golden_cross_long:khong-bi-che",
           "ok": true,
-          "detail": "w=80 hit=button.strat-tab"
+          "detail": "w=77 hit=button.strat-tab"
         },
         {
           "name": "tab:golden_cross_short:khong-bi-che",
           "ok": true,
-          "detail": "w=91 hit=button.strat-tab"
+          "detail": "w=87 hit=button.strat-tab"
         },
         {
           "name": "tab:ichimoku:khong-bi-che",
           "ok": true,
-          "detail": "w=70 hit=button.strat-tab"
+          "detail": "w=68 hit=button.strat-tab"
         },
         {
           "name": "tab:combined:khong-bi-che",
           "ok": true,
-          "detail": "w=92 hit=button.strat-tab"
+          "detail": "w=90 hit=button.strat-tab"
         },
         {
           "name": "tab:analyzer:khong-bi-che",
           "ok": true,
-          "detail": "w=110 hit=button.strat-tab"
+          "detail": "w=106 hit=button.strat-tab"
         },
         {
           "name": "tab:khong-bi-bop-chu",
           "ok": true,
-          "detail": "scrollW=560 clientW=405 (can cuon)"
+          "detail": "scrollW=542 clientW=405 (can cuon)"
         },
         {
           "name": "tab:cuon-den-cuoi-duoc",
           "ok": true,
-          "detail": "dat=155 doc lai=155"
+          "detail": "dat=137 doc lai=137"
         },
         {
           "name": "tab:cuoi-toi-duoc-sau-khi-cuon",
           "ok": true,
-          "detail": "w=110 hit=button.strat-tab"
+          "detail": "w=106 hit=button.strat-tab"
         },
         {
           "name": "analyzer:o-nhap-hien-ra",
@@ -10523,16 +10595,16 @@
             "maxTouchPoints": 1
           },
           "metrics": {
-            "tabsScrollWidth": 560,
+            "tabsScrollWidth": 542,
             "tabsClientWidth": 405,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -10579,8 +10651,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10605,8 +10677,8 @@
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
-            "atBottomEdge": "div.list-head-right",
-            "atCenter": "span.lg-dot"
+            "atBottomEdge": "div.list-head",
+            "atCenter": "div.legend-inline"
           }
         },
         "scrolled": {
@@ -10620,16 +10692,16 @@
             "maxTouchPoints": 1
           },
           "metrics": {
-            "tabsScrollWidth": 560,
+            "tabsScrollWidth": 542,
             "tabsClientWidth": 405,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -10676,8 +10748,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10702,8 +10774,8 @@
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
-            "atBottomEdge": "div.list-head-right",
-            "atCenter": "span.lg-dot"
+            "atBottomEdge": "div.list-head",
+            "atCenter": "div.legend-inline"
           }
         }
       },
@@ -10741,47 +10813,47 @@
         {
           "name": "tab:pre_breakout:khong-bi-che",
           "ok": true,
-          "detail": "w=94 hit=button.strat-tab"
+          "detail": "w=91 hit=button.strat-tab"
         },
         {
           "name": "tab:golden_cross_long:khong-bi-che",
           "ok": true,
-          "detail": "w=80 hit=button.strat-tab"
+          "detail": "w=77 hit=button.strat-tab"
         },
         {
           "name": "tab:golden_cross_short:khong-bi-che",
           "ok": true,
-          "detail": "w=91 hit=button.strat-tab"
+          "detail": "w=87 hit=button.strat-tab"
         },
         {
           "name": "tab:ichimoku:khong-bi-che",
           "ok": true,
-          "detail": "w=70 hit=button.strat-tab"
+          "detail": "w=68 hit=button.strat-tab"
         },
         {
           "name": "tab:combined:khong-bi-che",
           "ok": true,
-          "detail": "w=92 hit=button.strat-tab"
+          "detail": "w=90 hit=button.strat-tab"
         },
         {
           "name": "tab:analyzer:khong-bi-che",
           "ok": true,
-          "detail": "w=110 hit=button.strat-tab"
+          "detail": "w=106 hit=button.strat-tab"
         },
         {
           "name": "tab:khong-bi-bop-chu",
           "ok": true,
-          "detail": "scrollW=560 clientW=405 (can cuon)"
+          "detail": "scrollW=542 clientW=405 (can cuon)"
         },
         {
           "name": "tab:cuon-den-cuoi-duoc",
           "ok": true,
-          "detail": "dat=155 doc lai=155"
+          "detail": "dat=137 doc lai=137"
         },
         {
           "name": "tab:cuoi-toi-duoc-sau-khi-cuon",
           "ok": true,
-          "detail": "w=110 hit=button.strat-tab"
+          "detail": "w=106 hit=button.strat-tab"
         },
         {
           "name": "analyzer:o-nhap-hien-ra",
@@ -10832,16 +10904,16 @@
             "maxTouchPoints": 0
           },
           "metrics": {
-            "tabsScrollWidth": 560,
+            "tabsScrollWidth": 542,
             "tabsClientWidth": 403,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -10888,8 +10960,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10914,7 +10986,7 @@
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
-            "atBottomEdge": "div.list-head-right",
+            "atBottomEdge": "div.list-head",
             "atCenter": "div.legend-inline"
           }
         },
@@ -10929,16 +11001,16 @@
             "maxTouchPoints": 0
           },
           "metrics": {
-            "tabsScrollWidth": 560,
+            "tabsScrollWidth": 542,
             "tabsClientWidth": 403,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -10985,8 +11057,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -11011,7 +11083,7 @@
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
-            "atBottomEdge": "div.list-head-right",
+            "atBottomEdge": "div.list-head",
             "atCenter": "div.legend-inline"
           }
         }
@@ -11759,16 +11831,16 @@
             "maxTouchPoints": 1
           },
           "metrics": {
-            "tabsScrollWidth": 560,
+            "tabsScrollWidth": 542,
             "tabsClientWidth": 386,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -11815,8 +11887,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -11841,7 +11913,7 @@
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
-            "atBottomEdge": "div.list-head-right",
+            "atBottomEdge": "div.list-head",
             "atCenter": "div.legend-inline"
           }
         },
@@ -11856,16 +11928,16 @@
             "maxTouchPoints": 1
           },
           "metrics": {
-            "tabsScrollWidth": 560,
+            "tabsScrollWidth": 542,
             "tabsClientWidth": 386,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -11912,8 +11984,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -11938,7 +12010,7 @@
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
-            "atBottomEdge": "div.list-head-right",
+            "atBottomEdge": "div.list-head",
             "atCenter": "div.legend-inline"
           }
         }
@@ -12377,16 +12449,16 @@
             "maxTouchPoints": 1
           },
           "metrics": {
-            "tabsScrollWidth": 560,
+            "tabsScrollWidth": 542,
             "tabsClientWidth": 386,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -12433,8 +12505,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -12459,7 +12531,7 @@
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
-            "atBottomEdge": "div.list-head-right",
+            "atBottomEdge": "div.list-head",
             "atCenter": "div.legend-inline"
           }
         },
@@ -12474,16 +12546,16 @@
             "maxTouchPoints": 1
           },
           "metrics": {
-            "tabsScrollWidth": 560,
+            "tabsScrollWidth": 542,
             "tabsClientWidth": 386,
             "tabCount": 6,
             "tabWidths": [
-              94,
-              80,
               91,
-              70,
-              92,
-              110
+              77,
+              87,
+              68,
+              90,
+              106
             ]
           },
           "cols": {
@@ -12530,8 +12602,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 4125,
-              "scrollHeight": 4125,
+              "height": 4282,
+              "scrollHeight": 4282,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -12556,7 +12628,7 @@
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
-            "atBottomEdge": "div.list-head-right",
+            "atBottomEdge": "div.list-head",
             "atCenter": "div.legend-inline"
           }
         }
@@ -12595,47 +12667,47 @@
         {
           "name": "tab:pre_breakout:khong-bi-che",
           "ok": true,
-          "detail": "w=94 hit=button.strat-tab"
+          "detail": "w=91 hit=button.strat-tab"
         },
         {
           "name": "tab:golden_cross_long:khong-bi-che",
           "ok": true,
-          "detail": "w=80 hit=button.strat-tab"
+          "detail": "w=77 hit=button.strat-tab"
         },
         {
           "name": "tab:golden_cross_short:khong-bi-che",
           "ok": true,
-          "detail": "w=91 hit=button.strat-tab"
+          "detail": "w=87 hit=button.strat-tab"
         },
         {
           "name": "tab:ichimoku:khong-bi-che",
           "ok": true,
-          "detail": "w=70 hit=button.strat-tab"
+          "detail": "w=68 hit=button.strat-tab"
         },
         {
           "name": "tab:combined:khong-bi-che",
           "ok": true,
-          "detail": "w=92 hit=button.strat-tab"
+          "detail": "w=90 hit=button.strat-tab"
         },
         {
           "name": "tab:analyzer:khong-bi-che",
           "ok": true,
-          "detail": "w=110 hit=button.strat-tab"
+          "detail": "w=106 hit=button.strat-tab"
         },
         {
           "name": "tab:khong-bi-bop-chu",
           "ok": true,
-          "detail": "scrollW=560 clientW=386 (can cuon)"
+          "detail": "scrollW=542 clientW=386 (can cuon)"
         },
         {
           "name": "tab:cuon-den-cuoi-duoc",
           "ok": true,
-          "detail": "dat=174 doc lai=174"
+          "detail": "dat=156 doc lai=156"
         },
         {
           "name": "tab:cuoi-toi-duoc-sau-khi-cuon",
           "ok": true,
-          "detail": "w=110 hit=button.strat-tab"
+          "detail": "w=106 hit=button.strat-tab"
         },
         {
           "name": "analyzer:o-nhap-hien-ra",

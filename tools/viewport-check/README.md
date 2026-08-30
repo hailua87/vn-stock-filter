@@ -234,3 +234,61 @@ moi khoa deu "da sua" hoac "moi phat sinh" ma khong noi len dieu gi.
 `accepted.json` KHONG bi anh huong khi dung lai moc chuan — no doc lap, va do
 la chu y: muc da can nhac khong sua van phai duoc in ra va canh gac du moc
 chuan co doi.
+
+## SETTLE() — hai bai hoc, cai thu hai sac hon
+
+### 1. Phai lay mau CHINH phan tu co transition
+
+Phep kiem do mot phan tu co transition ma settle() khong lay mau phan tu do thi
+moi so do ve no la ANH CHUP GIUA CHUNG. Thieu mot phan tu trong mau la du.
+
+Va no chi lo tren may cham hon — tuc lo o CI chu khong lo khi phat trien.
+Cung mot ma nguon: **Windows 0/45 khung hong, CI 41/45 hong**.
+
+Lay mau theo THUOC TINH BI ANIMATE, khong theo viec co animation hay khong:
+- `.col-detail` (styles.css:1041) va `.col-filters` (:1629) co
+  `transition: transform 0.25s` -> PHAI vao mau.
+- `.brand-mark` (:147) co `animation: pulse 2s infinite` nhung pulse chi doi
+  `opacity`, khong doi hinh hoc -> KHONG vao mau. Va khong duoc vao: lay mau
+  mot phan tu co animation lap vo han thi settle() khong bao gio tra ve.
+- 17 khai bao `transition: all 0.12s` khac: 0.12s ngan hon mot nhip lay mau
+  250ms nen da xong truoc lan do thu hai.
+
+### 2. Them phan tu vao mau la CHUA DU — phai lay DUNG DAI LUONG bi bien doi
+
+Day la cho de sai nhat, va da sai that.
+
+Sau khi them `.col-detail` vao mau, CI VAN hong **42/45**. Ly do: anh chup luc
+do chi ghi `width x height`. Drawer truot NGANG bang `translateX` — width va
+height **bat bien** suot qua trinh. Lay mau mot dai luong bat bien duoi phep
+bien doi can phat hien thi khong phat hien duoc gi.
+
+Sau khi chup ca `x,y`: **0/45**.
+
+**Quy tac chung: mau phai chua dai luong ma phep bien doi can phat hien LAM
+THAY DOI — khong phai bat ky dai luong nao cua phan tu do.**
+  - `translateX` / `translateY` -> can `x`, `y`
+  - `scale` / doi kich thuoc     -> can `width`, `height`
+  - `opacity` / mau              -> khong doi hinh hoc, thuong khong can vao mau
+
+Neu dung o "da them phan tu ma van hong" roi chuyen sang doi PHEP KHANG DINH
+(vi du doi so toa do sang `elementFromPoint`), phep kiem se xanh — nhung do la
+che trieu chung, con so do van lay giua luc dang truot va moi phep kiem khac
+cham toi drawer van sai.
+
+## ACCEPTED CHE DUOC CA LOI BO DO
+
+`accepted.json` khong tinh muc da chap nhan la loi. Nghia la neu mot phep kiem
+CHOP TAT trong pham vi da chap nhan, no se khong bao gio hien o cot MOI PHAT
+SINH — va khong ai thay.
+
+Da xay ra that: 16 muc vo dong lat qua lat lai giua hai luot chay cach nhau 6
+phut, bi che vi vua duoc danh dau accepted.
+
+**Chay kiem tat dinh TRUOC khi them muc accepted moi, khong phai sau.**
+Kiem tat dinh = dung lai moc chuan, chay them mot luot, so voi chinh no; phai
+ra 0 muc moi va 0 khung bao 'BO CUC KHONG ON DINH'.
+
+Cung ly do do, moc chuan CI dau tien (e566c7d) da chot mot phep kiem HONG lam
+trang thai binh thuong: `detail:dong` hong 41/45 khung nam san trong moc chuan
+nen khong bao gio hien ra. Chi lo khi kiem tat dinh hai luot.
