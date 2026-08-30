@@ -62,6 +62,15 @@ jobs:
           echo "playwright: $(node -p "require('playwright/package.json').version")"
           node -e "import('playwright').then(async({chromium})=>{const b=await chromium.launch();console.log('chromium:',b.version());await b.close();})"
 
+      # TAM THOI — chan doan detail:dong lech giua Windows va Linux.
+      # Se go sau khi lay duoc so. Chi chay o che do dispatch.
+      - name: Chan doan vi tri drawer
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          (cd ../../web && python3 -m http.server 8788 --bind 127.0.0.1 >/dev/null 2>&1) &
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:8788/index.html && break; sleep 1; done
+          BASE_URL=http://127.0.0.1:8788 node do-drawer.mjs
+
       # May chu va bo do trong CUNG MOT step. Tach ra thi tien trinh nen co the
       # nhan SIGHUP khi shell cua step truoc thoat — dung duoc nhung mong manh.
       - name: Khoi dong may chu roi chay bo do
