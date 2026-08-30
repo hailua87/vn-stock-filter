@@ -8,10 +8,61 @@ Kiem bo cuc bang Playwright + Chromium tren mot dai viewport. Chay tren
 ```
 cd web && python -m http.server 8765 --bind 127.0.0.1 &
 cd tools/viewport-check
-npm install && npx playwright install chromium
-node check.mjs result.json          # SHOTS=1 de chup anh
+npm ci && npx playwright install chromium
+node check.mjs result.json          # SHOTS=1 chup anh; ONLY=ten1,ten2 chay mot phan
 node diff.mjs baseline.json result.json
 ```
+
+`npm ci` chu khong phai `npm install`: package-lock.json duoc commit de ghim
+Playwright, khong ghim thi Chromium moi luot mot ban va moc chuan troi.
+
+**Chi mot may chu, mot cong.** Hai tien trinh `http.server` cung cong tren
+Windows chia yeu cau bat dinh va gay treo — da mac. Kiem:
+`Get-CimInstance Win32_Process -Filter "Name='python.exe'"`
+
+Cong CI: `.github/workflows/viewport-check.yml` (chay tren PR khi doi `web/**`
+tru `web/data/**`, hoac `tools/viewport-check/**`).
+
+## Tep nao lam gi
+
+| tep | vai tro |
+| --- | --- |
+| `check.mjs` | trinh chay: duyet 45 khung, goi probe + functional, ghi ket qua |
+| `probe.mjs` | do TRONG TRANG: tran, tran chu, vo dong, chong lan, cot, tri so |
+| `functional.mjs` | bam that: drawer mo/dong, tab, o nhap |
+| `viewports.mjs` | danh sach 45 khung tren hai truc |
+| `diff.mjs` | so hai ket qua, in ba cot, ap `accepted.json` |
+| `accepted.json` | muc da do, da can nhac, quyet dinh khong sua |
+| `baseline.json` | moc chuan tai may (Windows) |
+| `baseline-ci.json` | moc chuan CI (Linux) |
+| `so-hai-moc-chuan.mjs` | so hai moc chuan, tim khac biet giua hai nen |
+| `kiem-safe-area.mjs` | bom gia tri gia vao safe-area, do he qua (`LUI=1` de thu do) |
+| `do-drawer.mjs` | chan doan vi tri that cua `.col-detail`, khong lam tron |
+
+## Them mot muc vao `accepted.json`
+
+**Chay kiem tat dinh TRUOC** — xem muc "ACCEPTED CHE DUOC CA LOI BO DO" o cuoi.
+
+Hai kieu muc, khac nhau o cach canh gac:
+
+```jsonc
+{
+  "khoa": "fn|ten-phep-kiem",        // mot khoa cu the
+  "khung": ["bp-1281-mouse", ...],
+  "lyDo": "...", "taiLieu": "docs/... muc N",
+  "san": { "truong": "w", "toiThieu": { "bp-1281-mouse": 82, ... } }
+}                                    // do neu tri so TUT duoi san
+{
+  // Trong JSON phai la \\| (hai gach cheo): JSON an mot cai, regex nhan mot cai.
+  "khoaMau": "^(top|scrolled)\\|voDong\\|span(\\.brand-name|#live-text)\\|",
+  "khung": ["bp-1281-mouse", "bp-1281-touch"],
+  "soToiDa": 16,
+  "lyDo": "...", "taiLieu": "docs/... muc N"
+}                                    // do neu SO MUC tang, hoac LAN sang khung khac
+```
+
+Chap nhan 16 muc o hai khung KHONG co nghia chap nhan 20 muc, cung khong co
+nghia chap nhan chung xuat hien o khung thu ba.
 
 ## Hai truc, khong phai mot
 
