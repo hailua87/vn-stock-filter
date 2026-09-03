@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T10:31:09.547831",
+  "generated_at": "2026-09-03T19:46:37.319197",
   "strategy": "golden_cross_long",
   "total": 2,
   "metadata": {
@@ -9,7 +9,7 @@
       "HNX",
       "UPCOM"
     ],
-    "total_scanned": 420,
+    "total_scanned": 500,
     "market_context": {
       "available": true,
       "close": 1827.72,
@@ -24,39 +24,37 @@
       "label": "Thị trường trung tính — tín hiệu mua nên vào với tỷ trọng nhỏ hơn",
       "position_size_multiplier": 0.6,
       "breadth": {
-        "pct_above_ma50": 30.2,
-        "sample_size": 420
+        "pct_above_ma50": 31.0,
+        "sample_size": 500
       }
     },
     "session_date": "2026-09-03",
-    "written_at_ict": "2026-09-03 17:20:47+0700",
+    "written_at_ict": "2026-09-04 02:46:24+0700",
     "run_type": "eod",
-    "session_complete": 0.989,
-    "archive_written": false,
+    "session_complete": 0.986,
+    "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 17:20 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: fail (84% >= 80%, vòng fetch dừng sớm (time_budget))",
+    "archive_gate": "gate_time: pass (phiên 2026-09-03 đã đóng dứt khoát (hôm nay 2026-09-04)) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 17:20 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-09-03 đã đóng dứt khoát (hôm nay 2026-09-04)"
       },
       {
         "name": "gate_coverage",
-        "passed": false,
-        "detail": "84% >= 80%, vòng fetch dừng sớm (time_budget)"
+        "passed": true,
+        "detail": "100% >= 80%, vòng fetch chạy trọn"
       }
     ],
-    "archive_gates_failed": [
-      "gate_coverage"
-    ],
-    "fetch_truncated": true,
-    "fetch_stop_reason": "time_budget",
-    "fetch_coverage": 0.84,
-    "fetch_elapsed_s": 2701.3,
+    "archive_gates_failed": [],
+    "fetch_truncated": false,
+    "fetch_stop_reason": null,
+    "fetch_coverage": 1.0,
+    "fetch_elapsed_s": 1789.5,
     "intraday": false,
-    "run_time_ict": "17:31",
-    "run_date_ict": "2026-09-03"
+    "run_time_ict": "02:46",
+    "run_date_ict": "2026-09-04"
   },
   "signals": [
     {
