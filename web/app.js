@@ -126,6 +126,35 @@ function statNumber(v) {
   return Number.isFinite(n) ? n.toLocaleString() : STAT_UNKNOWN;
 }
 
+// ──────────── Ghi nho lua chon cua nguoi dung ────────────
+//
+// localStorage co the NEM LOI, khong phai chi tra ve null: che do rieng tu cua
+// mot so trinh duyet, hoac nguoi dung chan site data, thi chinh viec CHAM vao
+// localStorage da throw. Nen moi lan doc/ghi deu boc try/catch, va trang phai
+// chay dung khi khong co gia tri nao — moi ham doc deu co fallback.
+//
+// Tien to "vnss:" de khoa cua trang nay khong lan voi thu khac tren cung origin.
+const PREF_PREFIX = 'vnss:';
+
+function prefGet(key, fallback = null) {
+  try {
+    const v = localStorage.getItem(PREF_PREFIX + key);
+    return v === null ? fallback : v;
+  } catch {
+    return fallback;
+  }
+}
+
+function prefSet(key, value) {
+  try {
+    if (value === null || value === undefined) localStorage.removeItem(PREF_PREFIX + key);
+    else localStorage.setItem(PREF_PREFIX + key, String(value));
+  } catch {
+    /* Khong ghi duoc thi thoi. Khong bao loi: nguoi dung khong lam gi sai, va
+       mat mot lua chon khong dang lam gian doan viec ho dang lam. */
+  }
+}
+
 const state = {
   raw: [],
   filtered: [],
@@ -169,9 +198,29 @@ window.addEventListener('DOMContentLoaded', async () => {
   bindMobileDrawers();
   bindAnalyzerEvents();
 
-  await loadLatestFirst();
-  await loadDateIndex();
-  renderDateOptions();
+  // Khoi phuc tab da chon. switchStrategy() tu nap du lieu cua tab do (nhanh
+  // cuoi cua no goi loadCombinedData hoac loadLatestFirst+loadDateIndex), nen
+  // KHONG goi loadLatestFirst truoc — se nap hai lan roi vut mot.
+  //
+  // Gia tri khong hop le (tab da doi ten, localStorage bi sua tay) khong lot
+  // qua duoc `STRATEGIES[saved]`, va ban than switchStrategy cung co cua chan
+  // `if (!STRATEGIES[strategy]) return`. Ca hai truong hop deu roi ve nhanh
+  // duoi — tab mac dinh pre_breakout — chu khong bao gio de trang trang.
+  //
+  // Cua chan 'analyzer' o day la LOP PHONG THU cho ban ghi cu — tu commit sau,
+  // switchStrategy khong ghi khoa nay khi vao tab phan tich nua, nen gia tri
+  // 'analyzer' chi con co the den tu localStorage luu truoc do (hoac sua tay).
+  // Mo len thay man phan tich rong la trang trang ve mat cam nhan — khong bang,
+  // khong tin hieu, chi mot o tim kiem. 'combined' thi giu: van la bang day du.
+  const savedStrategy = prefGet('strategy');
+  if (savedStrategy && savedStrategy !== 'analyzer'
+      && savedStrategy !== activeStrategy && STRATEGIES[savedStrategy]) {
+    await switchStrategy(savedStrategy);
+  } else {
+    await loadLatestFirst();
+    await loadDateIndex();
+    renderDateOptions();
+  }
 });
 
 // ──────────── Mobile drawer handling ────────────
@@ -315,6 +364,13 @@ function bindStrategyTabs() {
 async function switchStrategy(strategy) {
   if (!STRATEGIES[strategy]) return;
   activeStrategy = strategy;
+  // KHONG ghi khi la tab phan tich: giu nguyen khoa cu.
+  //
+  // Nguoi ta ghe tab do de TRA MOT MA roi di. Lua chon tab that cua ho la cai
+  // TRUOC DO — ghi de len no bang mot lan ghe qua la lam mat dung cai minh
+  // dang co gang nho. Chan o cho GHI chu khong phai o cho doc, vi chi o day
+  // moi biet lua chon truoc do la gi de ma giu.
+  if (strategy !== 'analyzer') prefSet('strategy', strategy);
   document.querySelectorAll('.strat-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.strategy === strategy);
   });
@@ -635,6 +691,9 @@ function bindFilters() {
         chip.classList.add('active');
         chip.setAttribute('aria-pressed', 'true');
         state.filters[filter] = chip.dataset.value;
+        // Chi nho hai nhom on dinh giua cac tab. `ich_special` KHONG nho:
+        // switchStrategy() reset no ve '' moi lan doi tab, nho lai la mau thuan.
+        if (filter === 'exchange' || filter === 'rating') prefSet('f.' + filter, chip.dataset.value);
         // Update Ichimoku filter hint dynamically
         if (filter === 'ich_special') {
           const hint = document.getElementById('ich-filter-hint');
@@ -663,11 +722,16 @@ function bindFilters() {
   document.getElementById('vol-min').addEventListener('input', e => {
     state.filters.volMin = parseVolumeInput(e.target.value);
     e.target.classList.toggle('active', !!e.target.value);
+    // Luu CHUOI NGUOI DUNG GO ("100K"), khong luu so da phan tich. Ho go lai
+    // gi thi thay lai dung cai do; va neu sau nay parseVolumeInput doi cach
+    // hieu don vi thi ban ghi cu van doc duoc.
+    prefSet('volMin', e.target.value || null);
     render();
   });
   document.getElementById('vol-max').addEventListener('input', e => {
     state.filters.volMax = parseVolumeInput(e.target.value);
     e.target.classList.toggle('active', !!e.target.value);
+    prefSet('volMax', e.target.value || null);
     render();
   });
   document.getElementById('vol-clear').addEventListener('click', () => {
@@ -677,11 +741,21 @@ function bindFilters() {
     document.getElementById('vol-max').classList.remove('active');
     state.filters.volMin = null;
     state.filters.volMax = null;
+    prefSet('volMin', null);
+    prefSet('volMax', null);
     render();
   });
 
+  restoreSavedFilters();
+
   document.getElementById('reset-filters').addEventListener('click', () => {
     state.filters = { exchange: '', rating: '', search: '', volMin: null, volMax: null, ich_special: '' };
+    // Xoa bo loc la xoa luon ban ghi nho — neu khong, tai lai trang se thay bo
+    // loc quay ve, dung cai vua bam de bo di.
+    prefSet('f.exchange', null);
+    prefSet('f.rating', null);
+    prefSet('volMin', null);
+    prefSet('volMax', null);
     document.querySelectorAll('.chip-row').forEach(group => {
       group.querySelectorAll('.chip').forEach((c, i) => c.classList.toggle('active', i === 0));
     });
@@ -728,6 +802,43 @@ function parseVolumeInput(s) {
   else if (s.endsWith('B')) { mult = 1e9; s = s.slice(0, -1); }
   const n = parseFloat(s);
   return isNaN(n) ? null : n * mult;
+}
+
+// Khoi phuc bo loc da nho. Goi o CUOI bindFilters, tuc TRUOC loadLatestFirst()
+// va do do truoc render() dau tien — bang ve mot lan, dung ngay.
+//
+// Moi gia tri deu duoc DOI CHIEU voi DOM truoc khi dung. Mot `data-value` da
+// bien mat (doi ten san, bo mot hang xep loai) se khong khop chip nao, va ta
+// giu nguyen mac dinh thay vi ap mot bo loc khong con y nghia — bang se rong
+// ma nguoi dung khong hieu vi sao.
+function restoreSavedFilters() {
+  for (const filter of ['exchange', 'rating']) {
+    const saved = prefGet('f.' + filter);
+    if (saved === null || saved === '') continue;      // '' la mac dinh "Tất cả"
+    const group = document.querySelector(`.chip-row[data-filter="${filter}"]`);
+    if (!group) continue;
+    const chip = group.querySelector(`.chip[data-value="${CSS.escape(saved)}"]`);
+    if (!chip) { prefSet('f.' + filter, null); continue; }   // gia tri chet: don luon
+    group.querySelectorAll('.chip').forEach(c => {
+      c.classList.remove('active');
+      c.setAttribute('aria-pressed', 'false');
+    });
+    chip.classList.add('active');
+    chip.setAttribute('aria-pressed', 'true');
+    state.filters[filter] = saved;
+  }
+
+  for (const [key, field] of [['volMin', 'volMin'], ['volMax', 'volMax']]) {
+    const saved = prefGet(key);
+    if (!saved) continue;
+    const parsed = parseVolumeInput(saved);
+    if (parsed === null) { prefSet(key, null); continue; }   // go rac: don luon
+    const input = document.getElementById(key === 'volMin' ? 'vol-min' : 'vol-max');
+    if (!input) continue;
+    input.value = saved;
+    input.classList.add('active');
+    state.filters[field] = parsed;
+  }
 }
 
 // ──────────── Sort ────────────
@@ -872,7 +983,15 @@ function bindCollapseFilters() {
     btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
   };
 
-  const toggle = () => { dash.classList.toggle('filters-collapsed'); apply(); };
+  const toggle = () => {
+    dash.classList.toggle('filters-collapsed');
+    prefSet('filtersCollapsed', dash.classList.contains('filters-collapsed') ? '1' : '0');
+    apply();
+  };
+
+  // Khoi phuc TRUOC apply(): chi '1' moi la thu gon. Moi gia tri khac — ke ca
+  // rac trong localStorage — deu roi ve mac dinh MO. Hong theo huong mo.
+  if (prefGet('filtersCollapsed') === '1') dash.classList.add('filters-collapsed');
 
   btn.setAttribute('aria-controls', 'col-filters');
   btn.addEventListener('click', toggle);
@@ -1080,6 +1199,12 @@ function escapeAttr(str) {
   ));
 }
 
+// LUU Y KHI SUA BANG: moi <td> phai mang DUNG class prio-* nhu <th> tuong ung
+// trong index.html. Khoi @media an cot bang `.signal-table .prio-N { display: none }`
+// — quy tac do ap cho CA th LAN td, nhung neu td thieu class thi chi HANG TIEU DE
+// mat o, con hang du lieu giu nguyen => bang LECH COT.
+// Truoc 29/08/2026 co 9/15 cot thieu, nen o 402px tieu de chi con 5 cot ma moi
+// hang du lieu van 15 o: nguoi dung thay HOSE va KLGD duoi tieu de GIA va DIEM.
 function renderRow(s, idx) {
   const change = s.m_change_5d_pct || 0;
   const changeClass = change > 0 ? 'up' : change < 0 ? 'down' : 'flat';
@@ -1120,19 +1245,19 @@ function renderRow(s, idx) {
     const passCls = passCount === totalStrats ? 'full' : passCount >= 2 ? 'high' : 'low';
 
     return `<tr data-ticker="${s.ticker}" class="${selectedClass}">
-      <td class="th-idx">${idx}</td>
+      <td class="th-idx prio-4">${idx}</td>
       <td class="ticker-with-badges"><span class="ticker-cell">${s.ticker}</span>${eventFlag}<span class="ticker-badges">${badgesInline}</span></td>
-      <td><span class="exchange-cell">${s.exchange}</span></td>
+      <td class="prio-3"><span class="exchange-cell">${s.exchange}</span></td>
       <td class="num td-price">${fmtPrice(s.close)}</td>
       <td class="num prio-1">${renderChange1D(s)}</td>
       <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
-      <td class="num">${fmtVolume(s.volume)}</td>
-      <td class="num">${fmtValue(s.close, s.volume)}</td>
-      <td class="num">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
-      <td class="num">${(s.m_rsi14 || 0).toFixed(0)}</td>
-      <td class="num">${supCell}</td>
-      <td class="num">${resCell}</td>
-      <td class="combined-criteria-cell" style="display:none;"></td>
+      <td class="num prio-2">${fmtVolume(s.volume)}</td>
+      <td class="num prio-3">${fmtValue(s.close, s.volume)}</td>
+      <td class="num prio-3">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
+      <td class="num prio-3">${(s.m_rsi14 || 0).toFixed(0)}</td>
+      <td class="num prio-4">${supCell}</td>
+      <td class="num prio-4">${resCell}</td>
+      <td class="combined-criteria-cell prio-4" style="display:none;"></td>
       <td class="num"><span class="combined-pass ${passCls}">${passCount}/${totalStrats}</span></td>
       <td><span class="rating-tag ${ratingClass}">${s.rating}</span></td>
     </tr>`;
@@ -1158,19 +1283,19 @@ function renderRow(s, idx) {
     : '';
 
   return `<tr data-ticker="${s.ticker}" class="${selectedClass}">
-    <td class="th-idx">${idx}</td>
+    <td class="th-idx prio-4">${idx}</td>
     <td><span class="ticker-cell">${s.ticker}</span>${tkCrossFlag}${turnaroundFlag}${eventFlag}</td>
-    <td><span class="exchange-cell">${s.exchange}</span></td>
+    <td class="prio-3"><span class="exchange-cell">${s.exchange}</span></td>
     <td class="num td-price">${fmtPrice(s.close)}</td>
     <td class="num prio-1">${renderChange1D(s)}</td>
     <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
-    <td class="num">${fmtVolume(s.volume)}</td>
-    <td class="num">${fmtValue(s.close, s.volume)}</td>
-    <td class="num">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
-    <td class="num">${(s.m_rsi14 || 0).toFixed(0)}</td>
-    <td class="num">${supCell}</td>
-    <td class="num">${resCell}</td>
-    <td><div class="criteria-pills">${pills}</div></td>
+    <td class="num prio-2">${fmtVolume(s.volume)}</td>
+    <td class="num prio-3">${fmtValue(s.close, s.volume)}</td>
+    <td class="num prio-3">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
+    <td class="num prio-3">${(s.m_rsi14 || 0).toFixed(0)}</td>
+    <td class="num prio-4">${supCell}</td>
+    <td class="num prio-4">${resCell}</td>
+    <td class="prio-4"><div class="criteria-pills">${pills}</div></td>
     <td class="num score-cell ${scoreClass}">${s.total_score}/${currentMaxScore()}</td>
     <td><span class="rating-tag ${ratingClass}">${s.rating}</span></td>
   </tr>`;
