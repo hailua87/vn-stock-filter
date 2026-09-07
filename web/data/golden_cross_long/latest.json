@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-04T19:27:53.721742",
+  "generated_at": "2026-09-07T10:41:24.931795",
   "strategy": "golden_cross_long",
   "total": 1,
   "metadata": {
@@ -9,60 +9,60 @@
       "HNX",
       "UPCOM"
     ],
-    "total_scanned": 487,
+    "total_scanned": 500,
     "market_context": {
       "available": true,
-      "close": 1853.08,
-      "ma50": 1786.08,
-      "ma200": 1784.36,
+      "close": 1821.64,
+      "ma50": 1784.95,
+      "ma200": 1785.31,
       "above_ma50": true,
       "above_ma200": true,
       "ma50_rising": false,
-      "change_20d_pct": 4.27,
-      "drawdown_from_high_pct": -3.88,
+      "change_20d_pct": 2.54,
+      "drawdown_from_high_pct": -5.51,
       "regime": "neutral",
       "label": "Thị trường trung tính — tín hiệu mua nên vào với tỷ trọng nhỏ hơn",
       "position_size_multiplier": 0.6,
       "breadth": {
-        "pct_above_ma50": 32.2,
-        "sample_size": 487
+        "pct_above_ma50": 28.6,
+        "sample_size": 500
       }
     },
-    "session_date": "2026-09-04",
-    "written_at_ict": "2026-09-05 02:16:54+0700",
+    "session_date": "2026-09-07",
+    "written_at_ict": "2026-09-07 17:31:08+0700",
     "run_type": "eod",
-    "session_complete": 0.861,
+    "session_complete": 0.916,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên 2026-09-04 đã đóng dứt khoát (hôm nay 2026-09-05)) | gate_coverage: pass (97% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên hôm nay, 17:31 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên 2026-09-04 đã đóng dứt khoát (hôm nay 2026-09-05)"
+        "detail": "phiên hôm nay, 17:31 ICT >= 15:15 — khối lượng đã chốt"
       },
       {
         "name": "gate_coverage",
         "passed": true,
-        "detail": "97% >= 80%, vòng fetch chạy trọn"
+        "detail": "100% >= 80%, vòng fetch chạy trọn"
       }
     ],
     "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 0.974,
-    "fetch_elapsed_s": 1110.1,
+    "fetch_coverage": 1.0,
+    "fetch_elapsed_s": 1515.7,
     "intraday": false,
-    "run_time_ict": "02:27",
-    "run_date_ict": "2026-09-05"
+    "run_time_ict": "17:41",
+    "run_date_ict": "2026-09-07"
   },
   "signals": [
     {
       "ticker": "SZL",
       "exchange": "HOSE",
-      "date": "2026-09-04T00:00:00",
+      "date": "2026-09-07T00:00:00",
       "close": 52.5,
-      "volume": 26100,
+      "volume": 42700,
       "preset": "long",
       "total_score": 4,
       "rating": "A",
@@ -71,17 +71,17 @@
       "gc_ma_stacking": 1,
       "gc_slow_rising": 1,
       "gc_volume_confirm": 0,
-      "m_change_1d_pct": -0.38,
-      "m_limit_status": "normal",
+      "m_change_1d_pct": 0.0,
+      "m_limit_status": "reference",
       "m_limit_locked": false,
       "m_tradable_warning": null,
       "m_preset_name": "MA50×MA200",
-      "m_cross_days_ago": 3,
-      "m_fast_ma": 48.79,
-      "m_slow_ma": 48.68,
-      "m_slow_spread_pct": 0.21,
-      "m_change_5d_pct": 2.14,
-      "m_vol_ratio": 0.86,
+      "m_cross_days_ago": 4,
+      "m_fast_ma": 48.85,
+      "m_slow_ma": 48.73,
+      "m_slow_spread_pct": 0.25,
+      "m_change_5d_pct": 1.35,
+      "m_vol_ratio": 1.34,
       "m_rsi14": 67.3,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
@@ -124,16 +124,16 @@
       "m_fibo_swing": {
         "high": 53.7,
         "high_date": "2026-08-28",
-        "high_idx": 57,
+        "high_idx": 56,
         "low": 45.95,
         "low_date": "2026-07-23",
-        "low_idx": 32,
+        "low_idx": 31,
         "direction": "up",
         "range": 7.75
       },
-      "m_rs_score": 5.8,
+      "m_rs_score": 6.72,
       "m_rs_rank": 92,
-      "m_rs_63d": 5.32
+      "m_rs_63d": 5.11
     }
   ]
 }
