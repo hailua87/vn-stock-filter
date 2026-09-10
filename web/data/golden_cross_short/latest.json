@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-10T10:08:04.834698",
+  "generated_at": "2026-09-10T19:24:47.250216",
   "strategy": "golden_cross_short",
   "total": 17,
   "metadata": {
@@ -29,17 +29,17 @@
       }
     },
     "session_date": "2026-09-10",
-    "written_at_ict": "2026-09-10 16:57:47+0700",
+    "written_at_ict": "2026-09-11 02:24:41+0700",
     "run_type": "eod",
     "session_complete": 0.758,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 16:57 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên 2026-09-10 đã đóng dứt khoát (hôm nay 2026-09-11)) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 16:57 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-09-10 đã đóng dứt khoát (hôm nay 2026-09-11)"
       },
       {
         "name": "gate_coverage",
@@ -51,10 +51,10 @@
     "fetch_truncated": false,
     "fetch_stop_reason": null,
     "fetch_coverage": 1.0,
-    "fetch_elapsed_s": 1509.3,
+    "fetch_elapsed_s": 1118.2,
     "intraday": false,
-    "run_time_ict": "17:08",
-    "run_date_ict": "2026-09-10"
+    "run_time_ict": "02:24",
+    "run_date_ict": "2026-09-11"
   },
   "signals": [
     {
@@ -312,7 +312,7 @@
         "range": 1.77
       },
       "m_rs_score": -15.31,
-      "m_rs_rank": 30,
+      "m_rs_rank": 29,
       "m_rs_63d": -14.06
     },
     {
@@ -335,7 +335,7 @@
       "m_tradable_warning": null,
       "m_preset_name": "MA10×MA20",
       "m_cross_days_ago": 4,
-      "m_fast_ma": 26.16,
+      "m_fast_ma": 26.17,
       "m_slow_ma": 25.44,
       "m_slow_spread_pct": 2.86,
       "m_change_5d_pct": 0.57,
@@ -406,7 +406,7 @@
         "range": 9.43
       },
       "m_rs_score": -1.93,
-      "m_rs_rank": 82,
+      "m_rs_rank": 81,
       "m_rs_63d": -9.06
     },
     {
@@ -492,7 +492,7 @@
         "range": 19.5
       },
       "m_rs_score": -1.19,
-      "m_rs_rank": 84,
+      "m_rs_rank": 83,
       "m_rs_63d": -2.27
     },
     {
@@ -578,7 +578,7 @@
         "range": 0.93
       },
       "m_rs_score": -0.61,
-      "m_rs_rank": 85,
+      "m_rs_rank": 84,
       "m_rs_63d": 2.28
     },
     {
@@ -742,7 +742,7 @@
         "range": 2.6
       },
       "m_rs_score": -11.33,
-      "m_rs_rank": 45,
+      "m_rs_rank": 44,
       "m_rs_63d": -11.85
     },
     {
@@ -946,7 +946,7 @@
       "m_preset_name": "MA10×MA20",
       "m_cross_days_ago": 4,
       "m_fast_ma": 73.59,
-      "m_slow_ma": 72.14,
+      "m_slow_ma": 72.15,
       "m_slow_spread_pct": 2.0,
       "m_change_5d_pct": -0.41,
       "m_vol_ratio": 2.08,
@@ -1078,94 +1078,8 @@
         "range": 3.83
       },
       "m_rs_score": -14.15,
-      "m_rs_rank": 32,
+      "m_rs_rank": 31,
       "m_rs_63d": -15.25
-    },
-    {
-      "ticker": "VC3",
-      "exchange": "HNX",
-      "date": "2026-09-10T00:00:00",
-      "close": 23.7,
-      "volume": 1004600,
-      "preset": "short",
-      "total_score": 3,
-      "rating": "B",
-      "gc_recent_cross": 1,
-      "gc_price_above_fast": 1,
-      "gc_ma_stacking": 1,
-      "gc_slow_rising": 0,
-      "gc_volume_confirm": 0,
-      "m_change_1d_pct": 0.42,
-      "m_limit_status": "normal",
-      "m_limit_locked": false,
-      "m_tradable_warning": null,
-      "m_preset_name": "MA10×MA20",
-      "m_cross_days_ago": 0,
-      "m_fast_ma": 23.54,
-      "m_slow_ma": 23.52,
-      "m_slow_spread_pct": 0.12,
-      "m_change_5d_pct": 0.0,
-      "m_vol_ratio": 0.84,
-      "m_rsi14": 47.3,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 23.5,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 0.84
-        },
-        {
-          "price": 22.32,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 5.82
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 24.22,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 2.19
-        },
-        {
-          "price": 24.81,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 4.68
-        },
-        {
-          "price": 25.4,
-          "label": "61.8%",
-          "ratio": 0.618,
-          "is_golden": true,
-          "type": "fibo",
-          "distance_pct": 7.17
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 27.3,
-        "high_date": "2026-07-01",
-        "high_idx": 11,
-        "low": 22.32,
-        "low_date": "2026-08-21",
-        "low_idx": 48,
-        "direction": "down",
-        "range": 4.98
-      },
-      "m_rs_score": -9.76,
-      "m_rs_rank": 51,
-      "m_rs_63d": -11.64
     },
     {
       "ticker": "DCL",
@@ -1262,6 +1176,92 @@
       "m_rs_63d": 4.56
     },
     {
+      "ticker": "VC3",
+      "exchange": "HNX",
+      "date": "2026-09-10T00:00:00",
+      "close": 23.7,
+      "volume": 1004600,
+      "preset": "short",
+      "total_score": 3,
+      "rating": "B",
+      "gc_recent_cross": 1,
+      "gc_price_above_fast": 1,
+      "gc_ma_stacking": 1,
+      "gc_slow_rising": 0,
+      "gc_volume_confirm": 0,
+      "m_change_1d_pct": 0.42,
+      "m_limit_status": "normal",
+      "m_limit_locked": false,
+      "m_tradable_warning": null,
+      "m_preset_name": "MA10×MA20",
+      "m_cross_days_ago": 0,
+      "m_fast_ma": 23.54,
+      "m_slow_ma": 23.52,
+      "m_slow_spread_pct": 0.12,
+      "m_change_5d_pct": 0.0,
+      "m_vol_ratio": 0.84,
+      "m_rsi14": 47.3,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 23.5,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 0.84
+        },
+        {
+          "price": 22.32,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 5.82
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 24.22,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 2.19
+        },
+        {
+          "price": 24.81,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 4.68
+        },
+        {
+          "price": 25.4,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 7.17
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 27.3,
+        "high_date": "2026-07-01",
+        "high_idx": 11,
+        "low": 22.32,
+        "low_date": "2026-08-21",
+        "low_idx": 48,
+        "direction": "down",
+        "range": 4.98
+      },
+      "m_rs_score": -9.76,
+      "m_rs_rank": 51,
+      "m_rs_63d": -11.64
+    },
+    {
       "ticker": "HDG",
       "exchange": "HOSE",
       "date": "2026-09-10T00:00:00",
@@ -1336,7 +1336,7 @@
         "range": 6.7
       },
       "m_rs_score": -22.45,
-      "m_rs_rank": 14,
+      "m_rs_rank": 13,
       "m_rs_63d": -24.69
     },
     {
@@ -1500,7 +1500,7 @@
         "range": 7.0
       },
       "m_rs_score": -27.54,
-      "m_rs_rank": 8,
+      "m_rs_rank": 7,
       "m_rs_63d": -38.08
     }
   ]
