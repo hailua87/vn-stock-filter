@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-15T10:43:43.963304",
+  "generated_at": "2026-09-15T20:20:41.169512",
   "strategy": "golden_cross_short",
   "total": 11,
   "metadata": {
@@ -9,7 +9,7 @@
       "HNX",
       "UPCOM"
     ],
-    "total_scanned": 377,
+    "total_scanned": 500,
     "market_context": {
       "available": true,
       "close": 1811.15,
@@ -24,127 +24,39 @@
       "label": "Thị trường trung tính — tín hiệu mua nên vào với tỷ trọng nhỏ hơn",
       "position_size_multiplier": 0.6,
       "breadth": {
-        "pct_above_ma50": 25.5,
-        "sample_size": 377
+        "pct_above_ma50": 26.6,
+        "sample_size": 500
       }
     },
     "session_date": "2026-09-15",
-    "written_at_ict": "2026-09-15 17:43:21+0700",
+    "written_at_ict": "2026-09-16 03:14:11+0700",
     "run_type": "eod",
-    "session_complete": 0.909,
-    "archive_written": false,
+    "session_complete": 0.907,
+    "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 17:43 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: fail (75% < 80%, vòng fetch dừng sớm (time_budget))",
+    "archive_gate": "gate_time: pass (phiên 2026-09-15 đã đóng dứt khoát (hôm nay 2026-09-16)) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 17:43 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-09-15 đã đóng dứt khoát (hôm nay 2026-09-16)"
       },
       {
         "name": "gate_coverage",
-        "passed": false,
-        "detail": "75% < 80%, vòng fetch dừng sớm (time_budget)"
+        "passed": true,
+        "detail": "100% >= 80%, vòng fetch chạy trọn"
       }
     ],
-    "archive_gates_failed": [
-      "gate_coverage"
-    ],
-    "fetch_truncated": true,
-    "fetch_stop_reason": "time_budget",
-    "fetch_coverage": 0.754,
-    "fetch_elapsed_s": 2709.2,
+    "archive_gates_failed": [],
+    "fetch_truncated": false,
+    "fetch_stop_reason": null,
+    "fetch_coverage": 1.0,
+    "fetch_elapsed_s": 2021.3,
     "intraday": false,
-    "run_time_ict": "17:43",
-    "run_date_ict": "2026-09-15"
+    "run_time_ict": "03:20",
+    "run_date_ict": "2026-09-16"
   },
   "signals": [
-    {
-      "ticker": "PVC",
-      "exchange": "HNX",
-      "date": "2026-09-15T00:00:00",
-      "close": 13.2,
-      "volume": 2184500,
-      "preset": "short",
-      "total_score": 5,
-      "rating": "A+",
-      "gc_recent_cross": 1,
-      "gc_price_above_fast": 1,
-      "gc_ma_stacking": 1,
-      "gc_slow_rising": 1,
-      "gc_volume_confirm": 1,
-      "m_change_1d_pct": 8.2,
-      "m_limit_status": "near_ceiling",
-      "m_limit_locked": false,
-      "m_tradable_warning": "Sát giá trần — thanh khoản bên bán mỏng, khó khớp đủ khối lượng",
-      "m_preset_name": "MA10×MA20",
-      "m_cross_days_ago": 0,
-      "m_fast_ma": 12.26,
-      "m_slow_ma": 12.21,
-      "m_slow_spread_pct": 0.37,
-      "m_change_5d_pct": 8.2,
-      "m_vol_ratio": 3.79,
-      "m_rsi14": 64.0,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 12.76,
-          "label": "61.8%",
-          "ratio": 0.618,
-          "is_golden": true,
-          "type": "fibo",
-          "distance_pct": 3.33
-        },
-        {
-          "price": 12.35,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 6.44
-        },
-        {
-          "price": 11.94,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 9.55
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 13.35,
-          "label": "78.6%",
-          "ratio": 0.786,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 1.14
-        },
-        {
-          "price": 14.1,
-          "label": "100%",
-          "ratio": 1.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 6.82
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 14.1,
-        "high_date": "2026-06-22",
-        "high_idx": 1,
-        "low": 10.6,
-        "low_date": "2026-07-29",
-        "low_idx": 28,
-        "direction": "down",
-        "range": 3.5
-      },
-      "m_rs_score": -8.61,
-      "m_rs_rank": 56,
-      "m_rs_63d": -5.01
-    },
     {
       "ticker": "HID",
       "exchange": "HOSE",
@@ -211,7 +123,7 @@
         "range": 1.8
       },
       "m_rs_score": 24.2,
-      "m_rs_rank": 98,
+      "m_rs_rank": 97,
       "m_rs_63d": 10.83
     },
     {
@@ -304,9 +216,95 @@
         "direction": "up",
         "range": 9.1
       },
-      "m_rs_score": 3.18,
-      "m_rs_rank": 89,
+      "m_rs_score": 3.06,
+      "m_rs_rank": 88,
       "m_rs_63d": 0.35
+    },
+    {
+      "ticker": "PVC",
+      "exchange": "HNX",
+      "date": "2026-09-15T00:00:00",
+      "close": 13.2,
+      "volume": 2184500,
+      "preset": "short",
+      "total_score": 4,
+      "rating": "A",
+      "gc_recent_cross": 1,
+      "gc_price_above_fast": 1,
+      "gc_ma_stacking": 1,
+      "gc_slow_rising": 1,
+      "gc_volume_confirm": 0,
+      "m_change_1d_pct": 8.2,
+      "m_limit_status": "near_ceiling",
+      "m_limit_locked": false,
+      "m_tradable_warning": "Sát giá trần — thanh khoản bên bán mỏng, khó khớp đủ khối lượng",
+      "m_preset_name": "MA10×MA20",
+      "m_cross_days_ago": 1,
+      "m_fast_ma": 12.26,
+      "m_slow_ma": 12.21,
+      "m_slow_spread_pct": 0.37,
+      "m_change_5d_pct": 8.2,
+      "m_vol_ratio": 3.79,
+      "m_rsi14": 64.0,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 12.76,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 3.33
+        },
+        {
+          "price": 12.35,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 6.44
+        },
+        {
+          "price": 11.94,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 9.55
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 13.35,
+          "label": "78.6%",
+          "ratio": 0.786,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 1.14
+        },
+        {
+          "price": 14.1,
+          "label": "100%",
+          "ratio": 1.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 6.82
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 14.1,
+        "high_date": "2026-06-22",
+        "high_idx": 1,
+        "low": 10.6,
+        "low_date": "2026-07-29",
+        "low_idx": 28,
+        "direction": "down",
+        "range": 3.5
+      },
+      "m_rs_score": -8.61,
+      "m_rs_rank": 53,
+      "m_rs_63d": -5.01
     },
     {
       "ticker": "CTF",
@@ -329,7 +327,7 @@
       "m_preset_name": "MA10×MA20",
       "m_cross_days_ago": 0,
       "m_fast_ma": 20.86,
-      "m_slow_ma": 20.82,
+      "m_slow_ma": 20.81,
       "m_slow_spread_pct": 0.22,
       "m_change_5d_pct": 1.19,
       "m_vol_ratio": 1.05,
@@ -383,7 +381,7 @@
         "range": 5.35
       },
       "m_rs_score": 8.58,
-      "m_rs_rank": 94,
+      "m_rs_rank": 93,
       "m_rs_63d": 19.12
     },
     {
@@ -461,7 +459,7 @@
         "range": 1.88
       },
       "m_rs_score": 18.12,
-      "m_rs_rank": 97,
+      "m_rs_rank": 96,
       "m_rs_63d": 23.58
     },
     {
@@ -547,7 +545,7 @@
         "range": 1.08
       },
       "m_rs_score": -8.48,
-      "m_rs_rank": 57,
+      "m_rs_rank": 54,
       "m_rs_63d": -12.62
     },
     {
@@ -633,7 +631,7 @@
         "range": 1.4
       },
       "m_rs_score": 11.77,
-      "m_rs_rank": 95,
+      "m_rs_rank": 94,
       "m_rs_63d": 12.63
     },
     {
@@ -719,7 +717,7 @@
         "range": 8.5
       },
       "m_rs_score": -8.16,
-      "m_rs_rank": 59,
+      "m_rs_rank": 55,
       "m_rs_63d": 3.21
     },
     {
@@ -797,7 +795,7 @@
         "range": 1.0
       },
       "m_rs_score": 0.13,
-      "m_rs_rank": 85,
+      "m_rs_rank": 84,
       "m_rs_63d": 1.26
     },
     {
@@ -891,7 +889,7 @@
         "range": 4.8
       },
       "m_rs_score": -6.06,
-      "m_rs_rank": 66,
+      "m_rs_rank": 63,
       "m_rs_63d": -6.82
     },
     {
@@ -977,7 +975,7 @@
         "range": 5.8
       },
       "m_rs_score": 5.79,
-      "m_rs_rank": 93,
+      "m_rs_rank": 91,
       "m_rs_63d": 11.72
     }
   ]

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-15T10:43:45.542438",
+  "generated_at": "2026-09-15T20:20:42.714072",
   "strategy": "ichimoku",
   "total": 60,
   "metadata": {
@@ -9,7 +9,7 @@
       "HNX",
       "UPCOM"
     ],
-    "total_scanned": 377,
+    "total_scanned": 500,
     "market_context": {
       "available": true,
       "close": 1811.15,
@@ -24,39 +24,37 @@
       "label": "Thị trường trung tính — tín hiệu mua nên vào với tỷ trọng nhỏ hơn",
       "position_size_multiplier": 0.6,
       "breadth": {
-        "pct_above_ma50": 25.5,
-        "sample_size": 377
+        "pct_above_ma50": 26.6,
+        "sample_size": 500
       }
     },
     "session_date": "2026-09-15",
-    "written_at_ict": "2026-09-15 17:43:21+0700",
+    "written_at_ict": "2026-09-16 03:14:11+0700",
     "run_type": "eod",
-    "session_complete": 0.909,
-    "archive_written": false,
+    "session_complete": 0.907,
+    "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 17:43 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: fail (75% < 80%, vòng fetch dừng sớm (time_budget))",
+    "archive_gate": "gate_time: pass (phiên 2026-09-15 đã đóng dứt khoát (hôm nay 2026-09-16)) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 17:43 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-09-15 đã đóng dứt khoát (hôm nay 2026-09-16)"
       },
       {
         "name": "gate_coverage",
-        "passed": false,
-        "detail": "75% < 80%, vòng fetch dừng sớm (time_budget)"
+        "passed": true,
+        "detail": "100% >= 80%, vòng fetch chạy trọn"
       }
     ],
-    "archive_gates_failed": [
-      "gate_coverage"
-    ],
-    "fetch_truncated": true,
-    "fetch_stop_reason": "time_budget",
-    "fetch_coverage": 0.754,
-    "fetch_elapsed_s": 2709.2,
+    "archive_gates_failed": [],
+    "fetch_truncated": false,
+    "fetch_stop_reason": null,
+    "fetch_coverage": 1.0,
+    "fetch_elapsed_s": 2021.3,
     "intraday": false,
-    "run_time_ict": "17:43",
-    "run_date_ict": "2026-09-15"
+    "run_time_ict": "03:20",
+    "run_date_ict": "2026-09-16"
   },
   "signals": [
     {
@@ -244,7 +242,7 @@
         "range": 10.7
       },
       "m_rs_score": 4.62,
-      "m_rs_rank": 90,
+      "m_rs_rank": 89,
       "m_rs_63d": 5.19
     },
     {
@@ -330,7 +328,7 @@
         "range": 18.8
       },
       "m_rs_score": 3.62,
-      "m_rs_rank": 90,
+      "m_rs_rank": 89,
       "m_rs_63d": 9.09
     },
     {
@@ -424,7 +422,7 @@
         "range": 3.7
       },
       "m_rs_score": 4.36,
-      "m_rs_rank": 90,
+      "m_rs_rank": 89,
       "m_rs_63d": 5.09
     },
     {
@@ -510,7 +508,7 @@
         "range": 9.0
       },
       "m_rs_score": 5.73,
-      "m_rs_rank": 92,
+      "m_rs_rank": 91,
       "m_rs_63d": 12.76
     },
     {
@@ -596,7 +594,7 @@
         "range": 5.35
       },
       "m_rs_score": 8.58,
-      "m_rs_rank": 94,
+      "m_rs_rank": 93,
       "m_rs_63d": 19.12
     },
     {
@@ -854,7 +852,7 @@
         "range": 1.88
       },
       "m_rs_score": 18.12,
-      "m_rs_rank": 97,
+      "m_rs_rank": 96,
       "m_rs_63d": 23.58
     },
     {
@@ -940,7 +938,7 @@
         "range": 7.84
       },
       "m_rs_score": 5.02,
-      "m_rs_rank": 91,
+      "m_rs_rank": 90,
       "m_rs_63d": 14.65
     },
     {
@@ -1112,7 +1110,7 @@
         "range": 3.45
       },
       "m_rs_score": 11.67,
-      "m_rs_rank": 95,
+      "m_rs_rank": 94,
       "m_rs_63d": 18.52
     },
     {
@@ -1206,7 +1204,7 @@
         "range": 1.4
       },
       "m_rs_score": 11.77,
-      "m_rs_rank": 95,
+      "m_rs_rank": 94,
       "m_rs_63d": 12.63
     },
     {
@@ -1394,7 +1392,7 @@
         "range": 4.25
       },
       "m_rs_score": 5.01,
-      "m_rs_rank": 91,
+      "m_rs_rank": 90,
       "m_rs_63d": 4.68
     },
     {
@@ -1480,7 +1478,7 @@
         "range": 13.3
       },
       "m_rs_score": -3.08,
-      "m_rs_rank": 76,
+      "m_rs_rank": 75,
       "m_rs_63d": -1.88
     },
     {
@@ -1557,7 +1555,7 @@
         "range": 8.1
       },
       "m_rs_score": 5.48,
-      "m_rs_rank": 92,
+      "m_rs_rank": 90,
       "m_rs_63d": 14.25
     },
     {
@@ -1651,7 +1649,7 @@
         "range": 3.6
       },
       "m_rs_score": 1.63,
-      "m_rs_rank": 88,
+      "m_rs_rank": 87,
       "m_rs_63d": 6.88
     },
     {
@@ -1753,7 +1751,7 @@
         "range": 9.8
       },
       "m_rs_score": -3.89,
-      "m_rs_rank": 73,
+      "m_rs_rank": 71,
       "m_rs_63d": 2.61
     },
     {
@@ -1839,7 +1837,7 @@
         "range": 27.1
       },
       "m_rs_score": 7.0,
-      "m_rs_rank": 93,
+      "m_rs_rank": 92,
       "m_rs_63d": 10.0
     },
     {
@@ -1925,7 +1923,7 @@
         "range": 7.3
       },
       "m_rs_score": 7.31,
-      "m_rs_rank": 94,
+      "m_rs_rank": 92,
       "m_rs_63d": 16.87
     },
     {
@@ -2019,7 +2017,7 @@
         "range": 15.0
       },
       "m_rs_score": -3.12,
-      "m_rs_rank": 76,
+      "m_rs_rank": 74,
       "m_rs_63d": -4.55
     },
     {
@@ -2105,7 +2103,7 @@
         "range": 15.55
       },
       "m_rs_score": 10.63,
-      "m_rs_rank": 95,
+      "m_rs_rank": 94,
       "m_rs_63d": 14.52
     },
     {
@@ -2191,7 +2189,7 @@
         "range": 18.3
       },
       "m_rs_score": 14.49,
-      "m_rs_rank": 96,
+      "m_rs_rank": 95,
       "m_rs_63d": 23.19
     },
     {
@@ -2293,7 +2291,7 @@
         "range": 10.0
       },
       "m_rs_score": -10.49,
-      "m_rs_rank": 50,
+      "m_rs_rank": 47,
       "m_rs_63d": -12.98
     },
     {
@@ -2379,7 +2377,7 @@
         "range": 4.55
       },
       "m_rs_score": -0.24,
-      "m_rs_rank": 85,
+      "m_rs_rank": 83,
       "m_rs_63d": 9.24
     },
     {
@@ -2481,7 +2479,7 @@
         "range": 8.5
       },
       "m_rs_score": -5.82,
-      "m_rs_rank": 67,
+      "m_rs_rank": 64,
       "m_rs_63d": -9.8
     },
     {
@@ -2560,7 +2558,7 @@
         "range": 15.0
       },
       "m_rs_score": 1.54,
-      "m_rs_rank": 88,
+      "m_rs_rank": 87,
       "m_rs_63d": 7.01
     },
     {
@@ -2646,7 +2644,7 @@
         "range": 3.9
       },
       "m_rs_score": -0.53,
-      "m_rs_rank": 84,
+      "m_rs_rank": 83,
       "m_rs_63d": 6.59
     },
     {
@@ -2842,7 +2840,7 @@
         "range": 9.8
       },
       "m_rs_score": -9.14,
-      "m_rs_rank": 54,
+      "m_rs_rank": 50,
       "m_rs_63d": -8.1
     },
     {
@@ -2928,7 +2926,7 @@
         "range": 4.9
       },
       "m_rs_score": 4.59,
-      "m_rs_rank": 90,
+      "m_rs_rank": 89,
       "m_rs_63d": 2.23
     },
     {
@@ -3014,7 +3012,7 @@
         "range": 1.0
       },
       "m_rs_score": 0.13,
-      "m_rs_rank": 85,
+      "m_rs_rank": 84,
       "m_rs_63d": 1.26
     },
     {
@@ -3194,7 +3192,7 @@
         "range": 7.1
       },
       "m_rs_score": 13.92,
-      "m_rs_rank": 96,
+      "m_rs_rank": 95,
       "m_rs_63d": 16.24
     },
     {
@@ -3282,7 +3280,7 @@
         "range": 8.9
       },
       "m_rs_score": 6.27,
-      "m_rs_rank": 93,
+      "m_rs_rank": 92,
       "m_rs_63d": 12.88
     },
     {
@@ -3376,7 +3374,7 @@
         "range": 3.1
       },
       "m_rs_score": 0.79,
-      "m_rs_rank": 86,
+      "m_rs_rank": 85,
       "m_rs_63d": 2.51
     },
     {
@@ -3472,7 +3470,7 @@
         "range": 3.5
       },
       "m_rs_score": -8.61,
-      "m_rs_rank": 56,
+      "m_rs_rank": 53,
       "m_rs_63d": -5.01
     },
     {
@@ -3558,7 +3556,7 @@
         "range": 6.25
       },
       "m_rs_score": -2.32,
-      "m_rs_rank": 79,
+      "m_rs_rank": 77,
       "m_rs_63d": 0.33
     },
     {
@@ -3654,7 +3652,7 @@
         "range": 2.7
       },
       "m_rs_score": -2.17,
-      "m_rs_rank": 81,
+      "m_rs_rank": 79,
       "m_rs_63d": 0.18
     },
     {
@@ -3756,7 +3754,7 @@
         "range": 1.1
       },
       "m_rs_score": -0.24,
-      "m_rs_rank": 85,
+      "m_rs_rank": 83,
       "m_rs_63d": -0.66
     },
     {
@@ -3861,7 +3859,7 @@
         "range": 2.7
       },
       "m_rs_score": -0.93,
-      "m_rs_rank": 83,
+      "m_rs_rank": 82,
       "m_rs_63d": 5.22
     },
     {
@@ -3963,7 +3961,7 @@
         "range": 4.72
       },
       "m_rs_score": 5.64,
-      "m_rs_rank": 92,
+      "m_rs_rank": 91,
       "m_rs_63d": 9.73
     },
     {
@@ -4049,7 +4047,7 @@
         "range": 15.6
       },
       "m_rs_score": 15.59,
-      "m_rs_rank": 97,
+      "m_rs_rank": 96,
       "m_rs_63d": 15.5
     },
     {
@@ -4151,7 +4149,7 @@
         "range": 7.75
       },
       "m_rs_score": -0.59,
-      "m_rs_rank": 84,
+      "m_rs_rank": 82,
       "m_rs_63d": 2.63
     },
     {
@@ -4228,7 +4226,7 @@
         "range": 1.8
       },
       "m_rs_score": 24.2,
-      "m_rs_rank": 98,
+      "m_rs_rank": 97,
       "m_rs_63d": 10.83
     },
     {
@@ -4322,7 +4320,7 @@
         "range": 6.05
       },
       "m_rs_score": -5.78,
-      "m_rs_rank": 67,
+      "m_rs_rank": 64,
       "m_rs_63d": -6.41
     },
     {
@@ -4424,7 +4422,7 @@
         "range": 16.3
       },
       "m_rs_score": 7.78,
-      "m_rs_rank": 94,
+      "m_rs_rank": 92,
       "m_rs_63d": 5.65
     },
     {
@@ -4518,110 +4516,8 @@
         "range": 3.4
       },
       "m_rs_score": -2.34,
-      "m_rs_rank": 78,
+      "m_rs_rank": 77,
       "m_rs_63d": 3.02
-    },
-    {
-      "ticker": "PIA",
-      "exchange": "HNX",
-      "date": "2026-09-15T00:00:00",
-      "close": 28.1,
-      "volume": 13000,
-      "total_score": 4.0,
-      "max_score": 5.0,
-      "rating": "A+",
-      "ich_tk_bullish": 1,
-      "ich_recent_tk_cross": 0,
-      "ich_price_above_cloud": 0,
-      "ich_cloud_bullish": 1,
-      "ich_chikou_free": 1,
-      "ich_future_cloud_bullish": 1,
-      "m_change_1d_pct": 0.36,
-      "m_limit_status": "normal",
-      "m_limit_locked": false,
-      "m_tradable_warning": null,
-      "m_tenkan": 28.05,
-      "m_kijun": 27.55,
-      "m_senkou_a": 28.61,
-      "m_senkou_b": 28.24,
-      "m_cloud_top": 28.61,
-      "m_cloud_bottom": 28.24,
-      "m_cloud_distance_pct": -0.5,
-      "m_future_cloud_gap_pct": 0.91,
-      "m_tk_cross_days_ago": null,
-      "m_tk_cross_reverted": false,
-      "m_is_turnaround": false,
-      "m_turnaround_reasons": [],
-      "m_change_5d_pct": 4.07,
-      "m_vol_ratio": 0.85,
-      "m_rsi14": 53.6,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 27.55,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 1.96
-        },
-        {
-          "price": 26.48,
-          "label": "61.8%",
-          "ratio": 0.618,
-          "is_golden": true,
-          "type": "fibo",
-          "distance_pct": 5.77
-        },
-        {
-          "price": 24.95,
-          "label": "78.6%",
-          "ratio": 0.786,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 11.21
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 28.62,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 1.85
-        },
-        {
-          "price": 29.95,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 6.58
-        },
-        {
-          "price": 32.1,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 14.23
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 32.1,
-        "high_date": "2026-09-14",
-        "high_idx": 58,
-        "low": 23.0,
-        "low_date": "2026-03-18",
-        "low_idx": 37,
-        "direction": "up",
-        "range": 9.1
-      },
-      "m_rs_score": 3.18,
-      "m_rs_rank": 89,
-      "m_rs_63d": 0.35
     },
     {
       "ticker": "PVG",
@@ -4816,7 +4712,7 @@
         "range": 3.7
       },
       "m_rs_score": -5.38,
-      "m_rs_rank": 69,
+      "m_rs_rank": 66,
       "m_rs_63d": -5.2
     },
     {
@@ -4912,7 +4808,7 @@
         "range": 1.69
       },
       "m_rs_score": -4.48,
-      "m_rs_rank": 71,
+      "m_rs_rank": 68,
       "m_rs_63d": -9.77
     },
     {
@@ -5006,7 +4902,7 @@
         "range": 9.98
       },
       "m_rs_score": -2.61,
-      "m_rs_rank": 78,
+      "m_rs_rank": 76,
       "m_rs_63d": -3.26
     },
     {
@@ -5092,7 +4988,7 @@
         "range": 6.72
       },
       "m_rs_score": -7.92,
-      "m_rs_rank": 59,
+      "m_rs_rank": 56,
       "m_rs_63d": -4.55
     },
     {
@@ -5186,7 +5082,7 @@
         "range": 3.2
       },
       "m_rs_score": -9.51,
-      "m_rs_rank": 53,
+      "m_rs_rank": 49,
       "m_rs_63d": -3.2
     },
     {
@@ -5288,7 +5184,7 @@
         "range": 51.3
       },
       "m_rs_score": -7.54,
-      "m_rs_rank": 61,
+      "m_rs_rank": 57,
       "m_rs_63d": 8.75
     },
     {
@@ -5382,7 +5278,7 @@
         "range": 2.8
       },
       "m_rs_score": 5.7,
-      "m_rs_rank": 92,
+      "m_rs_rank": 91,
       "m_rs_63d": 0.5
     },
     {
@@ -5473,7 +5369,7 @@
         "range": 1.2
       },
       "m_rs_score": -8.19,
-      "m_rs_rank": 59,
+      "m_rs_rank": 55,
       "m_rs_63d": 3.42
     },
     {
@@ -5559,8 +5455,110 @@
         "range": 0.84
       },
       "m_rs_score": -1.29,
-      "m_rs_rank": 82,
+      "m_rs_rank": 81,
       "m_rs_63d": 1.82
+    },
+    {
+      "ticker": "UDC",
+      "exchange": "HOSE",
+      "date": "2026-09-15T00:00:00",
+      "close": 2.9,
+      "volume": 90900,
+      "total_score": 3.0,
+      "max_score": 5.0,
+      "rating": "A",
+      "ich_tk_bullish": 1,
+      "ich_recent_tk_cross": 0,
+      "ich_price_above_cloud": 1,
+      "ich_cloud_bullish": 0,
+      "ich_chikou_free": 0,
+      "ich_future_cloud_bullish": 1,
+      "m_change_1d_pct": -3.33,
+      "m_limit_status": "normal",
+      "m_limit_locked": false,
+      "m_tradable_warning": null,
+      "m_tenkan": 2.9,
+      "m_kijun": 2.85,
+      "m_senkou_a": 2.85,
+      "m_senkou_b": 2.85,
+      "m_cloud_top": 2.85,
+      "m_cloud_bottom": 2.85,
+      "m_cloud_distance_pct": 1.75,
+      "m_future_cloud_gap_pct": 0.88,
+      "m_tk_cross_days_ago": null,
+      "m_tk_cross_reverted": false,
+      "m_is_turnaround": false,
+      "m_turnaround_reasons": [],
+      "m_change_5d_pct": -9.38,
+      "m_vol_ratio": 4.54,
+      "m_rsi14": 51.3,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 2.85,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 1.72
+        },
+        {
+          "price": 2.74,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 5.52
+        },
+        {
+          "price": 2.61,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 10.0
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 2.96,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 2.07
+        },
+        {
+          "price": 3.11,
+          "label": "78.6%",
+          "ratio": 0.786,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 7.24
+        },
+        {
+          "price": 3.3,
+          "label": "100%",
+          "ratio": 1.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 13.79
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 3.3,
+        "high_date": "2026-08-06",
+        "high_idx": 34,
+        "low": 2.4,
+        "low_date": "2026-08-18",
+        "low_idx": 42,
+        "direction": "down",
+        "range": 0.9
+      },
+      "m_rs_score": -6.61,
+      "m_rs_rank": 61,
+      "m_rs_63d": -0.66
     }
   ]
 }
