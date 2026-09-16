@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-15T20:20:40.386857",
+  "generated_at": "2026-09-16T10:16:50.586392",
   "strategy": "golden_cross_long",
   "total": 2,
   "metadata": {
@@ -12,34 +12,34 @@
     "total_scanned": 500,
     "market_context": {
       "available": true,
-      "close": 1811.15,
-      "ma50": 1778.91,
-      "ma200": 1790.29,
+      "close": 1810.11,
+      "ma50": 1777.87,
+      "ma200": 1791.07,
       "above_ma50": true,
       "above_ma200": true,
       "ma50_rising": false,
-      "change_20d_pct": 2.58,
-      "drawdown_from_high_pct": -6.06,
+      "change_20d_pct": 4.69,
+      "drawdown_from_high_pct": -6.11,
       "regime": "neutral",
       "label": "Thị trường trung tính — tín hiệu mua nên vào với tỷ trọng nhỏ hơn",
       "position_size_multiplier": 0.6,
       "breadth": {
-        "pct_above_ma50": 26.6,
+        "pct_above_ma50": 26.0,
         "sample_size": 500
       }
     },
-    "session_date": "2026-09-15",
-    "written_at_ict": "2026-09-16 03:14:11+0700",
+    "session_date": "2026-09-16",
+    "written_at_ict": "2026-09-16 17:12:55+0700",
     "run_type": "eod",
-    "session_complete": 0.907,
+    "session_complete": 0.859,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên 2026-09-15 đã đóng dứt khoát (hôm nay 2026-09-16)) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên hôm nay, 17:12 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên 2026-09-15 đã đóng dứt khoát (hôm nay 2026-09-16)"
+        "detail": "phiên hôm nay, 17:12 ICT >= 15:15 — khối lượng đã chốt"
       },
       {
         "name": "gate_coverage",
@@ -51,18 +51,18 @@
     "fetch_truncated": false,
     "fetch_stop_reason": null,
     "fetch_coverage": 1.0,
-    "fetch_elapsed_s": 2021.3,
+    "fetch_elapsed_s": 1462.0,
     "intraday": false,
-    "run_time_ict": "03:20",
+    "run_time_ict": "17:16",
     "run_date_ict": "2026-09-16"
   },
   "signals": [
     {
       "ticker": "TLG",
       "exchange": "HOSE",
-      "date": "2026-09-15T00:00:00",
-      "close": 53.5,
-      "volume": 325800,
+      "date": "2026-09-16T00:00:00",
+      "close": 53.0,
+      "volume": 160600,
       "preset": "long",
       "total_score": 4,
       "rating": "A",
@@ -71,18 +71,18 @@
       "gc_ma_stacking": 0,
       "gc_slow_rising": 1,
       "gc_volume_confirm": 1,
-      "m_change_1d_pct": 3.08,
+      "m_change_1d_pct": -0.93,
       "m_limit_status": "normal",
       "m_limit_locked": false,
       "m_tradable_warning": null,
       "m_preset_name": "MA50×MA200",
-      "m_cross_days_ago": 0,
-      "m_fast_ma": 49.55,
-      "m_slow_ma": 49.53,
-      "m_slow_spread_pct": 0.05,
-      "m_change_5d_pct": 5.11,
-      "m_vol_ratio": 2.09,
-      "m_rsi14": 65.0,
+      "m_cross_days_ago": 1,
+      "m_fast_ma": 49.64,
+      "m_slow_ma": 49.57,
+      "m_slow_spread_pct": 0.15,
+      "m_change_5d_pct": 5.16,
+      "m_vol_ratio": 1.08,
+      "m_rsi14": 61.4,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
@@ -92,7 +92,7 @@
           "ratio": 0.236,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 2.62
+          "distance_pct": 1.7
         },
         {
           "price": 50.8,
@@ -100,7 +100,7 @@
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 5.05
+          "distance_pct": 4.15
         },
         {
           "price": 49.75,
@@ -108,7 +108,7 @@
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 7.01
+          "distance_pct": 6.13
         }
       ],
       "m_resistances": [
@@ -118,29 +118,29 @@
           "ratio": 0.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 1.31
+          "distance_pct": 2.26
         }
       ],
       "m_fibo_swing": {
         "high": 54.2,
         "high_date": "2026-08-13",
-        "high_idx": 39,
+        "high_idx": 38,
         "low": 45.3,
         "low_date": "2026-07-23",
-        "low_idx": 24,
+        "low_idx": 23,
         "direction": "up",
         "range": 8.9
       },
-      "m_rs_score": 6.27,
-      "m_rs_rank": 92,
-      "m_rs_63d": 12.88
+      "m_rs_score": 2.31,
+      "m_rs_rank": 88,
+      "m_rs_63d": 11.2
     },
     {
       "ticker": "CTF",
       "exchange": "HOSE",
-      "date": "2026-09-15T00:00:00",
-      "close": 21.2,
-      "volume": 331400,
+      "date": "2026-09-16T00:00:00",
+      "close": 21.0,
+      "volume": 317900,
       "preset": "long",
       "total_score": 4,
       "rating": "A",
@@ -149,18 +149,18 @@
       "gc_ma_stacking": 1,
       "gc_slow_rising": 1,
       "gc_volume_confirm": 0,
-      "m_change_1d_pct": 0.24,
+      "m_change_1d_pct": -0.94,
       "m_limit_status": "normal",
       "m_limit_locked": false,
       "m_tradable_warning": null,
       "m_preset_name": "MA50×MA200",
-      "m_cross_days_ago": 3,
-      "m_fast_ma": 19.08,
+      "m_cross_days_ago": 4,
+      "m_fast_ma": 19.17,
       "m_slow_ma": 18.85,
-      "m_slow_spread_pct": 1.23,
-      "m_change_5d_pct": 1.19,
-      "m_vol_ratio": 1.05,
-      "m_rsi14": 72.6,
+      "m_slow_spread_pct": 1.68,
+      "m_change_5d_pct": -0.47,
+      "m_vol_ratio": 1.01,
+      "m_rsi14": 65.7,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
@@ -170,7 +170,7 @@
           "ratio": 0.236,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 5.0
+          "distance_pct": 4.1
         },
         {
           "price": 19.36,
@@ -178,7 +178,7 @@
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 8.68
+          "distance_pct": 7.81
         },
         {
           "price": 18.72,
@@ -186,7 +186,7 @@
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 11.7
+          "distance_pct": 10.86
         }
       ],
       "m_resistances": [
@@ -196,22 +196,22 @@
           "ratio": 0.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 0.94
+          "distance_pct": 1.9
         }
       ],
       "m_fibo_swing": {
         "high": 21.4,
         "high_date": "2026-09-14",
-        "high_idx": 58,
+        "high_idx": 57,
         "low": 16.05,
         "low_date": "2026-06-26",
-        "low_idx": 5,
+        "low_idx": 4,
         "direction": "up",
         "range": 5.35
       },
-      "m_rs_score": 8.58,
+      "m_rs_score": 6.98,
       "m_rs_rank": 93,
-      "m_rs_63d": 19.12
+      "m_rs_63d": 18.86
     }
   ]
 }
