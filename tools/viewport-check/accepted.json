@@ -1,0 +1,35 @@
+{
+  "_doc": "Muc DA DO, DA CAN NHAC, QUYET DINH KHONG SUA. KHAC 'nhieu': nhieu la bo do sai va phai vut bo do di; day la muc co that ma ta chon song chung. diff.mjs khong tinh la loi nhung VAN IN RA moi lan chay, va van canh gac. Hai kieu canh gac: 'san' (tri so khong duoc tut duoi muc hom nay) va 'soToiDa'+'khung' (so muc khong duoc tang, va khong duoc lan sang khung khac).",
+  "muc": [
+    {
+      "khoa": "fn|analyzer:o-nhap-du-rong",
+      "khung": [
+        "bp-1281-mouse",
+        "bp-1281-touch",
+        "d-1366x768",
+        "ipad-1366x1024-touch"
+      ],
+      "lyDo": "O nhap bi flex co o dai 1281-1365px (khong con flex-wrap, chua du cho). Chuc nang khong hong: ma co phieu VN dai 3 ky tu, 'FPT'=22px van lot ca o khung hep nhat (vung chu 38px). Chi PHAN GOI Y bi cat, va chi o 1281-1339px — dai rong 59px khong co thiet bi pho bien nao.",
+      "taiLieu": "docs/mobile-layout-out-of-scope.md muc 5",
+      "san": {
+        "truong": "w",
+        "toiThieu": {
+          "bp-1281-mouse": 82,
+          "bp-1281-touch": 64,
+          "d-1366x768": 167,
+          "ipad-1366x1024-touch": 149
+        }
+      }
+    },
+    {
+      "khoaMau": "^(top|scrolled)\\|voDong\\|span(\\.brand-name|#live-text|#market-text|#clock\\.time)\\|",
+      "khung": [
+        "bp-1281-mouse",
+        "bp-1281-touch"
+      ],
+      "soToiDa": 16,
+      "lyDo": "Bon nhan topbar (.brand-name, #live-text, #market-text, #clock) vo dong o dai 1281-1299px. Dai rong 19px, khong co thiet bi pho bien nao trong do (1280 va 1366 deu ngoai). Cach sua that la bo bot phan tu khoi topbar, tuc M1 — sua vat o day se phai go ra khi lam M1. 16 = 4 nhan x 2 khung x 2 luot do (dau trang / da cuon).",
+      "taiLieu": "docs/mobile-layout-out-of-scope.md muc 7"
+    }
+  ]
+}
