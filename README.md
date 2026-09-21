@@ -88,9 +88,14 @@ vn-scanner/
 
 ### Setup
 ```bash
-pip install vnstock pyarrow pandas numpy
+pip install -r backend/requirements.txt
 export VNSTOCK_API_KEY=your_key_here
+export VNSTOCK_DISABLE_AGENT_SETUP=1
 ```
+`VNSTOCK_DISABLE_AGENT_SETUP=1` là bắt buộc: không có nó, `vnai` (đi kèm vnstock)
+sẽ tự ghi một prompt tải từ vnstocks.com vào `AGENTS.md` của thư mục đang chạy và
+`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`. Trên Windows:
+`setx VNSTOCK_DISABLE_AGENT_SETUP 1`.
 
 ### Chạy scanner kỹ thuật
 ```bash

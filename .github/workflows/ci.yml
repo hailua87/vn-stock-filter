@@ -14,6 +14,11 @@ on:
     paths-ignore:
       - 'web/data/**'
 
+# vnai >= 2.6 (phu thuoc cua vnstock) tu ghi prompt tai tu vnstocks.com vao
+# AGENTS.md cua thu muc dang chay va ~/.claude, ~/.codex, ~/.gemini. Tat han.
+env:
+  VNSTOCK_DISABLE_AGENT_SETUP: "1"
+
 jobs:
   test:
     runs-on: ubuntu-latest
