@@ -189,7 +189,9 @@ class ValuationReport:
             'verdict': self.verdict,
             'confidence': round(self.confidence * 100, 0),
             'method_dispersion_pct': round(self.method_dispersion * 100, 0),
-            'methods_conflict': self.method_dispersion > MAX_METHOD_DISPERSION,
+            # bool(): dispersion là numpy float → so sánh ra numpy.bool_, mà
+            # json.dump(default=str) ghi thành chuỗi "True"/"False"
+            'methods_conflict': bool(self.method_dispersion > MAX_METHOD_DISPERSION),
             'methods_used': self.methods_used,
             'method_details': [
                 {
@@ -277,6 +279,25 @@ HOLD_ONLY_INDUSTRIES = frozenset({
     ValuationIndustry.SECURITIES,
     ValuationIndustry.INSURANCE,
 })
+
+# Cần ít nhất chừng này phương pháp khả dụng mới đưa ra kết luận có hướng.
+# Một phương pháp thì độ phân tán = 0 nên không có gì để phát hiện mâu thuẫn
+# (vd. CNA −80%, CII, PVD chỉ có EV/EBITDA ở lượt chạy 2026-09-21).
+MIN_METHODS_FOR_DIRECTIONAL = 2
+
+
+def _publish_guard(verdict: str, industry: ValuationIndustry,
+                   n_methods: int) -> Tuple[str, Optional[str]]:
+    """Hạ verdict có hướng về HOLD khi chưa đủ căn cứ. Trả (verdict, cảnh báo)."""
+    if verdict == "HOLD":
+        return verdict, None
+    if industry in HOLD_ONLY_INDUSTRIES:
+        return "HOLD", (f"Nhóm tài chính ({industry.value}): chưa có NPL/CAR nên chưa "
+                        f"khuyến nghị — mô hình cho {verdict}, đã hạ về HOLD")
+    if n_methods < MIN_METHODS_FOR_DIRECTIONAL:
+        return "HOLD", (f"Chỉ có {n_methods} phương pháp định giá khả dụng, không kiểm "
+                        f"chéo được — mô hình cho {verdict}, đã hạ về HOLD")
+    return verdict, None
 
 
 def _method_dispersion(fair_values: List[float]) -> float:
@@ -487,12 +508,10 @@ def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
                          f"{MAX_METHOD_DISPERSION:.0%})")
         overall_confidence *= 0.5
 
-    if classification.valuation_industry in HOLD_ONLY_INDUSTRIES and verdict != "HOLD":
-        all_warnings.insert(0, (
-            f"Nhóm tài chính ({classification.valuation_industry.value}): chưa có NPL/CAR "
-            f"nên chưa khuyến nghị — mô hình cho {verdict}, đã hạ về HOLD"
-        ))
-        verdict = "HOLD"
+    verdict, guard_warning = _publish_guard(verdict, classification.valuation_industry,
+                                            len(used_methods))
+    if guard_warning:
+        all_warnings.insert(0, guard_warning)
 
     if data['ratios'].get('_historical_multiples_source') == 'unavailable':
         rec_notes.append(
