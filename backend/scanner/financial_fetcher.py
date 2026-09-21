@@ -111,9 +111,9 @@ def fetch_financial_statements(ticker: str, source: str = 'vci',
     """
     setup_api_key()
     try:
-        from vnstock.api.finance import Finance
-    except ImportError:
-        log.error("vnstock not installed")
+        from vnstock.api.financial import Finance
+    except ImportError as e:
+        log.error(f"vnstock Finance import failed: {e}")
         return None
 
     results = {}
