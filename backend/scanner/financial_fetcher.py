@@ -28,6 +28,7 @@ from typing import Optional, Dict, Any
 import pandas as pd
 
 # Tái sử dụng monkey-patch và setup từ data_fetcher
+from .snapshots import vnstock_version
 from .data_fetcher import (
     setup_api_key,
     RateLimitError,
@@ -323,6 +324,7 @@ def fetch_fundamentals(ticker: str, period: str = 'year',
         'schema': CACHE_SCHEMA,
         'ticker': ticker,
         'fetched_at': datetime.now().isoformat(),
+        'vnstock_version': vnstock_version(),
         'period': period,
         'current_price': price,
         'overview': overview or {},

@@ -31,6 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from scanner.data_fetcher import get_ticker_universe, setup_api_key
 from scanner.financial_fetcher import fetch_fundamentals
 from scanner.strategies.valuation import value_ticker
+from scanner.snapshots import record_snapshot
 
 # Fair value lệch khỏi giá quá mức này gần như luôn do phương pháp không hợp
 # với doanh nghiệp (vd. EV/EBITDA khi EBITDA năm đáy < nợ ròng → BAF −97%),
@@ -70,6 +71,10 @@ def main():
     parser.add_argument('--web-data-dir', type=str, default='web/data')
     parser.add_argument('--period', type=str, default='year', choices=['year', 'quarter'])
     parser.add_argument('--no-cache', action='store_true', help='Bỏ qua cache, fetch lại tất cả')
+    parser.add_argument('--snapshot-registry', type=str,
+                        default=str(Path(__file__).resolve().parent / 'data' / 'snapshots'
+                                    / 'fundamentals_registry.json'),
+                        help='Sổ point-in-time của BCTC (audit F3); "" để tắt')
     args = parser.parse_args()
 
     setup_api_key()
@@ -106,6 +111,7 @@ def main():
     peer_inputs = []
     classifier = IndustryClassifier()
     failures = []
+    snapshot_stats = {'new': 0, 'revised': 0}
 
     for i, ticker in enumerate(tickers, 1):
         if i % 20 == 0:
@@ -117,6 +123,13 @@ def main():
             if raw is None:
                 failures.append({'ticker': ticker, 'reason': 'no_fundamentals'})
                 continue
+
+            if args.snapshot_registry:
+                # Ngày = ngày lấy dữ liệu thật (fetched_at), kể cả khi đọc từ cache
+                snap = record_snapshot(raw, Path(args.snapshot_registry),
+                                       today=str(raw.get('fetched_at', ''))[:10] or None)
+                snapshot_stats['new'] += snap['new']
+                snapshot_stats['revised'] += snap['revised']
 
             # Enrich với beta + historical multiples thực
             raw = enrich_with_market_metrics(ticker, raw)
@@ -142,6 +155,8 @@ def main():
             failures.append({'ticker': ticker, 'reason': str(e)[:100]})
 
     log.info(f"  Pass 1 complete: {len(cached_raw)} fetched, {len(peer_inputs)} contributed to peer DB")
+    log.info(f"  Snapshot registry: {snapshot_stats['new']} kỳ mới, "
+             f"{snapshot_stats['revised']} kỳ bị sửa số liệu")
 
     # Build & save peer database
     peer_db = build_peer_database(peer_inputs)
