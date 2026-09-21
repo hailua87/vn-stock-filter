@@ -31,14 +31,16 @@ log = logging.getLogger(__name__)
 BS_ALIASES = {
     'total_assets': ['total_assets', 'TOTAL ASSETS (Bn. VND)', 'tong_tai_san'],
     'shareholders_equity': ['owner_s_equity', "OWNER'S EQUITY(Bn.VND)", 'shareholders_equity',
-                            'equity', 'von_chu_so_huu', 'common_shareholder_s_equity'],
+                            'equity', 'von_chu_so_huu', 'common_shareholder_s_equity', 'owners_equity'],
     'total_liabilities': ['liabilities', 'LIABILITIES (Bn. VND)', 'total_liabilities'],
     'short_term_debt': ['short_term_borrowings', 'short_term_debt', 'no_ngan_han'],
     'long_term_debt': ['long_term_borrowings', 'long_term_debt', 'no_dai_han'],
-    'cash_and_equivalents': ['cash', 'cash_and_equivalents', 'tien_va_tuong_duong_tien'],
+    'cash_and_equivalents': ['cash_and_cash_equivalents', 'cash', 'cash_and_equivalents',
+                             'cash_and_precious_metals', 'tien_va_tuong_duong_tien'],
     'inventory': ['inventories', 'inventory_net', 'hang_ton_kho'],
     'fixed_assets': ['fixed_assets', 'net_fixed_assets', 'tai_san_co_dinh'],
-    'investment_property': ['investment_in_properties', 'investment_property', 'bds_dau_tu'],
+    'investment_property': ['investment_in_properties', 'investment_properties',
+                            'investment_property', 'bds_dau_tu'],
     'loans_to_customers': ['loans_to_customers', 'net_loans_to_customers',
                             'loans_and_advances_to_customers', 'cho_vay_khach_hang'],
     'customer_deposits': ['customer_deposits', 'deposits_from_customers', 'tien_gui_khach_hang'],
@@ -48,9 +50,12 @@ BS_ALIASES = {
 IS_ALIASES = {
     'revenue': ['revenue', 'net_revenue', 'net_sales', 'doanh_thu_thuan', 'sales'],
     'gross_profit': ['gross_profit', 'lai_gop'],
-    'operating_profit': ['operating_profit', 'profit_loss_from_operating_activities', 'lai_thuan_hd'],
-    'profit_before_tax': ['profit_before_tax', 'pretax_profit', 'loi_nhuan_truoc_thue'],
+    'operating_profit': ['operating_profit', 'operating_profit_loss',
+                         'profit_loss_from_operating_activities', 'lai_thuan_hd'],
+    'profit_before_tax': ['profit_before_tax', 'pretax_profit',
+                          'net_accounting_profit_loss_before_tax', 'loi_nhuan_truoc_thue'],
     'net_profit': ['net_profit_for_the_year', 'net_profit', 'profit_after_tax',
+                   'net_profit_loss_after_tax',
                    'attributable_to_parent_company', 'loi_nhuan_sau_thue'],
     'net_profit_parent': ['attributable_to_parent_company', 'profit_after_tax_attributable_to_parent',
                           'net_profit_for_the_year', 'loi_nhuan_co_dong_cong_ty_me'],
@@ -59,15 +64,18 @@ IS_ALIASES = {
 }
 
 CF_ALIASES = {
-    'operating_cf': ['net_cash_inflows_outflows_from_operating_activities', 'cf_from_operations',
+    'operating_cf': ['net_cash_inflows_outflows_from_operating_activities',
+                     'net_cash_from_operating_activities', 'cf_from_operations',
                      'dong_tien_tu_hd_kinh_doanh'],
-    'capex': ['purchase_of_fixed_assets', 'capex', 'mua_tai_san'],
-    'depreciation': ['depreciation_and_amortisation', 'depreciation', 'khau_hao'],
+    'capex': ['purchase_of_fixed_assets', 'purchases_of_fixed_assets_and_other_long_term_assets',
+              'capex', 'mua_tai_san'],
+    'depreciation': ['depreciation_and_amortisation', 'depreciation_and_amortization',
+                     'depreciation', 'khau_hao'],
 }
 
 RATIO_ALIASES = {
-    'pe_ttm': ['pe', 'p_e', 'priceToEarning', 'price_to_earnings'],
-    'pb_current': ['pb', 'p_b', 'priceToBook', 'price_to_book'],
+    'pe_ttm': ['pe', 'pe_ratio', 'p_e', 'priceToEarning', 'price_to_earnings'],
+    'pb_current': ['pb', 'pb_ratio', 'p_b', 'priceToBook', 'price_to_book'],
     'roe_ttm': ['roe', 'return_on_equity', 'roe_percent'],
     'roa_ttm': ['roa', 'return_on_assets'],
     'eps_ttm': ['eps', 'earnings_per_share', 'basic_eps'],
@@ -79,7 +87,7 @@ RATIO_ALIASES = {
     'nim': ['nim', 'net_interest_margin'],
     'gross_margin': ['gross_margin', 'gross_profit_margin'],
     'net_margin': ['net_margin', 'net_profit_margin'],
-    'debt_to_equity': ['debt_to_equity', 'de_ratio'],
+    'debt_to_equity': ['debt_to_equity', 'debtPerEquity', 'de_ratio'],
 }
 
 
