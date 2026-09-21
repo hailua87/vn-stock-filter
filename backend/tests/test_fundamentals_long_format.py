@@ -44,9 +44,18 @@ def _fetch(monkeypatch, tmp_path, ticker, shares, price):
 
 def test_statement_records_are_periods_latest_first_in_bn():
     recs = ff.statement_to_records(_load('FPT')['balance_sheet'])
-    assert [r['period'] for r in recs] == ['2025', '2024', '2023', '2022', '2021']
+    assert [r['period'] for r in recs] == [str(y) for y in range(2025, 2017, -1)]
     assert recs[0]['total_assets'] == pytest.approx(88_141.991634625)
-    assert recs[-1]['period'] == '2021'
+
+
+def test_keeps_enough_years_for_5y_cagr():
+    """Audit F2: giữ 5 kỳ thì CAGR 5 năm (cần 6 điểm) luôn thiếu."""
+    from scanner.quality.metrics import cagr
+    recs = ff.statement_to_records(_load('FPT')['income'])
+    assert len(recs) >= 6
+    revenue_old_to_new = [r['net_sales'] for r in reversed(recs)]
+    # 2020 → 2025: 29.830,4 → 70.112,8 tỷ ⇒ (70112,8 / 29830,4)^(1/5) − 1 ≈ 18,64%
+    assert cagr(revenue_old_to_new, 5) == pytest.approx(0.1864, abs=1e-3)
 
 
 def test_statement_records_sort_quarters_and_keep_first_duplicate():

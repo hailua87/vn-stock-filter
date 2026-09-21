@@ -47,10 +47,12 @@ DEFAULT_CACHE_TTL_DAYS = 7
 # Tăng khi đổi định dạng record trong cache; cache khác schema bị bỏ qua.
 # 2: mỗi record là một kỳ, khóa theo item_id, BCTC theo tỷ đồng.
 # 3: overview có industry (ICB cấp 2) và icb_code_lv2/lv4 cho vnstock 4.0.7.
-CACHE_SCHEMA = 3
+# 4: giữ 8 kỳ thay vì 5.
+CACHE_SCHEMA = 4
 
-# Số kỳ giữ lại (normalizer tính CAGR 5 năm)
-MAX_PERIODS = 5
+# Số kỳ giữ lại. CAGR 5 năm cần 6 điểm (audit F2); bản cộng đồng của vnstock
+# trả tối đa 8 kỳ, nên giữ hết. Normalizer tự cắt phần nó cần.
+MAX_PERIODS = 8
 
 # vnstock 4.x trả BCTC theo đồng; normalizer làm việc bằng tỷ đồng
 # (vd. eps = net_profit * 1e9 / shares).
