@@ -142,3 +142,42 @@ def test_historical_multiples_with_empty_ratio_does_not_crash(monkeypatch):
 ])
 def test_outlier_gate(upside, excluded):
     assert (outlier_reason(upside) is not None) == excluded
+
+
+# --- 5. Nhóm tài chính luôn HOLD khi chưa có NPL/CAR ------------------------
+
+@pytest.fixture
+def no_dispersion(monkeypatch):
+    """Cố định độ phân tán = 0 để engine không tự hạ HOLD vì mâu thuẫn
+    phương pháp — chỉ còn cờ nhóm tài chính quyết định verdict."""
+    from scanner.strategies.valuation import engine
+    monkeypatch.setattr(engine, '_method_dispersion', lambda fvs: 0.0)
+
+
+def _value(ticker, industry_lv2, price, shares):
+    from scanner.strategies.valuation import value_ticker
+    raw = _raw(ticker, overview={'industry': industry_lv2, 'outstanding_share': shares})
+    raw['current_price'] = price
+    return value_ticker(ticker, raw_fundamentals=raw)
+
+
+def test_bank_verdict_forced_to_hold_but_upside_kept(no_dispersion):
+    # VCB fair value ≈ 48.000đ (lượt chạy 21/09); giá 20.000đ → mô hình cho mua mạnh
+    r = _value('VCB', 'Banks', 20_000.0, 8_355_675_094)
+    assert r.upside_pct > 0.5
+    assert r.verdict == 'HOLD'
+    assert 'chưa có NPL/CAR' in r.warnings[0]
+    assert 'STRONG BUY' in r.warnings[0]
+
+
+@pytest.mark.parametrize('lv2', ['Financial Services', 'Insurance'])
+def test_securities_and_insurance_also_forced(no_dispersion, lv2):
+    r = _value('VCB', lv2, 20_000.0, 8_355_675_094)
+    assert r.verdict == 'HOLD' and 'NPL/CAR' in r.warnings[0]
+
+
+def test_non_financial_verdict_not_forced(no_dispersion):
+    # FPT (Technology) giá thấp vẫn giữ kết luận mua
+    r = _value('FPT', 'Technology', 30_000.0, 1_714_326_422)
+    assert r.verdict in ('BUY', 'STRONG BUY')
+    assert not any('NPL/CAR' in w for w in r.warnings)

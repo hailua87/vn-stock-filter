@@ -268,6 +268,16 @@ STRONG_SELL_THRESHOLD = -0.35
 # nghĩa — báo mâu thuẫn thay vì đưa ra một con số duy nhất.
 MAX_METHOD_DISPERSION = 0.40
 
+# Nhóm tài chính luôn công bố HOLD cho tới khi có nguồn NPL, bao phủ nợ xấu,
+# CAR: vnstock bản cộng đồng chỉ trả bảng ratio 2018 và 3 bảng BCTC không đủ
+# để tính các chỉ số này (CAR đang dùng mặc định 0,115). Fair value và upside
+# vẫn hiển thị; chỉ verdict bị hạ. Đổi thành frozenset() khi đã có nguồn.
+HOLD_ONLY_INDUSTRIES = frozenset({
+    ValuationIndustry.BANKING,
+    ValuationIndustry.SECURITIES,
+    ValuationIndustry.INSURANCE,
+})
+
 
 def _method_dispersion(fair_values: List[float]) -> float:
     """
@@ -476,6 +486,13 @@ def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
         rec_notes.append(f"Độ phân tán giữa các phương pháp: {dispersion:.0%} (ngưỡng "
                          f"{MAX_METHOD_DISPERSION:.0%})")
         overall_confidence *= 0.5
+
+    if classification.valuation_industry in HOLD_ONLY_INDUSTRIES and verdict != "HOLD":
+        all_warnings.insert(0, (
+            f"Nhóm tài chính ({classification.valuation_industry.value}): chưa có NPL/CAR "
+            f"nên chưa khuyến nghị — mô hình cho {verdict}, đã hạ về HOLD"
+        ))
+        verdict = "HOLD"
 
     if data['ratios'].get('_historical_multiples_source') == 'unavailable':
         rec_notes.append(
