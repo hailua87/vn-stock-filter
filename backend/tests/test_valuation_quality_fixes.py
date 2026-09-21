@@ -113,10 +113,11 @@ def test_roe_5y_from_statements_when_ratio_dropped():
 
 def test_eps_history_uses_each_years_share_count():
     hist = mm._extract_eps_bvps_history(_raw('FPT'))
-    assert [h['period'] for h in hist] == ['2021', '2022', '2023', '2024', '2025']
+    assert [h['period'] for h in hist] == [str(y) for y in range(2018, 2026)]  # cũ trước
+    by_year = {h['period']: h for h in hist}
     # 2021: 4.337,4 tỷ / (9.075,5 tỷ / 10.000) cp ≈ 4.779 đ.
     # Dùng số cp hiện tại sẽ ra ≈ 2.530 đ và P/E 2021 gấp đôi.
-    assert hist[0]['eps'] == pytest.approx(4_779, rel=1e-3)
+    assert by_year['2021']['eps'] == pytest.approx(4_779, rel=1e-3)
     assert hist[-1]['eps'] == pytest.approx(5_504, rel=1e-3)
     assert hist[-1]['bvps'] == pytest.approx(43_748.0 / 17_035.1 * 10_000, rel=1e-3)
 

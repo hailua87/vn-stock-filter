@@ -147,22 +147,8 @@ jobs:
           git config user.name "VN Scanner Bot"
           git config user.email "bot@vn-scanner.local"
 
-          git add web/data/valuation/
-          if git diff --staged --quiet; then
-            echo "ℹ️  Không có thay đổi"
-            exit 0
-          fi
-
-          git commit -m "chore: cập nhật định giá $(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')"
-
-          # Chỉ rebase + retry. KHÔNG dùng `-X ours` hay force-push ở đây: khác
-          # với daily-scan, dữ liệu định giá chạy 90 phút, ghi đè commit của
-          # người khác là rủi ro không đáng.
-          for i in 1 2 3; do
-            git pull --rebase origin ${{ github.ref_name }} && \
-              git push origin HEAD:${{ github.ref_name }} && exit 0
-            echo "Lần $i thất bại, thử lại..."
-            sleep 5
-          done
-          echo "❌ Không push được sau 3 lần thử"
-          exit 1
+          # Dữ liệu định giá + sổ snapshot BCTC (audit F3). Push bằng
+          # scripts/commit-bot-data.sh: không rebase, không force-push (audit F9).
+          BRANCH="${{ github.ref_name }}" bash scripts/commit-bot-data.sh \
+            "chore: cập nhật định giá $(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')" \
+            web/data/valuation/ backend/data/snapshots/
