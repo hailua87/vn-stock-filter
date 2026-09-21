@@ -46,7 +46,8 @@ DEFAULT_CACHE_TTL_DAYS = 7
 
 # Tăng khi đổi định dạng record trong cache; cache khác schema bị bỏ qua.
 # 2: mỗi record là một kỳ, khóa theo item_id, BCTC theo tỷ đồng.
-CACHE_SCHEMA = 2
+# 3: overview có industry (ICB cấp 2) và icb_code_lv2/lv4 cho vnstock 4.0.7.
+CACHE_SCHEMA = 3
 
 # Số kỳ giữ lại (normalizer tính CAGR 5 năm)
 MAX_PERIODS = 5
@@ -175,12 +176,19 @@ def fetch_company_overview(ticker: str, source: str = 'vci') -> Optional[Dict[st
             return None
         # vnstock 4.x trả về DataFrame 1 hàng; convert thành dict
         row = df.iloc[0].to_dict()
-        # Normalize keys (vnstock có thể đổi tên cột giữa versions)
+        # Normalize keys (vnstock có thể đổi tên cột giữa versions).
+        # vnstock 4.0.7 (VCI) không còn icb_name2..4: cột `sector` là tên ngành
+        # ICB cấp 2 tiếng Anh ('Banks', 'Real Estate') kèm icb_code_lv2/lv4.
+        # Bản cũ dùng `sector` cho cấp 3, nên chỉ coi nó là cấp 2 khi có icb_code_lv2.
+        icb_lv2_layout = 'icb_code_lv2' in row and 'icb_name2' not in row
         return {
             'ticker': ticker,
-            'industry': row.get('icb_name2') or row.get('industry') or row.get('industry_en'),
-            'sector': row.get('icb_name3') or row.get('sector'),
+            'industry': (row.get('icb_name2') or row.get('industry') or row.get('industry_en')
+                         or (row.get('sector') if icb_lv2_layout else None)),
+            'sector': row.get('icb_name3') or (None if icb_lv2_layout else row.get('sector')),
             'subsector': row.get('icb_name4') or row.get('subsector'),
+            'icb_code_lv2': row.get('icb_code_lv2'),
+            'icb_code_lv4': row.get('icb_code_lv4'),
             'company_name': row.get('short_name') or row.get('company_name'),
             'established_year': row.get('established_year'),
             'listed_date': row.get('listed_date'),

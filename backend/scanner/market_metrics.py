@@ -203,7 +203,7 @@ def _extract_eps_bvps_history(fundamentals_raw: Dict) -> List[Dict]:
     """
     ratio_records = fundamentals_raw.get('ratio', [])
     if not ratio_records:
-        return []
+        return _eps_bvps_history_from_statements(fundamentals_raw)
 
     out = []
     # ratio_records từ vnstock: latest first → reverse cho chronological
@@ -220,6 +220,35 @@ def _extract_eps_bvps_history(fundamentals_raw: Dict) -> List[Dict]:
                 'eps': float(eps) if eps is not None else None,
                 'bvps': float(bvps) if bvps is not None else None,
             })
+    return out
+
+
+def _eps_bvps_history_from_statements(fundamentals_raw: Dict) -> List[Dict]:
+    """
+    EPS/BVPS theo năm tính từ BCTC (tỷ đồng) khi không có bảng ratio.
+
+    Số cổ phiếu lấy theo vốn góp CỦA TỪNG NĂM / mệnh giá, không dùng số cổ
+    phiếu hiện tại — cổ tức bằng cổ phiếu và phát hành thêm rất phổ biến ở
+    VN, dùng số hiện tại sẽ làm EPS các năm cũ thấp đi và P/E lịch sử cao lên.
+    """
+    from .strategies.valuation.normalizer import (
+        BS_ALIASES, IS_ALIASES, _get_field, _safe_float, shares_from_paid_in_capital,
+    )
+    bs_by_period = {r.get('period'): r for r in fundamentals_raw.get('balance_sheet', [])}
+    out = []
+    for is_rec in reversed(fundamentals_raw.get('income', [])):  # cũ trước
+        period = is_rec.get('period')
+        bs_rec = bs_by_period.get(period)
+        shares = shares_from_paid_in_capital(bs_rec) if bs_rec else 0.0
+        if not period or shares <= 0:
+            continue
+        profit = _safe_float(_get_field(is_rec, IS_ALIASES['net_profit_parent']))
+        equity = _safe_float(_get_field(bs_rec, BS_ALIASES['shareholders_equity']))
+        out.append({
+            'period': str(period),
+            'eps': profit * 1_000_000_000 / shares,
+            'bvps': equity * 1_000_000_000 / shares if equity > 0 else None,
+        })
     return out
 
 
@@ -326,8 +355,10 @@ def calculate_historical_multiples(ticker: str, fundamentals_raw: Dict,
 
     # Thêm điểm hiện tại (TTM) để median phản ánh cả giá hiện tại
     current_price = quote_to_vnd(float(price_df['Close'].iloc[-1]))
-    current_eps = fundamentals_raw.get('ratio', [{}])[0].get('eps')
-    current_bvps = fundamentals_raw.get('ratio', [{}])[0].get('bvps')
+    # Bảng ratio có thể là [] (đã bị bỏ vì cũ) → lấy năm mới nhất của history
+    latest_ratio = (fundamentals_raw.get('ratio') or [{}])[0]
+    current_eps = latest_ratio.get('eps') or history[-1].get('eps')
+    current_bvps = latest_ratio.get('bvps') or history[-1].get('bvps')
 
     if current_eps and current_eps > 0:
         pe_now = current_price / float(current_eps)

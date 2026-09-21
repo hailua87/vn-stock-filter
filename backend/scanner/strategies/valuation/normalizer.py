@@ -115,6 +115,34 @@ def _safe_float(v, default=0.0) -> float:
         return default
 
 
+# Mệnh giá cổ phiếu niêm yết tại Việt Nam (Luật Chứng khoán): 10.000 VND/cp
+PAR_VALUE_VND = 10_000
+PAID_IN_CAPITAL_ALIASES = ['paid_in_capital', 'common_shares', 'charter_capital', 'von_gop']
+
+
+def shares_from_paid_in_capital(bs_record: Dict) -> float:
+    """Số cổ phiếu = vốn góp (tỷ đồng) × 1e9 / mệnh giá. 0 nếu thiếu.
+
+    Dòng `common_shares` của vnstock là VỐN CỔ PHẦN theo tiền, không phải số
+    cổ phiếu — dùng nó như số lượng làm EPS của HAG thành 167 triệu đồng/cp.
+    """
+    capital_bn = _safe_float(_get_field(bs_record or {}, PAID_IN_CAPITAL_ALIASES))
+    return capital_bn * 1_000_000_000 / PAR_VALUE_VND if capital_bn > 0 else 0.0
+
+
+def roe_history_from_statements(is_records: List[Dict], bs_records: List[Dict],
+                                n: int = 5) -> List[float]:
+    """ROE từng năm = LNST cổ đông mẹ / vốn chủ sở hữu cuối kỳ, ghép theo 'period'."""
+    equity_by_period = {r.get('period'): _safe_float(_get_field(r, BS_ALIASES['shareholders_equity']))
+                        for r in bs_records}
+    out = []
+    for r in is_records[:n]:
+        equity = equity_by_period.get(r.get('period'), 0.0)
+        if equity > 0:
+            out.append(_safe_float(_get_field(r, IS_ALIASES['net_profit_parent'])) / equity)
+    return out
+
+
 def _extract_history(records: List[Dict], aliases: List[str], n: int = 5) -> List[float]:
     """Extract historical values from list of period records (latest first)."""
     out = []
@@ -163,7 +191,8 @@ def normalize_fundamentals(raw: Dict[str, Any]) -> Dict[str, Any]:
 
     # === Shares outstanding ===
     shares = (_safe_float(overview.get('outstanding_share'))
-              or _safe_float(_get_field(bs0, ['outstanding_share', 'issue_share', 'common_shares']))
+              or _safe_float(_get_field(bs0, ['outstanding_share', 'issue_share']))
+              or shares_from_paid_in_capital(bs0)
               or 0)
     if shares == 0:
         # Estimate từ equity / BVPS
@@ -211,6 +240,9 @@ def normalize_fundamentals(raw: Dict[str, Any]) -> Dict[str, Any]:
     roe_5y = _extract_history(ratio_records, RATIO_ALIASES['roe_ttm'])
     # Normalize percent (vnstock có thể trả 0.21 hoặc 21.0)
     roe_5y = [r/100 if r > 1.5 else r for r in roe_5y if r > -1.0]
+    if not ratio_records:
+        # Bảng ratio bị bỏ (cũ hơn BCTC) → tính từ BCTC thay vì để rỗng
+        roe_5y = [r for r in roe_history_from_statements(is_records, bs_records) if r > -1.0]
     income['roe_5y'] = roe_5y
 
     # === Ratios ===
@@ -222,6 +254,9 @@ def normalize_fundamentals(raw: Dict[str, Any]) -> Dict[str, Any]:
                          'npl_ratio', 'car', 'nim', 'gross_margin', 'net_margin']:
             v = v / 100 if v > 1.5 else v
         ratios[std_field] = v
+
+    if ratios.get('roe_ttm', 0) == 0 and roe_5y:
+        ratios['roe_ttm'] = roe_5y[0]
 
     # Default values nếu missing
     ratios.setdefault('payout_ratio', 0.30)
