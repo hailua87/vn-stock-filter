@@ -1,0 +1,345 @@
+# viewport-check
+
+Kiem bo cuc bang Playwright + Chromium tren mot dai viewport. Chay tren
+`web/` phuc vu qua HTTP tinh, so ket qua voi `baseline.json`.
+
+## Chay
+
+```
+cd web && python -m http.server 8765 --bind 127.0.0.1 &
+cd tools/viewport-check
+npm ci && npx playwright install chromium
+node check.mjs result.json          # SHOTS=1 chup anh; ONLY=ten1,ten2 chay mot phan
+node diff.mjs baseline.json result.json
+```
+
+`npm ci` chu khong phai `npm install`: package-lock.json duoc commit de ghim
+Playwright, khong ghim thi Chromium moi luot mot ban va moc chuan troi.
+
+**Chi mot may chu, mot cong.** Hai tien trinh `http.server` cung cong tren
+Windows chia yeu cau bat dinh va gay treo — da mac. Kiem:
+`Get-CimInstance Win32_Process -Filter "Name='python.exe'"`
+
+Cong CI: `.github/workflows/viewport-check.yml` (chay tren PR khi doi `web/**`
+tru `web/data/**`, hoac `tools/viewport-check/**`).
+
+## Tep nao lam gi
+
+| tep | vai tro |
+| --- | --- |
+| `check.mjs` | trinh chay: duyet 45 khung, goi probe + functional, ghi ket qua |
+| `probe.mjs` | do TRONG TRANG: tran, tran chu, vo dong, chong lan, cot, tri so |
+| `functional.mjs` | bam that: drawer mo/dong, tab, o nhap |
+| `viewports.mjs` | danh sach 45 khung tren hai truc |
+| `diff.mjs` | so hai ket qua, in ba cot, ap `accepted.json` |
+| `accepted.json` | muc da do, da can nhac, quyet dinh khong sua |
+| `baseline.json` | moc chuan tai may (Windows) |
+| `baseline-ci.json` | moc chuan CI (Linux) |
+| `so-hai-moc-chuan.mjs` | so hai moc chuan, tim khac biet giua hai nen |
+| `kiem-safe-area.mjs` | bom gia tri gia vao safe-area, do he qua (`LUI=1` de thu do) |
+| `do-drawer.mjs` | chan doan vi tri that cua `.col-detail`, khong lam tron |
+
+## Them mot muc vao `accepted.json`
+
+**Chay kiem tat dinh TRUOC** — xem muc "ACCEPTED CHE DUOC CA LOI BO DO" o cuoi.
+
+Hai kieu muc, khac nhau o cach canh gac:
+
+```jsonc
+{
+  "khoa": "fn|ten-phep-kiem",        // mot khoa cu the
+  "khung": ["bp-1281-mouse", ...],
+  "lyDo": "...", "taiLieu": "docs/... muc N",
+  "san": { "truong": "w", "toiThieu": { "bp-1281-mouse": 82, ... } }
+}                                    // do neu tri so TUT duoi san
+{
+  // Trong JSON phai la \\| (hai gach cheo): JSON an mot cai, regex nhan mot cai.
+  "khoaMau": "^(top|scrolled)\\|voDong\\|span(\\.brand-name|#live-text)\\|",
+  "khung": ["bp-1281-mouse", "bp-1281-touch"],
+  "soToiDa": 16,
+  "lyDo": "...", "taiLieu": "docs/... muc N"
+}                                    // do neu SO MUC tang, hoac LAN sang khung khac
+```
+
+Chap nhan 16 muc o hai khung KHONG co nghia chap nhan 20 muc, cung khong co
+nghia chap nhan chung xuat hien o khung thu ba.
+
+## Hai truc, khong phai mot
+
+**Be rong** — nguong @media trong styles.css: 1280, 1100, 1024, 900, 860, 768,
+700, 600, 420. Moi nguong chay ca hai phia (vd 769 va 767). Loi cascade khong
+lo o giua dai, no lo dung luc mot khoi bat hoac tat.
+
+**Con tro** — `@media (pointer: coarse)` CAT NGANG moi nguong be rong. Baseline
+dau tien dat `hasTouch = !!v.mobile` nen 18 nguong ranh gioi deu chay chuot, va
+duong dan coarse-pointer KHONG he duoc kiem — dung cho nguyen nhan goc so 2 nam.
+Nay moi nguong chay hai lan.
+
+## PHAM VI BAO VE CUA TUNG BO DO — doc truoc khi tin mot o mau xanh
+
+Bon bo do bat bon lop loi KHAC NHAU. Khong cai nao thay the duoc cai nao.
+
+### `overflow` — tran ra ngoai viewport
+Phan tu co `right > vw+1` hoac `left < -1`.
+Da loai: phan tu nam TRON ngoai man (skip-link `-9999px`, drawer dong bi day
+sang phai) va phan tu trong vung cuon ngang hop le (`overflow-x: auto`).
+**Khong bat duoc**: chu tran ra khoi hop cua chinh no khi hop van trong viewport.
+
+### `textOverflow` — chu rong hon hop chua no
+Do bang `Range` tren noi dung phan tu, so voi content box.
+Chi xet phan tu co `white-space: nowrap|pre` VA `clientWidth > 0` — hop inline
+co clientWidth = 0 theo spec nen phep so vo nghia (208 `<span>` bao nham o lan
+chay dau).
+**Day la bo do DUY NHAT bat duoc loi dai tab dinh chu.**
+
+### `textWrap` — chu VO DONG (khac han `textOverflow`)
+Chi xet con chau cua `.topbar`. Do rieng tung NUT VAN BAN TRUC TIEP, dem so vi
+tri `top` khac nhau; >1 la vo dong.
+
+`textOverflow` MU voi loai loi nay: no chi xet phan tu `white-space: nowrap`.
+Nhan trong topbar deu `white-space: normal`, nen chung khong tran — chung XUONG
+DONG, va truoc dot nay khong bo do nao thay.
+
+Hai bay da dinh, ghi lai de khoi lap:
+- `getClientRects()` tra ve MANH rect chu khong phai dong. Dem tho `.length`
+  cho ba bao nham o 1920px, vi `<span>emoji</span> + chu` cho nhieu rect cung
+  mot dong.
+- Do ca noi dung phan tu thi phan tu `inline-flex` cho moi flex item mot rect,
+  lech `top` vi chieu cao khac nhau — `💰 VALUATION` bao 2 dong o 1920px du no
+  co `white-space: nowrap` va khong the xuong dong.
+Do rieng tung nut van ban tranh duoc ca hai. Sau khi sua: 1920px = 0.
+
+### `overlap` — bi phan tu khac che
+`elementFromPoint` tai TAM phan tu co text truc tiep.
+Da loai phan tu bi to tien CAT (tam roi ra ngoai client rect cua mot to tien
+`overflow != visible`) — 19 cap gia o desktop 1366px o lan chay dau.
+
+### `functional` — bam that, khong chi nhin
+Drawer chi tiet mo/dong, drawer bo loc + backdrop, sau tab bam duoc, o nhap
+analyzer khong bi che. Vu `.col-detail` la loi CHUC NANG: drawer chet tren
+desktop ma anh tinh van trong binh thuong.
+
+## CANH BAO: `functional` KHONG bat duoc loi tab dinh chu
+
+Do la ket qua thuc te, khong phai gia dinh:
+
+| | be rong tab | `elementFromPoint` tai tam | `textOverflow` |
+| --- | ---: | --- | --- |
+| bp-767 chuot | 94px | `div.mobile-bar` — BAT DUOC | 0 |
+| m-402 cam ung | 63px | `button.strat-tab` — XANH | 6 tab, tran 21-38px |
+
+O 402px sau tab da hong hoan toan ve mat hinh (chu tran 21-38px khoi hop, dinh
+sang nut ben), nhung TAM cua nut 63px van thuoc ve chinh nut do, nen phep kiem
+"6 tab bam duoc" VAN XANH.
+
+Nguoc lai o bp-767 chuot, tab rong 94px nen khong tran chu, nhung ca dai tab bi
+`.mobile-bar` (z-30) ve de len — `functional` bat duoc, `textOverflow` khong.
+
+**Mot o xanh o `functional` KHONG co nghia la dai tab lanh.** Doc ca bon cot.
+
+## PHEP KIEM PHAT HIEN vs PHEP KIEM XAC NHAN
+
+Do bang cach chay chinh bo cong cu nay tren mot `git worktree` tai 0dce064 —
+trang thai TRUOC moi ban va — roi xem tung phep kiem co DO hay khong.
+Mot phep kiem chua tung do chua chung minh duoc no bat duoc gi.
+
+| phep kiem | o trang thai LOI GOC | loai |
+| --- | --- | --- |
+| `textOverflow` tren `.strat-tab` | **DO** — 6 tab, chu 74px / hop 43px | **PHAT HIEN** |
+| `tab:khong-bi-bop-chu` (scrollW > clientW) | XANH — scrollW=412 clientW=386 | XAC NHAN |
+| `tab:cuon-den-cuoi-duoc` | XANH — dat=26 doc lai=26 | XAC NHAN |
+| `tab:cuoi-toi-duoc-sau-khi-cuon` | XANH — w=72 hit=chinh no | XAC NHAN |
+| `textWrap` tren nhan `.topbar` | **DO** — 4 nhan vo dong o 1281-1600px | **PHAT HIEN** |
+
+Dai 1281-1600px o tren la truoc commit 5 (`832fd9c`). Sau khi sua `[hidden]`,
+hop phan tich khong con chiem cho nen dai thu hep con **1281-1299px** (19px).
+Con 16 muc o hai khung bp-1281, da danh dau trong `accepted.json`.
+Giu nguyen so cu trong bang vi no ghi lai luc phep kiem CHUNG MINH duoc no
+bat duoc loi — do moi la y nghia cua cot "PHAT HIEN".
+
+**Ba trong bon phep kiem cuon dai tab la XAC NHAN, khong phai PHAT HIEN.**
+
+VI SAO chung xanh — va day la cho de doc nham. KHONG phai vi chung khong lien
+quan toi loi. Chung rat lien quan:
+
+```
+hong:  scrollWidth 412  /  clientWidth 386     (nut bi bop xuong 43px)
+dung:  scrollWidth 560  /  clientWidth 386     (nut giu be rong that)
+```
+
+O trang thai hong dai tab VAN cuon duoc, chi 26px thay vi 174px. `scrollWidth`
+phan anh loi RAT RO — lech 148px. Phep kiem xanh vi no dat cau hoi NHI PHAN
+(`scrollW > clientW ?`) cho mot dai luong LIEN TUC, roi vut bo chinh tin hieu do
+khi rut ve true/false.
+
+Khac biet nay quan trong: phep kiem khong lien quan thi bo di cung duoc; phep
+kiem dung sai nguong thi SUA DUOC thanh phat hien.
+
+Vi vay `scrollWidth`, `clientWidth`, `tabCount` va be rong tung tab duoc ghi vao
+baseline duoi dang SO DO (`runs.top.metrics`), va `diff.mjs` so chung voi nguong
+8px (tabCount: 0). So do doi khong lam fail build — no la thong tin — nhung no
+KHONG con nam im trong baseline ma khong ai doc.
+
+## Gioi han khong khac phuc duoc
+
+Chromium **khong phai** Safari iOS. Hai thu SE KHONG tai hien duoc, phai xac
+nhan tay tren may that:
+  - `env(safe-area-inset-*)` — notch, Dynamic Island, thanh Home
+  - thanh dia chi Safari che dong cuoi khi cuon
+
+Ket qua desktop dang tin hon ket qua mobile.
+
+## SAFE AREA — chi do duoc tren may that
+
+`env(safe-area-inset-*)` KHONG do duoc bang bat cu cong cu nao trong repo nay:
+
+- Chromium headless khong co thanh dia chi de an, va khong co API nao (ke ca
+  CDP) dat duoc safe-area inset khac 0.
+- WebKit cua Playwright la build headless tren desktop — khong notch, khong
+  home indicator, nen cung tra 0. Cai them no khong giai quyet duoc gi.
+
+Do tren iPhone 16 Pro that o ban `f2137be`: ca bon canh deu **0px**, va do la
+KET QUA HOP LE — khi Safari hien thanh dia chi o day, no thu vung noi dung con
+402x714 va tu chua cho Dynamic Island lan home indicator, nen vung do da nam
+tron trong safe area.
+
+Bon so chi khac 0 o hai luc:
+  (a) Safari thu thanh dia chi khi cuon xuong — vung noi dung gian ra sat mep
+  (b) chay standalone tu man hinh chinh — chua the xay ra: repo khong co
+      manifest.json lan the apple-mobile-web-app-capable
+
+**Khong tu do duoc (a). Phai do tren may that**, o trang thai da cuon cho thanh
+dia chi thu lai, va o ca hai chieu xoay.
+
+Cai bo do o day LAM DUOC la kiem HE QUA: bom gia tri gia vao dung cac khai bao
+ma khoi @supports dat, roi xem bo cuc co chiu duoc khong. Xem chu thich khoi
+`@supports (padding: env(...))` o cuoi `web/styles.css`.
+
+### Bom gia tri gia vao safe-area: hai kieu do SAI da mac
+
+Do mot to hop KHONG XAY RA THAT la tu bia ra thiet hai. Hai lan da mac:
+
+**1. Bom ca bon canh cung luc.** Khong bao gio xay ra. Tren iPhone:
+  - DOC : trai/phai = 0 (khong co gi che hai ben), tren/duoi khac 0
+  - NGANG: tren = 0 (Dynamic Island nam mot ben), trai/phai va duoi khac 0
+Bom ca bon canh o che do doc lam topbar mat 118px be ngang va bao 2 nhan vo
+dong — mot ket qua khong co that. Bom theo to hop dung: 0 muc.
+
+**2. Bom inset khac 0 ma giu nguyen chieu cao cu.** Inset chi khac 0 khi Safari
+DA THU thanh dia chi, ma luc do khung nhin CAO HON (402x714 -> 402x874). Do voi
+714px roi bao "mat 2 hang" la sai: thuc te duoc 15 hang, nhieu hon ca truoc.
+
+To hop dung de bom:
+| che do | tren | phai | duoi | trai | khung |
+| --- | ---: | ---: | ---: | ---: | --- |
+| doc, thanh da thu | 59 | 0 | 34 | 0 | 402x874 |
+| ngang | 0 | 59 | 21 | 59 | 874x402 |
+
+(Cac so tren la gia tri DO, khong phai so do duoc — xem muc safe-area o tren.)
+
+### Nhieu lam tron cua flex o 1281px
+
+`.chip-row` o 1281px la flex; chip `flex: 1 1 auto` chia sub-pixel khong on
+dinh: cung mot trang chay bon lan cho 57.38 roi 57.92 ba lan, lam tron thanh
+57 vs 58. Truoc khi ket luan mot thay doi CSS gay ra chenh lech 1px, do lai
+NHIEU LAN o cung dieu kien. Da mot lan doc nham nhieu nay thanh hoi quy.
+
+## HAI MOC CHUAN — dung cai nao o dau
+
+| tep | do o dau | ai dung |
+| --- | --- | --- |
+| `baseline.json` | Chromium tren **Windows**, font Windows | do tai may khi phat trien |
+| `baseline-ci.json` | Chromium tren **ubuntu-latest**, font Linux | cong CI (`.github/workflows/viewport-check.yml`) |
+
+**KHONG DUNG CHUNG DUOC.** Font Windows va font Linux cho be rong chu khac
+nhau, ma `textOverflow` va `textWrap` do CHINH be rong chu. Lay moc chuan
+Windows di so tren Linux thi cong do ngay luot dau, khong phai vi trang sai.
+
+Khong the do khac biet nay tai may neu may khong co Docker/WSL — nen moc chuan
+CI phai SINH TRONG CI, khong doan ra duoc.
+
+### Sinh / dung lai `baseline-ci.json`
+
+1. Chay workflow o che do `workflow_dispatch` (khong so sanh, chi tai ket qua
+   len artifact).
+2. Tai artifact `ket-qua-viewport-<run_id>` ve.
+3. Doi ten `ket-qua-ci.json` thanh `baseline-ci.json`, commit.
+4. Chay `workflow_dispatch` lan thu hai va so voi ban vua commit. **Phai xanh.**
+   Khong xanh nghia la co gi do khong tat dinh trong chinh moi truong CI —
+   dieu tra, dung va cho qua.
+
+### Dung lai `baseline.json` (tai may) khi DOM doi HOP LE
+
+Doi DOM hop le (them cot, doi nhan, them phan tu) lam moc chuan cu het nghia:
+moi khoa deu "da sua" hoac "moi phat sinh" ma khong noi len dieu gi.
+
+1. Xac nhan thay doi la CO Y, khong phai hoi quy — doc ba cot trong lan chay
+   cuoi truoc khi doi.
+2. Khoi dong DUNG MOT may chu: `cd web && python -m http.server 8765 --bind 127.0.0.1`
+   (hai tien trinh cung cong tren Windows chia yeu cau bat dinh va gay treo).
+3. `node check.mjs baseline-moi.json` roi doi ten thanh `baseline.json`.
+4. Chay lai mot luot va so voi moc chuan vua chot: phai ra 0 muc moi. Neu
+   khong, bo do co cho khong tat dinh — sua bo do truoc, dung chot moc chuan.
+5. Ghi trong commit message: doi cai gi, vi sao, va so khung truoc/sau.
+
+`accepted.json` KHONG bi anh huong khi dung lai moc chuan — no doc lap, va do
+la chu y: muc da can nhac khong sua van phai duoc in ra va canh gac du moc
+chuan co doi.
+
+## SETTLE() — hai bai hoc, cai thu hai sac hon
+
+### 1. Phai lay mau CHINH phan tu co transition
+
+Phep kiem do mot phan tu co transition ma settle() khong lay mau phan tu do thi
+moi so do ve no la ANH CHUP GIUA CHUNG. Thieu mot phan tu trong mau la du.
+
+Va no chi lo tren may cham hon — tuc lo o CI chu khong lo khi phat trien.
+Cung mot ma nguon: **Windows 0/45 khung hong, CI 41/45 hong**.
+
+Lay mau theo THUOC TINH BI ANIMATE, khong theo viec co animation hay khong:
+- `.col-detail` (styles.css:1041) va `.col-filters` (:1629) co
+  `transition: transform 0.25s` -> PHAI vao mau.
+- `.brand-mark` (:147) co `animation: pulse 2s infinite` nhung pulse chi doi
+  `opacity`, khong doi hinh hoc -> KHONG vao mau. Va khong duoc vao: lay mau
+  mot phan tu co animation lap vo han thi settle() khong bao gio tra ve.
+- 17 khai bao `transition: all 0.12s` khac: 0.12s ngan hon mot nhip lay mau
+  250ms nen da xong truoc lan do thu hai.
+
+### 2. Them phan tu vao mau la CHUA DU — phai lay DUNG DAI LUONG bi bien doi
+
+Day la cho de sai nhat, va da sai that.
+
+Sau khi them `.col-detail` vao mau, CI VAN hong **42/45**. Ly do: anh chup luc
+do chi ghi `width x height`. Drawer truot NGANG bang `translateX` — width va
+height **bat bien** suot qua trinh. Lay mau mot dai luong bat bien duoi phep
+bien doi can phat hien thi khong phat hien duoc gi.
+
+Sau khi chup ca `x,y`: **0/45**.
+
+**Quy tac chung: mau phai chua dai luong ma phep bien doi can phat hien LAM
+THAY DOI — khong phai bat ky dai luong nao cua phan tu do.**
+  - `translateX` / `translateY` -> can `x`, `y`
+  - `scale` / doi kich thuoc     -> can `width`, `height`
+  - `opacity` / mau              -> khong doi hinh hoc, thuong khong can vao mau
+
+Neu dung o "da them phan tu ma van hong" roi chuyen sang doi PHEP KHANG DINH
+(vi du doi so toa do sang `elementFromPoint`), phep kiem se xanh — nhung do la
+che trieu chung, con so do van lay giua luc dang truot va moi phep kiem khac
+cham toi drawer van sai.
+
+## ACCEPTED CHE DUOC CA LOI BO DO
+
+`accepted.json` khong tinh muc da chap nhan la loi. Nghia la neu mot phep kiem
+CHOP TAT trong pham vi da chap nhan, no se khong bao gio hien o cot MOI PHAT
+SINH — va khong ai thay.
+
+Da xay ra that: 16 muc vo dong lat qua lat lai giua hai luot chay cach nhau 6
+phut, bi che vi vua duoc danh dau accepted.
+
+**Chay kiem tat dinh TRUOC khi them muc accepted moi, khong phai sau.**
+Kiem tat dinh = dung lai moc chuan, chay them mot luot, so voi chinh no; phai
+ra 0 muc moi va 0 khung bao 'BO CUC KHONG ON DINH'.
+
+Cung ly do do, moc chuan CI dau tien (e566c7d) da chot mot phep kiem HONG lam
+trang thai binh thuong: `detail:dong` hong 41/45 khung nam san trong moc chuan
+nen khong bao gio hien ra. Chi lo khi kiem tat dinh hai luot.

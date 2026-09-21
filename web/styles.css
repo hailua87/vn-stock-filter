@@ -102,12 +102,30 @@ input { font-family: inherit; }
   /* min-height chu khong phai height: topbar phai CAO THEO NOI DUNG khi wrap
      xuong hai dong. Ep `height` thi dong thu hai bi cat. */
   min-height: var(--topbar-h);
+  /* KHONG BAO GIO bi flex ep co.
+     body la flex column (6bb88fb). `min-height` tuong minh THAY THE san `auto`
+     cua Flexbox 4.5, tuc xoa san kich thuoc noi dung — topbar co the bi ep
+     xuong tan 48px trong khi noi dung da wrap can 168px, va 120px do TRAN RA
+     NGOAI hop, ve de len .mobile-bar (z-30) ngay duoi.
+     Do that o 402x874 truoc khi sua: h=48, scrollHeight=168.
+     Chi lo o <=768px: tren nguong do .dashboard con flex-shrink 1 nen no hap
+     thu het ap luc (bp-769: topbar h=104, scrollH=102, khong tran); tu 768
+     tro xuong .dashboard chuyen flex: none nen ap luc dồn sang topbar
+     (bp-767: h=48, scrollH=107).
+     Chan o day chu khong go min-height: go se tra san ve auto nhung bo luon y
+     dinh "topbar gon 48px" cua khoi 768px. */
+  flex-shrink: 0;
   background: linear-gradient(180deg, var(--bg-elev-2) 0%, var(--bg-elev-1) 100%);
   border-bottom: 2px solid var(--border-strong);
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  /* Padding goc de trong BIEN de khoi @supports safe-area o cuoi file cong
+     them env() ma khong phai biet gia tri goc la bao nhieu. Xem chu thich
+     o khoi do. */
+  --topbar-pad-y: 0px;
+  --topbar-pad-x: 16px;
+  padding: var(--topbar-pad-y) var(--topbar-pad-x);
   gap: 24px;
   position: relative;
   z-index: 10;
@@ -198,6 +216,22 @@ input { font-family: inherit; }
   margin-left: auto;
 }
 .strat-tab {
+  /* KHONG BAO GIO bi flex ep co — cung mau voi .topbar (xem chu thich o do).
+     `@media (pointer: coarse)` dat min-width: 44px cho nut nay. Gia tri tuong
+     minh THAY THE san `auto` cua Flexbox 4.5, tuc xoa san kich thuoc noi dung:
+     nut tu ~102px co xuong 43px, ma `white-space: nowrap` chan chu xuong dong,
+     nen chu TRAN RA NGOAI hop va dinh sang nut ben —
+     "Pre-BreakouGC dai hanGC ngan haIchimoku".
+     Do that o 402x874 truoc khi sua (chu / hop):
+       Pre-Breakout 74/43   GC dai han 60/35   GC ngan han 71/41
+       Ichimoku     50/29   Tong hop   71/41   Phan tich ma 90/52
+     Va vi nut co vua chieu ngang, `overflow-x: auto` cua .strategy-tabs (khoi
+     1280px) KHONG BAO GIO kich hoat — dai tab dang le phai cuon thi lai bop chu.
+     flex-shrink: 0 tra viec cuon lai cho no.
+     GIU min-width: 44px: no van dung muc dich vung cham cho nut NHO hon 44px
+     (.dp-nav, .icon-btn chi chua mot ky tu), chi la khong duoc lam san cho nut
+     lon hon 44px. */
+  flex-shrink: 0;
   background: transparent;
   border: none;
   color: var(--text-dim);
@@ -1524,7 +1558,7 @@ kbd {
      Grid 2 cot cho moi nut dung nua be rong, hang le de lai o trong can doi.
      `1fr 1fr` tu lo phan gap, khong phai tu tinh calc(50% - gap).
 
-     .chip bo `flex` (vo nghia voi grid item) va bo `min-width: 44px`. min-width
+     .chip bo `flex` (vo nghia voi grid item). min-width: 44px cua .chip goc
      khong xung dot o day (nua o la 81px > 44px) nhung trong grid no thua.
 
      KHONG ap o be rong day du (cot 240px, .chip-row trong 204px): o do ca nhom
@@ -1537,7 +1571,20 @@ kbd {
   }
   .chip-row .chip {
     flex: none;
-    min-width: 0;
+    /* `min-content` chu KHONG phai 0. Track `1fr` la `minmax(auto, 1fr)`, ma
+       san `auto` cua grid item bi min-width tuong minh THAY THE — dung mau
+       Flexbox 4.5 da gap o .topbar, .strat-tab, va day la lan thu tu. Dat 0
+       la xoa han san, cho nut co duoi be rong chu.
+       Chua lo o dieu kien thuong vi .chip-row con du cho. Lo khi .col-filters
+       bi them padding safe-area ben trai luc xoay ngang: chip-row 171px ->
+       112px, chip 81px -> 51px, chu "Tất cả" 42px trong hop 39px, tran 3px.
+       `min-content` tra lai dung cai san da bi xoa, khong hon:
+         truoc: chip=[51,51,51,51] tran chu 2 muc
+         sau  : chip=[54,48,54,48] tran chu 0, khong loi ra ngoai hop,
+                khong sinh cuon ngang
+       Do o moi viewport (1920 -> 375, ca hai che do flex va grid): KHONG DOI
+       cho nao khac. */
+    min-width: min-content;
   }
   /* Nhom Ichimoku xep DOC, khong phai luoi 2 cot — giu nguyen mot cot. */
   .chip-row-vertical { grid-template-columns: 1fr; }
@@ -1558,7 +1605,8 @@ kbd {
   /* flex-wrap / order / flex-basis / overflow-x da khai o khoi 1280px, khong
      lap lai. O day chi con phan COMPACT rieng cho mobile. */
   .topbar {
-    padding: 6px 8px;
+    --topbar-pad-y: 6px;
+    --topbar-pad-x: 8px;
     min-height: 48px;
     gap: 6px;
   }
@@ -1800,7 +1848,33 @@ kbd {
   display: flex;
   align-items: center;
 }
+/* `display` cua tac gia DE LEN `[hidden] { display: none }` cua trinh duyet.
+   index.html khai <div class="topbar-analyzer" hidden>, app.js:335 dat
+   analyzerBox.hidden = (strategy !== 'analyzer') — ca hai deu dung. Nhung
+   `display: flex` o tren thang, nen o nhap ma HIEN O MOI TAB:
+     el.hidden = true, computed display = flex, w = 210px.
+   Da xac nhan tren Safari iPhone 16 Pro that: dang o tab "Pre-Breakout"
+   ma o nhap van hien.
+   Hop 280px luon chiem cho con ep .topbar-left / .topbar-right vo dong.
+   Do: an hop di thi so nhan vo dong o 1366/1440/1600px tu 4 xuong 0.
+   (#help-modal khong dinh loi nay vi no dat ca style.display noi tuyen.) */
+.topbar-analyzer[hidden] {
+  display: none;
+}
 .analyzer-input {
+  /* PLACEHOLDER LA RANG BUOC BE RONG DUY NHAT cua o nay.
+     `maxlength="10"` trong index.html, ma ma co phieu VN dai 3 ky tu, nen noi
+     dung nguoi dung go khong bao gio quyet dinh be rong. Dung di do lai no.
+
+     Do 29/08/2026, font 12px JetBrains Mono, padding+border ngang 26px:
+       "🔍 Nhập mã để phân tích (vd: FPT, VNM, HPG)..."  45 ky tu -> 359px
+       "Nhập mã, vd: FPT"                               16 ky tu -> 141px
+     Chuoi cu can 359px trong o khai bao `width: 280px` — no TRAN 79px o MOI
+     be rong, ke ca 1920px. Tuc no chua bao gio doc het duoc. Do la loi doc lap,
+     co tu truoc, khong lien quan viec flex ep co.
+
+     Bo emoji: be rong U+1F50D render khac nhau giua Safari va Chromium nen so
+     do tren Chromium se hut tren Safari. Icon kinh lup da co o nhan tab. */
   width: 100%;
   height: 32px;
   background: var(--bg-elev-2);
@@ -2381,7 +2455,9 @@ kbd {
    KHONG dua vao #help-modal: van ban phap ly phai o tren trang, khong giau sau
    mot nut bam. */
 .site-disclaimer {
-  padding: 8px 20px;
+  --foot-pad-y: 8px;
+  --foot-pad-x: 20px;
+  padding: var(--foot-pad-y) var(--foot-pad-x);
   font-size: 11px;
   line-height: 1.4;
   color: var(--text-dim, #8b93a7);
@@ -2680,3 +2756,57 @@ kbd {
 .error-title  { font-size: 14px; color: var(--down); margin-bottom: 6px; font-weight: 600; }
 .error-detail { font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
 .error-state .btn-ghost { margin-top: 12px; }
+
+/* ═══ SAFE AREA — nua sau bat buoc cua viewport-fit=cover (f2137be) ═══
+
+   3a them `viewport-fit=cover` vao the meta. Mac dinh (`auto`) Safari TU THUT
+   noi dung vao trong safe area; `cover` TAT co che do di, cho trang phu ra sat
+   mep vat ly. Khong co khoi nay thi 3a dung mot minh la BUOC LUI: mat lop bao
+   ve san co ma chua bu lai gi.
+
+   Hom nay bon so deu 0 nen khoi nay khong doi gi — do tren iPhone 16 Pro that
+   o ban f2137be: top/right/bottom/left deu 0px. Chung khac 0 o hai luc:
+     (a) Safari thu thanh dia chi khi cuon xuong — vung noi dung gian ra sat mep
+     (b) chay standalone tu man hinh chinh (chua the xay ra: repo khong co
+         manifest.json lan apple-mobile-web-app-capable)
+   KHONG do duoc (a) bang cong cu trong repo — xem README.
+
+   VI SAO DUNG BIEN chu khong viet thang so: iPhone xoay ngang la 874x402 CSS
+   px, tuc RONG 874 > 768, nen khoi @media (max-width: 768px) KHONG ap. Do dung
+   la luc inset trai/phai khac 0 (~59px moi ben). Viet env() vao trong khoi
+   768px thi xoay ngang khong duoc bao ve gi. Bien cho mot khoi nay dung o MOI
+   diem ngat, va gia tri goc chi song o dung mot cho.
+
+   VI SAO BOC @supports: viet thang `padding: calc(8px + env(...))` thi o trinh
+   duyet khong hieu env(), CA khai bao bi vut va mat luon 8px goc. Kieu nay giu
+   khai bao goc nguyen ven.
+
+   Khoi nay PHAI o cuoi file: cung do cu the (0,1,0) voi cac khai bao tren nen
+   thu tu nguon quyet dinh. */
+@supports (padding: env(safe-area-inset-top)) {
+  /* topbar cham mep TREN va hai canh */
+  .topbar {
+    padding-top: calc(var(--topbar-pad-y) + env(safe-area-inset-top));
+    padding-left: calc(var(--topbar-pad-x) + env(safe-area-inset-left));
+    padding-right: calc(var(--topbar-pad-x) + env(safe-area-inset-right));
+  }
+  /* footer cham mep DUOI va hai canh — day la cho home indicator che */
+  .site-disclaimer {
+    padding-bottom: calc(var(--foot-pad-y) + env(safe-area-inset-bottom));
+    padding-left: calc(var(--foot-pad-x) + env(safe-area-inset-left));
+    padding-right: calc(var(--foot-pad-x) + env(safe-area-inset-right));
+  }
+  /* Hai drawer full-height: padding goc = 0 (tu `* { padding: 0 }`) nen cong
+     thang env() khong can bien. .col-filters truot tu TRAI, .col-detail tu PHAI
+     — moi cai chi can canh ngang cua no. */
+  .col-filters {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+  }
+  .col-detail {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-right: env(safe-area-inset-right);
+  }
+}
