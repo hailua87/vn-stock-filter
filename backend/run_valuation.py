@@ -32,6 +32,21 @@ from scanner.data_fetcher import get_ticker_universe, setup_api_key
 from scanner.financial_fetcher import fetch_fundamentals
 from scanner.strategies.valuation import value_ticker
 
+# Fair value lệch khỏi giá quá mức này gần như luôn do phương pháp không hợp
+# với doanh nghiệp (vd. EV/EBITDA khi EBITDA năm đáy < nợ ròng → BAF −97%),
+# không phải cơ hội thật. Không công bố làm tín hiệu; ghi vào metadata.
+MIN_PUBLISHED_UPSIDE = -0.80
+MAX_PUBLISHED_UPSIDE = 2.00
+
+
+def outlier_reason(upside: float) -> str | None:
+    """Lý do loại khỏi latest.json, hoặc None nếu được công bố."""
+    if upside < MIN_PUBLISHED_UPSIDE:
+        return f"upside {upside:+.0%} < {MIN_PUBLISHED_UPSIDE:+.0%}"
+    if upside > MAX_PUBLISHED_UPSIDE:
+        return f"upside {upside:+.0%} > {MAX_PUBLISHED_UPSIDE:+.0%}"
+    return None
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s',
@@ -145,6 +160,7 @@ def main():
     log.info("=" * 60)
 
     reports = []
+    outliers = []
     for i, ticker in enumerate(cached_raw.keys(), 1):
         if i % 20 == 0:
             log.info(f"  Pass 2 progress: {i}/{len(cached_raw)} (valid={len(reports)})")
@@ -159,12 +175,19 @@ def main():
                 continue
             if report.confidence < args.min_confidence:
                 continue
+            reason = outlier_reason(report.upside_pct)
+            if reason:
+                outliers.append({'ticker': ticker, 'fair_value': round(report.fair_value),
+                                 'current_price': report.current_price, 'reason': reason})
+                continue
 
             reports.append(report)
         except Exception as e:
             log.warning(f"  {ticker} pass-2 failed: {type(e).__name__}: {str(e)[:100]}")
 
     log.info(f"  Pass 2 complete: {len(reports)} valid signals after filters")
+    if outliers:
+        log.warning(f"  Excluded {len(outliers)} outliers: " + ", ".join(o['ticker'] for o in outliers))
 
     # === Write outputs ===
     web_dir = Path(args.web_data_dir) / 'valuation'
@@ -192,6 +215,7 @@ def main():
             'total_attempted': len(tickers),
             'failures': len(failures),
             'verdict_counts': verdict_counts,
+            'excluded_outliers': outliers,
         },
         'signals': [r.to_dict() for r in reports],
     }

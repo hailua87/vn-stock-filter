@@ -108,6 +108,9 @@ ICB_TO_VALUATION = {
     "Hàng & Dịch vụ Công nghiệp": ValuationIndustry.INDUSTRIAL_MANUFACTURING,
     "Industrial Goods & Services": ValuationIndustry.INDUSTRIAL_MANUFACTURING,
 
+    # Automobiles & Parts (ICB 3300: săm lốp DRC, đại lý ô tô CTF)
+    "Ô tô và phụ tùng": ValuationIndustry.CONSUMER_DISCRETIONARY,
+    "Automobiles & Parts": ValuationIndustry.CONSUMER_DISCRETIONARY,
     # Healthcare
     "Y tế": ValuationIndustry.HEALTHCARE,
     "Health Care": ValuationIndustry.HEALTHCARE,
@@ -136,6 +139,19 @@ SECTOR_OVERRIDE = {
     "Iron & Steel": ValuationIndustry.STEEL_METALS,
 }
 
+
+# Cùng ý nghĩa với SECTOR_OVERRIDE nhưng theo mã ICB cấp 4 (icb_code_lv4),
+# vì vnstock 4.0.7 chỉ trả mã số cho cấp 3-4.
+ICB_LV4_OVERRIDE = {
+    "1757": ValuationIndustry.STEEL_METALS,           # Iron & Steel
+    "3573": ValuationIndustry.AGRICULTURE_LIVESTOCK,  # Farming & Fishing
+    "2771": ValuationIndustry.LOGISTICS_TRANSPORT,    # Delivery Services
+    "2773": ValuationIndustry.LOGISTICS_TRANSPORT,    # Marine Transportation
+    "2775": ValuationIndustry.LOGISTICS_TRANSPORT,    # Railroads
+    "2777": ValuationIndustry.LOGISTICS_TRANSPORT,    # Transportation Services
+    "2779": ValuationIndustry.LOGISTICS_TRANSPORT,    # Trucking
+    "5751": ValuationIndustry.LOGISTICS_TRANSPORT,    # Airlines
+}
 
 # Manual ticker override cho các mã đặc thù không thể tự phân loại
 # Lý do: holding company, business mix phức tạp, hoặc ICB code chưa chính xác
@@ -229,6 +245,21 @@ class IndustryClassifier:
         icb_sector = (overview_data.get("sector")
                       or overview_data.get("icb_name3")
                       or overview_data.get("icb_name4"))
+
+        # === Step 2a: ICB cấp 4 theo mã số (vnstock 4.0.7 không trả tên cấp 3-4) ===
+        icb_lv4 = str(overview_data.get("icb_code_lv4") or "").strip()
+        if icb_lv4 in ICB_LV4_OVERRIDE:
+            industry = ICB_LV4_OVERRIDE[icb_lv4]
+            notes.append(f"Áp dụng ICB cấp 4: {icb_lv4} → {industry.value}")
+            return IndustryClassification(
+                ticker=ticker,
+                valuation_industry=industry,
+                icb_industry=icb_industry,
+                icb_sector=icb_lv4,
+                confidence=0.95,
+                classification_source="sector_override",
+                notes=notes,
+            )
 
         # === Step 2: Sector-level override (chi tiết hơn industry) ===
         if icb_sector and icb_sector in SECTOR_OVERRIDE:
