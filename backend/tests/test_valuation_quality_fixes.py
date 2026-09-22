@@ -8,7 +8,8 @@ chỉ 7/100 mã qua bộ lọc, BAF −97%, HAG EPS 167 triệu đồng.
   3. ROE, EPS/BVPS lịch sử: bảng ratio bị bỏ (chỉ có 2018) → tính từ BCTC.
   4. Cổng chặn ngoại lai trước khi công bố.
 
-Số kỳ vọng đọc tay từ fixture thật (vnstock 4.0.7, FPT/VCB năm):
+Số đọc tay từ BCTC thật (vnstock 4.0.7, FPT/VCB năm); fixture đã nhân
+FIXTURE_SCALE nên số tuyệt đối trong test nhân thêm hệ số, tỷ lệ giữ nguyên:
   FPT 2025: LNST mẹ 9.376,1 tỷ; VCSH 43.748,0 tỷ; vốn góp 17.035,1 tỷ
   FPT 2021: LNST mẹ 4.337,4 tỷ; vốn góp 9.075,5 tỷ
   VCB 2025: vốn góp 83.556,8 tỷ; overview trả 8.355.675.094 cp
@@ -21,6 +22,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import pandas as pd
 import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fixture_scale import FIXTURE_SCALE  # fixture đã biến đổi, xem fixture_scale.py
 
 from scanner import financial_fetcher as ff
 from scanner import market_metrics as mm
@@ -92,12 +96,12 @@ def test_classify_from_icb_level4_code(ticker, lv2_name, lv4, expected):
 
 def test_shares_from_paid_in_capital_matches_overview_for_vcb():
     bs0 = _raw('VCB')['balance_sheet'][0]
-    assert shares_from_paid_in_capital(bs0) == pytest.approx(8_355_675_094, rel=1e-4)
+    assert shares_from_paid_in_capital(bs0) == pytest.approx(8_355_675_094 * FIXTURE_SCALE, rel=1e-4)
 
 
 def test_missing_overview_uses_paid_in_capital_not_common_shares_value():
     d = normalize_fundamentals(_raw('FPT', overview={}))
-    assert d['market']['shares_outstanding'] == pytest.approx(1_703_510_000, rel=1e-4)
+    assert d['market']['shares_outstanding'] == pytest.approx(1_703_510_000 * FIXTURE_SCALE, rel=1e-4)
     # 9.376,1 tỷ / 1,70351 tỷ cp ≈ 5.504 đ — không phải hàng trăm triệu
     assert d['per_share']['eps_ttm'] == pytest.approx(5_504, rel=1e-3)
 

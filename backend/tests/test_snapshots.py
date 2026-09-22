@@ -1,7 +1,7 @@
 """
 Sổ đăng ký snapshot BCTC (audit F3, blueprint §5.2 mục 3–4).
 
-Dữ liệu là record theo kỳ thật của FPT (vnstock 4.0.7, 8 năm 2018–2025).
+Dữ liệu là record theo kỳ của FPT (fixture vnstock 4.0.7 đã biến đổi, 8 năm 2018–2025).
 """
 import copy
 import json
