@@ -39,12 +39,20 @@ def test_methods_conflict_is_json_bool(price):
     ('STRONG BUY', ValuationIndustry.CHEMICALS, 3, 'STRONG BUY', None),                     # DCM
     ('SELL', ValuationIndustry.CONSUMER_DISCRETIONARY, 2, 'SELL', None),                    # BCV
     ('STRONG SELL', ValuationIndustry.BANKING, 3, 'HOLD', 'NPL/CAR'),
-    ('HOLD', ValuationIndustry.OIL_GAS, 1, 'HOLD', None),
+    # Mô hình tự ra HOLD vẫn phải có lý do, để mức định giá là "Chưa có"
+    ('HOLD', ValuationIndustry.OIL_GAS, 1, 'HOLD', '1 phương pháp'),
+    ('HOLD', ValuationIndustry.BANKING, 3, 'HOLD', 'NPL/CAR'),
+    ('HOLD', ValuationIndustry.CHEMICALS, 3, 'HOLD', None),
 ])
 def test_publish_guard(verdict, industry, n, expected, warn):
     v, w = engine._publish_guard(verdict, industry, n)
     assert v == expected
-    assert (w is None) if warn is None else (warn in w and verdict in w)
+    if warn is None:
+        assert w is None
+    else:
+        assert warn in w
+        # Chỉ nhắc verdict gốc khi mô hình đã cho kết luận có hướng
+        assert (verdict in w) == (verdict != 'HOLD')
 
 
 def test_single_method_end_to_end(monkeypatch, no_dispersion):

@@ -25,7 +25,10 @@ VALUATION_EXPENSIVE_UPSIDE = -10.0
 # Phuong phap dang gian luoc: neu la phuong phap trong so lon nhat thi ep
 # confidence xuong duoi nguong, tranh upside cuc lon (vd RNAV he so vung mac
 # dinh) bien thanh muc "Hap dan".
-SIMPLIFIED_METHODS = {'RNAV', 'SOTP'}
+# Ten phai TRUNG KHOP ten phuong phap engine tra ve: engine goi la
+# 'SOTP Simplified', nen ban cu chi co 'SOTP' khien gioi han khong bao gio ap
+# cho VIC/REE/MSN/GEX (holding lay SOTP lam phuong phap chinh).
+SIMPLIFIED_METHODS = {'RNAV', 'SOTP', 'SOTP Simplified'}
 
 # --- Anh xa 19 nhom nganh cua valuation engine -> 5 mo hinh cham diem -------
 INDUSTRY_TO_MODEL = {

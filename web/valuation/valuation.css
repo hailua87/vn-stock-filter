@@ -3,12 +3,16 @@
    ════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Verdict colors */
-  --v-strong-buy:  #00c853;
+  /* Màu upside (+/−) */
   --v-buy:         #66bb6a;
-  --v-hold:        #b0bec5;
   --v-sell:        #ef5350;
-  --v-strong-sell: #c62828;
+
+  /* Mức định giá (blueprint §9). Không dùng xanh lá/đỏ: §11.3 dành các màu đó
+     cho giá, và mức định giá không phải tín hiệu mua/bán (§16). */
+  --band-attractive:    #4fc3f7;
+  --band-fair:          #9fa8da;
+  --band-expensive:     #ffb74d;
+  --band-not-available: #78909c;
 
   /* Detail panel layout */
   --val-filter-w: 260px;
@@ -23,10 +27,11 @@
   font-weight: 500;
 }
 
-/* Verdict stats in topbar */
-.stat-buy   { color: var(--v-buy); }
-.stat-hold  { color: var(--v-hold); }
-.stat-sell  { color: var(--v-sell); }
+/* Số mã theo mức định giá trên topbar */
+.stat-attractive { color: var(--band-attractive); }
+.stat-fair       { color: var(--band-fair); }
+.stat-expensive  { color: var(--band-expensive); }
+.stat-na         { color: var(--band-not-available); }
 
 /* Main dashboard layout */
 .val-dashboard {
@@ -160,12 +165,11 @@ input[type=range]::-moz-range-thumb {
   border-color: var(--focus);
 }
 
-/* Verdict-specific chip colors when active */
-.chip-strong-buy.active { background: var(--v-strong-buy); border-color: var(--v-strong-buy); }
-.chip-buy.active        { background: var(--v-buy);        border-color: var(--v-buy); }
-.chip-hold.active       { background: var(--v-hold);       border-color: var(--v-hold); color: var(--bg-base); }
-.chip-sell.active       { background: var(--v-sell);       border-color: var(--v-sell); }
-.chip-strong-sell.active{ background: var(--v-strong-sell);border-color: var(--v-strong-sell); }
+/* Chip lọc theo mức định giá khi active */
+.chip-band-ATTRACTIVE.active    { background: var(--band-attractive);    border-color: var(--band-attractive);    color: var(--bg-base); }
+.chip-band-FAIR.active          { background: var(--band-fair);          border-color: var(--band-fair);          color: var(--bg-base); }
+.chip-band-EXPENSIVE.active     { background: var(--band-expensive);     border-color: var(--band-expensive);     color: var(--bg-base); }
+.chip-band-NOT_AVAILABLE.active { background: var(--band-not-available); border-color: var(--band-not-available); color: var(--bg-base); }
 
 .link-btn {
   background: transparent;
@@ -320,7 +324,7 @@ input[type=range]::-moz-range-thumb {
 .upside-pos { color: var(--v-buy);  font-weight: 600; }
 .upside-neg { color: var(--v-sell); font-weight: 600; }
 
-.verdict-badge {
+.band-badge {
   display: inline-block;
   padding: 3px 10px;
   border-radius: 4px;
@@ -331,11 +335,24 @@ input[type=range]::-moz-range-thumb {
   min-width: 90px;
 }
 
-.verdict-STRONG\ BUY  { background: var(--v-strong-buy); color: white; }
-.verdict-BUY          { background: var(--v-buy); color: white; }
-.verdict-HOLD         { background: var(--v-hold); color: var(--bg-base); }
-.verdict-SELL         { background: var(--v-sell); color: white; }
-.verdict-STRONG\ SELL { background: var(--v-strong-sell); color: white; }
+.band-ATTRACTIVE    { background: var(--band-attractive);    color: var(--bg-base); }
+.band-FAIR          { background: var(--band-fair);          color: var(--bg-base); }
+.band-EXPENSIVE     { background: var(--band-expensive);     color: var(--bg-base); }
+.band-NOT_AVAILABLE { background: transparent; color: var(--band-not-available);
+                      border: 1px dashed var(--band-not-available); }
+
+.band-reason {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: -8px 0 8px;
+}
+
+.band-disclaimer {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-bottom: 14px;
+}
 
 .confidence-bar {
   display: inline-flex;
@@ -531,7 +548,7 @@ input[type=range]::-moz-range-thumb {
 .fv-range-fill {
   position: absolute;
   height: 100%;
-  background: linear-gradient(90deg, var(--v-strong-sell), var(--v-hold), var(--v-strong-buy));
+  background: linear-gradient(90deg, var(--band-not-available), var(--band-fair));
   opacity: 0.3;
 }
 

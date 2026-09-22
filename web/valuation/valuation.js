@@ -12,7 +12,7 @@ const state = {
   sort: { column: 'upside_pct', direction: 'desc' },
   filters: {
     search: '',
-    verdict: '',
+    band: '',
     industry: '',
     minUpside: -100,
     minConfidence: 30,
@@ -73,8 +73,8 @@ const STALE_AFTER_DAYS = 8;
  * Quyết định banner cảnh báo dựa trên chất lượng file dữ liệu.
  *
  * FIX: trước đây chỉ hiện banner khi signals rỗng, nên file demo (metadata.demo
- * = true, 6 mã) hiển thị như dữ liệu thật — người dùng thấy "VHM STRONG BUY
- * +85.8%" mà không biết đó là số minh hoạ.
+ * = true, 6 mã) hiển thị như dữ liệu thật — người dùng thấy "VHM" với upside
+ * +85.8% mà không biết đó là số minh hoạ.
  */
 function checkDataQuality(data) {
   if (data.metadata?.demo) return showBanner('demo');
@@ -122,17 +122,32 @@ function showBanner(kind, ageDays) {
   el.style.display = 'block';
 }
 
+// Mức định giá (blueprint §9) do backend tính — xem scanner/quality/status.py.
+// Trang KHÔNG hiển thị verdict mua/bán của engine (§9, §16) và không tự tính
+// lại ngưỡng ở đây: ngưỡng chỉ nằm một chỗ, ở backend.
+const BAND_ORDER = { ATTRACTIVE: 0, FAIR: 1, EXPENSIVE: 2, NOT_AVAILABLE: 3 };
+
+function bandOf(s) {
+  return s.valuation_band || {
+    band: 'NOT_AVAILABLE', label: 'Chưa có',
+    reason: 'Dữ liệu tạo trước khi có mức định giá — chờ lần chạy định giá kế tiếp',
+  };
+}
+
 function updateTopbarStats(data) {
-  const counts = (data.metadata?.verdict_counts) || {};
   const total = data.total || state.signals.length;
-  const buy = (counts['STRONG BUY'] || 0) + (counts['BUY'] || 0);
-  const hold = counts['HOLD'] || 0;
-  const sell = (counts['SELL'] || 0) + (counts['STRONG SELL'] || 0);
+  // band_counts có từ bản chạy mới; bản cũ thì đếm lại từ chính các mã
+  let counts = data.metadata?.band_counts;
+  if (!counts) {
+    counts = {};
+    state.signals.forEach(s => { const b = bandOf(s).band; counts[b] = (counts[b] || 0) + 1; });
+  }
 
   document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-buy').textContent = buy;
-  document.getElementById('stat-hold').textContent = hold;
-  document.getElementById('stat-sell').textContent = sell;
+  document.getElementById('stat-attractive').textContent = counts.ATTRACTIVE || 0;
+  document.getElementById('stat-fair').textContent = counts.FAIR || 0;
+  document.getElementById('stat-expensive').textContent = counts.EXPENSIVE || 0;
+  document.getElementById('stat-na').textContent = counts.NOT_AVAILABLE || 0;
 
   if (data.generated_at) {
     const d = new Date(data.generated_at);
@@ -177,11 +192,11 @@ function bindFilters() {
     applyFiltersAndRender();
   });
 
-  document.querySelectorAll('#filter-verdict .chip').forEach(chip => {
+  document.querySelectorAll('#filter-band .chip').forEach(chip => {
     chip.addEventListener('click', () => {
-      document.querySelectorAll('#filter-verdict .chip').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('#filter-band .chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
-      state.filters.verdict = chip.dataset.verdict;
+      state.filters.band = chip.dataset.band;
       applyFiltersAndRender();
     });
   });
@@ -197,7 +212,7 @@ function bindFilters() {
 
   document.getElementById('reset-filters').addEventListener('click', () => {
     state.filters = {
-      search: '', verdict: '', industry: '',
+      search: '', band: '', industry: '',
       minUpside: -100, minConfidence: 30, holding: '',
     };
     document.getElementById('ticker-search').value = '';
@@ -206,7 +221,7 @@ function bindFilters() {
     document.getElementById('filter-upside-value').textContent = '-100';
     document.getElementById('filter-confidence').value = 30;
     document.getElementById('filter-confidence-value').textContent = '30';
-    document.querySelectorAll('#filter-verdict .chip').forEach((c, i) =>
+    document.querySelectorAll('#filter-band .chip').forEach((c, i) =>
       c.classList.toggle('active', i === 0));
     document.querySelectorAll('#filter-holding .chip').forEach((c, i) =>
       c.classList.toggle('active', i === 0));
@@ -234,7 +249,7 @@ function bindSort() {
 function applyFiltersAndRender() {
   let result = state.signals.filter(s => {
     if (state.filters.search && !s.ticker.includes(state.filters.search)) return false;
-    if (state.filters.verdict && s.verdict !== state.filters.verdict) return false;
+    if (state.filters.band && bandOf(s).band !== state.filters.band) return false;
     if (state.filters.industry && s.industry !== state.filters.industry) return false;
     if (s.upside_pct < state.filters.minUpside) return false;
     if (s.confidence < state.filters.minConfidence) return false;
@@ -246,9 +261,8 @@ function applyFiltersAndRender() {
   // Sort
   const col = state.sort.column;
   const dir = state.sort.direction === 'asc' ? 1 : -1;
-  if (col === 'verdict') {
-    const order = { 'STRONG BUY': 0, 'BUY': 1, 'HOLD': 2, 'SELL': 3, 'STRONG SELL': 4 };
-    result.sort((a, b) => dir * (order[a.verdict] - order[b.verdict]));
+  if (col === 'band') {
+    result.sort((a, b) => dir * (BAND_ORDER[bandOf(a).band] - BAND_ORDER[bandOf(b).band]));
   } else {
     result.sort((a, b) => {
       const va = a[col];
@@ -285,8 +299,7 @@ function renderTable() {
   tbody.innerHTML = state.filtered.map(s => {
     const upsideCls = s.upside_pct >= 0 ? 'upside-pos' : 'upside-neg';
     const upsideStr = (s.upside_pct >= 0 ? '+' : '') + s.upside_pct.toFixed(1) + '%';
-    const verdictKey = s.verdict.replace(/ /g, '\\ ');
-    const verdictClassSuffix = s.verdict.replace(/ /g, '\\ ');
+    const band = bandOf(s);
     const confCls = s.confidence >= 70 ? 'high' : (s.confidence >= 45 ? 'mid' : 'low');
     const methodPills = (s.methods_used || []).slice(0, 3).map(m => {
       const short = abbrevMethod(m);
@@ -302,7 +315,7 @@ function renderTable() {
         <td class="td-num">${fmtNum(s.fair_value)}</td>
         <td class="td-num ${upsideCls}">${upsideStr}</td>
         <td class="td-center">
-          <span class="verdict-badge verdict-${verdictClassSuffix}">${s.verdict}</span>
+          <span class="band-badge band-${band.band}" title="${escapeHtml(band.reason || '')}">${band.label}</span>
         </td>
         <td class="td-num">
           <div class="confidence-bar">
@@ -356,7 +369,7 @@ function renderDetail(signal) {
 
   const upsideCls = signal.upside_pct >= 0 ? 'upside-pos' : 'upside-neg';
   const upsideStr = (signal.upside_pct >= 0 ? '+' : '') + signal.upside_pct.toFixed(1) + '%';
-  const verdictClassSuffix = signal.verdict.replace(/ /g, '\\ ');
+  const band = bandOf(signal);
 
   // Fair value range bar
   const range = signal.fair_value_high - signal.fair_value_low;
@@ -405,9 +418,11 @@ function renderDetail(signal) {
     </div>
 
     <div class="detail-verdict-row">
-      <span class="verdict-badge verdict-${verdictClassSuffix}">${signal.verdict}</span>
+      <span class="band-badge band-${band.band}">${band.label}</span>
       <span class="detail-upside ${upsideCls}">${upsideStr}</span>
     </div>
+    ${band.reason ? `<div class="band-reason">${escapeHtml(band.reason)}</div>` : ''}
+    <div class="band-disclaimer">Mức gợi ý theo mô hình định giá, không phải khuyến nghị mua bán.</div>
 
     <div class="detail-section">
       <div class="detail-section-title">Khoảng giá trị hợp lý</div>

@@ -57,6 +57,12 @@ def valuation_band(signal: Optional[dict]) -> dict:
     if signal.get('methods_conflict'):
         return {**out, 'reason': 'Các phương pháp định giá mâu thuẫn'}
 
+    # Engine da ha verdict ve HOLD vi chua du can cu (nhom tai chinh chua co
+    # NPL/CAR, hoac chi 1 phuong phap) -> muc dinh gia cung la Chua co. Thieu
+    # buoc nay thi ngan hang van hien "Hap dan" (TPB, MSB 21/09).
+    if signal.get('guard_reason'):
+        return {**out, 'reason': signal['guard_reason']}
+
     eff_conf = conf
     if method in C.SIMPLIFIED_METHODS:
         eff_conf = min(conf, C.VALUATION_MIN_CONFIDENCE - 1)
