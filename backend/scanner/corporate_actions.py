@@ -307,7 +307,8 @@ def has_upcoming_event(events: list[CorporateAction], days: int = 5) -> Optional
 
 def apply_event_filter(results: list, lookback_days: int = 5,
                        lookahead_days: int = 5, delay: float = 1.0,
-                       deadline: Optional[float] = None) -> list:
+                       deadline: Optional[float] = None,
+                       min_score: Optional[float] = None) -> list:
     """
     Áp bộ lọc sự kiện quyền lên KẾT QUẢ đã chấm điểm của bất kỳ strategy nào.
 
@@ -325,7 +326,16 @@ def apply_event_filter(results: list, lookback_days: int = 5,
     if not results:
         return results
 
-    tickers = sorted({r.ticker for r in results})
+    # Chỉ mã đạt ngưỡng công bố mới cần kiểm sự kiện quyền: mã dưới ngưỡng
+    # không vào latest.json nên kiểm cho chúng là phí API (Pre-Breakout 22/09:
+    # ~250 mã được chấm điểm, chỉ vài chục mã đạt min_score). Mã dưới ngưỡng
+    # được trả về nguyên trạng, thứ tự giữ nguyên.
+    def _needs_check(r) -> bool:
+        return min_score is None or (getattr(r, 'total_score', 0) or 0) >= min_score
+
+    tickers = sorted({r.ticker for r in results if _needs_check(r)})
+    if not tickers:
+        return results
     events_map = fetch_events_batch(tickers, delay=delay,
                                     lookahead_days=max(lookahead_days, 30),
                                     deadline=deadline)
@@ -333,6 +343,9 @@ def apply_event_filter(results: list, lookback_days: int = 5,
     kept = []
     dropped = 0
     for r in results:
+        if not _needs_check(r):
+            kept.append(r)
+            continue
         events = events_map.get(r.ticker) or []
         if events and has_recent_event(events, days=lookback_days):
             dropped += 1

@@ -217,3 +217,31 @@ def test_decision_table_unchanged_by_the_rewrite(hour, minute, cov, stop,
 def test_missing_fetch_summary_behaves_like_before():
     assert archive_decision(now=at(23, 30), session_date='2026-08-27')['write'] is True
     assert archive_decision(now=at(13, 0), session_date='2026-08-27')['write'] is False
+
+
+# ── Dừng vì hết giờ nhưng đủ ngưỡng (2026-09-23) ─────────────────────────
+# Số liệu thật: phiên 17/09 run EOD 85% (time_budget) bị chặn → mất archive.
+def test_time_budget_above_threshold_now_passes():
+    g = gate(evaluate_archive_gates(at(23, 12), summary(0.848, 'time_budget'),
+                                    session_date='2026-08-27'), 'gate_coverage')
+    assert g['passed'] is True
+    assert '85%' in g['detail'] and 'hết giờ' in g['detail']
+
+
+@pytest.mark.parametrize('coverage', [0.366, 0.58, 0.708])   # 14/09 và 17/09 thật
+def test_time_budget_below_threshold_still_fails(coverage):
+    g = gate(evaluate_archive_gates(at(23, 12), summary(coverage, 'time_budget'),
+                                    session_date='2026-08-27'), 'gate_coverage')
+    assert g['passed'] is False
+
+
+def test_archive_written_for_time_budget_above_threshold():
+    d = archive_decision(now=at(23, 12), fetch_summary=summary(0.848, 'time_budget'),
+                         session_date='2026-08-27')
+    assert d['write'] is True
+
+
+def test_archive_blocked_for_circuit_breaker_even_above_threshold():
+    d = archive_decision(now=at(23, 12), fetch_summary=summary(0.95, 'circuit_breaker'),
+                         session_date='2026-08-27')
+    assert d['write'] is False

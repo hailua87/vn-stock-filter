@@ -76,8 +76,9 @@ def test_scanner_passes_deadline_to_event_filter(monkeypatch):
     from scanner import scanner as sc
     seen = {}
 
-    def spy(results, lookback_days, lookahead_days, deadline=None):
+    def spy(results, lookback_days, lookahead_days, deadline=None, min_score=None):
         seen['deadline'] = deadline
+        seen['min_score'] = min_score
         return results
     monkeypatch.setattr(sc, 'apply_event_filter', spy)
     monkeypatch.setattr(sc, 'evaluate', lambda df, tk, cfg: SimpleNamespace(ticker=tk))
@@ -85,10 +86,41 @@ def test_scanner_passes_deadline_to_event_filter(monkeypatch):
 
     import pandas as pd
     df = pd.DataFrame({'Ticker': ['AAA', 'BBB'], 'Date': ['2026-09-22'] * 2})
-    sc.BreakoutScanner(events_deadline=123.0).scan_from_dataframe(df)
+    sc.BreakoutScanner(events_deadline=123.0, events_min_score=5).scan_from_dataframe(df)
     assert seen['deadline'] == 123.0
+    assert seen['min_score'] == 5
 
 
 def test_run_daily_default_budget_is_under_workflow_timeout():
     import run_daily
     assert run_daily.FETCH_BUDGET_S < run_daily.RUN_BUDGET_S < 60 * 60
+
+
+# --- Chỉ kiểm sự kiện quyền cho mã đạt ngưỡng công bố ------------------------
+
+def test_only_candidates_above_min_score_hit_the_api(env):
+    """Pre-Breakout 22/09: ~250 mã được chấm, chỉ vài chục mã đạt min_score."""
+    _, calls, _ = env
+    results = [SimpleNamespace(ticker=f'T{i}', total_score=i, metrics={}) for i in range(10)]
+    kept = ca.apply_event_filter(results, min_score=7)
+    assert sorted(calls) == ['T7', 'T8', 'T9']
+    # Mã dưới ngưỡng vẫn giữ nguyên, đúng thứ tự
+    assert [r.ticker for r in kept] == [r.ticker for r in results]
+
+
+def test_below_threshold_results_not_dropped_even_with_dilutive_event(env, monkeypatch):
+    """Mã dưới ngưỡng không được kiểm nên cũng không bị loại (không vào latest.json)."""
+    _, calls, _ = env
+    monkeypatch.setattr(ca, 'has_recent_event', lambda events, days: True)
+    monkeypatch.setattr(ca, 'fetch_events', lambda tk, *a, **k: ['event'])
+    results = [SimpleNamespace(ticker='LOW', total_score=1, metrics={}),
+               SimpleNamespace(ticker='HIGH', total_score=9, metrics={})]
+    kept = ca.apply_event_filter(results, min_score=5)
+    assert [r.ticker for r in kept] == ['LOW']        # HIGH bị loại vì sự kiện pha loãng
+
+
+def test_no_candidates_means_no_api_calls(env):
+    _, calls, _ = env
+    results = [SimpleNamespace(ticker=f'T{i}', total_score=1, metrics={}) for i in range(5)]
+    assert ca.apply_event_filter(results, min_score=5) == results
+    assert calls == []

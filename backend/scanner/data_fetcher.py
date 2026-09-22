@@ -412,6 +412,27 @@ def _last_trading_session(today: 'date') -> 'date':
     return last_trading_session(today)
 
 
+# ── Điều tiết lượt gọi mạng ────────────────────────────────────────────────
+# Trước 2026-09-23, fetch_universe NGỦ `delay` giây trước MỌI mã, kể cả mã lấy
+# thẳng từ cache không gọi mạng: 500 mã × 2 s ≈ 16,7 phút của ngân sách 45 phút
+# chỉ để ngủ. Ngày nguồn chậm (mỗi lần gọi ~3 s) thì mỗi mã tốn 2 + 3 = 5 s.
+# Nay `delay` là KHOẢNG CÁCH TỐI THIỂU giữa hai lần gọi mạng thật: vẫn giữ trần
+# rate limit, nhưng mã từ cache tốn ~0 s và mã chậm tốn max(delay, thời gian gọi).
+_net_lock = threading.Lock()
+_net_last_call = 0.0
+_net_min_interval = 0.0
+
+
+def _net_throttle() -> None:
+    """Chờ tới khi cách lần gọi mạng trước ít nhất `_net_min_interval` giây."""
+    global _net_last_call
+    with _net_lock:
+        wait = _net_last_call + _net_min_interval - time.monotonic()
+        if wait > 0:
+            time.sleep(wait)
+        _net_last_call = time.monotonic()
+
+
 def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
                      force_refresh: bool = False, adjusted: bool = True,
                      last_session: Optional['date'] = None) -> Optional[pd.DataFrame]:
@@ -493,6 +514,7 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
                 #   b) last_date == today → có thể vnstock đã update, refetch để chắc
                 # Refetch incremental (refresh 30 ngày cuối phòng late corp actions)
                 refetch_start = (last_date - timedelta(days=30))
+                _net_throttle()
                 new = fetch_ohlcv(ticker, str(refetch_start), str(end), adjusted=adjusted)
                 if new is not None and not new.empty:
                     cached_old = cached[cached['Date'] < pd.Timestamp(refetch_start)]
@@ -518,6 +540,7 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
 
     if df is None:
         # Không có cache hoặc cache read fail → fetch from scratch
+        _net_throttle()
         df = fetch_ohlcv(ticker, str(start), str(end), adjusted=adjusted)
         if df is None or df.empty:
             return None
@@ -676,10 +699,14 @@ def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
             return _SKIPPED
         if deadline is not None and now() >= deadline:
             return _SKIPPED
-        if delay:
-            time.sleep(delay)
+        # `delay` không còn ngủ ở đây — xem _net_throttle
         return fetch_with_cache(row['ticker'], row['exchange'], lookback_days,
                                 last_session=session_expected)
+
+    # `delay` giờ là khoảng cách tối thiểu giữa hai lượt gọi mạng thật (xem
+    # _net_throttle), đặt cho suốt vòng này rồi trả lại giá trị cũ ở cuối hàm.
+    global _net_min_interval
+    prev_interval, _net_min_interval = _net_min_interval, (delay or 0.0)
 
     with ThreadPoolExecutor(max_workers=max_workers) as ex:
         futures = {ex.submit(_worker, r): r['ticker']
@@ -748,6 +775,7 @@ def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
         out = pd.concat(all_frames, ignore_index=True)
     # attrs sống sót qua concat khi gán sau; caller đọc để biết có bị cắt không.
     out.attrs['fetch_summary'] = summary
+    _net_min_interval = prev_interval
     return out
 
 
