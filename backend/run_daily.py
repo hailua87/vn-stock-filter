@@ -15,6 +15,7 @@ import sys
 from datetime import date, datetime, time as dtime
 from pathlib import Path
 from typing import Optional
+from time import monotonic
 
 import pandas as pd
 
@@ -57,6 +58,13 @@ ARCHIVE_CUTOFF_ICT = dtime(15, 15)
 # đã lấy về không thành cái gì cả. Tự dừng ở phút 45 thì phần chấm điểm, ghi JSON
 # và commit vẫn còn 15 phút để chạy — hỏng có kiểm soát thay vì bị chặt ngang.
 FETCH_BUDGET_S = int(os.environ.get('FETCH_BUDGET_S', 45 * 60))
+
+# Hạn chót cho MỌI lệnh gọi API sau vòng fetch (hiện là sự kiện quyền), tính từ
+# lúc tiến trình bắt đầu. 55 phút < timeout 60 phút của workflow. Trước đây chỉ
+# vòng fetch có ngân sách: 21-22/09 nguồn chậm ~5 lần, bộ lọc sự kiện quyền gọi
+# API cho ~250 mã sau phút 45 và job bị chặt ở phút 60, mất cả kết quả đã tính.
+RUN_BUDGET_S = int(os.environ.get('RUN_BUDGET_S', 55 * 60))
+_STARTED = monotonic()
 
 # Độ phủ tối thiểu để bản quét được coi là đại diện cho cả phiên. Dưới mức này,
 # archive bị chặn: một file archive mỏng là VĨNH VIỄN (không ai chạy lại phiên
@@ -448,6 +456,9 @@ def main():
     parser.add_argument('--limit', type=int, default=None)
     parser.add_argument('--web-data-dir', type=str, default='web/data')
     parser.add_argument('--output-dir', type=str, default='backend/data/results')
+    parser.add_argument('--run-budget', type=int, default=RUN_BUDGET_S,
+                        help='Giây, tính từ lúc bắt đầu: sau mốc này không gọi API '
+                             'sự kiện quyền nữa (mặc định 55 phút)')
     parser.add_argument('--no-corporate-actions', action='store_true',
                         help='Bỏ qua bộ lọc sự kiện quyền (nhanh hơn, dùng khi test)')
     parser.add_argument('--fetch-budget', type=int, default=FETCH_BUDGET_S,
@@ -561,8 +572,10 @@ def main():
 
     # -------- Pre-Breakout --------
     log.info("Running Pre-Breakout strategy...")
+    events_deadline = _STARTED + args.run_budget
     scanner = BreakoutScanner(exchanges=exchanges,
-                              fetch_corporate_actions=not args.no_corporate_actions)
+                              fetch_corporate_actions=not args.no_corporate_actions,
+                              events_deadline=events_deadline)
     df_pb = scanner.scan_from_dataframe(df_all_raw)
     if not df_pb.empty:
         # Gắn RS vào bảng kết quả Pre-Breakout (scanner trả về DataFrame)
@@ -623,7 +636,7 @@ def main():
         log.info(f"  {label}: {len(results)} candidates")
         annotate_results(results, rs_map)
         if not args.no_corporate_actions:
-            results = apply_event_filter(results)
+            results = apply_event_filter(results, deadline=events_deadline)
         return results
 
     # -------- Golden Cross — LONG preset (MA50 × MA200) --------
