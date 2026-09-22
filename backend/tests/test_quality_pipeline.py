@@ -223,3 +223,15 @@ def test_missing_proceeds_in_year_with_capital_increase_is_unknown():
 def test_buyback_reduces_shares():
     out = adapter.cash_issued_shares([100.0, 90.0], [1.0, 0.9], [0.0, 0.0])
     assert out == [100.0, pytest.approx(90.0)]
+
+
+def test_metadata_exports_model_specs_for_web(universe):
+    """Web đọc ngưỡng và danh sách chỉ tiêu từ JSON, không chép lại cấu hình."""
+    from scanner.quality import config as C
+    _, payload, _ = _run(universe)
+    m = payload['metadata']
+    assert m['thresholds']['qualify'] == C.QUALIFY
+    spec = m['model_specs']['NON_FINANCIAL']['quality']
+    assert [s['key'] for s in spec] == [k for k, _, _ in C.MODELS['NON_FINANCIAL']['quality']]
+    assert set(m['model_specs']) == C.ACTIVE_MODELS
+    json.dumps(m)                                   # ghi được ra JSON

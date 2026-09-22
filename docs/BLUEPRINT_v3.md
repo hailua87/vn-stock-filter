@@ -62,6 +62,7 @@ Nguyên tắc (giữ từ v2):
 | D16 | Archive khi fetch dừng sớm | Luôn chặn | Dừng vì **hết giờ** mà độ phủ ≥ 80% thì cho ghi; dừng vì **cầu dao** vẫn chặn (§7.5) |
 | D17 | Ngưỡng "Cần xem lại" | Quản trị < 60, Chất lượng < 60, Chống chịu < 50 | Quản trị < 30, Chất lượng < 30, Chống chịu < 25. Điểm 3 chiều là **percentile** nên trung vị ~50; ngưỡng cũ tự động đưa ~60% mã vào "Cần xem lại" (chạy thật 22/09: 55/100) (§10) |
 | D18 | Cờ pha loãng | Số CP lưu hành tăng | Chỉ tính CP **phát hành lấy tiền**: phần CP tăng × min(1, tiền thu phát hành / phần vốn góp tăng). Cổ tức cổ phiếu, cổ phiếu thưởng không phải pha loãng (chạy thật: 58 → 19 mã bị cờ) (§8.5) |
+| D19 | Nền màu giao diện | Mockup "Sổ tay phân tích" nền sáng (`tokens.css` --n-*, --px-*) | **Giữ nền tối cho cả app** (quyết định 29/08 trong `web/index.html`: chuyển sáng làm 8 biến đang đạt AA bị hỏng). Màn Phase 2 dùng bảng màu tối của `styles.css` + token phi màu của `tokens.css`; cấu trúc thông tin vẫn theo canvas/mockup (§11) |
 
 ## 4. Phạm vi
 
@@ -393,7 +394,7 @@ Các ngưỡng là mặc định cấu hình, không phải bằng chứng về 
 |---|---|
 | Hôm nay | Chỉ số và độ rộng thị trường; top mã scan (ưu tiên khớp nhiều chiến lược); mã watchlist đổi trạng thái hoặc định giá; tình trạng dữ liệu |
 | Scan hằng ngày | Cột trái: chiến lược, Combined, điều kiện nền, liên kết Chất lượng. Bảng kết quả theo §7.3 |
-| Watchlist dài hạn | Tab trạng thái có số đếm; bảng 4 chiều dạng thanh ngắn có vạch ngưỡng; độ phủ; định giá; P/E so với 5 năm; trạng thái; kỳ BCTC; lý do |
+| Watchlist dài hạn — **đã có** (`web/watchlist/`) | Tab trạng thái có số đếm; bảng 4 chiều dạng thanh ngắn có vạch ngưỡng; độ phủ; định giá; trạng thái; kỳ BCTC; lý do. Chưa có: P/E so với 5 năm |
 | Chi tiết mã | Góc giao dịch: biểu đồ nến + MA, mức vùng vào/cắt lỗ, kế hoạch lệnh, tín hiệu đã kích hoạt, lưu ý T+2. Góc dài hạn: 4 chiều với từng chỉ tiêu, percentile, chỉ tiêu thiếu; định giá; ô luận điểm và điều kiện bán |
 
 ### 11.2 Dữ liệu cho web

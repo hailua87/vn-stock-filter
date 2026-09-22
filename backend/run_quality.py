@@ -169,6 +169,13 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
             'active_models': sorted(C.ACTIVE_MODELS),
             'thresholds': {'qualify': C.QUALIFY, 'review_below': C.REVIEW_BELOW,
                            'coverage_min': C.COVERAGE_MIN, 'min_peer_group': C.MIN_PEER_GROUP},
+            # Web đọc cấu hình từ đây thay vì chép lại (blueprint v3: không đổi
+            # ngưỡng, trọng số chỉ trên giao diện).
+            'model_specs': {m: {dim: [{'key': k, 'weight': w, 'higher_better': h}
+                                      for k, w, h in specs]
+                                for dim, specs in C.MODELS[m].items()}
+                            for m in sorted(C.ACTIVE_MODELS)},
+            'governance_penalty': C.PENALTY,
             'note': ('Percentile là thứ hạng trong universe Module B (top thanh khoản), '
                      'không phải toàn thị trường. Ngưỡng là mặc định cấu hình, chưa backtest. '
                      'Không phải khuyến nghị đầu tư.'),
