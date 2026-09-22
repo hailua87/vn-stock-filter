@@ -1,0 +1,6954 @@
+{
+ "schema": 1,
+ "generated_at": "2026-09-22T16:48:19",
+ "as_of": "2026-09-22",
+ "metadata": {
+  "universe_size": 100,
+  "scored": 100,
+  "failures": [],
+  "status_counts": {
+   "MON": 47,
+   "REV": 7,
+   "RES": 43,
+   "EXC": 3
+  },
+  "model_counts": {
+   "NON_FINANCIAL": 55,
+   "SECURITIES": 12,
+   "null": 1,
+   "REAL_ESTATE": 15,
+   "BANK": 16,
+   "INSURANCE": 1
+  },
+  "active_models": [
+   "BANK",
+   "NON_FINANCIAL",
+   "SECURITIES"
+  ],
+  "thresholds": {
+   "qualify": {
+    "quality": 75,
+    "growth": 70,
+    "governance": 70,
+    "resilience": 65
+   },
+   "review_below": {
+    "governance": 30,
+    "quality": 30,
+    "resilience": 25
+   },
+   "coverage_min": 0.7,
+   "min_peer_group": 8
+  },
+  "note": "Percentile là thứ hạng trong universe Module B (top thanh khoản), không phải toàn thị trường. Ngưỡng là mặc định cấu hình, chưa backtest. Không phải khuyến nghị đầu tư."
+ },
+ "items": [
+  {
+   "ticker": "FPT",
+   "industry": "Technology",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Đạt 4 ngưỡng nhưng chưa có định giá đủ tin cậy",
+   "dims": {
+    "quality": {
+     "score": 78.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 70.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 71.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.2035,
+    "gross_margin_std5": 0.0073,
+    "ebit_margin_std5": 0.0041,
+    "cash_conversion3": 1.1023,
+    "asset_turnover": 0.8756,
+    "revenue_cagr5": 0.1864,
+    "ebit_cagr5": 0.1965,
+    "cfo_cagr5": 0.0984,
+    "revenue_up_years5": 1.0,
+    "reinvestment_rate": 0.7306,
+    "net_debt_ebitda": 0.6293,
+    "interest_coverage": 17.108,
+    "current_ratio": 1.4001,
+    "profit_drawdown5": 0.0
+   },
+   "percentiles": {
+    "roic_avg5": 83.0,
+    "gross_margin_std5": 98.1,
+    "ebit_margin_std5": 98.1,
+    "cash_conversion3": 46.9,
+    "asset_turnover": 57.4,
+    "revenue_cagr5": 75.5,
+    "ebit_cagr5": 67.4,
+    "cfo_cagr5": 54.1,
+    "revenue_up_years5": 91.5,
+    "reinvestment_rate": 63.5,
+    "net_debt_ebitda": 69.2,
+    "interest_coverage": 70.4,
+    "current_ratio": 44.4,
+    "profit_drawdown5": 95.4
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "PVS",
+   "industry": "Oil_Gas",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Tăng trưởng 50 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 77.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 49.8,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 85.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.1826,
+    "gross_margin_std5": 0.0056,
+    "ebit_margin_std5": 0.0055,
+    "cash_conversion3": 1.415,
+    "asset_turnover": 0.898,
+    "revenue_cagr5": 0.1015,
+    "ebit_cagr5": 0.1604,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 0.6913,
+    "net_debt_ebitda": -3.4782,
+    "interest_coverage": 33.2041,
+    "current_ratio": 1.5846,
+    "profit_drawdown5": 0.046
+   },
+   "percentiles": {
+    "roic_avg5": 75.5,
+    "gross_margin_std5": 98.1,
+    "ebit_margin_std5": 87.0,
+    "cash_conversion3": 63.3,
+    "asset_turnover": 61.1,
+    "revenue_cagr5": 39.6,
+    "ebit_cagr5": 52.2,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 55.8,
+    "net_debt_ebitda": 98.1,
+    "interest_coverage": 81.5,
+    "current_ratio": 66.7,
+    "profit_drawdown5": 85.2
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "DGW",
+   "industry": "Consumer_Discretionary",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Tăng trưởng 62 dưới 70, Chống chịu 51 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 76.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 62.0,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 51.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.2218,
+    "gross_margin_std5": 0.0076,
+    "ebit_margin_std5": 0.0056,
+    "cash_conversion3": 0.2513,
+    "asset_turnover": 2.6957,
+    "revenue_cagr5": 0.1627,
+    "ebit_cagr5": 0.1806,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 0.883,
+    "net_debt_ebitda": 1.3177,
+    "interest_coverage": 5.9834,
+    "current_ratio": 1.3755,
+    "profit_drawdown5": 0.4696
+   },
+   "percentiles": {
+    "roic_avg5": 88.7,
+    "gross_margin_std5": 98.1,
+    "ebit_margin_std5": 85.2,
+    "cash_conversion3": 16.3,
+    "asset_turnover": 92.6,
+    "revenue_cagr5": 60.4,
+    "ebit_cagr5": 60.9,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 69.2,
+    "net_debt_ebitda": 55.8,
+    "interest_coverage": 50.0,
+    "current_ratio": 40.7,
+    "profit_drawdown5": 53.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "FTS",
+   "industry": "Securities",
+   "model": "SECURITIES",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Tăng trưởng 49 dưới 70, Chống chịu 30 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 75.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 49.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 29.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -50.4,
+    "confidence": 52.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho STRONG SELL, đã hạ về HOLD"
+   },
+   "metrics": {
+    "roe_avg3": 0.1221,
+    "recurring_share": 0.8037,
+    "fvtpl_equity": 0.5676,
+    "revenue_cagr5": 0.2447,
+    "npat_cagr5": 0.184,
+    "margin_loans_cagr3": 0.3022,
+    "margin_loans_equity": 1.8661,
+    "debt_equity": 1.9815,
+    "profit_drawdown5": 0.6238
+   },
+   "percentiles": {
+    "roe_avg3": 72.7,
+    "recurring_share": 100.0,
+    "fvtpl_equity": 54.5,
+    "revenue_cagr5": 54.5,
+    "npat_cagr5": 50.0,
+    "margin_loans_cagr3": 36.4,
+    "margin_loans_equity": 18.2,
+    "debt_equity": 27.3,
+    "profit_drawdown5": 45.5
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VNM",
+   "industry": "Consumer_Staples",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Tăng trưởng 25 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 75.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 24.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 76.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.2307,
+    "gross_margin_std5": 0.0108,
+    "ebit_margin_std5": 0.0118,
+    "cash_conversion3": 0.941,
+    "asset_turnover": 1.1747,
+    "revenue_cagr5": 0.0131,
+    "ebit_cagr5": -0.026,
+    "cfo_cagr5": -0.0316,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": -0.1782,
+    "net_debt_ebitda": 0.5437,
+    "interest_coverage": 36.7576,
+    "current_ratio": 1.9579,
+    "profit_drawdown5": 0.2366
+   },
+   "percentiles": {
+    "roic_avg5": 92.5,
+    "gross_margin_std5": 88.9,
+    "ebit_margin_std5": 77.8,
+    "cash_conversion3": 38.8,
+    "asset_turnover": 74.1,
+    "revenue_cagr5": 20.8,
+    "ebit_cagr5": 10.9,
+    "cfo_cagr5": 27.0,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 11.5,
+    "net_debt_ebitda": 71.2,
+    "interest_coverage": 83.3,
+    "current_ratio": 79.6,
+    "profit_drawdown5": 74.1
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "PLX",
+   "industry": "Oil_Gas",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 74 dưới 75, Tăng trưởng 52 dưới 70, Chống chịu 49 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 73.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 51.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 48.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.0976,
+    "gross_margin_std5": 0.0109,
+    "ebit_margin_std5": 0.0054,
+    "cash_conversion3": 1.256,
+    "asset_turnover": 3.7082,
+    "revenue_cagr5": 0.2012,
+    "ebit_cagr5": 0.1599,
+    "cfo_cagr5": -0.0569,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": -1.0688,
+    "net_debt_ebitda": 1.1888,
+    "interest_coverage": 5.5644,
+    "current_ratio": 1.076,
+    "profit_drawdown5": 0.391
+   },
+   "percentiles": {
+    "roic_avg5": 47.2,
+    "gross_margin_std5": 87.0,
+    "ebit_margin_std5": 90.7,
+    "cash_conversion3": 59.2,
+    "asset_turnover": 98.1,
+    "revenue_cagr5": 81.1,
+    "ebit_cagr5": 50.0,
+    "cfo_cagr5": 24.3,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 5.8,
+    "net_debt_ebitda": 57.7,
+    "interest_coverage": 46.3,
+    "current_ratio": 18.5,
+    "profit_drawdown5": 59.3
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "MWG",
+   "industry": "Consumer_Discretionary",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 74 dưới 75, Tăng trưởng 37 dưới 70, Chống chịu 45 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 73.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 36.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 44.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.1161,
+    "gross_margin_std5": 0.0156,
+    "ebit_margin_std5": 0.0164,
+    "cash_conversion3": 1.6448,
+    "asset_turnover": 2.02,
+    "revenue_cagr5": 0.0751,
+    "ebit_cagr5": 0.1097,
+    "cfo_cagr5": -0.108,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 0.2362,
+    "net_debt_ebitda": 2.0785,
+    "interest_coverage": 6.8701,
+    "current_ratio": 1.5206,
+    "profit_drawdown5": 0.9658
+   },
+   "percentiles": {
+    "roic_avg5": 62.3,
+    "gross_margin_std5": 79.6,
+    "ebit_margin_std5": 70.4,
+    "cash_conversion3": 73.5,
+    "asset_turnover": 88.9,
+    "revenue_cagr5": 35.8,
+    "ebit_cagr5": 43.5,
+    "cfo_cagr5": 16.2,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 26.9,
+    "net_debt_ebitda": 46.2,
+    "interest_coverage": 53.7,
+    "current_ratio": 59.3,
+    "profit_drawdown5": 18.5
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VTP",
+   "industry": "Logistics_Transport",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 73 dưới 75, Tăng trưởng 33 dưới 70, Chống chịu 51 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 73.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 33.0,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 50.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -64.3,
+    "confidence": 34.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roic_avg5": 0.1567,
+    "gross_margin_std5": 0.0106,
+    "ebit_margin_std5": 0.0045,
+    "cash_conversion3": 0.6905,
+    "asset_turnover": 2.9641,
+    "revenue_cagr5": 0.0361,
+    "ebit_cagr5": 0.0196,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 1.6138,
+    "net_debt_ebitda": 1.9299,
+    "interest_coverage": 7.9593,
+    "current_ratio": 1.0899,
+    "profit_drawdown5": 0.3328
+   },
+   "percentiles": {
+    "roic_avg5": 69.8,
+    "gross_margin_std5": 90.7,
+    "ebit_margin_std5": 92.6,
+    "cash_conversion3": 24.5,
+    "asset_turnover": 94.4,
+    "revenue_cagr5": 26.4,
+    "ebit_cagr5": 23.9,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 82.7,
+    "net_debt_ebitda": 50.0,
+    "interest_coverage": 57.4,
+    "current_ratio": 20.4,
+    "profit_drawdown5": 64.8
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "MBS",
+   "industry": "Securities",
+   "model": "SECURITIES",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 72 dưới 75, Quản trị 55 dưới 70, Chống chịu 36 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 72.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 79.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 36.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 55,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -10.2,
+    "confidence": 30.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roe_avg3": 0.133,
+    "recurring_share": 0.6448,
+    "fvtpl_equity": 0.3883,
+    "revenue_cagr5": 0.2668,
+    "npat_cagr5": 0.333,
+    "margin_loans_cagr3": 0.5875,
+    "margin_loans_equity": 1.8813,
+    "debt_equity": 2.2177,
+    "profit_drawdown5": 0.1237
+   },
+   "percentiles": {
+    "roe_avg3": 81.8,
+    "recurring_share": 72.7,
+    "fvtpl_equity": 63.6,
+    "revenue_cagr5": 72.7,
+    "npat_cagr5": 80.0,
+    "margin_loans_cagr3": 90.9,
+    "margin_loans_equity": 9.1,
+    "debt_equity": 9.1,
+    "profit_drawdown5": 100.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "BVS",
+   "industry": "Securities",
+   "model": "SECURITIES",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 69 dưới 75, Tăng trưởng 13 dưới 70, Chống chịu 50 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 68.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 13.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 50.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -6.9,
+    "confidence": 30.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roe_avg3": 0.086,
+    "recurring_share": 0.7332,
+    "fvtpl_equity": 0.2247,
+    "revenue_cagr5": 0.1416,
+    "npat_cagr5": 0.1114,
+    "margin_loans_cagr3": 0.2643,
+    "margin_loans_equity": 1.7153,
+    "debt_equity": 1.5321,
+    "profit_drawdown5": 0.4809
+   },
+   "percentiles": {
+    "roe_avg3": 27.3,
+    "recurring_share": 90.9,
+    "fvtpl_equity": 81.8,
+    "revenue_cagr5": 9.1,
+    "npat_cagr5": 10.0,
+    "margin_loans_cagr3": 27.3,
+    "margin_loans_equity": 36.4,
+    "debt_equity": 45.5,
+    "profit_drawdown5": 72.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "MCH",
+   "industry": "Consumer_Staples",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 65 dưới 75, Tăng trưởng 32 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 65.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 32.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 71.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 80,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.3317,
+    "gross_margin_std5": 0.0211,
+    "ebit_margin_std5": 0.0278,
+    "cash_conversion3": 0.8051,
+    "asset_turnover": 0.9878,
+    "revenue_cagr5": 0.0553,
+    "ebit_cagr5": 0.0778,
+    "cfo_cagr5": -0.1454,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 1.4891,
+    "net_debt_ebitda": 0.151,
+    "interest_coverage": 16.7055,
+    "current_ratio": 1.4053,
+    "profit_drawdown5": 0.146
+   },
+   "percentiles": {
+    "roic_avg5": 98.1,
+    "gross_margin_std5": 66.7,
+    "ebit_margin_std5": 55.6,
+    "cash_conversion3": 30.6,
+    "asset_turnover": 66.7,
+    "revenue_cagr5": 30.2,
+    "ebit_cagr5": 34.8,
+    "cfo_cagr5": 10.8,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 80.8,
+    "net_debt_ebitda": 78.8,
+    "interest_coverage": 68.5,
+    "current_ratio": 46.3,
+    "profit_drawdown5": 79.6
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "PNJ",
+   "industry": "Consumer_Staples",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 65 dưới 75, Tăng trưởng 43 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 65.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 42.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 76.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.1675,
+    "gross_margin_std5": 0.0164,
+    "ebit_margin_std5": 0.0131,
+    "cash_conversion3": 0.2329,
+    "asset_turnover": 1.8718,
+    "revenue_cagr5": 0.1484,
+    "ebit_cagr5": 0.1957,
+    "cfo_cagr5": -0.5829,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 0.6883,
+    "net_debt_ebitda": 0.9864,
+    "interest_coverage": 30.7931,
+    "current_ratio": 2.7078,
+    "profit_drawdown5": 0.0377
+   },
+   "percentiles": {
+    "roic_avg5": 73.6,
+    "gross_margin_std5": 77.8,
+    "ebit_margin_std5": 75.9,
+    "cash_conversion3": 14.3,
+    "asset_turnover": 87.0,
+    "revenue_cagr5": 54.7,
+    "ebit_cagr5": 65.2,
+    "cfo_cagr5": 1.4,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 53.8,
+    "net_debt_ebitda": 61.5,
+    "interest_coverage": 77.8,
+    "current_ratio": 90.7,
+    "profit_drawdown5": 88.9
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "PVT",
+   "industry": "Logistics_Transport",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 64 dưới 75, Tăng trưởng 65 dưới 70, Chống chịu 59 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 63.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 65.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 59.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "FAIR",
+    "label": "Hợp lý",
+    "upside_pct": 3.6,
+    "confidence": 68.0,
+    "method": "EV/EBITDA",
+    "reason": null
+   },
+   "metrics": {
+    "roic_avg5": 0.1121,
+    "gross_margin_std5": 0.0213,
+    "ebit_margin_std5": 0.0258,
+    "cash_conversion3": 1.8478,
+    "asset_turnover": 0.7595,
+    "revenue_cagr5": 0.1675,
+    "ebit_cagr5": 0.1205,
+    "cfo_cagr5": 0.1554,
+    "revenue_up_years5": 1.0,
+    "reinvestment_rate": 1.2387,
+    "net_debt_ebitda": 1.3411,
+    "interest_coverage": 4.7991,
+    "current_ratio": 1.8494,
+    "profit_drawdown5": 0.0958
+   },
+   "percentiles": {
+    "roic_avg5": 60.4,
+    "gross_margin_std5": 63.0,
+    "ebit_margin_std5": 59.3,
+    "cash_conversion3": 79.6,
+    "asset_turnover": 53.7,
+    "revenue_cagr5": 64.2,
+    "ebit_cagr5": 45.7,
+    "cfo_cagr5": 64.9,
+    "revenue_up_years5": 91.5,
+    "reinvestment_rate": 76.9,
+    "net_debt_ebitda": 53.8,
+    "interest_coverage": 40.7,
+    "current_ratio": 77.8,
+    "profit_drawdown5": 81.5
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "FRT",
+   "industry": "Consumer_Discretionary",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 63 dưới 75, Chống chịu 26 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 63.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 87.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 26.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 92,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 105.8,
+    "confidence": 32.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roic_avg5": 0.0687,
+    "gross_margin_std5": 0.0209,
+    "ebit_margin_std5": 0.0115,
+    "cash_conversion3": 1.4268,
+    "asset_turnover": 2.5834,
+    "revenue_cagr5": 0.2836,
+    "ebit_cagr5": 0.6245,
+    "cfo_cagr5": 0.1259,
+    "revenue_up_years5": 1.0,
+    "reinvestment_rate": 2.3561,
+    "net_debt_ebitda": 3.5725,
+    "interest_coverage": 4.1372,
+    "current_ratio": 1.173,
+    "profit_drawdown5": 1.7416
+   },
+   "percentiles": {
+    "roic_avg5": 26.4,
+    "gross_margin_std5": 68.5,
+    "ebit_margin_std5": 81.5,
+    "cash_conversion3": 65.3,
+    "asset_turnover": 90.7,
+    "revenue_cagr5": 94.3,
+    "ebit_cagr5": 97.8,
+    "cfo_cagr5": 62.2,
+    "revenue_up_years5": 91.5,
+    "reinvestment_rate": 86.5,
+    "net_debt_ebitda": 23.1,
+    "interest_coverage": 37.0,
+    "current_ratio": 33.3,
+    "profit_drawdown5": 9.3
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "SAB",
+   "industry": "Consumer_Staples",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 62 dưới 75, Tăng trưởng 16 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 62.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 16.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 88.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.2233,
+    "gross_margin_std5": 0.0258,
+    "ebit_margin_std5": 0.0155,
+    "cash_conversion3": 0.7781,
+    "asset_turnover": 0.7841,
+    "revenue_cagr5": -0.0153,
+    "ebit_cagr5": -0.0164,
+    "cfo_cagr5": -0.0114,
+    "revenue_up_years5": 0.4,
+    "reinvestment_rate": -0.7996,
+    "net_debt_ebitda": -0.5581,
+    "interest_coverage": 100.0,
+    "current_ratio": 2.4933,
+    "profit_drawdown5": 0.2263
+   },
+   "percentiles": {
+    "roic_avg5": 90.6,
+    "gross_margin_std5": 55.6,
+    "ebit_margin_std5": 72.2,
+    "cash_conversion3": 28.6,
+    "asset_turnover": 55.6,
+    "revenue_cagr5": 13.2,
+    "ebit_cagr5": 15.2,
+    "cfo_cagr5": 32.4,
+    "revenue_up_years5": 9.4,
+    "reinvestment_rate": 7.7,
+    "net_debt_ebitda": 90.4,
+    "interest_coverage": 95.4,
+    "current_ratio": 87.0,
+    "profit_drawdown5": 75.9
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "GAS",
+   "industry": "Utilities",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 61 dưới 75, Tăng trưởng 51 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 61.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 51.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 83.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 7.5,
+    "confidence": 30.0,
+    "method": "DCF FCFF",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roic_avg5": 0.1972,
+    "gross_margin_std5": 0.028,
+    "ebit_margin_std5": 0.0284,
+    "cash_conversion3": 1.0574,
+    "asset_turnover": 1.5406,
+    "revenue_cagr5": 0.1607,
+    "ebit_cagr5": 0.0766,
+    "cfo_cagr5": 0.1221,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 0.5266,
+    "net_debt_ebitda": -0.2249,
+    "interest_coverage": 67.4615,
+    "current_ratio": 3.3977,
+    "profit_drawdown5": 0.2971
+   },
+   "percentiles": {
+    "roic_avg5": 79.2,
+    "gross_margin_std5": 51.9,
+    "ebit_margin_std5": 53.7,
+    "cash_conversion3": 44.9,
+    "asset_turnover": 75.9,
+    "revenue_cagr5": 58.5,
+    "ebit_cagr5": 32.6,
+    "cfo_cagr5": 59.5,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 44.2,
+    "net_debt_ebitda": 82.7,
+    "interest_coverage": 87.0,
+    "current_ratio": 98.1,
+    "profit_drawdown5": 66.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "OIL",
+   "industry": "Oil_Gas",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 60 dưới 75, Tăng trưởng 67 dưới 70, Chống chịu 32 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 60.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 66.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 31.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.0619,
+    "gross_margin_std5": 0.0088,
+    "ebit_margin_std5": 0.0044,
+    "cash_conversion3": -0.3398,
+    "asset_turnover": 3.4474,
+    "revenue_cagr5": 0.2465,
+    "ebit_cagr5": 0.9489,
+    "cfo_cagr5": -0.0609,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": -0.1335,
+    "net_debt_ebitda": 4.0636,
+    "interest_coverage": 2.9285,
+    "current_ratio": 1.1559,
+    "profit_drawdown5": 0.3861
+   },
+   "percentiles": {
+    "roic_avg5": 22.6,
+    "gross_margin_std5": 94.4,
+    "ebit_margin_std5": 98.1,
+    "cash_conversion3": 8.2,
+    "asset_turnover": 98.1,
+    "revenue_cagr5": 90.6,
+    "ebit_cagr5": 97.8,
+    "cfo_cagr5": 21.6,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 15.4,
+    "net_debt_ebitda": 21.2,
+    "interest_coverage": 25.9,
+    "current_ratio": 29.6,
+    "profit_drawdown5": 61.1
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "BSR",
+   "industry": "Oil_Gas",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 60 dưới 75",
+   "dims": {
+    "quality": {
+     "score": 59.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 71.8,
+     "coverage": 0.75,
+     "missing": [
+      "ebit_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 65.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.1553,
+    "gross_margin_std5": 0.0316,
+    "ebit_margin_std5": 0.0294,
+    "cash_conversion3": 1.1702,
+    "asset_turnover": 1.6318,
+    "revenue_cagr5": 0.1956,
+    "ebit_cagr5": null,
+    "cfo_cagr5": 0.6539,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 1.1131,
+    "net_debt_ebitda": 0.3394,
+    "interest_coverage": 22.9436,
+    "current_ratio": 2.9546,
+    "profit_drawdown5": 0.9597
+   },
+   "percentiles": {
+    "roic_avg5": 67.9,
+    "gross_margin_std5": 48.1,
+    "ebit_margin_std5": 51.9,
+    "cash_conversion3": 53.1,
+    "asset_turnover": 79.6,
+    "revenue_cagr5": 79.2,
+    "ebit_cagr5": null,
+    "cfo_cagr5": 91.9,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 75.0,
+    "net_debt_ebitda": 73.1,
+    "interest_coverage": 72.2,
+    "current_ratio": 92.6,
+    "profit_drawdown5": 20.4
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VCI",
+   "industry": "Securities",
+   "model": "SECURITIES",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 56 dưới 75, Tăng trưởng 32 dưới 70, Quản trị 55 dưới 70, Chống chịu 55 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 56.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 31.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 55.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 55,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -27.2,
+    "confidence": 60.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD"
+   },
+   "metrics": {
+    "roe_avg3": 0.0824,
+    "recurring_share": 0.4428,
+    "fvtpl_equity": 0.1243,
+    "revenue_cagr5": 0.2356,
+    "npat_cagr5": 0.1178,
+    "margin_loans_cagr3": 0.4522,
+    "margin_loans_equity": 0.8977,
+    "debt_equity": 0.892,
+    "profit_drawdown5": 0.6718
+   },
+   "percentiles": {
+    "roe_avg3": 18.2,
+    "recurring_share": 54.5,
+    "fvtpl_equity": 90.9,
+    "revenue_cagr5": 36.4,
+    "npat_cagr5": 20.0,
+    "margin_loans_cagr3": 45.5,
+    "margin_loans_equity": 63.6,
+    "debt_equity": 63.6,
+    "profit_drawdown5": 36.4
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "PC1",
+   "industry": "Construction",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 54 dưới 75, Tăng trưởng 57 dưới 70, Chống chịu 36 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 53.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 57.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 36.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.0743,
+    "gross_margin_std5": 0.0334,
+    "ebit_margin_std5": 0.0155,
+    "cash_conversion3": 1.9638,
+    "asset_turnover": 0.5745,
+    "revenue_cagr5": 0.144,
+    "ebit_cagr5": 0.2017,
+    "cfo_cagr5": 0.2915,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 0.5431,
+    "net_debt_ebitda": 2.5279,
+    "interest_coverage": 3.2853,
+    "current_ratio": 1.4509,
+    "profit_drawdown5": 0.7624
+   },
+   "percentiles": {
+    "roic_avg5": 32.1,
+    "gross_margin_std5": 46.3,
+    "ebit_margin_std5": 74.1,
+    "cash_conversion3": 81.6,
+    "asset_turnover": 35.2,
+    "revenue_cagr5": 50.9,
+    "ebit_cagr5": 69.6,
+    "cfo_cagr5": 78.4,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 48.1,
+    "net_debt_ebitda": 38.5,
+    "interest_coverage": 27.8,
+    "current_ratio": 50.0,
+    "profit_drawdown5": 35.2
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "MSN",
+   "industry": "Diversified_Holding",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 53 dưới 75, Tăng trưởng 32 dưới 70, Chống chịu 26 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 53.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 32.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 25.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.1101,
+    "gross_margin_std5": 0.0212,
+    "ebit_margin_std5": 0.0218,
+    "cash_conversion3": 0.883,
+    "asset_turnover": 0.5903,
+    "revenue_cagr5": 0.0112,
+    "ebit_cagr5": 0.169,
+    "cfo_cagr5": 0.0027,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": -0.0405,
+    "net_debt_ebitda": 3.1536,
+    "interest_coverage": 2.4559,
+    "current_ratio": 0.9001,
+    "profit_drawdown5": 0.8149
+   },
+   "percentiles": {
+    "roic_avg5": 58.5,
+    "gross_margin_std5": 64.8,
+    "ebit_margin_std5": 64.8,
+    "cash_conversion3": 36.7,
+    "asset_turnover": 37.0,
+    "revenue_cagr5": 18.9,
+    "ebit_cagr5": 54.3,
+    "cfo_cagr5": 35.1,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 17.3,
+    "net_debt_ebitda": 30.8,
+    "interest_coverage": 24.1,
+    "current_ratio": 11.1,
+    "profit_drawdown5": 29.6
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VGI",
+   "industry": "Telecom",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 53 dưới 75",
+   "dims": {
+    "quality": {
+     "score": 53.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 75.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 84.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.2082,
+    "gross_margin_std5": 0.0537,
+    "ebit_margin_std5": 0.1055,
+    "cash_conversion3": 2.2952,
+    "asset_turnover": 0.6109,
+    "revenue_cagr5": 0.1848,
+    "ebit_cagr5": 0.5039,
+    "cfo_cagr5": 0.2139,
+    "revenue_up_years5": 1.0,
+    "reinvestment_rate": 0.1962,
+    "net_debt_ebitda": -0.6953,
+    "interest_coverage": 46.7161,
+    "current_ratio": 1.7852,
+    "profit_drawdown5": 0.191
+   },
+   "percentiles": {
+    "roic_avg5": 84.9,
+    "gross_margin_std5": 25.9,
+    "ebit_margin_std5": 14.8,
+    "cash_conversion3": 89.8,
+    "asset_turnover": 38.9,
+    "revenue_cagr5": 71.7,
+    "ebit_cagr5": 91.3,
+    "cfo_cagr5": 73.0,
+    "revenue_up_years5": 91.5,
+    "reinvestment_rate": 25.0,
+    "net_debt_ebitda": 92.3,
+    "interest_coverage": 85.2,
+    "current_ratio": 74.1,
+    "profit_drawdown5": 77.8
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "GEX",
+   "industry": "Diversified_Holding",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 53 dưới 75, Tăng trưởng 68 dưới 70, Chống chịu 49 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 52.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 67.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 49.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.0806,
+    "gross_margin_std5": 0.0208,
+    "ebit_margin_std5": 0.0205,
+    "cash_conversion3": 1.1529,
+    "asset_turnover": 0.6204,
+    "revenue_cagr5": 0.171,
+    "ebit_cagr5": 0.2427,
+    "cfo_cagr5": 0.0791,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 3.0905,
+    "net_debt_ebitda": 2.2278,
+    "interest_coverage": 4.8575,
+    "current_ratio": 1.8084,
+    "profit_drawdown5": 0.4816
+   },
+   "percentiles": {
+    "roic_avg5": 35.8,
+    "gross_margin_std5": 70.4,
+    "ebit_margin_std5": 66.7,
+    "cash_conversion3": 51.0,
+    "asset_turnover": 40.7,
+    "revenue_cagr5": 67.9,
+    "ebit_cagr5": 78.3,
+    "cfo_cagr5": 45.9,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 90.4,
+    "net_debt_ebitda": 42.3,
+    "interest_coverage": 42.6,
+    "current_ratio": 75.9,
+    "profit_drawdown5": 51.9
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VIX",
+   "industry": "Securities",
+   "model": "SECURITIES",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 52 dưới 75, Quản trị 55 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 52.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 100.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 73.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 55,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roe_avg3": 0.1526,
+    "recurring_share": 0.1551,
+    "fvtpl_equity": 0.6777,
+    "revenue_cagr5": 0.6305,
+    "npat_cagr5": 0.7513,
+    "margin_loans_cagr3": 1.0467,
+    "margin_loans_equity": 0.7169,
+    "debt_equity": 0.5282,
+    "profit_drawdown5": 0.576
+   },
+   "percentiles": {
+    "roe_avg3": 100.0,
+    "recurring_share": 18.2,
+    "fvtpl_equity": 45.5,
+    "revenue_cagr5": 100.0,
+    "npat_cagr5": 100.0,
+    "margin_loans_cagr3": 100.0,
+    "margin_loans_equity": 81.8,
+    "debt_equity": 81.8,
+    "profit_drawdown5": 54.5
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "SBT",
+   "industry": "Consumer_Staples",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 51 dưới 75, Tăng trưởng 49 dưới 70, Chống chịu 28 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 50.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 48.8,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 28.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.084,
+    "gross_margin_std5": 0.0172,
+    "ebit_margin_std5": 0.0087,
+    "cash_conversion3": -0.5758,
+    "asset_turnover": 0.7509,
+    "revenue_cagr5": 0.1288,
+    "ebit_cagr5": 0.0984,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 0.7039,
+    "net_debt_ebitda": 5.5586,
+    "interest_coverage": 1.567,
+    "current_ratio": 1.2251,
+    "profit_drawdown5": 0.2391
+   },
+   "percentiles": {
+    "roic_avg5": 39.6,
+    "gross_margin_std5": 75.9,
+    "ebit_margin_std5": 83.3,
+    "cash_conversion3": 6.1,
+    "asset_turnover": 51.9,
+    "revenue_cagr5": 47.2,
+    "ebit_cagr5": 39.1,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 57.7,
+    "net_debt_ebitda": 15.4,
+    "interest_coverage": 11.1,
+    "current_ratio": 35.2,
+    "profit_drawdown5": 70.4
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VSC",
+   "industry": "Logistics_Transport",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 50 dưới 75, Tăng trưởng 63 dưới 70, Chống chịu 34 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 50.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 62.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 34.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 80,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -52.6,
+    "confidence": 36.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roic_avg5": 0.1065,
+    "gross_margin_std5": 0.0203,
+    "ebit_margin_std5": 0.0317,
+    "cash_conversion3": 1.1075,
+    "asset_turnover": 0.3088,
+    "revenue_cagr5": 0.1367,
+    "ebit_cagr5": 0.2325,
+    "cfo_cagr5": 0.0346,
+    "revenue_up_years5": 1.0,
+    "reinvestment_rate": 0.7567,
+    "net_debt_ebitda": 3.3313,
+    "interest_coverage": 3.4838,
+    "current_ratio": 1.327,
+    "profit_drawdown5": 0.519
+   },
+   "percentiles": {
+    "roic_avg5": 56.6,
+    "gross_margin_std5": 72.2,
+    "ebit_margin_std5": 48.1,
+    "cash_conversion3": 49.0,
+    "asset_turnover": 14.8,
+    "revenue_cagr5": 49.1,
+    "ebit_cagr5": 76.1,
+    "cfo_cagr5": 43.2,
+    "revenue_up_years5": 91.5,
+    "reinvestment_rate": 67.3,
+    "net_debt_ebitda": 26.9,
+    "interest_coverage": 33.3,
+    "current_ratio": 38.9,
+    "profit_drawdown5": 46.3
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "HSG",
+   "industry": "Steel_Metals",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 50 dưới 75, Tăng trưởng 19 dưới 70, Chống chịu 35 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 49.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 18.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 34.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 174.6,
+    "confidence": 34.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roic_avg5": 0.0709,
+    "gross_margin_std5": 0.0304,
+    "ebit_margin_std5": 0.0368,
+    "cash_conversion3": 1.2321,
+    "asset_turnover": 1.6985,
+    "revenue_cagr5": 0.0292,
+    "ebit_cagr5": -0.1711,
+    "cfo_cagr5": 0.0325,
+    "revenue_up_years5": 0.4,
+    "reinvestment_rate": -0.1489,
+    "net_debt_ebitda": 2.8998,
+    "interest_coverage": 4.8677,
+    "current_ratio": 1.3922,
+    "profit_drawdown5": 1.2439
+   },
+   "percentiles": {
+    "roic_avg5": 28.3,
+    "gross_margin_std5": 50.0,
+    "ebit_margin_std5": 44.4,
+    "cash_conversion3": 57.1,
+    "asset_turnover": 81.5,
+    "revenue_cagr5": 24.5,
+    "ebit_cagr5": 2.2,
+    "cfo_cagr5": 40.5,
+    "revenue_up_years5": 9.4,
+    "reinvestment_rate": 13.5,
+    "net_debt_ebitda": 34.6,
+    "interest_coverage": 44.4,
+    "current_ratio": 42.6,
+    "profit_drawdown5": 14.8
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "DGC",
+   "industry": "Chemicals",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 49 dưới 75, Tăng trưởng 60 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 49.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 60.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 79.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.285,
+    "gross_margin_std5": 0.054,
+    "ebit_margin_std5": 0.0545,
+    "cash_conversion3": 0.8149,
+    "asset_turnover": 0.637,
+    "revenue_cagr5": 0.1255,
+    "ebit_cagr5": 0.2872,
+    "cfo_cagr5": 0.115,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 0.5722,
+    "net_debt_ebitda": 0.1289,
+    "interest_coverage": 88.5214,
+    "current_ratio": 3.9304,
+    "profit_drawdown5": 0.4853
+   },
+   "percentiles": {
+    "roic_avg5": 98.1,
+    "gross_margin_std5": 24.1,
+    "ebit_margin_std5": 31.5,
+    "cash_conversion3": 32.7,
+    "asset_turnover": 46.3,
+    "revenue_cagr5": 45.3,
+    "ebit_cagr5": 84.8,
+    "cfo_cagr5": 56.8,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 50.0,
+    "net_debt_ebitda": 80.8,
+    "interest_coverage": 88.9,
+    "current_ratio": 98.1,
+    "profit_drawdown5": 50.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "HCM",
+   "industry": "Securities",
+   "model": "SECURITIES",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 49 dưới 75, Tăng trưởng 42 dưới 70, Quản trị 55 dưới 70, Chống chịu 31 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 48.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 41.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 30.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 55,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -43.5,
+    "confidence": 60.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho STRONG SELL, đã hạ về HOLD"
+   },
+   "metrics": {
+    "roe_avg3": 0.0961,
+    "recurring_share": 0.6978,
+    "fvtpl_equity": 0.9466,
+    "revenue_cagr5": 0.1797,
+    "npat_cagr5": 0.1731,
+    "margin_loans_cagr3": 0.5625,
+    "margin_loans_equity": 1.9356,
+    "debt_equity": 2.124,
+    "profit_drawdown5": 0.4121
+   },
+   "percentiles": {
+    "roe_avg3": 45.5,
+    "recurring_share": 81.8,
+    "fvtpl_equity": 18.2,
+    "revenue_cagr5": 27.3,
+    "npat_cagr5": 40.0,
+    "margin_loans_cagr3": 72.7,
+    "margin_loans_equity": 0.0,
+    "debt_equity": 18.2,
+    "profit_drawdown5": 81.8
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "HAH",
+   "industry": "Logistics_Transport",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 48 dưới 75, Chống chịu 54 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 47.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 84.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 54.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 48.8,
+    "confidence": 32.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roic_avg5": 0.1999,
+    "gross_margin_std5": 0.0705,
+    "ebit_margin_std5": 0.0761,
+    "cash_conversion3": 1.6219,
+    "asset_turnover": 0.6363,
+    "revenue_cagr5": 0.337,
+    "ebit_cagr5": 0.5714,
+    "cfo_cagr5": 0.4553,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 0.3911,
+    "net_debt_ebitda": 0.6821,
+    "interest_coverage": 14.1209,
+    "current_ratio": 1.0329,
+    "profit_drawdown5": 0.6562
+   },
+   "percentiles": {
+    "roic_avg5": 81.1,
+    "gross_margin_std5": 14.8,
+    "ebit_margin_std5": 18.5,
+    "cash_conversion3": 71.4,
+    "asset_turnover": 44.4,
+    "revenue_cagr5": 98.1,
+    "ebit_cagr5": 97.8,
+    "cfo_cagr5": 86.5,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 38.5,
+    "net_debt_ebitda": 67.3,
+    "interest_coverage": 66.7,
+    "current_ratio": 16.7,
+    "profit_drawdown5": 40.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "POW",
+   "industry": "Utilities",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 48 dưới 75, Tăng trưởng 32 dưới 70, Chống chịu 38 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 47.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 31.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 38.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 31.2,
+    "confidence": 31.0,
+    "method": "DCF FCFF",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roic_avg5": 0.0548,
+    "gross_margin_std5": 0.0245,
+    "ebit_margin_std5": 0.025,
+    "cash_conversion3": 1.7796,
+    "asset_turnover": 0.4071,
+    "revenue_cagr5": 0.029,
+    "ebit_cagr5": 0.0109,
+    "cfo_cagr5": -0.2343,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 3.5973,
+    "net_debt_ebitda": 3.2821,
+    "interest_coverage": 5.9347,
+    "current_ratio": 1.1707,
+    "profit_drawdown5": 0.5451
+   },
+   "percentiles": {
+    "roic_avg5": 20.8,
+    "gross_margin_std5": 57.4,
+    "ebit_margin_std5": 61.1,
+    "cash_conversion3": 75.5,
+    "asset_turnover": 24.1,
+    "revenue_cagr5": 22.6,
+    "ebit_cagr5": 19.6,
+    "cfo_cagr5": 8.1,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 92.3,
+    "net_debt_ebitda": 28.8,
+    "interest_coverage": 48.1,
+    "current_ratio": 31.5,
+    "profit_drawdown5": 44.4
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "NAF",
+   "industry": "Consumer_Staples",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 47 dưới 75, Tăng trưởng 50 dưới 70, Chống chịu 41 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 46.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 50.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 40.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "EXPENSIVE",
+    "label": "Đắt",
+    "upside_pct": -19.0,
+    "confidence": 57.0,
+    "method": "P/E Multiple",
+    "reason": null
+   },
+   "metrics": {
+    "roic_avg5": 0.0807,
+    "gross_margin_std5": 0.0376,
+    "ebit_margin_std5": 0.0249,
+    "cash_conversion3": 0.8684,
+    "asset_turnover": 0.9484,
+    "revenue_cagr5": 0.114,
+    "ebit_cagr5": 0.1812,
+    "cfo_cagr5": 0.1803,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 0.4363,
+    "net_debt_ebitda": 3.5152,
+    "interest_coverage": 3.4117,
+    "current_ratio": 1.1159,
+    "profit_drawdown5": 0.0
+   },
+   "percentiles": {
+    "roic_avg5": 37.7,
+    "gross_margin_std5": 40.7,
+    "ebit_margin_std5": 63.0,
+    "cash_conversion3": 34.7,
+    "asset_turnover": 63.0,
+    "revenue_cagr5": 41.5,
+    "ebit_cagr5": 63.0,
+    "cfo_cagr5": 67.6,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 42.3,
+    "net_debt_ebitda": 25.0,
+    "interest_coverage": 31.5,
+    "current_ratio": 24.1,
+    "profit_drawdown5": 95.4
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VCG",
+   "industry": "Construction",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 46 dưới 75, Chống chịu 56 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 46.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 75.0,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 56.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.101,
+    "gross_margin_std5": 0.0233,
+    "ebit_margin_std5": 0.0749,
+    "cash_conversion3": 1.5146,
+    "asset_turnover": 0.5294,
+    "revenue_cagr5": 0.2369,
+    "ebit_cagr5": 0.1713,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 1.0,
+    "reinvestment_rate": 0.7165,
+    "net_debt_ebitda": 0.9112,
+    "interest_coverage": 13.9574,
+    "current_ratio": 1.4642,
+    "profit_drawdown5": 0.7655
+   },
+   "percentiles": {
+    "roic_avg5": 49.1,
+    "gross_margin_std5": 59.3,
+    "ebit_margin_std5": 20.4,
+    "cash_conversion3": 67.3,
+    "asset_turnover": 29.6,
+    "revenue_cagr5": 84.9,
+    "ebit_cagr5": 58.7,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 91.5,
+    "reinvestment_rate": 61.5,
+    "net_debt_ebitda": 63.5,
+    "interest_coverage": 64.8,
+    "current_ratio": 53.7,
+    "profit_drawdown5": 33.3
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "CMP",
+   "industry": "Logistics_Transport",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 46 dưới 75, Tăng trưởng 63 dưới 70, Chống chịu 43 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 45.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 63.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 42.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "FAIR",
+    "label": "Hợp lý",
+    "upside_pct": 12.4,
+    "confidence": 56.0,
+    "method": "EV/EBITDA",
+    "reason": null
+   },
+   "metrics": {
+    "roic_avg5": 0.0397,
+    "gross_margin_std5": 0.034,
+    "ebit_margin_std5": 0.0335,
+    "cash_conversion3": 4.2017,
+    "asset_turnover": 0.473,
+    "revenue_cagr5": 0.1897,
+    "ebit_cagr5": 0.2148,
+    "cfo_cagr5": 0.0799,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 0.0521,
+    "net_debt_ebitda": 0.8502,
+    "interest_coverage": 3.3868,
+    "current_ratio": 1.4893,
+    "profit_drawdown5": 1.6828
+   },
+   "percentiles": {
+    "roic_avg5": 15.1,
+    "gross_margin_std5": 44.4,
+    "ebit_margin_std5": 46.3,
+    "cash_conversion3": 98.0,
+    "asset_turnover": 27.8,
+    "revenue_cagr5": 77.4,
+    "ebit_cagr5": 73.9,
+    "cfo_cagr5": 48.6,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 23.1,
+    "net_debt_ebitda": 65.4,
+    "interest_coverage": 29.6,
+    "current_ratio": 57.4,
+    "profit_drawdown5": 11.1
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "HDG",
+   "industry": "Utilities",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 46 dưới 75, Tăng trưởng 13 dưới 70, Chống chịu 44 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 45.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 12.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 43.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 103.8,
+    "confidence": 30.0,
+    "method": "DCF FCFF",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roic_avg5": 0.1021,
+    "gross_margin_std5": 0.015,
+    "ebit_margin_std5": 0.0841,
+    "cash_conversion3": 1.3383,
+    "asset_turnover": 0.1953,
+    "revenue_cagr5": -0.1103,
+    "ebit_cagr5": -0.0635,
+    "cfo_cagr5": -0.027,
+    "revenue_up_years5": 0.2,
+    "reinvestment_rate": -0.0352,
+    "net_debt_ebitda": 2.3392,
+    "interest_coverage": 4.5708,
+    "current_ratio": 1.6569,
+    "profit_drawdown5": 0.6716
+   },
+   "percentiles": {
+    "roic_avg5": 50.9,
+    "gross_margin_std5": 81.5,
+    "ebit_margin_std5": 16.7,
+    "cash_conversion3": 61.2,
+    "asset_turnover": 7.4,
+    "revenue_cagr5": 7.5,
+    "ebit_cagr5": 8.7,
+    "cfo_cagr5": 29.7,
+    "revenue_up_years5": 1.9,
+    "reinvestment_rate": 19.2,
+    "net_debt_ebitda": 40.4,
+    "interest_coverage": 38.9,
+    "current_ratio": 68.5,
+    "profit_drawdown5": 38.9
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "DCM",
+   "industry": "Chemicals",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 44 dưới 75, Tăng trưởng 66 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 43.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 66.1,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 74.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "ATTRACTIVE",
+    "label": "Hấp dẫn",
+    "upside_pct": 48.5,
+    "confidence": 57.0,
+    "method": "EV/EBITDA",
+    "reason": null
+   },
+   "metrics": {
+    "roic_avg5": 0.2159,
+    "gross_margin_std5": 0.07,
+    "ebit_margin_std5": 0.0691,
+    "cash_conversion3": 0.3588,
+    "asset_turnover": 0.9967,
+    "revenue_cagr5": 0.1708,
+    "ebit_cagr5": 0.2455,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 0.3426,
+    "net_debt_ebitda": -0.4992,
+    "interest_coverage": 32.3533,
+    "current_ratio": 2.4341,
+    "profit_drawdown5": 0.7431
+   },
+   "percentiles": {
+    "roic_avg5": 86.8,
+    "gross_margin_std5": 16.7,
+    "ebit_margin_std5": 22.2,
+    "cash_conversion3": 18.4,
+    "asset_turnover": 70.4,
+    "revenue_cagr5": 66.0,
+    "ebit_cagr5": 80.4,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 36.5,
+    "net_debt_ebitda": 86.5,
+    "interest_coverage": 79.6,
+    "current_ratio": 85.2,
+    "profit_drawdown5": 37.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "GVR",
+   "industry": "Chemicals",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 44 dưới 75, Tăng trưởng 32 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 43.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 32.0,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 80.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.0871,
+    "gross_margin_std5": 0.0265,
+    "ebit_margin_std5": 0.0192,
+    "cash_conversion3": 0.7492,
+    "asset_turnover": 0.3428,
+    "revenue_cagr5": 0.0661,
+    "ebit_cagr5": 0.0206,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 0.6708,
+    "net_debt_ebitda": -0.5037,
+    "interest_coverage": 30.5257,
+    "current_ratio": 3.0075,
+    "profit_drawdown5": 0.3684
+   },
+   "percentiles": {
+    "roic_avg5": 43.4,
+    "gross_margin_std5": 53.7,
+    "ebit_margin_std5": 68.5,
+    "cash_conversion3": 26.5,
+    "asset_turnover": 20.4,
+    "revenue_cagr5": 32.1,
+    "ebit_cagr5": 26.1,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 51.9,
+    "net_debt_ebitda": 88.5,
+    "interest_coverage": 75.9,
+    "current_ratio": 94.4,
+    "profit_drawdown5": 63.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "SSI",
+   "industry": "Securities",
+   "model": "SECURITIES",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 41 dưới 75, Tăng trưởng 59 dưới 70, Quản trị 67 dưới 70, Chống chịu 56 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 41.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 58.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 55.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 67,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -33.1,
+    "confidence": 30.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roe_avg3": 0.1179,
+    "recurring_share": 0.4568,
+    "fvtpl_equity": 1.1931,
+    "revenue_cagr5": 0.2425,
+    "npat_cagr5": 0.2674,
+    "margin_loans_cagr3": 0.5214,
+    "margin_loans_equity": 1.2144,
+    "debt_equity": 1.8761,
+    "profit_drawdown5": 0.3701
+   },
+   "percentiles": {
+    "roe_avg3": 63.6,
+    "recurring_share": 63.6,
+    "fvtpl_equity": 0.0,
+    "revenue_cagr5": 45.5,
+    "npat_cagr5": 70.0,
+    "margin_loans_cagr3": 63.6,
+    "margin_loans_equity": 45.5,
+    "debt_equity": 36.4,
+    "profit_drawdown5": 90.9
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "HPG",
+   "industry": "Steel_Metals",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 38 dưới 75, Tăng trưởng 42 dưới 70, Chống chịu 38 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 38.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 41.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 38.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -20.3,
+    "confidence": 33.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roic_avg5": 0.1056,
+    "gross_margin_std5": 0.0603,
+    "ebit_margin_std5": 0.0639,
+    "cash_conversion3": 0.95,
+    "asset_turnover": 0.6473,
+    "revenue_cagr5": 0.1162,
+    "ebit_cagr5": 0.0381,
+    "cfo_cagr5": 0.0843,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 0.9041,
+    "net_debt_ebitda": 2.8311,
+    "interest_coverage": 6.7918,
+    "current_ratio": 1.1006,
+    "profit_drawdown5": 0.803
+   },
+   "percentiles": {
+    "roic_avg5": 54.7,
+    "gross_margin_std5": 20.4,
+    "ebit_margin_std5": 24.1,
+    "cash_conversion3": 40.8,
+    "asset_turnover": 48.1,
+    "revenue_cagr5": 43.4,
+    "ebit_cagr5": 28.3,
+    "cfo_cagr5": 51.4,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 71.2,
+    "net_debt_ebitda": 36.5,
+    "interest_coverage": 51.9,
+    "current_ratio": 22.2,
+    "profit_drawdown5": 31.5
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "DBC",
+   "industry": "Agriculture_Livestock",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 38 dưới 75, Tăng trưởng 36 dưới 70, Chống chịu 43 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 37.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 36.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 42.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 80,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 45.2,
+    "confidence": 32.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roic_avg5": 0.0717,
+    "gross_margin_std5": 0.0393,
+    "ebit_margin_std5": 0.0408,
+    "cash_conversion3": 0.6306,
+    "asset_turnover": 0.9899,
+    "revenue_cagr5": 0.0825,
+    "ebit_cagr5": 0.0022,
+    "cfo_cagr5": -0.0984,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 1.0698,
+    "net_debt_ebitda": 2.1453,
+    "interest_coverage": 7.2176,
+    "current_ratio": 1.4218,
+    "profit_drawdown5": 0.9963
+   },
+   "percentiles": {
+    "roic_avg5": 30.2,
+    "gross_margin_std5": 37.0,
+    "ebit_margin_std5": 40.7,
+    "cash_conversion3": 22.4,
+    "asset_turnover": 68.5,
+    "revenue_cagr5": 37.7,
+    "ebit_cagr5": 17.4,
+    "cfo_cagr5": 18.9,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 73.1,
+    "net_debt_ebitda": 44.2,
+    "interest_coverage": 55.6,
+    "current_ratio": 48.1,
+    "profit_drawdown5": 16.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "HHV",
+   "industry": "Construction",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 37 dưới 75, Chống chịu 26 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 36.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 78.1,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 26.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 80,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.033,
+    "gross_margin_std5": 0.0402,
+    "ebit_margin_std5": 0.0299,
+    "cash_conversion3": 2.1991,
+    "asset_turnover": 0.0954,
+    "revenue_cagr5": 0.2591,
+    "ebit_cagr5": 0.206,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 1.0,
+    "reinvestment_rate": 0.2538,
+    "net_debt_ebitda": 8.4731,
+    "interest_coverage": 1.8543,
+    "current_ratio": 0.5229,
+    "profit_drawdown5": 0.0
+   },
+   "percentiles": {
+    "roic_avg5": 9.4,
+    "gross_margin_std5": 35.2,
+    "ebit_margin_std5": 50.0,
+    "cash_conversion3": 85.7,
+    "asset_turnover": 1.9,
+    "revenue_cagr5": 92.5,
+    "ebit_cagr5": 71.7,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 91.5,
+    "reinvestment_rate": 30.8,
+    "net_debt_ebitda": 1.9,
+    "interest_coverage": 20.4,
+    "current_ratio": 1.9,
+    "profit_drawdown5": 95.4
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VND",
+   "industry": "Securities",
+   "model": "SECURITIES",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 36 dưới 75, Tăng trưởng 53 dưới 70, Quản trị 67 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 35.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 53.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 70.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 67,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -17.0,
+    "confidence": 60.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá"
+   },
+   "metrics": {
+    "roe_avg3": 0.1083,
+    "recurring_share": 0.3562,
+    "fvtpl_equity": 1.0782,
+    "revenue_cagr5": 0.2548,
+    "npat_cagr5": 0.2389,
+    "margin_loans_cagr3": 0.1648,
+    "margin_loans_equity": 0.685,
+    "debt_equity": 1.266,
+    "profit_drawdown5": 0.4879
+   },
+   "percentiles": {
+    "roe_avg3": 54.5,
+    "recurring_share": 45.5,
+    "fvtpl_equity": 9.1,
+    "revenue_cagr5": 63.6,
+    "npat_cagr5": 60.0,
+    "margin_loans_cagr3": 18.2,
+    "margin_loans_equity": 90.9,
+    "debt_equity": 54.5,
+    "profit_drawdown5": 63.6
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "DPM",
+   "industry": "Chemicals",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 35 dưới 75, Tăng trưởng 45 dưới 70, Chống chịu 54 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 35.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 44.6,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 54.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.1889,
+    "gross_margin_std5": 0.1251,
+    "ebit_margin_std5": 0.1314,
+    "cash_conversion3": 0.0512,
+    "asset_turnover": 0.965,
+    "revenue_cagr5": 0.1637,
+    "ebit_cagr5": 0.098,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 0.3319,
+    "net_debt_ebitda": 1.5886,
+    "interest_coverage": 10.5241,
+    "current_ratio": 2.4068,
+    "profit_drawdown5": 0.9051
+   },
+   "percentiles": {
+    "roic_avg5": 77.4,
+    "gross_margin_std5": 7.4,
+    "ebit_margin_std5": 11.1,
+    "cash_conversion3": 12.2,
+    "asset_turnover": 64.8,
+    "revenue_cagr5": 62.3,
+    "ebit_cagr5": 37.0,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 34.6,
+    "net_debt_ebitda": 51.9,
+    "interest_coverage": 61.1,
+    "current_ratio": 83.3,
+    "profit_drawdown5": 25.9
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "SHS",
+   "industry": "Securities",
+   "model": "SECURITIES",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 33 dưới 75, Tăng trưởng 36 dưới 70, Chống chịu 54 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 33.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 35.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 53.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roe_avg3": 0.0881,
+    "recurring_share": 0.3105,
+    "fvtpl_equity": 0.896,
+    "revenue_cagr5": 0.1524,
+    "npat_cagr5": 0.1223,
+    "margin_loans_cagr3": 0.5689,
+    "margin_loans_equity": 0.7219,
+    "debt_equity": 0.6523,
+    "profit_drawdown5": 0.8838
+   },
+   "percentiles": {
+    "roe_avg3": 36.4,
+    "recurring_share": 36.4,
+    "fvtpl_equity": 27.3,
+    "revenue_cagr5": 18.2,
+    "npat_cagr5": 30.0,
+    "margin_loans_cagr3": 81.8,
+    "margin_loans_equity": 72.7,
+    "debt_equity": 72.7,
+    "profit_drawdown5": 9.1
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "PVD",
+   "industry": "Oil_Gas",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 33 dưới 75, Chống chịu 48 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 33.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 74.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 47.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -21.2,
+    "confidence": 68.0,
+    "method": "EV/EBITDA",
+    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho SELL, đã hạ về HOLD"
+   },
+   "metrics": {
+    "roic_avg5": 0.035,
+    "gross_margin_std5": 0.0517,
+    "ebit_margin_std5": 0.06,
+    "cash_conversion3": 1.7796,
+    "asset_turnover": 0.4197,
+    "revenue_cagr5": 0.1582,
+    "ebit_cagr5": 0.3736,
+    "cfo_cagr5": 0.5421,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 1.2435,
+    "net_debt_ebitda": 1.0621,
+    "interest_coverage": 8.2658,
+    "current_ratio": 1.4589,
+    "profit_drawdown5": 1.8424
+   },
+   "percentiles": {
+    "roic_avg5": 11.3,
+    "gross_margin_std5": 27.8,
+    "ebit_margin_std5": 25.9,
+    "cash_conversion3": 77.6,
+    "asset_turnover": 25.9,
+    "revenue_cagr5": 56.6,
+    "ebit_cagr5": 89.1,
+    "cfo_cagr5": 89.2,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 78.8,
+    "net_debt_ebitda": 59.6,
+    "interest_coverage": 59.3,
+    "current_ratio": 51.9,
+    "profit_drawdown5": 7.4
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "GMD",
+   "industry": "Logistics_Transport",
+   "model": "NON_FINANCIAL",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 32 dưới 75",
+   "dims": {
+    "quality": {
+     "score": 32.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 70.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 75.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 80,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -34.8,
+    "confidence": 35.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roic_avg5": 0.1526,
+    "gross_margin_std5": 0.0391,
+    "ebit_margin_std5": 0.195,
+    "cash_conversion3": 0.5423,
+    "asset_turnover": 0.3149,
+    "revenue_cagr5": 0.1798,
+    "ebit_cagr5": 0.3192,
+    "cfo_cagr5": 0.2673,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 0.2619,
+    "net_debt_ebitda": 0.2515,
+    "interest_coverage": 23.3913,
+    "current_ratio": 2.6494,
+    "profit_drawdown5": 0.2409
+   },
+   "percentiles": {
+    "roic_avg5": 66.0,
+    "gross_margin_std5": 38.9,
+    "ebit_margin_std5": 7.4,
+    "cash_conversion3": 20.4,
+    "asset_turnover": 16.7,
+    "revenue_cagr5": 69.8,
+    "ebit_cagr5": 87.0,
+    "cfo_cagr5": 75.7,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 32.7,
+    "net_debt_ebitda": 75.0,
+    "interest_coverage": 74.1,
+    "current_ratio": 88.9,
+    "profit_drawdown5": 68.5
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "ORS",
+   "industry": "Securities",
+   "model": "SECURITIES",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 31 dưới 75, Tăng trưởng 38 dưới 70, Quản trị 55 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 31.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 38.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 75.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 55,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roe_avg3": 0.0774,
+    "recurring_share": 0.1513,
+    "fvtpl_equity": 0.2705,
+    "revenue_cagr5": 0.3063,
+    "npat_cagr5": 0.0583,
+    "margin_loans_cagr3": 0.1384,
+    "margin_loans_equity": 0.1912,
+    "debt_equity": 0.2679,
+    "profit_drawdown5": 0.6874
+   },
+   "percentiles": {
+    "roe_avg3": 9.1,
+    "recurring_share": 9.1,
+    "fvtpl_equity": 72.7,
+    "revenue_cagr5": 90.9,
+    "npat_cagr5": 0.0,
+    "margin_loans_cagr3": 9.1,
+    "margin_loans_equity": 100.0,
+    "debt_equity": 90.9,
+    "profit_drawdown5": 27.3
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VTZ",
+   "industry": "Chemicals",
+   "model": "NON_FINANCIAL",
+   "status": "REV",
+   "status_label": "Cần xem lại",
+   "reason": "Chống chịu 18 dưới 25",
+   "dims": {
+    "quality": {
+     "score": 53.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 83.4,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 18.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 55,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.0627,
+    "gross_margin_std5": 0.0114,
+    "ebit_margin_std5": 0.0054,
+    "cash_conversion3": -8.4799,
+    "asset_turnover": 1.7309,
+    "revenue_cagr5": 0.6032,
+    "ebit_cagr5": 0.5629,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 1.0,
+    "reinvestment_rate": -1.6105,
+    "net_debt_ebitda": 8.9756,
+    "interest_coverage": 1.581,
+    "current_ratio": 1.131,
+    "profit_drawdown5": 0.5087
+   },
+   "percentiles": {
+    "roic_avg5": 24.5,
+    "gross_margin_std5": 85.2,
+    "ebit_margin_std5": 88.9,
+    "cash_conversion3": 2.0,
+    "asset_turnover": 83.3,
+    "revenue_cagr5": 98.1,
+    "ebit_cagr5": 93.5,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 91.5,
+    "reinvestment_rate": 1.9,
+    "net_debt_ebitda": 1.9,
+    "interest_coverage": 13.0,
+    "current_ratio": 27.8,
+    "profit_drawdown5": 48.1
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "CTS",
+   "industry": "Securities",
+   "model": "SECURITIES",
+   "status": "REV",
+   "status_label": "Cần xem lại",
+   "reason": "Chống chịu 15 dưới 25",
+   "dims": {
+    "quality": {
+     "score": 49.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 79.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 15.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roe_avg3": 0.1434,
+    "recurring_share": 0.2934,
+    "fvtpl_equity": 0.7241,
+    "revenue_cagr5": 0.2804,
+    "npat_cagr5": 0.3512,
+    "margin_loans_cagr3": 0.4869,
+    "margin_loans_equity": 1.7385,
+    "debt_equity": 2.9498,
+    "profit_drawdown5": 0.8161
+   },
+   "percentiles": {
+    "roe_avg3": 90.9,
+    "recurring_share": 27.3,
+    "fvtpl_equity": 36.4,
+    "revenue_cagr5": 81.8,
+    "npat_cagr5": 90.0,
+    "margin_loans_cagr3": 54.5,
+    "margin_loans_equity": 27.3,
+    "debt_equity": 0.0,
+    "profit_drawdown5": 18.2
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VIC",
+   "industry": "Diversified_Holding",
+   "model": "NON_FINANCIAL",
+   "status": "REV",
+   "status_label": "Cần xem lại",
+   "reason": "Chống chịu 23 dưới 25",
+   "dims": {
+    "quality": {
+     "score": 44.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 76.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 23.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.0775,
+    "gross_margin_std5": 0.0494,
+    "ebit_margin_std5": 0.0428,
+    "cash_conversion3": 3.8093,
+    "asset_turnover": 0.3394,
+    "revenue_cagr5": 0.246,
+    "ebit_cagr5": 0.1701,
+    "cfo_cagr5": 0.3412,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 5.0502,
+    "net_debt_ebitda": 3.001,
+    "interest_coverage": 1.9066,
+    "current_ratio": 1.1214,
+    "profit_drawdown5": 2.6628
+   },
+   "percentiles": {
+    "roic_avg5": 34.0,
+    "gross_margin_std5": 29.6,
+    "ebit_margin_std5": 38.9,
+    "cash_conversion3": 98.0,
+    "asset_turnover": 18.5,
+    "revenue_cagr5": 88.7,
+    "ebit_cagr5": 56.5,
+    "cfo_cagr5": 81.1,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 98.1,
+    "net_debt_ebitda": 32.7,
+    "interest_coverage": 22.2,
+    "current_ratio": 25.9,
+    "profit_drawdown5": 5.6
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "BAF",
+   "industry": "Agriculture_Livestock",
+   "model": "NON_FINANCIAL",
+   "status": "REV",
+   "status_label": "Cần xem lại",
+   "reason": "Chống chịu 15 dưới 25",
+   "dims": {
+    "quality": {
+     "score": 38.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 27.8,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 14.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 55,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.1044,
+    "gross_margin_std5": 0.035,
+    "ebit_margin_std5": 0.0272,
+    "cash_conversion3": -4.39,
+    "asset_turnover": 0.5527,
+    "revenue_cagr5": -0.1707,
+    "ebit_cagr5": 0.1565,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 0.2,
+    "reinvestment_rate": 3.6013,
+    "net_debt_ebitda": 5.9323,
+    "interest_coverage": 1.3872,
+    "current_ratio": 1.0023,
+    "profit_drawdown5": 0.9058
+   },
+   "percentiles": {
+    "roic_avg5": 52.8,
+    "gross_margin_std5": 42.6,
+    "ebit_margin_std5": 57.4,
+    "cash_conversion3": 2.0,
+    "asset_turnover": 33.3,
+    "revenue_cagr5": 1.9,
+    "ebit_cagr5": 47.8,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 1.9,
+    "reinvestment_rate": 94.2,
+    "net_debt_ebitda": 13.5,
+    "interest_coverage": 9.3,
+    "current_ratio": 14.8,
+    "profit_drawdown5": 24.1
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "DCL",
+   "industry": "Healthcare",
+   "model": "NON_FINANCIAL",
+   "status": "REV",
+   "status_label": "Cần xem lại",
+   "reason": "Chất lượng 27 dưới 30",
+   "dims": {
+    "quality": {
+     "score": 27.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 34.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 28.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.0517,
+    "gross_margin_std5": 0.0616,
+    "ebit_margin_std5": 0.0563,
+    "cash_conversion3": 1.0276,
+    "asset_turnover": 0.5449,
+    "revenue_cagr5": 0.1451,
+    "ebit_cagr5": -0.068,
+    "cfo_cagr5": -0.1254,
+    "revenue_up_years5": 1.0,
+    "reinvestment_rate": -0.7344,
+    "net_debt_ebitda": 5.5152,
+    "interest_coverage": 1.7065,
+    "current_ratio": 2.0314,
+    "profit_drawdown5": 0.8221
+   },
+   "percentiles": {
+    "roic_avg5": 17.0,
+    "gross_margin_std5": 18.5,
+    "ebit_margin_std5": 29.6,
+    "cash_conversion3": 42.9,
+    "asset_turnover": 31.5,
+    "revenue_cagr5": 52.8,
+    "ebit_cagr5": 6.5,
+    "cfo_cagr5": 13.5,
+    "revenue_up_years5": 91.5,
+    "reinvestment_rate": 9.6,
+    "net_debt_ebitda": 17.3,
+    "interest_coverage": 16.7,
+    "current_ratio": 81.5,
+    "profit_drawdown5": 27.8
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "MSR",
+   "industry": "Steel_Metals",
+   "model": "NON_FINANCIAL",
+   "status": "REV",
+   "status_label": "Cần xem lại",
+   "reason": "Chất lượng 18 dưới 30, Chống chịu 15 dưới 25",
+   "dims": {
+    "quality": {
+     "score": 17.7,
+     "coverage": 0.8,
+     "missing": [
+      "cash_conversion3"
+     ]
+    },
+    "growth": {
+     "score": 20.1,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 14.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.0232,
+    "gross_margin_std5": 0.0546,
+    "ebit_margin_std5": 0.0527,
+    "cash_conversion3": null,
+    "asset_turnover": 0.2786,
+    "revenue_cagr5": 0.0041,
+    "ebit_cagr5": -0.02,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 0.4102,
+    "net_debt_ebitda": 6.1817,
+    "interest_coverage": 1.0479,
+    "current_ratio": 1.5415,
+    "profit_drawdown5": 7.076
+   },
+   "percentiles": {
+    "roic_avg5": 5.7,
+    "gross_margin_std5": 22.2,
+    "ebit_margin_std5": 33.3,
+    "cash_conversion3": null,
+    "asset_turnover": 11.1,
+    "revenue_cagr5": 15.1,
+    "ebit_cagr5": 13.0,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 40.4,
+    "net_debt_ebitda": 9.6,
+    "interest_coverage": 5.6,
+    "current_ratio": 61.1,
+    "profit_drawdown5": 1.9
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "CII",
+   "industry": "Construction",
+   "model": "NON_FINANCIAL",
+   "status": "REV",
+   "status_label": "Cần xem lại",
+   "reason": "Chất lượng 9 dưới 30, Chống chịu 16 dưới 25",
+   "dims": {
+    "quality": {
+     "score": 9.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 20.3,
+     "coverage": 0.8,
+     "missing": [
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 16.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 55,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -21.1,
+    "confidence": 64.0,
+    "method": "EV/EBITDA",
+    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho SELL, đã hạ về HOLD"
+   },
+   "metrics": {
+    "roic_avg5": 0.0519,
+    "gross_margin_std5": 0.1336,
+    "ebit_margin_std5": 0.109,
+    "cash_conversion3": -0.8616,
+    "asset_turnover": 0.0797,
+    "revenue_cagr5": -0.1124,
+    "ebit_cagr5": 0.0193,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 0.2,
+    "reinvestment_rate": 2.7156,
+    "net_debt_ebitda": 7.4223,
+    "interest_coverage": 1.3103,
+    "current_ratio": 1.5523,
+    "profit_drawdown5": 1.5128
+   },
+   "percentiles": {
+    "roic_avg5": 18.9,
+    "gross_margin_std5": 5.6,
+    "ebit_margin_std5": 13.0,
+    "cash_conversion3": 2.0,
+    "asset_turnover": 1.9,
+    "revenue_cagr5": 5.7,
+    "ebit_cagr5": 21.7,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 1.9,
+    "reinvestment_rate": 88.5,
+    "net_debt_ebitda": 5.8,
+    "interest_coverage": 7.4,
+    "current_ratio": 63.0,
+    "profit_drawdown5": 13.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "CPH",
+   "industry": "Consumer_Discretionary",
+   "model": "NON_FINANCIAL",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Quản trị",
+   "dims": {
+    "quality": {
+     "score": 84.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 39.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 81.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": null,
+     "coverage": 0.667,
+     "missing": [
+      "late_filing"
+     ]
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.4634,
+    "gross_margin_std5": 0.0144,
+    "ebit_margin_std5": 0.0045,
+    "cash_conversion3": 2.1753,
+    "asset_turnover": 0.6481,
+    "revenue_cagr5": 0.068,
+    "ebit_cagr5": 0.0422,
+    "cfo_cagr5": 0.4021,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": -1.1549,
+    "net_debt_ebitda": -3.1146,
+    "interest_coverage": 100.0,
+    "current_ratio": 0.9012,
+    "profit_drawdown5": 0.0588
+   },
+   "percentiles": {
+    "roic_avg5": 98.1,
+    "gross_margin_std5": 83.3,
+    "ebit_margin_std5": 94.4,
+    "cash_conversion3": 83.7,
+    "asset_turnover": 50.0,
+    "revenue_cagr5": 34.0,
+    "ebit_cagr5": 30.4,
+    "cfo_cagr5": 83.8,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 1.9,
+    "net_debt_ebitda": 98.1,
+    "interest_coverage": 95.4,
+    "current_ratio": 13.0,
+    "profit_drawdown5": 83.3
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": null,
+   "sharp_drops": []
+  },
+  {
+   "ticker": "DPP",
+   "industry": "Healthcare",
+   "model": "NON_FINANCIAL",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Quản trị",
+   "dims": {
+    "quality": {
+     "score": 81.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 36.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 88.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": null,
+     "coverage": 0.667,
+     "missing": [
+      "late_filing"
+     ]
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 89.5,
+    "confidence": 47.0,
+    "method": "P/E Multiple",
+    "reason": "Độ tin cậy 47% dưới 50%"
+   },
+   "metrics": {
+    "roic_avg5": 0.1607,
+    "gross_margin_std5": 0.0088,
+    "ebit_margin_std5": 0.0038,
+    "cash_conversion3": 1.1908,
+    "asset_turnover": 3.3335,
+    "revenue_cagr5": 0.0498,
+    "ebit_cagr5": 0.1023,
+    "cfo_cagr5": 0.0125,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 0.7063,
+    "net_debt_ebitda": -0.3389,
+    "interest_coverage": 100.0,
+    "current_ratio": 1.7108,
+    "profit_drawdown5": 0.0
+   },
+   "percentiles": {
+    "roic_avg5": 71.7,
+    "gross_margin_std5": 92.6,
+    "ebit_margin_std5": 98.1,
+    "cash_conversion3": 55.1,
+    "asset_turnover": 98.1,
+    "revenue_cagr5": 28.3,
+    "ebit_cagr5": 41.3,
+    "cfo_cagr5": 37.8,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 59.6,
+    "net_debt_ebitda": 84.6,
+    "interest_coverage": 95.4,
+    "current_ratio": 72.2,
+    "profit_drawdown5": 95.4
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": null,
+   "sharp_drops": []
+  },
+  {
+   "ticker": "CMK",
+   "industry": "Industrial_Manufacturing",
+   "model": "NON_FINANCIAL",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Quản trị",
+   "dims": {
+    "quality": {
+     "score": 69.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 11.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 16.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": null,
+     "coverage": 0.667,
+     "missing": [
+      "late_filing"
+     ]
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.0867,
+    "gross_margin_std5": 0.0232,
+    "ebit_margin_std5": 0.0117,
+    "cash_conversion3": 18.0455,
+    "asset_turnover": 1.6074,
+    "revenue_cagr5": -0.0153,
+    "ebit_cagr5": -0.171,
+    "cfo_cagr5": -0.3725,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 0.0244,
+    "net_debt_ebitda": 4.6661,
+    "interest_coverage": 1.6614,
+    "current_ratio": 0.8774,
+    "profit_drawdown5": 0.9577
+   },
+   "percentiles": {
+    "roic_avg5": 41.5,
+    "gross_margin_std5": 61.1,
+    "ebit_margin_std5": 79.6,
+    "cash_conversion3": 98.0,
+    "asset_turnover": 77.8,
+    "revenue_cagr5": 11.3,
+    "ebit_cagr5": 2.2,
+    "cfo_cagr5": 5.4,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 21.2,
+    "net_debt_ebitda": 19.2,
+    "interest_coverage": 14.8,
+    "current_ratio": 7.4,
+    "profit_drawdown5": 22.2
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": null,
+   "sharp_drops": []
+  },
+  {
+   "ticker": "DKC",
+   "industry": "Consumer_Discretionary",
+   "model": "NON_FINANCIAL",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Quản trị",
+   "dims": {
+    "quality": {
+     "score": 62.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 56.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 84.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": null,
+     "coverage": 0.667,
+     "missing": [
+      "late_filing"
+     ]
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": 0.2378,
+    "gross_margin_std5": 0.0184,
+    "ebit_margin_std5": 0.051,
+    "cash_conversion3": 1.5545,
+    "asset_turnover": 0.4068,
+    "revenue_cagr5": 0.005,
+    "ebit_cagr5": 0.2577,
+    "cfo_cagr5": 0.7546,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 0.2446,
+    "net_debt_ebitda": -2.5216,
+    "interest_coverage": 100.0,
+    "current_ratio": 1.476,
+    "profit_drawdown5": 0.2376
+   },
+   "percentiles": {
+    "roic_avg5": 94.3,
+    "gross_margin_std5": 74.1,
+    "ebit_margin_std5": 35.2,
+    "cash_conversion3": 69.4,
+    "asset_turnover": 22.2,
+    "revenue_cagr5": 17.0,
+    "ebit_cagr5": 82.6,
+    "cfo_cagr5": 94.6,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 28.8,
+    "net_debt_ebitda": 94.2,
+    "interest_coverage": 95.4,
+    "current_ratio": 55.6,
+    "profit_drawdown5": 72.2
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": null,
+   "sharp_drops": []
+  },
+  {
+   "ticker": "HVN",
+   "industry": "Logistics_Transport",
+   "model": "NON_FINANCIAL",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Tăng trưởng",
+   "dims": {
+    "quality": {
+     "score": 48.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": null,
+     "coverage": 0.55,
+     "missing": [
+      "ebit_cagr5",
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 63.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 80,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 3.7,
+    "confidence": 71.0,
+    "method": "EV/EBITDA",
+    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được"
+   },
+   "metrics": {
+    "roic_avg5": 0.1409,
+    "gross_margin_std5": 0.1854,
+    "ebit_margin_std5": 0.1918,
+    "cash_conversion3": 2.2875,
+    "asset_turnover": 1.8454,
+    "revenue_cagr5": 0.2449,
+    "ebit_cagr5": null,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 1.6891,
+    "net_debt_ebitda": 0.2316,
+    "interest_coverage": 10.7459,
+    "current_ratio": 0.5679,
+    "profit_drawdown5": 0.044
+   },
+   "percentiles": {
+    "roic_avg5": 64.2,
+    "gross_margin_std5": 1.9,
+    "ebit_margin_std5": 9.3,
+    "cash_conversion3": 87.8,
+    "asset_turnover": 85.2,
+    "revenue_cagr5": 86.8,
+    "ebit_cagr5": null,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 84.6,
+    "net_debt_ebitda": 76.9,
+    "interest_coverage": 63.0,
+    "current_ratio": 1.9,
+    "profit_drawdown5": 87.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "BCV",
+   "industry": "Consumer_Discretionary",
+   "model": "NON_FINANCIAL",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Quản trị",
+   "dims": {
+    "quality": {
+     "score": 39.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 78.1,
+     "coverage": 0.75,
+     "missing": [
+      "ebit_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 84.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": null,
+     "coverage": 0.667,
+     "missing": [
+      "late_filing"
+     ]
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "EXPENSIVE",
+    "label": "Đắt",
+    "upside_pct": -29.3,
+    "confidence": 64.0,
+    "method": "EV/EBITDA",
+    "reason": null
+   },
+   "metrics": {
+    "roic_avg5": 0.0242,
+    "gross_margin_std5": 0.0829,
+    "ebit_margin_std5": 0.0573,
+    "cash_conversion3": 3.4631,
+    "asset_turnover": 1.1233,
+    "revenue_cagr5": 0.2203,
+    "ebit_cagr5": null,
+    "cfo_cagr5": 1.0118,
+    "revenue_up_years5": 0.8,
+    "reinvestment_rate": 0.542,
+    "net_debt_ebitda": -3.9643,
+    "interest_coverage": 100.0,
+    "current_ratio": 1.662,
+    "profit_drawdown5": 0.4606
+   },
+   "percentiles": {
+    "roic_avg5": 7.5,
+    "gross_margin_std5": 11.1,
+    "ebit_margin_std5": 27.8,
+    "cash_conversion3": 93.9,
+    "asset_turnover": 72.2,
+    "revenue_cagr5": 83.0,
+    "ebit_cagr5": null,
+    "cfo_cagr5": 98.6,
+    "revenue_up_years5": 62.3,
+    "reinvestment_rate": 46.2,
+    "net_debt_ebitda": 98.1,
+    "interest_coverage": 95.4,
+    "current_ratio": 70.4,
+    "profit_drawdown5": 55.6
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": null,
+   "sharp_drops": []
+  },
+  {
+   "ticker": "HUT",
+   "industry": "Consumer_Discretionary",
+   "model": "NON_FINANCIAL",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Tăng trưởng",
+   "dims": {
+    "quality": {
+     "score": 33.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": null,
+     "coverage": 0.55,
+     "missing": [
+      "ebit_cagr5",
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 27.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 92,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -48.8,
+    "confidence": 45.0,
+    "method": "P/E Multiple",
+    "reason": "Độ tin cậy 45% dưới 50%"
+   },
+   "metrics": {
+    "roic_avg5": 0.0379,
+    "gross_margin_std5": 0.1236,
+    "ebit_margin_std5": 0.1962,
+    "cash_conversion3": 3.2289,
+    "asset_turnover": 0.8943,
+    "revenue_cagr5": 1.1725,
+    "ebit_cagr5": null,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 1.0,
+    "reinvestment_rate": 5.7039,
+    "net_debt_ebitda": 6.103,
+    "interest_coverage": 1.8453,
+    "current_ratio": 1.5816,
+    "profit_drawdown5": 0.6083
+   },
+   "percentiles": {
+    "roic_avg5": 13.2,
+    "gross_margin_std5": 9.3,
+    "ebit_margin_std5": 5.6,
+    "cash_conversion3": 91.8,
+    "asset_turnover": 59.3,
+    "revenue_cagr5": 98.1,
+    "ebit_cagr5": null,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 91.5,
+    "reinvestment_rate": 98.1,
+    "net_debt_ebitda": 11.5,
+    "interest_coverage": 18.5,
+    "current_ratio": 64.8,
+    "profit_drawdown5": 42.6
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "HAG",
+   "industry": "Agriculture_Livestock",
+   "model": "NON_FINANCIAL",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Tăng trưởng",
+   "dims": {
+    "quality": {
+     "score": 26.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": null,
+     "coverage": 0.55,
+     "missing": [
+      "ebit_cagr5",
+      "cfo_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 39.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 6.7,
+    "confidence": 35.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roic_avg5": 0.0944,
+    "gross_margin_std5": 0.0727,
+    "ebit_margin_std5": 0.0399,
+    "cash_conversion3": 0.0509,
+    "asset_turnover": 0.3055,
+    "revenue_cagr5": 0.1853,
+    "ebit_cagr5": null,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 0.6,
+    "reinvestment_rate": 0.7468,
+    "net_debt_ebitda": 1.996,
+    "interest_coverage": 3.9669,
+    "current_ratio": 0.8194,
+    "profit_drawdown5": 0.405
+   },
+   "percentiles": {
+    "roic_avg5": 45.3,
+    "gross_margin_std5": 13.0,
+    "ebit_margin_std5": 42.6,
+    "cash_conversion3": 10.2,
+    "asset_turnover": 13.0,
+    "revenue_cagr5": 73.6,
+    "ebit_cagr5": null,
+    "cfo_cagr5": null,
+    "revenue_up_years5": 28.3,
+    "reinvestment_rate": 65.4,
+    "net_debt_ebitda": 48.1,
+    "interest_coverage": 35.2,
+    "current_ratio": 5.6,
+    "profit_drawdown5": 57.4
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "CNA",
+   "industry": "Agriculture_Livestock",
+   "model": "NON_FINANCIAL",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Tăng trưởng, Quản trị, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": 19.9,
+     "coverage": 0.8,
+     "missing": [
+      "cash_conversion3"
+     ]
+    },
+    "growth": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "ebit_cagr5",
+      "reinvestment_rate"
+     ]
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "net_debt_ebitda"
+     ]
+    },
+    "governance": {
+     "score": null,
+     "coverage": 0.333,
+     "missing": [
+      "earnings_cash_gap",
+      "late_filing"
+     ]
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -79.5,
+    "confidence": 76.0,
+    "method": "EV/EBITDA",
+    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho STRONG SELL, đã hạ về HOLD"
+   },
+   "metrics": {
+    "roic_avg5": -0.0065,
+    "gross_margin_std5": 0.0414,
+    "ebit_margin_std5": 0.0428,
+    "cash_conversion3": null,
+    "asset_turnover": 0.2422,
+    "revenue_cagr5": -0.0998,
+    "ebit_cagr5": null,
+    "cfo_cagr5": 1.0294,
+    "revenue_up_years5": 0.4,
+    "reinvestment_rate": null,
+    "net_debt_ebitda": null,
+    "interest_coverage": 100.0,
+    "current_ratio": 0.8855,
+    "profit_drawdown5": 0.0
+   },
+   "percentiles": {
+    "roic_avg5": 1.9,
+    "gross_margin_std5": 33.3,
+    "ebit_margin_std5": 37.0,
+    "cash_conversion3": null,
+    "asset_turnover": 9.3,
+    "revenue_cagr5": 9.4,
+    "ebit_cagr5": null,
+    "cfo_cagr5": 98.6,
+    "revenue_up_years5": 9.4,
+    "reinvestment_rate": null,
+    "net_debt_ebitda": null,
+    "interest_coverage": 95.4,
+    "current_ratio": 9.3,
+    "profit_drawdown5": 95.4
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": null,
+   "sharp_drops": []
+  },
+  {
+   "ticker": "BED",
+   "industry": "Unknown",
+   "model": null,
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "BT6",
+   "industry": "Construction",
+   "model": "NON_FINANCIAL",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Tăng trưởng",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.55,
+     "missing": [
+      "roic_avg5",
+      "cash_conversion3"
+     ]
+    },
+    "growth": {
+     "score": null,
+     "coverage": 0.1,
+     "missing": [
+      "revenue_cagr5",
+      "ebit_cagr5",
+      "cfo_cagr5",
+      "revenue_up_years5"
+     ]
+    },
+    "resilience": {
+     "score": 20.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": null,
+    "gross_margin_std5": 0.3642,
+    "ebit_margin_std5": 0.8097,
+    "cash_conversion3": null,
+    "asset_turnover": 0.6211,
+    "revenue_cagr5": null,
+    "ebit_cagr5": null,
+    "cfo_cagr5": null,
+    "revenue_up_years5": null,
+    "reinvestment_rate": -4.8716,
+    "net_debt_ebitda": 16.6212,
+    "interest_coverage": 0.2001,
+    "current_ratio": 0.0438,
+    "profit_drawdown5": 0.0
+   },
+   "percentiles": {
+    "roic_avg5": null,
+    "gross_margin_std5": 1.9,
+    "ebit_margin_std5": 1.9,
+    "cash_conversion3": null,
+    "asset_turnover": 42.6,
+    "revenue_cagr5": null,
+    "ebit_cagr5": null,
+    "cfo_cagr5": null,
+    "revenue_up_years5": null,
+    "reinvestment_rate": 1.9,
+    "net_debt_ebitda": 1.9,
+    "interest_coverage": 1.9,
+    "current_ratio": 1.9,
+    "profit_drawdown5": 95.4
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VHM",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VPB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 54.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 92,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0175,
+    "roe_avg3": 0.11,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.2496,
+    "toi_cagr5": 0.1385,
+    "pbt_cagr5": 0.1866,
+    "loans_cagr5": 0.2655,
+    "nonint_income_cagr3": -0.0158,
+    "npl_coverage": null,
+    "equity_assets": 0.1431,
+    "credit_cost_std": 0.0101,
+    "ldr": 1.5029
+   },
+   "percentiles": {
+    "roa_avg3": 53.3,
+    "roe_avg3": 6.7,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 93.3,
+    "toi_cagr5": 53.3,
+    "pbt_cagr5": 53.3,
+    "loans_cagr5": 93.3,
+    "nonint_income_cagr3": 20.0,
+    "npl_coverage": null,
+    "equity_assets": 93.3,
+    "credit_cost_std": 0.0,
+    "ldr": 0.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "SHB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 78.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0135,
+    "roe_avg3": 0.1731,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.2213,
+    "toi_cagr5": 0.1891,
+    "pbt_cagr5": 0.3567,
+    "loans_cagr5": 0.15,
+    "nonint_income_cagr3": 0.7003,
+    "npl_coverage": null,
+    "equity_assets": 0.0764,
+    "credit_cost_std": 0.0035,
+    "ldr": 1.0747
+   },
+   "percentiles": {
+    "roa_avg3": 26.7,
+    "roe_avg3": 46.7,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 100.0,
+    "toi_cagr5": 80.0,
+    "pbt_cagr5": 93.3,
+    "loans_cagr5": 33.3,
+    "nonint_income_cagr3": 100.0,
+    "npl_coverage": null,
+    "equity_assets": 20.0,
+    "credit_cost_std": 66.7,
+    "ldr": 60.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "TCB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 61.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0237,
+    "roe_avg3": 0.1542,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.3078,
+    "toi_cagr5": 0.1457,
+    "pbt_cagr5": 0.1554,
+    "loans_cagr5": 0.2257,
+    "nonint_income_cagr3": 0.1417,
+    "npl_coverage": null,
+    "equity_assets": 0.1505,
+    "credit_cost_std": 0.0013,
+    "ldr": 1.2403
+   },
+   "percentiles": {
+    "roa_avg3": 100.0,
+    "roe_avg3": 20.0,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 60.0,
+    "toi_cagr5": 73.3,
+    "pbt_cagr5": 33.3,
+    "loans_cagr5": 80.0,
+    "nonint_income_cagr3": 66.7,
+    "npl_coverage": null,
+    "equity_assets": 100.0,
+    "credit_cost_std": 100.0,
+    "ldr": 20.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VCB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 16.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -4.1,
+    "confidence": 61.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Nhóm tài chính (Banking): chưa có NPL/CAR nên chưa đưa ra kết luận định giá"
+   },
+   "metrics": {
+    "roa_avg3": 0.017,
+    "roe_avg3": 0.1917,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.3484,
+    "toi_cagr5": 0.0811,
+    "pbt_cagr5": 0.1381,
+    "loans_cagr5": 0.1479,
+    "nonint_income_cagr3": -0.0266,
+    "npl_coverage": null,
+    "equity_assets": 0.0919,
+    "credit_cost_std": 0.0042,
+    "ldr": 1.0006
+   },
+   "percentiles": {
+    "roa_avg3": 46.7,
+    "roe_avg3": 60.0,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 33.3,
+    "toi_cagr5": 6.7,
+    "pbt_cagr5": 20.0,
+    "loans_cagr5": 26.7,
+    "nonint_income_cagr3": 13.3,
+    "npl_coverage": null,
+    "equity_assets": 60.0,
+    "credit_cost_std": 46.7,
+    "ldr": 93.3
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "HDB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 87.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 53.4,
+    "confidence": 30.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roa_avg3": 0.0205,
+    "roe_avg3": 0.2507,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.2717,
+    "toi_cagr5": 0.2538,
+    "pbt_cagr5": 0.2969,
+    "loans_cagr5": 0.251,
+    "nonint_income_cagr3": 0.262,
+    "npl_coverage": null,
+    "equity_assets": 0.0841,
+    "credit_cost_std": 0.0027,
+    "ldr": 0.9744
+   },
+   "percentiles": {
+    "roa_avg3": 80.0,
+    "roe_avg3": 100.0,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 86.7,
+    "toi_cagr5": 100.0,
+    "pbt_cagr5": 80.0,
+    "loans_cagr5": 86.7,
+    "nonint_income_cagr3": 80.0,
+    "npl_coverage": null,
+    "equity_assets": 33.3,
+    "credit_cost_std": 86.7,
+    "ldr": 100.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "STB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 27.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -13.1,
+    "confidence": 30.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roa_avg3": 0.0112,
+    "roe_avg3": 0.1623,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.4069,
+    "toi_cagr5": 0.1317,
+    "pbt_cagr5": 0.1796,
+    "loans_cagr5": 0.1298,
+    "nonint_income_cagr3": -0.1576,
+    "npl_coverage": null,
+    "equity_assets": 0.0653,
+    "credit_cost_std": 0.0068,
+    "ldr": 1.013
+   },
+   "percentiles": {
+    "roa_avg3": 13.3,
+    "roe_avg3": 33.3,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 6.7,
+    "toi_cagr5": 40.0,
+    "pbt_cagr5": 46.7,
+    "loans_cagr5": 6.7,
+    "nonint_income_cagr3": 0.0,
+    "npl_coverage": null,
+    "equity_assets": 13.3,
+    "credit_cost_std": 6.7,
+    "ldr": 86.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "MBB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 82.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0224,
+    "roe_avg3": 0.2216,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.2907,
+    "toi_cagr5": 0.1986,
+    "pbt_cagr5": 0.2624,
+    "loans_cagr5": 0.2944,
+    "nonint_income_cagr3": 0.1889,
+    "npl_coverage": null,
+    "equity_assets": 0.0879,
+    "credit_cost_std": 0.0046,
+    "ldr": 1.1765
+   },
+   "percentiles": {
+    "roa_avg3": 93.3,
+    "roe_avg3": 86.7,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 73.3,
+    "toi_cagr5": 86.7,
+    "pbt_cagr5": 73.3,
+    "loans_cagr5": 100.0,
+    "nonint_income_cagr3": 73.3,
+    "npl_coverage": null,
+    "equity_assets": 46.7,
+    "credit_cost_std": 26.7,
+    "ldr": 26.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "CTG",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 46.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0118,
+    "roe_avg3": 0.1898,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.3042,
+    "toi_cagr5": 0.1399,
+    "pbt_cagr5": 0.2047,
+    "loans_cagr5": 0.1443,
+    "nonint_income_cagr3": 0.0848,
+    "npl_coverage": null,
+    "equity_assets": 0.0649,
+    "credit_cost_std": 0.0036,
+    "ldr": 1.1107
+   },
+   "percentiles": {
+    "roa_avg3": 20.0,
+    "roe_avg3": 53.3,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 66.7,
+    "toi_cagr5": 60.0,
+    "pbt_cagr5": 60.0,
+    "loans_cagr5": 20.0,
+    "nonint_income_cagr3": 33.3,
+    "npl_coverage": null,
+    "equity_assets": 6.7,
+    "credit_cost_std": 60.0,
+    "ldr": 46.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "ACB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 39.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0206,
+    "roe_avg3": 0.2137,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.3232,
+    "toi_cagr5": 0.1323,
+    "pbt_cagr5": 0.1528,
+    "loans_cagr5": 0.1713,
+    "nonint_income_cagr3": 0.0945,
+    "npl_coverage": null,
+    "equity_assets": 0.0921,
+    "credit_cost_std": 0.0032,
+    "ldr": 1.1736
+   },
+   "percentiles": {
+    "roa_avg3": 86.7,
+    "roe_avg3": 80.0,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 53.3,
+    "toi_cagr5": 46.7,
+    "pbt_cagr5": 26.7,
+    "loans_cagr5": 40.0,
+    "nonint_income_cagr3": 46.7,
+    "npl_coverage": null,
+    "equity_assets": 66.7,
+    "credit_cost_std": 73.3,
+    "ldr": 33.3
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "NVL",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VRE",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "BID",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 54.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.01,
+    "roe_avg3": 0.1921,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.3336,
+    "toi_cagr5": 0.1276,
+    "pbt_cagr5": 0.3316,
+    "loans_cagr5": 0.1434,
+    "nonint_income_cagr3": 0.2734,
+    "npl_coverage": null,
+    "equity_assets": 0.0521,
+    "credit_cost_std": 0.0047,
+    "ldr": 1.0675
+   },
+   "percentiles": {
+    "roa_avg3": 0.0,
+    "roe_avg3": 66.7,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 46.7,
+    "toi_cagr5": 26.7,
+    "pbt_cagr5": 86.7,
+    "loans_cagr5": 13.3,
+    "nonint_income_cagr3": 86.7,
+    "npl_coverage": null,
+    "equity_assets": 0.0,
+    "credit_cost_std": 20.0,
+    "ldr": 66.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VPI",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "DXG",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 55,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "LPB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 86.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 92,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0193,
+    "roe_avg3": 0.2316,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.2829,
+    "toi_cagr5": 0.23,
+    "pbt_cagr5": 0.4252,
+    "loans_cagr5": 0.1727,
+    "nonint_income_cagr3": 0.3707,
+    "npl_coverage": null,
+    "equity_assets": 0.0779,
+    "credit_cost_std": 0.0037,
+    "ldr": 1.1604
+   },
+   "percentiles": {
+    "roa_avg3": 73.3,
+    "roe_avg3": 93.3,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 80.0,
+    "toi_cagr5": 93.3,
+    "pbt_cagr5": 100.0,
+    "loans_cagr5": 46.7,
+    "nonint_income_cagr3": 93.3,
+    "npl_coverage": null,
+    "equity_assets": 26.7,
+    "credit_cost_std": 53.3,
+    "ldr": 40.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "TPB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 46.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 94.6,
+    "confidence": 60.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Nhóm tài chính (Banking): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho STRONG BUY, đã hạ về HOLD"
+   },
+   "metrics": {
+    "roa_avg3": 0.0149,
+    "roe_avg3": 0.1623,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.3461,
+    "toi_cagr5": 0.1287,
+    "pbt_cagr5": 0.1603,
+    "loans_cagr5": 0.2058,
+    "nonint_income_cagr3": 0.0995,
+    "npl_coverage": null,
+    "equity_assets": 0.091,
+    "credit_cost_std": 0.0045,
+    "ldr": 1.0959
+   },
+   "percentiles": {
+    "roa_avg3": 40.0,
+    "roe_avg3": 40.0,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 40.0,
+    "toi_cagr5": 33.3,
+    "pbt_cagr5": 40.0,
+    "loans_cagr5": 66.7,
+    "nonint_income_cagr3": 53.3,
+    "npl_coverage": null,
+    "equity_assets": 53.3,
+    "credit_cost_std": 33.3,
+    "ldr": 53.3
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "KDH",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 67,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "CEO",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 55,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "EIB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 5.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0102,
+    "roe_avg3": 0.0951,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.5833,
+    "toi_cagr5": 0.104,
+    "pbt_cagr5": 0.0245,
+    "loans_cagr5": 0.1282,
+    "nonint_income_cagr3": -0.0821,
+    "npl_coverage": null,
+    "equity_assets": 0.0952,
+    "credit_cost_std": 0.003,
+    "ldr": 1.039
+   },
+   "percentiles": {
+    "roa_avg3": 6.7,
+    "roe_avg3": 0.0,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.0,
+    "toi_cagr5": 13.3,
+    "pbt_cagr5": 0.0,
+    "loans_cagr5": 0.0,
+    "nonint_income_cagr3": 6.7,
+    "npl_coverage": null,
+    "equity_assets": 73.3,
+    "credit_cost_std": 80.0,
+    "ldr": 80.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "TCH",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 67,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "MSB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 62.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 63.7,
+    "confidence": 30.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roa_avg3": 0.0179,
+    "roe_avg3": 0.1548,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.3608,
+    "toi_cagr5": 0.1435,
+    "pbt_cagr5": 0.2284,
+    "loans_cagr5": 0.2093,
+    "nonint_income_cagr3": 0.093,
+    "npl_coverage": null,
+    "equity_assets": 0.1041,
+    "credit_cost_std": 0.0042,
+    "ldr": 1.0434
+   },
+   "percentiles": {
+    "roa_avg3": 66.7,
+    "roe_avg3": 26.7,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 26.7,
+    "toi_cagr5": 66.7,
+    "pbt_cagr5": 66.7,
+    "loans_cagr5": 73.3,
+    "nonint_income_cagr3": 40.0,
+    "npl_coverage": null,
+    "equity_assets": 80.0,
+    "credit_cost_std": 40.0,
+    "ldr": 73.3
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VIB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 27.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0175,
+    "roe_avg3": 0.1958,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.3716,
+    "toi_cagr5": 0.1227,
+    "pbt_cagr5": 0.0943,
+    "loans_cagr5": 0.1764,
+    "nonint_income_cagr3": 0.0814,
+    "npl_coverage": null,
+    "equity_assets": 0.0843,
+    "credit_cost_std": 0.0048,
+    "ldr": 1.2967
+   },
+   "percentiles": {
+    "roa_avg3": 60.0,
+    "roe_avg3": 73.3,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 13.3,
+    "toi_cagr5": 20.0,
+    "pbt_cagr5": 13.3,
+    "loans_cagr5": 60.0,
+    "nonint_income_cagr3": 26.7,
+    "npl_coverage": null,
+    "equity_assets": 40.0,
+    "credit_cost_std": 13.3,
+    "ldr": 13.3
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "PDR",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 67,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "DIG",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 92,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "NLG",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 67,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "BVH",
+   "industry": "Insurance",
+   "model": "INSURANCE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": null,
+     "coverage": 0.667,
+     "missing": [
+      "earnings_cash_gap"
+     ]
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "IDC",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "KBC",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 67,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild",
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VC3",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -45.0,
+    "confidence": 54.0,
+    "method": "RNAV",
+    "reason": "Phương pháp chính RNAV còn giản lược"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "BCM",
+   "industry": "Real_Estate",
+   "model": "REAL_ESTATE",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Mô hình ngành chưa kích hoạt",
+   "dims": {
+    "quality": null,
+    "growth": null,
+    "resilience": null,
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {},
+   "percentiles": {},
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "OCB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "RES",
+   "status_label": "Thiếu dữ liệu",
+   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
+   "dims": {
+    "quality": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "nim_std",
+      "npl_ratio"
+     ]
+    },
+    "growth": {
+     "score": 24.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "npl_coverage"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0136,
+    "roe_avg3": 0.1168,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 0.3626,
+    "toi_cagr5": 0.0766,
+    "pbt_cagr5": 0.0259,
+    "loans_cagr5": 0.1737,
+    "nonint_income_cagr3": 0.1386,
+    "npl_coverage": null,
+    "equity_assets": 0.105,
+    "credit_cost_std": 0.0016,
+    "ldr": 1.3248
+   },
+   "percentiles": {
+    "roa_avg3": 33.3,
+    "roe_avg3": 13.3,
+    "nim_std": null,
+    "npl_ratio": null,
+    "cost_income": 20.0,
+    "toi_cagr5": 0.0,
+    "pbt_cagr5": 6.7,
+    "loans_cagr5": 53.3,
+    "nonint_income_cagr3": 60.0,
+    "npl_coverage": null,
+    "equity_assets": 86.7,
+    "credit_cost_std": 93.3,
+    "ldr": 6.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "ART",
+   "industry": "Securities",
+   "model": "SECURITIES",
+   "status": "EXC",
+   "status_label": "Loại",
+   "reason": "Veto: Hủy niêm yết hoặc đình chỉ",
+   "dims": {
+    "quality": {
+     "score": 35.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": null,
+     "coverage": 0.6,
+     "missing": [
+      "npat_cagr5"
+     ]
+    },
+    "resilience": {
+     "score": 54.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": "Hủy niêm yết hoặc đình chỉ",
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roe_avg3": -0.1928,
+    "recurring_share": 0.1253,
+    "fvtpl_equity": 0.0965,
+    "revenue_cagr5": -0.5859,
+    "npat_cagr5": null,
+    "margin_loans_cagr3": -0.0371,
+    "margin_loans_equity": 1.2003,
+    "debt_equity": 0.0,
+    "profit_drawdown5": 30.1001
+   },
+   "percentiles": {
+    "roe_avg3": 0.0,
+    "recurring_share": 0.0,
+    "fvtpl_equity": 100.0,
+    "revenue_cagr5": 0.0,
+    "npat_cagr5": null,
+    "margin_loans_cagr3": 0.0,
+    "margin_loans_equity": 54.5,
+    "debt_equity": 100.0,
+    "profit_drawdown5": 0.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "TTB",
+   "industry": "Construction",
+   "model": "NON_FINANCIAL",
+   "status": "EXC",
+   "status_label": "Loại",
+   "reason": "Veto: Hủy niêm yết hoặc đình chỉ",
+   "dims": {
+    "quality": {
+     "score": 10.0,
+     "coverage": 0.8,
+     "missing": [
+      "cash_conversion3"
+     ]
+    },
+    "growth": {
+     "score": 26.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 9.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": null,
+     "coverage": 0.667,
+     "missing": [
+      "earnings_cash_gap"
+     ]
+    }
+   },
+   "governance_flags": [],
+   "veto": "Hủy niêm yết hoặc đình chỉ",
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": -0.0153,
+    "gross_margin_std5": 0.042,
+    "ebit_margin_std5": 0.7605,
+    "cash_conversion3": null,
+    "asset_turnover": 0.0974,
+    "revenue_cagr5": -0.172,
+    "ebit_cagr5": -0.3144,
+    "cfo_cagr5": 0.188,
+    "revenue_up_years5": 0.4,
+    "reinvestment_rate": 79.4031,
+    "net_debt_ebitda": 6.5365,
+    "interest_coverage": 1.0475,
+    "current_ratio": 1.2579,
+    "profit_drawdown5": 8.6608
+   },
+   "percentiles": {
+    "roic_avg5": 1.9,
+    "gross_margin_std5": 31.5,
+    "ebit_margin_std5": 1.9,
+    "cash_conversion3": null,
+    "asset_turnover": 5.6,
+    "revenue_cagr5": 1.9,
+    "ebit_cagr5": 2.2,
+    "cfo_cagr5": 70.3,
+    "revenue_up_years5": 9.4,
+    "reinvestment_rate": 98.1,
+    "net_debt_ebitda": 7.7,
+    "interest_coverage": 1.9,
+    "current_ratio": 37.0,
+    "profit_drawdown5": 1.9
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "SJF",
+   "industry": "Steel_Metals",
+   "model": "NON_FINANCIAL",
+   "status": "EXC",
+   "status_label": "Loại",
+   "reason": "Veto: Hủy niêm yết hoặc đình chỉ",
+   "dims": {
+    "quality": {
+     "score": 1.9,
+     "coverage": 0.8,
+     "missing": [
+      "cash_conversion3"
+     ]
+    },
+    "growth": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "ebit_cagr5",
+      "reinvestment_rate"
+     ]
+    },
+    "resilience": {
+     "score": null,
+     "coverage": 0.65,
+     "missing": [
+      "net_debt_ebitda"
+     ]
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": "Hủy niêm yết hoặc đình chỉ",
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roic_avg5": -0.0728,
+    "gross_margin_std5": 0.1924,
+    "ebit_margin_std5": 1.0972,
+    "cash_conversion3": null,
+    "asset_turnover": 0.0386,
+    "revenue_cagr5": -0.3873,
+    "ebit_cagr5": null,
+    "cfo_cagr5": -0.7748,
+    "revenue_up_years5": 0.4,
+    "reinvestment_rate": null,
+    "net_debt_ebitda": null,
+    "interest_coverage": -3.3179,
+    "current_ratio": 3.188,
+    "profit_drawdown5": 19.382
+   },
+   "percentiles": {
+    "roic_avg5": 1.9,
+    "gross_margin_std5": 1.9,
+    "ebit_margin_std5": 1.9,
+    "cash_conversion3": null,
+    "asset_turnover": 1.9,
+    "revenue_cagr5": 1.9,
+    "ebit_cagr5": null,
+    "cfo_cagr5": 1.4,
+    "revenue_up_years5": 9.4,
+    "reinvestment_rate": null,
+    "net_debt_ebitda": null,
+    "interest_coverage": 1.9,
+    "current_ratio": 98.1,
+    "profit_drawdown5": 1.9
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  }
+ ]
+}
