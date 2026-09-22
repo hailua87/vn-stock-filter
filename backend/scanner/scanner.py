@@ -10,6 +10,7 @@ import pandas as pd
 from .criteria import evaluate, CriteriaResult, DEFAULT_CONFIG
 from .data_fetcher import get_ticker_universe, fetch_universe, fetch_vnindex
 from .corporate_actions import apply_event_filter
+from .trade_levels import attach as attach_trade_levels
 
 log = logging.getLogger(__name__)
 
@@ -54,6 +55,9 @@ class BreakoutScanner:
                 log.warning(f"  {tk}: {e}")
             if i % 100 == 0:
                 log.info(f"  Processed {i}/{len(groups)}")
+
+        # Cắt lỗ / mục tiêu / R:R từ hỗ trợ - kháng cự đã có (§7.3, audit F5)
+        attach_trade_levels(self.results)
 
         if self.fetch_corporate_actions:
             self.results = apply_event_filter(

@@ -22,6 +22,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from scanner import BreakoutScanner
+from scanner.trade_levels import attach as attach_trade_levels
 from scanner.exporter import to_excel, to_json, to_html, write_json
 from scanner.data_fetcher import (
     CHECKPOINT_PATH, get_ticker_universe, fetch_universe, fetch_vnindex,
@@ -645,6 +646,7 @@ def main():
             log.info(f"  {label}: 0/{len(by_ticker)} mã raise exception")
         log.info(f"  {label}: {len(results)} candidates")
         annotate_results(results, rs_map)
+        attach_trade_levels(results)
         if not args.no_corporate_actions:
             results = apply_event_filter(results, deadline=events_deadline,
                                          min_score=min_score)
