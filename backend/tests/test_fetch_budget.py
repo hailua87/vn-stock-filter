@@ -84,6 +84,9 @@ class Fetcher:
         self.last_sessions: list = []
 
     def __call__(self, ticker, exchange, lookback_days, last_session=None):
+        # Mỗi lượt giả này là một lần gọi mạng: fetch_with_cache thật gọi
+        # _net_throttle() ngay trước fetch_ohlcv, nên `delay` điều tiết ở đây.
+        data_fetcher._net_throttle()
         self.calls.append(ticker)
         self.last_sessions.append(last_session)
         if self.clock is not None:
@@ -428,3 +431,47 @@ def test_normal_full_run_is_not_marked_forced(monkeypatch):
     d = archive_decision(force=True, now=at_2330, fetch_summary=_summary(1.0), session_date='2026-08-26')
     assert d['write'] is True and d['forced'] is False
     assert 'ÉP GHI' not in d['reason']
+
+
+# ── Điều tiết theo lượt gọi mạng, không ngủ mù trước mỗi mã ──────────────
+def test_cache_hits_do_not_sleep(patched, monkeypatch):
+    """
+    Trước đây worker ngủ `delay` trước MỌI mã: 500 × 2 s ≈ 16,7 phút của ngân
+    sách 45 phút, kể cả mã lấy từ cache không gọi mạng.
+    """
+    slept = []
+    monkeypatch.setattr(data_fetcher.time, 'sleep', lambda s: slept.append(s))
+
+    def cache_hit(ticker, exchange, lookback_days, last_session=None):
+        return _good_frame(ticker)           # không gọi mạng → không throttle
+    patched(cache_hit)
+    out = fetch_universe(universe(30), delay=2.0)
+    assert out.attrs['fetch_summary']['ok'] == 30
+    assert sum(slept) == 0
+
+
+def test_network_calls_are_spaced_by_delay(monkeypatch):
+    fake_now = [100.0]
+    slept = []
+
+    def sleep(s):
+        slept.append(s)
+        fake_now[0] += s
+    monkeypatch.setattr(data_fetcher.time, 'monotonic', lambda: fake_now[0])
+    monkeypatch.setattr(data_fetcher.time, 'sleep', sleep)
+    monkeypatch.setattr(data_fetcher, '_net_last_call', 0.0)
+    monkeypatch.setattr(data_fetcher, '_net_min_interval', 2.0)
+
+    data_fetcher._net_throttle()             # lần đầu: không chờ
+    fake_now[0] += 0.5                       # lượt gọi mạng tốn 0,5 s
+    data_fetcher._net_throttle()             # chờ nốt 1,5 s
+    fake_now[0] += 3.0                       # lượt gọi chậm 3 s > delay
+    data_fetcher._net_throttle()             # không chờ thêm
+    assert slept == [1.5]
+
+
+def test_interval_restored_after_fetch_universe(patched):
+    patched(Fetcher())
+    before = data_fetcher._net_min_interval
+    fetch_universe(universe(3), delay=0.001)
+    assert data_fetcher._net_min_interval == before
