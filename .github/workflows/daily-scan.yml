@@ -29,6 +29,14 @@ name: Daily Scan
 #   Workflow EOD cũ 17:00 (chỉ 2h15 sau close) lấy giá tạm → cache giữ data sai
 #   → ngày sau dùng cache → giá vĩnh viễn sai cho phiên đó.
 #   23:05 ICT đảm bảo vnstock đã update đúng trước khi scan.
+#
+#   ĐO LẠI (2026-09-22): với giá đóng cửa, nhận định trên không còn đúng. Archive
+#   ghi lúc ~17:00 ICT có Close trùng giá chốt ở 41/45 mã (16/09) và 57/60 mã
+#   (18/09); Volume chỉ thiếu nhẹ (trung vị ~0,1%). Mã lệch Close là do vnstock
+#   điều chỉnh hồi tố giá adjusted sau sự kiện quyền (FPT đúng ×1,1000), không
+#   phải giá tạm. Chi tiết: chú thích "ĐO LẠI" trong scanner/data_fetcher.py.
+#   Giữ lịch 23:05 cho tới khi đo thêm nhiều phiên. Lưu ý thêm: GitHub hay xếp
+#   hàng trễ — ca 12:05 thực tế chạy ~16:30-17:30, ca 23:05 hay chạy sau nửa đêm.
 on:
   schedule:
     - cron: '5 5 * * 1-5'    # 12:05 ICT — INTRADAY: sau phiên sáng
@@ -115,6 +123,9 @@ jobs:
         # tạm của vnstock và cache lại. Sau khi vnstock update đúng (~22:00 ICT
         # trở đi), workflow vẫn dùng cache cũ vì `last_date >= last_session`
         # check pass → không refetch → data sai vĩnh viễn cho phiên đó.
+        # (ĐO LẠI 2026-09-22: sau ~17:00 ICT Close đã chốt, chỉ Volume nhích nhẹ —
+        #  xem đầu file. Ngoài ra mỗi lần refetch tải lại 30 ngày cuối nên cache
+        #  tự sửa ở lần refetch kế tiếp; chỉ archive là ghi một lần.)
         #
         # Cache key bao gồm github.run_id để mỗi run đều save cache mới;
         # restore-keys khớp prefix 'ohlcv-cache-v3-' để restore cache mới nhất.
