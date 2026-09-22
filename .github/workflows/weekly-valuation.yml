@@ -44,6 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write  # scripts/ci-alert.sh mở/đóng issue cảnh báo
 
     concurrency:
       group: valuation
@@ -152,3 +153,23 @@ jobs:
           BRANCH="${{ github.ref_name }}" bash scripts/commit-bot-data.sh \
             "chore: cập nhật định giá $(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')" \
             web/data/valuation/ backend/data/snapshots/
+
+      # Cảnh báo bằng issue (nhãn workflow-failure): mở/comment khi hỏng, tự đóng
+      # khi chạy lại thành công. Trước đây workflow này đỏ 4 tuần liền (30/08–20/09)
+      # mà không có cảnh báo nào ngoài email mặc định. Xem scripts/ci-alert.sh.
+      - name: Close failure alert on success
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci-alert.sh ok "Weekly Valuation"
+
+      - name: Open or update failure alert
+        if: failure() || cancelled()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -f scripts/ci-alert.sh ]; then
+            bash scripts/ci-alert.sh fail "Weekly Valuation"
+          else
+            echo "::error::Weekly Valuation thất bại trước khi checkout — không mở được issue"
+          fi
