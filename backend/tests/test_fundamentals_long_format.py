@@ -6,9 +6,10 @@ cột = kỳ (mới trước), giá trị theo ĐỒNG. Code cũ coi dòng là k
 (`df.head(5).to_dict('records')`) nên normalizer không tìm thấy khoản mục
 nào và mọi trường rơi về 0.
 
-Fixture là output thật của `fetch_financial_statements` (vnstock 4.0.7, bản
-cộng đồng, lấy 2026-09-21) cho FPT và VCB, period='year'. Số kỳ vọng trong
-test đọc tay từ payload, không tính lại từ fixture.
+Fixture lấy từ output của `fetch_financial_statements` (vnstock 4.0.7, bản
+cộng đồng, lấy 2026-09-21) cho FPT và VCB, period='year', rồi ĐÃ BIẾN ĐỔI:
+chỉ giữ dòng code dùng và nhân giá trị tiền với FIXTURE_SCALE (xem
+fixture_scale.py). Số kỳ vọng tuyệt đối = số đọc tay từ BCTC thật × hệ số.
 """
 import json
 import sys
@@ -17,6 +18,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import pandas as pd
 import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fixture_scale import FIXTURE_SCALE  # fixture đã biến đổi, xem fixture_scale.py
 
 from scanner import financial_fetcher as ff
 from scanner.strategies.valuation.normalizer import normalize_fundamentals
@@ -45,7 +49,7 @@ def _fetch(monkeypatch, tmp_path, ticker, shares, price):
 def test_statement_records_are_periods_latest_first_in_bn():
     recs = ff.statement_to_records(_load('FPT')['balance_sheet'])
     assert [r['period'] for r in recs] == [str(y) for y in range(2025, 2017, -1)]
-    assert recs[0]['total_assets'] == pytest.approx(88_141.991634625)
+    assert recs[0]['total_assets'] == pytest.approx(88_141.991634625 * FIXTURE_SCALE)
 
 
 def test_keeps_enough_years_for_5y_cagr():
@@ -94,8 +98,8 @@ def test_fpt_end_to_end_normalized_values(monkeypatch, tmp_path):
 
     d = normalize_fundamentals(raw)
     bs, inc = d['balance_sheet'], d['income']
-    assert bs['total_assets'] == pytest.approx(88_141.991634625)
-    assert inc['revenue'] == pytest.approx(70_112.825100710)
+    assert bs['total_assets'] == pytest.approx(88_141.991634625 * FIXTURE_SCALE)
+    assert inc['revenue'] == pytest.approx(70_112.825100710 * FIXTURE_SCALE)
     assert len(inc['revenue_5y']) == 5 and inc['revenue_5y'][0] > inc['revenue_5y'][-1] > 0
     assert bs['shareholders_equity'] > 0
     assert bs['cash_and_equivalents'] > 0
@@ -110,8 +114,8 @@ def test_fpt_end_to_end_normalized_values(monkeypatch, tmp_path):
 def test_vcb_end_to_end_bank_fields(monkeypatch, tmp_path):
     raw = _fetch(monkeypatch, tmp_path, 'VCB', shares=8_355_675_094, price=58_900.0)
     d = normalize_fundamentals(raw)
-    assert d['balance_sheet']['total_assets'] == pytest.approx(2_442_279.166)
-    assert d['income']['net_interest_income'] == pytest.approx(58_771.41)
+    assert d['balance_sheet']['total_assets'] == pytest.approx(2_442_279.166 * FIXTURE_SCALE)
+    assert d['income']['net_interest_income'] == pytest.approx(58_771.41 * FIXTURE_SCALE)
     assert d['balance_sheet']['loans_to_customers'] > 0
     assert d['balance_sheet']['customer_deposits'] > 0
     assert 1_000 < d['per_share']['bvps'] < 100_000

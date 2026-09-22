@@ -253,7 +253,9 @@ def test_checkpoint_records_what_was_fetched(patched, tmp_path):
     data = json.loads(cp.read_text(encoding='utf-8'))
     assert data['stop_reason'] == 'time_budget'
     assert data['truncated'] is True
-    assert data['ok_tickers'] == ['T000', 'T001', 'T002', 'T003']
+    # Không so THỨ TỰ: as_completed trả các future đã xong theo thứ tự tùy ý khi
+    # nhiều cái cùng xong (từng làm test này đỏ ngẫu nhiên ~1/40 lần).
+    assert sorted(data['ok_tickers']) == ['T000', 'T001', 'T002', 'T003']
     assert len(data['skipped_tickers']) == 46
     assert data['total'] == 50
     assert data['time_budget_s'] == 100

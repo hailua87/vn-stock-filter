@@ -143,16 +143,38 @@ jobs:
         run: |
           python backend/backtest.py --horizon 90 --min-confidence 40
 
+      # Module B — chấm chất lượng (blueprint v3 §8–§10, §12): chạy NGAY SAU định
+      # giá, cùng universe (--limit phải bằng run_valuation), BCTC năm lấy từ cache
+      # vừa ghi; chỉ BCTC quý gọi mạng (~3 lượt/mã).
+      # continue-on-error: hỏng ở đây KHÔNG được chặn việc công bố định giá. Bước
+      # "Fail if quality failed" sau commit làm job đỏ để ci-alert mở issue.
+      - name: Run quality scoring
+        id: quality
+        continue-on-error: true
+        env:
+          VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
+          PYTHONIOENCODING: utf-8
+        run: |
+          python backend/run_quality.py \
+            --limit ${{ github.event.inputs.limit || '100' }}
+        timeout-minutes: 45
+
       - name: Commit valuation output
         run: |
           git config user.name "VN Scanner Bot"
           git config user.email "bot@vn-scanner.local"
 
-          # Dữ liệu định giá + sổ snapshot BCTC (audit F3). Push bằng
+          # Dữ liệu định giá + chất lượng + sổ snapshot BCTC (audit F3). Push bằng
           # scripts/commit-bot-data.sh: không rebase, không force-push (audit F9).
           BRANCH="${{ github.ref_name }}" bash scripts/commit-bot-data.sh \
-            "chore: cập nhật định giá $(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')" \
-            web/data/valuation/ backend/data/snapshots/
+            "chore: cập nhật định giá và chất lượng $(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')" \
+            web/data/valuation/ web/data/quality/ backend/data/snapshots/
+
+      - name: Fail if quality failed
+        if: steps.quality.outcome == 'failure'
+        run: |
+          echo "::error::Run quality scoring hỏng — định giá vẫn đã được công bố, xem log bước đó"
+          exit 1
 
       # Cảnh báo bằng issue (nhãn workflow-failure): mở/comment khi hỏng, tự đóng
       # khi chạy lại thành công. Trước đây workflow này đỏ 4 tuần liền (30/08–20/09)
