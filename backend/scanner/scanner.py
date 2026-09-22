@@ -18,13 +18,16 @@ class BreakoutScanner:
     def __init__(self, config: Optional[dict] = None,
                  exchanges: tuple = ('HOSE', 'HNX', 'UPCOM'),
                  fetch_corporate_actions: bool = True,
-                 events_deadline: Optional[float] = None):
+                 events_deadline: Optional[float] = None,
+                 events_min_score: Optional[float] = None):
         self.config = {**DEFAULT_CONFIG, **(config or {})}
         self.exchanges = exchanges
         self.results: list[CriteriaResult] = []
         self.fetch_corporate_actions = fetch_corporate_actions
         # time.monotonic(): quá hạn thì bộ lọc sự kiện quyền chỉ dùng cache
         self.events_deadline = events_deadline
+        # Chỉ kiểm sự kiện quyền cho mã đạt ngưỡng công bố (None = mọi mã)
+        self.events_min_score = events_min_score
 
     def scan_from_dataframe(self, df_all: pd.DataFrame) -> pd.DataFrame:
         """
@@ -58,6 +61,7 @@ class BreakoutScanner:
                 lookback_days=self.config['corporate_action_lookback_days'],
                 lookahead_days=self.config['corporate_action_lookahead_days'],
                 deadline=self.events_deadline,
+                min_score=self.events_min_score,
             )
 
         return self.to_dataframe()

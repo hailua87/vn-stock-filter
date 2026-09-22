@@ -276,7 +276,16 @@ def evaluate_archive_gates(now: datetime, fetch_summary: Optional[dict] = None,
         thin = coverage < min_coverage
         cov_str = f'{coverage:.0%}'
         thr_str = f'{min_coverage:.0%}'
-        if truncated or thin:
+        # Dừng vì HẾT GIỜ mà vẫn đủ ngưỡng thì cho ghi (2026-09-23): phiên 17/09
+        # mất archive dù độ phủ 85%. Hết giờ nghĩa là nguồn CHẬM — phần đã lấy
+        # vẫn đúng, chỉ thiếu phần cuối rổ (thanh khoản thấp nhất). Metadata
+        # archive ghi fetch_coverage/fetch_truncated nên đọc lại vẫn biết.
+        # Cầu dao thì khác: nguồn HỎNG liên tiếp, phần đã lấy cũng đáng ngờ → chặn.
+        if truncated and stop == 'time_budget' and not thin:
+            gates.append({'name': 'gate_coverage', 'passed': True,
+                          'detail': (f'{cov_str} >= {thr_str}, vòng fetch dừng vì hết giờ '
+                                     f'nhưng đủ ngưỡng — archive ghi kèm độ phủ')})
+        elif truncated or thin:
             why = f'{cov_str} < {thr_str}' if thin else f'{cov_str} >= {thr_str}'
             gates.append({
                 'name': 'gate_coverage', 'passed': False,
@@ -575,7 +584,8 @@ def main():
     events_deadline = _STARTED + args.run_budget
     scanner = BreakoutScanner(exchanges=exchanges,
                               fetch_corporate_actions=not args.no_corporate_actions,
-                              events_deadline=events_deadline)
+                              events_deadline=events_deadline,
+                              events_min_score=args.min_score)
     df_pb = scanner.scan_from_dataframe(df_all_raw)
     if not df_pb.empty:
         # Gắn RS vào bảng kết quả Pre-Breakout (scanner trả về DataFrame)
@@ -613,7 +623,7 @@ def main():
             except Exception as e:
                 log.warning(f"  Excel export failed: {e}")
 
-    def run_strategy(label, fn):
+    def run_strategy(label, fn, min_score):
         """Chấm điểm toàn bộ mã → gắn RS → áp bộ lọc sự kiện quyền."""
         results = []
         n_raised = 0
@@ -636,13 +646,15 @@ def main():
         log.info(f"  {label}: {len(results)} candidates")
         annotate_results(results, rs_map)
         if not args.no_corporate_actions:
-            results = apply_event_filter(results, deadline=events_deadline)
+            results = apply_event_filter(results, deadline=events_deadline,
+                                         min_score=min_score)
         return results
 
     # -------- Golden Cross — LONG preset (MA50 × MA200) --------
     log.info("Running Golden Cross strategy (LONG: MA50×MA200)...")
     gc_long_results = run_strategy(
-        'GC-long', lambda df_t, tk: golden_cross.evaluate(df_t, tk, preset='long'))
+        'GC-long', lambda df_t, tk: golden_cross.evaluate(df_t, tk, preset='long'),
+        args.min_score_goldencross)
     write_strategy_outputs(gc_long_results, web_dir / 'golden_cross_long', session_date,
                            args.min_score_goldencross, exchanges, total_scanned,
                            'golden_cross_long', market_context, decision, completeness,
@@ -651,7 +663,8 @@ def main():
     # -------- Golden Cross — SHORT preset (MA10 × MA20) --------
     log.info("Running Golden Cross strategy (SHORT: MA10×MA20)...")
     gc_short_results = run_strategy(
-        'GC-short', lambda df_t, tk: golden_cross.evaluate(df_t, tk, preset='short'))
+        'GC-short', lambda df_t, tk: golden_cross.evaluate(df_t, tk, preset='short'),
+        args.min_score_goldencross)
     write_strategy_outputs(gc_short_results, web_dir / 'golden_cross_short', session_date,
                            args.min_score_goldencross, exchanges, total_scanned,
                            'golden_cross_short', market_context, decision, completeness,
@@ -659,7 +672,8 @@ def main():
 
     # -------- Ichimoku --------
     log.info("Running Ichimoku strategy...")
-    ich_results = run_strategy('Ichimoku', lambda df_t, tk: ichimoku.evaluate(df_t, tk))
+    ich_results = run_strategy('Ichimoku', lambda df_t, tk: ichimoku.evaluate(df_t, tk),
+                               args.min_score_ichimoku)
     write_strategy_outputs(ich_results, web_dir / 'ichimoku', session_date,
                            args.min_score_ichimoku, exchanges, total_scanned,
                            'ichimoku', market_context, decision, completeness,
