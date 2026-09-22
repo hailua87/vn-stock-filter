@@ -55,6 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Cần để commit web/data/latest.json
+      issues: write    # scripts/ci-alert.sh mở/đóng issue cảnh báo
 
     # FIX: concurrency group ngăn 2 lần chạy chồng nhau. Nếu intraday đang chạy
     # mà EOD trigger → EOD đợi (cancel-in-progress: false) → tránh conflict commit.
@@ -324,7 +325,20 @@ jobs:
             web/data/golden_cross_long/ web/data/golden_cross_short/ \
             web/data/ichimoku/
 
-      - name: Notify on failure
-        if: failure()
+      # Cảnh báo bằng issue (nhãn workflow-failure): mở/comment khi hỏng, tự đóng
+      # khi chạy lại thành công. Xem scripts/ci-alert.sh.
+      - name: Close failure alert on success
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/ci-alert.sh ok "Daily scan"
+
+      - name: Open or update failure alert
+        if: failure() || cancelled()
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           echo "::error::Daily scan failed (${{ steps.runtype.outputs.run_type }}). Check logs above."
+          if [ -f scripts/ci-alert.sh ]; then
+            bash scripts/ci-alert.sh fail "Daily scan" "run_type=${{ steps.runtype.outputs.run_type }}"
+          fi
