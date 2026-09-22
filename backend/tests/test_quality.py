@@ -209,8 +209,14 @@ def test_mo_hinh_chua_kich_hoat():
 
 
 def test_can_xem_lai_theo_nguong_duoi():
+    r = ST.classify({**GOOD, 'resilience': 20}, FAIR)
+    assert r['status'] == 'REV' and 'Chống chịu 20 dưới 25' in r['reason']
+
+
+def test_nguong_xem_lai_la_nhom_duoi_cung_percentile():
+    """v3 D17: Chống chịu 45 (quanh trung vị) không còn là "Cần xem lại"."""
     r = ST.classify({**GOOD, 'resilience': 45}, FAIR)
-    assert r['status'] == 'REV' and 'Chống chịu 45' in r['reason']
+    assert r['status'] == 'MON' and 'Chống chịu 45 dưới 65' in r['reason']
 
 
 def test_du_chuan_chi_khi_dinh_gia_hap_dan_hoac_hop_ly():

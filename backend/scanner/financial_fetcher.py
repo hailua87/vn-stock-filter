@@ -208,7 +208,8 @@ def fetch_company_overview(ticker: str, source: str = 'vci') -> Optional[Dict[st
 
 
 def fetch_financial_statements(ticker: str, source: str = 'vci',
-                                period: str = 'year') -> Optional[Dict[str, pd.DataFrame]]:
+                                period: str = 'year',
+                                tables: Optional[tuple] = None) -> Optional[Dict[str, pd.DataFrame]]:
     """
     Fetch balance sheet + income statement + cash flow.
 
@@ -236,6 +237,9 @@ def fetch_financial_statements(ticker: str, source: str = 'vci',
         'cash_flow': lambda: fin.cash_flow(period=period, lang='en'),
         'ratio': lambda: fin.ratio(period=period, lang='en'),
     }
+    if tables is not None:
+        # Bỏ bớt bảng không dùng: mỗi bảng là một lượt gọi API
+        fetchers = {k: v for k, v in fetchers.items() if k in tables}
 
     for name, fn in fetchers.items():
         for attempt in range(3):
@@ -347,6 +351,50 @@ def fetch_fundamentals(ticker: str, period: str = 'year',
         except Exception as e:
             log.warning(f"  {ticker} cache write failed: {e}")
 
+    return result
+
+
+QUARTER_TABLES = ('balance_sheet', 'income', 'cash_flow')
+
+
+def fetch_quarterly_statements(ticker: str, use_cache: bool = True,
+                               cache_ttl_days: int = DEFAULT_CACHE_TTL_DAYS) -> Optional[Dict[str, Any]]:
+    """
+    BCTC QUÝ cho Module B (cờ quản trị, công bố chậm, veto thiếu hai quý).
+
+    Chỉ 3 bảng, không lấy bảng ratio (bản cộng đồng chỉ có 2018), không lấy
+    overview hay giá — Module B đã có chúng từ BCTC năm. Cache riêng
+    `{ticker}_quarter.json`, cùng schema và TTL với fetch_fundamentals. vnstock
+    trả số RIÊNG từng quý, không lũy kế (xem scanner/quality/adapter.py).
+    """
+    cache_path = _cache_path(ticker, 'quarter')
+    if use_cache and _is_cache_fresh(cache_path, cache_ttl_days):
+        try:
+            with open(cache_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            if data.get('schema') == CACHE_SCHEMA:
+                return data
+        except Exception as e:
+            log.warning(f"  {ticker} quarter cache read failed: {e}")
+
+    statements = fetch_financial_statements(ticker, period='quarter', tables=QUARTER_TABLES)
+    if not statements:
+        log.warning(f"  {ticker}: no quarterly statements available")
+        return None
+    result = {
+        'schema': CACHE_SCHEMA,
+        'ticker': ticker,
+        'fetched_at': datetime.now().isoformat(),
+        'vnstock_version': vnstock_version(),
+        'period': 'quarter',
+        **{k: statement_to_records(statements.get(k)) for k in QUARTER_TABLES},
+    }
+    if use_cache:
+        try:
+            with open(cache_path, 'w', encoding='utf-8') as f:
+                json.dump(result, f, ensure_ascii=False, indent=2, default=str)
+        except Exception as e:
+            log.warning(f"  {ticker} quarter cache write failed: {e}")
     return result
 
 

@@ -15,7 +15,12 @@ STALE_MAX_PERIODS = 2      # chi tieu cu hon 2 ky so voi ky moi nhat -> coi la t
 
 # --- Nguong trang thai watchlist (blueprint 10) ----------------------------
 QUALIFY = {'quality': 75, 'growth': 70, 'governance': 70, 'resilience': 65}
-REVIEW_BELOW = {'governance': 60, 'quality': 60, 'resilience': 50}
+# v3 D17 (2026-09-22): diem 3 chieu la PERCENTILE trong nhom nen trung vi ~50;
+# nguong cu 60/60/50 tu dong dua ~60% ma vao "Can xem lai" (chay that 100 ma:
+# 55 REV, trung vi Chat luong 49). Nay "Can xem lai" nghia la nhom duoi cung
+# (percentile < 30 / < 25). Quan tri la thang tuyet doi (100 - diem phat): < 30
+# tuong duong tong phat > 70, vd pha loang manh + lech dong tien + cong bo cham.
+REVIEW_BELOW = {'governance': 30, 'quality': 30, 'resilience': 25}
 SHARP_DROP_POINTS = 15     # co phu "Giam manh", khong doi trang thai
 
 # --- Quy doi dinh gia (blueprint 9) ----------------------------------------

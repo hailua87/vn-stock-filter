@@ -60,6 +60,8 @@ Nguyên tắc (giữ từ v2):
 | D14 | Lịch chạy | Valuation thứ Hai | Theo lịch thực trong repo (§12) |
 | D15 | Lộ trình | Phase 0 → 1 | Chèn Phase 0.5 (F1, F2, F3, F9) — **đã xong** (§15) |
 | D16 | Archive khi fetch dừng sớm | Luôn chặn | Dừng vì **hết giờ** mà độ phủ ≥ 80% thì cho ghi; dừng vì **cầu dao** vẫn chặn (§7.5) |
+| D17 | Ngưỡng "Cần xem lại" | Quản trị < 60, Chất lượng < 60, Chống chịu < 50 | Quản trị < 30, Chất lượng < 30, Chống chịu < 25. Điểm 3 chiều là **percentile** nên trung vị ~50; ngưỡng cũ tự động đưa ~60% mã vào "Cần xem lại" (chạy thật 22/09: 55/100) (§10) |
+| D18 | Cờ pha loãng | Số CP lưu hành tăng | Chỉ tính CP **phát hành lấy tiền**: phần CP tăng × min(1, tiền thu phát hành / phần vốn góp tăng). Cổ tức cổ phiếu, cổ phiếu thưởng không phải pha loãng (chạy thật: 58 → 19 mã bị cờ) (§8.5) |
 
 ## 4. Phạm vi
 
@@ -141,7 +143,7 @@ flowchart LR
 | `backend/run_valuation.py` + `strategies/valuation/` | Đã có; lớp quy đổi 4 mức **đã có** | Còn: nguồn NPL/CAR cho nhóm tài chính (§14.3) |
 | `backend/backtest.py` | Đã có (cho định giá) | Dùng để hiệu chỉnh ngưỡng định giá |
 | `industry_classifier.py`, `peer_database.py` | Đã có | Dùng lại để ánh xạ sang 5 mô hình chấm điểm (§8.2) |
-| Quality scoring | Lõi logic **đã có** (`backend/scanner/quality/`, 29 test) | Cần xây: adapter BCTC → schema chỉ tiêu, `run_quality.py`, `web/data/quality/*.json` |
+| Quality scoring | **Đã có** (Phase 1): lõi `backend/scanner/quality/`, adapter BCTC → schema chỉ tiêu (`adapter.py`), `backend/run_quality.py`, `web/data/quality/latest.json` + `archive/` | Còn: nguồn NPL/NIM cho `BANK`, kích hoạt `INSURANCE`, `REAL_ESTATE` |
 | Status engine (veto + phân loại watchlist) | Logic **đã có** (`scanner/quality/status.py`) | Nối vào `run_quality.py` |
 | Push dữ liệu của bot | `scripts/commit-bot-data.sh` | Không rebase, không merge driver, không force-push (audit F9) |
 | Cảnh báo CI | `scripts/ci-alert.sh` + `data-freshness-alert.yml` | Issue nhãn `workflow-failure` mở khi daily-scan/weekly-valuation hỏng, tự đóng khi hồi phục; chuông độ tươi bắt trường hợp không có run |
@@ -303,7 +305,7 @@ Chỉ giữ chỉ tiêu tính được từ BCTC/chỉ số mà vnstock trả v�
 
 | Cờ | Điều kiện | Phạt | Nguồn |
 |---|---|---:|---|
-| Pha loãng | Số CP lưu hành tăng bình quân 3 năm: > 10%/năm phạt 20; 5–10%/năm phạt 8 (một cờ hai mức, v3 D11) | 20 / 8 | BCTC |
+| Pha loãng | Số CP **phát hành lấy tiền** tăng bình quân 3 năm: > 10%/năm phạt 20; 5–10%/năm phạt 8 (một cờ hai mức, v3 D11, D18) | 20 / 8 | BCTC (vốn góp, tiền thu phát hành) |
 | Lợi nhuận lệch dòng tiền | LN ròng dương nhưng CFO âm ở ≥ 3 trong 4 quý gần nhất, hoặc CFO/LN ròng 3 năm < 0,5 | 25 | BCTC |
 | Công bố chậm | Chưa có số kỳ quý sau kết thúc kỳ + 45 ngày (dựa vào snapshot) | 10 | Snapshot |
 | Đang bị cảnh báo | Trạng thái cảnh báo | 25 | Cần xác thực |
@@ -371,7 +373,7 @@ Thứ tự đánh giá:
 
 1. Có veto → **Loại**.
 2. Thiếu bất kỳ chiều nào trong 4 chiều → **Thiếu dữ liệu**.
-3. Quản trị < 60, hoặc Chất lượng < 60, hoặc Chống chịu < 50 → **Cần xem lại**.
+3. Quản trị < 30, hoặc Chất lượng < 30, hoặc Chống chịu < 25 → **Cần xem lại** (v3 D17: nhóm dưới cùng theo percentile).
 4. Chất lượng ≥ 75, Tăng trưởng ≥ 70, Quản trị ≥ 70, Chống chịu ≥ 65:
    - Định giá Hấp dẫn hoặc Hợp lý → **Đủ chuẩn**.
    - Định giá Đắt hoặc Chưa có → **Theo dõi**.
@@ -418,7 +420,7 @@ Các ngưỡng là mặc định cấu hình, không phải bằng chứng về 
 | Daily scan (đã có) | OHLCV, chiến lược, archive; cần thêm điều kiện nền, `health.json` | Cron 12:05 và 23:05 ICT, thứ Hai–thứ Sáu. Thực tế GitHub xếp hàng trễ: ca 12:05 chạy ~16:30–17:30, ca 23:05 hay chạy sau nửa đêm |
 | Weekly valuation (đã có) | Định giá universe (`--limit 100 --period year`), ghi sổ snapshot BCTC | Chủ nhật 07:09 ICT (00:09 UTC) |
 | Data freshness alert (đã có) | Kiểm độ tươi `web/data/latest.json` theo lịch giao dịch | 08:07 ICT hằng ngày |
-| Weekly quality (cần xây) | Chấm 4 chiều, veto, trạng thái từ BCTC | Chạy ngay sau weekly valuation, cùng universe |
+| Weekly quality (đã có) | `run_quality.py` trong workflow weekly-valuation: chấm 4 chiều, veto, trạng thái; lấy thêm BCTC quý (~3 lượt/mã) | Ngay sau bước định giá, cùng job và universe; hỏng thì định giá vẫn công bố, job đỏ để mở issue |
 
 Không chạy hai workflow có gọi vnstock cùng lúc: chung một `VNSTOCK_API_KEY` (bản cộng đồng 60 request/phút) thì cả hai cùng chậm.
 
@@ -453,7 +455,7 @@ Mọi issue hiển thị trong khối "Tình trạng dữ liệu" của màn Hô
 |---|---|---|
 | 0. Dọn dẹp — **đã xong phần chính** | Không merge `rebuild/vercel-fisher`; lưu tài liệu vào `docs/`; xác thực các mục "Cần xác thực" ở §5.1, §7.1 | Có kết quả xác thực cho từng mục. Còn: trạng thái cảnh báo/kiểm soát, ý kiến kiểm toán (§14.2), tham số chiến lược §7.1 |
 | 0.5. Nền dữ liệu — **đã xong 22/09** | F1 dữ liệu định giá thật; F2 giữ 8 kỳ BCTC; F3 sổ snapshot point-in-time; F9 bot push không rebase | Đã xác nhận trên runner thật |
-| 1. Quality scoring | `scoring_models.yml`, snapshot BCTC, chỉ tiêu 3 mô hình, cờ quản trị, độ phủ, veto, status engine, `quality/latest.json` | Chạy được trên universe, mỗi trạng thái có lý do |
+| 1. Quality scoring — **đã chạy được 22/09** | Cấu hình, snapshot BCTC, chỉ tiêu 3 mô hình, cờ quản trị, độ phủ, veto, status engine, `quality/latest.json` | Chạy thật 100/100 mã, mỗi trạng thái có lý do: 52 Theo dõi, 16 Cần xem lại, 32 Thiếu dữ liệu (ngân hàng thiếu NPL/NIM, BĐS/bảo hiểm chưa kích hoạt) |
 | 2. Giao diện | 4 màn hình theo canvas v2 trên `web/` hiện có | Hiển thị đúng dữ liệu thật, empty state rõ ràng |
 | 3. Liên kết | Quy đổi định giá 4 mức, liên kết Chất lượng sang Module A, `health.json` | Hai module dùng chung universe và quy tắc |
 | 4. Hiệu chỉnh | Backtest ngưỡng định giá (≥ 3 tháng snapshot); backtest chiến lược nếu chốt ở §14.6; xét `INSURANCE`, `REAL_ESTATE` | Ngưỡng được cập nhật có ghi lại lý do |
