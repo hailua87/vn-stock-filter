@@ -40,6 +40,9 @@ import pandas as pd
 log = logging.getLogger(__name__)
 
 EVENTS_CACHE = Path(__file__).resolve().parent.parent / 'data' / 'cache' / 'events'
+
+# Khóa riêng trong kết quả fetch_events_batch: danh sách mã bị bỏ vì hết hạn chót
+SKIPPED_KEY = '__skipped__'
 EVENTS_CACHE.mkdir(parents=True, exist_ok=True)
 
 
@@ -200,23 +203,39 @@ def fetch_events(ticker: str, lookback_days: int = 365,
 
 def fetch_events_batch(tickers, delay: float = 1.0,
                        lookback_days: int = 365,
-                       lookahead_days: int = 30) -> dict:
+                       lookahead_days: int = 30,
+                       deadline: Optional[float] = None) -> dict:
     """
     Lấy sự kiện cho nhiều mã, tôn trọng rate limit của vnstock.
 
     Chỉ nên gọi cho danh sách mã ĐÃ có tín hiệu (vài chục mã) chứ không phải cả
     universe 500 mã — sự kiện quyền chỉ dùng để loại/ghi chú kết quả cuối.
+
+    `deadline` (giá trị time.monotonic()): quá hạn thì KHÔNG gọi API nữa, mã
+    còn lại chỉ dùng cache. Mã không có cache vắng mặt trong kết quả, và được
+    đếm vào `out[SKIPPED_KEY]`. Không có hạn chót này, khi nguồn chậm (21/09:
+    ~10 s/lần gọi × ~250 mã) daily-scan chạm timeout 60 phút và mất trắng
+    toàn bộ kết quả đã tính xong.
     """
     import time
     out = {}
+    skipped = []
     for i, tk in enumerate(tickers, 1):
         cached = _read_cache(EVENTS_CACHE / f'{tk}.json')
         if cached is not None:
             out[tk] = cached
             continue
+        if deadline is not None and time.monotonic() >= deadline:
+            skipped.append(tk)
+            continue
         if i > 1:
             time.sleep(delay)
         out[tk] = fetch_events(tk, lookback_days, lookahead_days)
+    if skipped:
+        log.warning(f"  Corporate actions: HẾT HẠN CHÓT — {len(skipped)}/{len(tickers)} mã "
+                    f"không kiểm được sự kiện quyền (giữ nguyên kết quả): "
+                    f"{', '.join(skipped[:15])}{' …' if len(skipped) > 15 else ''}")
+    out[SKIPPED_KEY] = skipped
     return out
 
 
@@ -287,7 +306,8 @@ def has_upcoming_event(events: list[CorporateAction], days: int = 5) -> Optional
 
 
 def apply_event_filter(results: list, lookback_days: int = 5,
-                       lookahead_days: int = 5, delay: float = 1.0) -> list:
+                       lookahead_days: int = 5, delay: float = 1.0,
+                       deadline: Optional[float] = None) -> list:
     """
     Áp bộ lọc sự kiện quyền lên KẾT QUẢ đã chấm điểm của bất kỳ strategy nào.
 
@@ -307,7 +327,8 @@ def apply_event_filter(results: list, lookback_days: int = 5,
 
     tickers = sorted({r.ticker for r in results})
     events_map = fetch_events_batch(tickers, delay=delay,
-                                    lookahead_days=max(lookahead_days, 30))
+                                    lookahead_days=max(lookahead_days, 30),
+                                    deadline=deadline)
 
     kept = []
     dropped = 0
