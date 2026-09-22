@@ -503,6 +503,22 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
             #
             # Hệ quả: mỗi run workflow sẽ refetch phiên hôm nay (chậm thêm ~2-3 phút
             # cho 500 mã). Đổi lại data luôn fresh nhất có thể.
+            #
+            # ĐO LẠI (2026-09-22): nhận định "giá tạm tới 22:00" ở trên KHÔNG còn
+            # đúng với giá đóng cửa. So archive ghi lúc ~17:00 ICT với dữ liệu
+            # vnstock lấy lại sau khi phiên đã chốt lâu:
+            #   16/09 (ghi 17:16): Close trùng 41/45 mã, Volume thiếu ở 9/45 mã
+            #                      (trung vị 0,12%, tối đa 2,08%)
+            #   18/09 (ghi 16:59): Close trùng 57/60 mã, Volume thiếu ở 7/60 mã
+            #                      (trung vị 0,08%, tối đa 0,36%)
+            # Các mã còn lại lệch Close theo một TỶ LỆ CỐ ĐỊNH qua mọi phiên (FPT
+            # đúng 1,1000 = cổ tức cổ phiếu 10%): đó là vnstock điều chỉnh hồi tố
+            # chuỗi giá adjusted sau sự kiện quyền, không phải giá tạm.
+            # Tức là sau ~17:00 ICT giá đã chốt; chỉ Volume còn có thể nhích nhẹ
+            # (thỏa thuận cộng muộn). Quy tắc refetch-khi-last_date==today vẫn giữ
+            # vì rẻ và còn bắt được phần Volume đó, và run chạy sau nửa đêm (dùng
+            # cache của run ~17:00) vì vậy KHÔNG mang giá sai. Mới đo 2 phiên —
+            # đo thêm trước khi dựa vào kết luận này để đổi giờ chạy.
             cache_fresh = (last_date >= last_session) and (last_date < today)
 
             if cache_fresh:
