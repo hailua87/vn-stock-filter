@@ -32,12 +32,29 @@ from scanner.data_fetcher import get_ticker_universe, setup_api_key
 from scanner.financial_fetcher import fetch_fundamentals
 from scanner.strategies.valuation import value_ticker
 from scanner.snapshots import record_snapshot
+from scanner.quality.status import valuation_band
 
 # Fair value lệch khỏi giá quá mức này gần như luôn do phương pháp không hợp
 # với doanh nghiệp (vd. EV/EBITDA khi EBITDA năm đáy < nợ ròng → BAF −97%),
 # không phải cơ hội thật. Không công bố làm tín hiệu; ghi vào metadata.
 MIN_PUBLISHED_UPSIDE = -0.80
 MAX_PUBLISHED_UPSIDE = 2.00
+
+
+def signals_with_bands(reports) -> tuple[list, dict]:
+    """
+    to_dict() của từng report + `valuation_band` (blueprint §9: Hấp dẫn / Hợp lý
+    / Đắt / Chưa có) và số mã theo mức. Web chỉ hiển thị mức này, KHÔNG hiển
+    thị verdict mua/bán của engine (§9, §16); `verdict` vẫn giữ cho backtest.py.
+    """
+    signals, counts = [], {}
+    for r in reports:
+        sig = r.to_dict()
+        sig['valuation_band'] = valuation_band(sig)
+        band = sig['valuation_band']['band']
+        counts[band] = counts.get(band, 0) + 1
+        signals.append(sig)
+    return signals, counts
 
 
 def outlier_reason(upside: float) -> str | None:
@@ -219,6 +236,8 @@ def main():
     for r in reports:
         verdict_counts[r.verdict] = verdict_counts.get(r.verdict, 0) + 1
 
+    signals_out, band_counts = signals_with_bands(reports)
+
     payload = {
         'generated_at': datetime.now().isoformat(),
         'strategy': 'multi_method_valuation',
@@ -230,9 +249,10 @@ def main():
             'total_attempted': len(tickers),
             'failures': len(failures),
             'verdict_counts': verdict_counts,
+            'band_counts': band_counts,
             'excluded_outliers': outliers,
         },
-        'signals': [r.to_dict() for r in reports],
+        'signals': signals_out,
     }
 
     # Write latest.json

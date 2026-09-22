@@ -173,6 +173,9 @@ class ValuationReport:
     method_weights: Dict[str, float] = field(default_factory=dict)
     warnings: List[str] = field(default_factory=list)
     recommendation_notes: List[str] = field(default_factory=list)
+    # Lý do _publish_guard hạ verdict về HOLD (nhóm tài chính, 1 phương pháp).
+    # Lớp mức định giá đọc trường này để trả "Chưa có" thay vì "Hấp dẫn"/"Đắt".
+    guard_reason: Optional[str] = None
 
     def to_dict(self) -> dict:
         """Chuyển thành dict JSON-serializable, tương thích web frontend pattern."""
@@ -204,6 +207,7 @@ class ValuationReport:
                 for m in self.methods_used
             ],
             'warnings': list(dict.fromkeys(self.warnings))[:5],  # dedupe + cap
+            'guard_reason': self.guard_reason,
             'notes': self.recommendation_notes[:8],
         }
 
@@ -288,15 +292,21 @@ MIN_METHODS_FOR_DIRECTIONAL = 2
 
 def _publish_guard(verdict: str, industry: ValuationIndustry,
                    n_methods: int) -> Tuple[str, Optional[str]]:
-    """Hạ verdict có hướng về HOLD khi chưa đủ căn cứ. Trả (verdict, cảnh báo)."""
-    if verdict == "HOLD":
-        return verdict, None
+    """
+    Chưa đủ căn cứ để kết luận → verdict HOLD và trả lý do. Trả (verdict, lý do).
+
+    Lý do được trả CẢ KHI mô hình đã tự ra HOLD: lớp mức định giá dùng nó để
+    công bố "Chưa có". Nếu chỉ chặn verdict có hướng thì ngân hàng có upside
+    nằm giữa hai ngưỡng vẫn nhận nhãn "Hợp lý"/"Đắt" (VCB, VND 22/09) — cũng là
+    một kết luận, trong khi chưa có NPL/CAR.
+    """
+    model = f" — mô hình cho {verdict}, đã hạ về HOLD" if verdict != "HOLD" else ""
     if industry in HOLD_ONLY_INDUSTRIES:
         return "HOLD", (f"Nhóm tài chính ({industry.value}): chưa có NPL/CAR nên chưa "
-                        f"khuyến nghị — mô hình cho {verdict}, đã hạ về HOLD")
+                        f"đưa ra kết luận định giá{model}")
     if n_methods < MIN_METHODS_FOR_DIRECTIONAL:
         return "HOLD", (f"Chỉ có {n_methods} phương pháp định giá khả dụng, không kiểm "
-                        f"chéo được — mô hình cho {verdict}, đã hạ về HOLD")
+                        f"chéo được{model}")
     return verdict, None
 
 
@@ -535,6 +545,7 @@ def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
         method_weights={m: method_weights[m] for m in used_methods},
         warnings=all_warnings,
         recommendation_notes=rec_notes,
+        guard_reason=guard_warning,
     )
 
 
