@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VN Watchlist — Chất lượng dài hạn</title>
+<!-- Nền tối như toàn app (blueprint v3 D19). Chỉ dùng token phi màu của tokens.css
+     (--fs-*, --sp-*, --r-*); màu lấy từ styles.css. Xem chú thích trong ../index.html. -->
+<link rel="stylesheet" href="../tokens.css">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../valuation/valuation.css">
+<link rel="stylesheet" href="watchlist.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="brand">
+      <span class="brand-mark">●</span>
+      <span class="brand-name">VN-SCANNER</span>
+    </div>
+    <span class="page-title">/ Watchlist dài hạn</span>
+  </div>
+
+  <div class="topbar-center wl-stats" id="wl-stats" aria-label="Số mã theo trạng thái">
+    <span class="stat-num" id="stat-total">—</span><span class="stat-lbl">mã</span>
+    <span class="stat-date" id="stat-date">—</span>
+  </div>
+
+  <div class="topbar-right">
+    <a href="../index.html" class="link-btn wl-nav">← Scanner</a>
+    <a href="../valuation/index.html" class="link-btn wl-nav">Định giá</a>
+  </div>
+</header>
+
+<div id="wl-banner" class="demo-banner" style="display: none;"></div>
+
+<nav class="wl-tabs" id="wl-tabs" aria-label="Lọc theo trạng thái"></nav>
+
+<main class="val-dashboard wl-dashboard">
+
+  <aside class="val-filters wl-filters">
+    <div class="col-head"><span class="col-title">BỘ LỌC</span></div>
+    <div class="col-body">
+      <div class="fg">
+        <label class="fg-label" for="wl-search">Mã</label>
+        <input id="wl-search" class="wl-input" type="search" placeholder="VD: FPT" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label class="fg-label" for="wl-model">Mô hình chấm điểm</label>
+        <select id="wl-model" class="wl-input"><option value="">Tất cả</option></select>
+      </div>
+      <div class="info-card">
+        <div class="info-title">Cách đọc</div>
+        <div class="info-body">
+          <p>Điểm 0–100 của Chất lượng, Tăng trưởng, Chống chịu là <b>thứ hạng trong universe</b>
+             (top thanh khoản, cùng mô hình ngành), không phải toàn thị trường.</p>
+          <p>Quản trị = 100 − điểm phạt từ cờ tự động.</p>
+          <p>Vạch trên mỗi thanh là ngưỡng <b>Đủ chuẩn</b>. Dưới 70% trọng số có dữ liệu thì chiều để trống (—).</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <section class="val-table-wrap">
+    <div class="val-table-head">
+      <div class="val-tab-info">
+        Chấm 4 chiều + định giá → trạng thái kèm lý do.
+        <span class="muted" id="result-count">—</span>
+      </div>
+    </div>
+    <div class="val-table-container">
+      <table class="val-table wl-table" id="wl-table">
+        <thead>
+          <tr>
+            <th class="th-sort" data-sort="ticker">Mã</th>
+            <th class="th-sort" data-sort="status">Trạng thái · lý do</th>
+            <th class="th-sort" data-sort="quality">Chất lượng</th>
+            <th class="th-sort" data-sort="growth">Tăng trưởng</th>
+            <th class="th-sort" data-sort="governance">Quản trị</th>
+            <th class="th-sort" data-sort="resilience">Chống chịu</th>
+            <th class="th-center th-sort" data-sort="band">Định giá</th>
+          </tr>
+        </thead>
+        <tbody id="wl-tbody">
+          <tr><td colspan="7" class="td-empty">Đang tải...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <aside class="val-detail wl-detail" id="wl-detail">
+    <div class="detail-empty" id="detail-empty">
+      <p>Chọn một mã để xem từng chỉ tiêu</p>
+    </div>
+    <div class="detail-content" id="detail-content" style="display: none;"></div>
+  </aside>
+
+</main>
+
+<footer class="site-disclaimer">
+  <strong>Miễn trừ trách nhiệm:</strong> Trạng thái watchlist là <em>thứ tự ưu tiên nghiên cứu</em>
+  sinh tự động từ BCTC do bên thứ ba cung cấp, với ngưỡng mặc định chưa được kiểm định bằng
+  backtest. Đây <strong>không phải khuyến nghị đầu tư, mua hoặc bán</strong> bất kỳ chứng khoán nào.
+</footer>
+
+<script src="watchlist.js"></script>
+</body>
+</html>
