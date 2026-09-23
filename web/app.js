@@ -68,6 +68,13 @@ const STRATEGIES = {
     sources: ['pre_breakout', 'golden_cross_long', 'golden_cross_short', 'ichimoku'],
     criteria: [],                  // built dynamically per source
   },
+  today: {
+    name: 'Hôm nay',
+    dataDir: null,
+    isToday: true,
+    sources: ['pre_breakout', 'golden_cross_long', 'golden_cross_short', 'ichimoku'],
+    criteria: [],
+  },
   analyzer: {
     name: 'Phân tích mã',
     dataDir: null,
@@ -188,7 +195,9 @@ const state = {
   // khong can chung, nen nap san se lam cham man dau vi khong ly do.
   // `null` = chua nap, `{}`/`[]` = da nap nhung khong co du lieu — hai
   // trang thai khac nhau, gop lai se nap lai vo han khi tep rong.
-  detail: { ohlc: null, quality: null, valuation: null },
+  // `qualityPrev` dung `undefined` lam 'chua nap' vi `null` o day co nghia
+  // rieng: da tim va KHONG co ban cham nao truoc do.
+  detail: { ohlc: null, quality: null, valuation: null, health: null, qualityPrev: undefined },
 };
 
 // ──────────── Init ────────────
@@ -376,7 +385,7 @@ async function switchStrategy(strategy) {
   // TRUOC DO — ghi de len no bang mot lan ghe qua la lam mat dung cai minh
   // dang co gang nho. Chan o cho GHI chu khong phai o cho doc, vi chi o day
   // moi biet lua chon truoc do la gi de ma giu.
-  if (strategy !== 'analyzer') prefSet('strategy', strategy);
+  if (strategy !== 'analyzer' && strategy !== 'today') prefSet('strategy', strategy);
   document.querySelectorAll('.strat-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.strategy === strategy);
   });
@@ -388,6 +397,8 @@ async function switchStrategy(strategy) {
 
   const dashboard = document.getElementById('dashboard');
   const analyzerView = document.getElementById('analyzer-view');
+  const todayView = document.getElementById('today-view');
+  if (todayView) todayView.style.display = strategy === 'today' ? '' : 'none';
 
   // GỘP HAI Ô TÌM KIẾM: trước đây ô tìm của Analyzer luôn nằm trên topbar,
   // cạnh ô "Tìm mã" trong sidebar — hai ô trông giống nhau nhưng hành vi khác
@@ -395,6 +406,13 @@ async function switchStrategy(strategy) {
   // biết dùng cái nào. Nay ô Analyzer chỉ xuất hiện đúng lúc nó có tác dụng.
   const analyzerBox = document.querySelector('.topbar-analyzer');
   if (analyzerBox) analyzerBox.hidden = (strategy !== 'analyzer');
+
+  if (strategy === 'today') {
+    dashboard.classList.add('analyzer-mode');   // cung kieu chiem tron be ngang
+    if (analyzerView) analyzerView.style.display = 'none';
+    await renderToday();
+    return;
+  }
 
   // Toggle layout mode
   if (strategy === 'analyzer') {
@@ -416,7 +434,7 @@ async function switchStrategy(strategy) {
     }
     return;
   }
-  // Leaving analyzer
+  // Leaving analyzer / today
   dashboard.classList.remove('analyzer-mode');
   if (analyzerView) analyzerView.style.display = 'none';
 
@@ -2497,6 +2515,214 @@ function renderT2Note() {
   return `<p class="detail-t2">Lưu ý T+2: cổ phiếu mua phiên này về tài khoản
     vào sáng ngày làm việc thứ hai sau đó, trong thời gian ấy không bán lại được.
     Mức cắt lỗ ở trên vì vậy chỉ thực hiện được từ phiên T+2 trở đi.</p>`;
+}
+
+// ════════════════════════════════════════════════════════════
+// Man Hom nay (blueprint v3 §11.1)
+// ════════════════════════════════════════════════════════════
+
+const SEV_LABEL = { error: 'Lỗi', warn: 'Cảnh báo', info: 'Thông tin' };
+const loadHealth = () => loadDetailSource('health', './data/health.json', null);
+
+/**
+ * Ban cham chat luong LAN TRUOC, de biet ma nao vua doi trang thai.
+ * Tra `null` khi chua co ban nao truoc — khac han voi mang rong (co ban truoc
+ * va khong ma nao doi). Man hinh phai noi hai ca nay khac nhau, neu khong
+ * "chua so duoc" se doc thanh "khong co gi doi".
+ */
+async function loadQualityPrevious() {
+  if (state.detail.qualityPrev !== undefined) return state.detail.qualityPrev;
+  state.detail.qualityPrev = null;
+  try {
+    const idx = await (await fetch(`./data/quality/archive/index.json?_=${Date.now()}`)).json();
+    const cur = (await loadQuality())?.as_of;
+    const prev = (idx.dates || []).filter(d => d !== cur)[0];
+    if (!prev) return state.detail.qualityPrev;      // chi moi co mot ban
+    state.detail.qualityPrev = await (await fetch(`./data/quality/archive/${prev}.json`)).json();
+  } catch (e) {
+    console.warn('Khong nap duoc ban cham chat luong truoc:', e.message);
+  }
+  return state.detail.qualityPrev;
+}
+
+/** [{ticker, kind, from, to}] — doi trang thai hoac doi muc dinh gia. */
+function qualityChanges(cur, prev) {
+  if (!cur || !prev) return null;
+  const before = Object.fromEntries((prev.items || []).map(i => [i.ticker, i]));
+  const out = [];
+  for (const it of cur.items || []) {
+    const b = before[it.ticker];
+    if (!b) continue;                                 // ma moi vao universe
+    if (b.status !== it.status) {
+      out.push({ ticker: it.ticker, kind: 'status', from: b.status, to: it.status });
+    }
+    const bb = b.valuation?.band, nb = it.valuation?.band;
+    if (bb && nb && bb !== nb) {
+      out.push({ ticker: it.ticker, kind: 'band', from: bb, to: nb,
+                 fromLabel: b.valuation?.label, toLabel: it.valuation?.label });
+    }
+  }
+  return out;
+}
+
+function renderTodayMarket(mc) {
+  if (!mc || !mc.available) {
+    return '<p class="muted">Chưa có dữ liệu bối cảnh thị trường cho phiên này.</p>';
+  }
+  const b = mc.breadth || {};
+  const num = v => (v == null ? '—' : Number(v).toLocaleString('vi-VN'));
+  // Ten truong lay dung theo metadata.market_context that: `close` va `label`,
+  // khong phai `vnindex_close`/`note` — doc nham thi ca hai o im lang hien '—'.
+  const cells = [
+    ['VN-Index', num(mc.close)],
+    ['MA50', num(mc.ma50)],
+    ['20 phiên', mc.change_20d_pct == null ? '—'
+      : `${mc.change_20d_pct > 0 ? '+' : ''}${Number(mc.change_20d_pct).toFixed(1)}%`],
+    ['Mã trên MA50', b.pct_above_ma50 == null ? '—' : `${b.pct_above_ma50}%`],
+    ['Tỷ trọng gợi ý', mc.position_size_multiplier == null ? '—'
+      : `${Math.round(mc.position_size_multiplier * 100)}% mức thường`],
+  ];
+  const icon = { risk_on: '🟢', neutral: '🟡', risk_off: '🔴' }[mc.regime] || '⚪';
+  return `<div class="today-stats">${cells.map(([k, v]) =>
+    `<div class="today-stat"><span class="today-stat-k">${k}</span><span class="today-stat-v">${escapeAttr(v)}</span></div>`).join('')}</div>
+    ${mc.label ? `<p class="today-regime">${icon} ${escapeAttr(mc.label)}</p>` : ''}`;
+}
+
+/** Top ma theo so chien luoc khop — dung dung thu tu cua man Scan (§7.4). */
+function renderTodayTop(limit = 10) {
+  const map = state.strategyMap || {};
+  const byTicker = {};
+  for (const key of STRATEGIES.today.sources) {
+    for (const sig of state.combined.sourceData[key]?.signals || []) {
+      const cur = byTicker[sig.ticker];
+      if (!cur || (sig.total_score || 0) > (cur.total_score || 0)) byTicker[sig.ticker] = sig;
+    }
+  }
+  const rows = Object.values(byTicker)
+    .filter(s => !s.m_suppress_signal && s.m_limit_status !== 'floor')
+    .sort((a, b) => ((map[b.ticker] || []).length - (map[a.ticker] || []).length)
+      || ((b.m_vol_ratio || 0) - (a.m_vol_ratio || 0)))
+    .slice(0, limit);
+  if (!rows.length) return '<p class="muted">Phiên này không có tín hiệu nào.</p>';
+
+  // Bang 6 cot khong lot khung dien thoai. Cho cuon ngang trong mot khung rieng
+  // thay vi ep cot hep lai: ep thi so lieu bi cat, cuon thi van doc duoc het.
+  return `<div class="today-scroll"><table class="today-table"><thead><tr>
+      <th>Mã</th><th>Chiến lược khớp</th><th class="th-num">Giá</th>
+      <th class="th-num">±1D</th><th class="th-num">KL/TB20</th><th class="th-num">R:R</th>
+    </tr></thead><tbody>${rows.map(s => {
+      const tags = (map[s.ticker] || []).map(k => `<span class="strat-tag">${STRAT_TAG[k] || k}</span>`).join('');
+      const ch = s.m_change_1d_pct;
+      const cls = ch > 0 ? 'up' : ch < 0 ? 'down' : '';
+      return `<tr data-ticker="${escapeAttr(s.ticker)}" tabindex="0">
+        <td><span class="ticker-cell">${escapeAttr(s.ticker)}</span></td>
+        <td><span class="strat-tags">${tags}</span></td>
+        <td class="td-num">${s.close == null ? '—' : Number(s.close).toFixed(2).replace('.', ',')}</td>
+        <td class="td-num ${cls}">${ch == null ? '—' : `${ch > 0 ? '+' : ''}${ch.toFixed(2)}%`}</td>
+        <td class="td-num">${s.m_vol_ratio == null ? '—' : `${s.m_vol_ratio.toFixed(2)}×`}</td>
+        <td class="td-num">${s.m_rr == null ? '—' : s.m_rr.toFixed(2)}</td>
+      </tr>`;
+    }).join('')}</tbody></table></div>
+    <p class="muted">Bấm một dòng để mở màn Chi tiết mã.</p>`;
+}
+
+function renderTodayChanges(changes) {
+  if (changes === null) {
+    return `<p class="muted">Chưa có bản chấm trước để so sánh — lần chấm chất lượng
+      đầu tiên mới chạy. Từ lần sau, mục này sẽ liệt kê mã đổi trạng thái hoặc đổi mức định giá.</p>`;
+  }
+  if (!changes.length) {
+    return '<p class="muted">Không mã nào đổi trạng thái hay mức định giá so với lần chấm trước.</p>';
+  }
+  const QV = window.QV;
+  return `<ul class="today-changes">${changes.map(c => c.kind === 'status'
+    ? `<li><b>${escapeAttr(c.ticker)}</b> ${QV.statusBadge(c.from)} → ${QV.statusBadge(c.to)}</li>`
+    : `<li><b>${escapeAttr(c.ticker)}</b> định giá:
+         <span class="band-badge band-${c.from}">${escapeAttr(c.fromLabel || c.from)}</span> →
+         <span class="band-badge band-${c.to}">${escapeAttr(c.toLabel || c.to)}</span></li>`).join('')}</ul>`;
+}
+
+function renderTodayHealth(h) {
+  if (!h) {
+    return `<p class="muted">Chưa có <code>health.json</code>. Tệp này do lượt quét hằng ngày
+      sinh ra — nó sẽ xuất hiện sau lượt chạy kế tiếp.</p>`;
+  }
+  const d = h.sources?.daily_scan || {};
+  const rows = [
+    ['Phiên quét', d.session_date || '—'],
+    ['Chạy lúc', [d.run_date_ict, d.run_time_ict].filter(Boolean).join(' ') || '—'],
+    ['Số mã lấy được', d.universe == null ? '—'
+      : `${d.universe}${d.fetch?.failed ? ` (${d.fetch.failed} lỗi)` : ''}`],
+    ['Sau điều kiện nền', d.universe_after_base == null ? '—'
+      : `${d.universe_after_base}${d.dropped_low_liquidity ? ` (loại ${d.dropped_low_liquidity})` : ''}`],
+    ['Mã dữ liệu chưa mới', d.stale_ratio == null ? '—' : `${Math.round(d.stale_ratio * 100)}%`],
+    ['Bản lưu phiên', d.archive_written ? 'đã ghi' : 'chưa ghi'],
+  ];
+  for (const key of ['valuation', 'quality']) {
+    const src = h.sources?.[key];
+    if (!src) continue;
+    rows.push([src.label, src.available
+      ? `${src.as_of || '—'}${src.age_days == null ? '' : ` · ${src.age_days} ngày trước`}`
+      : 'chưa có dữ liệu']);
+  }
+  const issues = (h.issues || []).map(i =>
+    `<li class="sev-${i.severity}"><span class="sev-tag">${SEV_LABEL[i.severity] || i.severity}</span>
+       ${escapeAttr(i.message)}</li>`).join('');
+
+  return `<table class="today-table today-health"><tbody>${rows.map(([k, v]) =>
+      `<tr><th scope="row">${k}</th><td>${escapeAttr(v)}</td></tr>`).join('')}</tbody></table>
+    ${issues ? `<ul class="today-issues">${issues}</ul>`
+             : '<p class="muted">Không có vấn đề nào được ghi nhận.</p>'}`;
+}
+
+async function renderToday() {
+  const box = document.getElementById('today-content');
+  if (!box) return;
+  box.innerHTML = '<p class="muted">Đang tải…</p>';
+
+  // Bon nguon, nap song song. Nguon nao hong thi phan cua no bao thieu du lieu,
+  // ba phan con lai van hien — mot man tom tat ma trang bong vi mot tep 404 thi
+  // vo dung dung luc can nhat.
+  if (Object.keys(state.combined.sourceData).length === 0) await loadCombinedData(true);
+  await ensureStrategyMap();
+  const [health, q, qPrev] = await Promise.all([loadHealth(), loadQuality(), loadQualityPrevious()]);
+
+  const mc = state.marketContext
+    || state.combined.sourceData.pre_breakout?.metadata?.market_context;
+  const changes = qPrev ? qualityChanges(q, qPrev) : null;
+
+  box.innerHTML = `
+    <h2 class="today-title">Hôm nay${state.currentDate ? ` · phiên ${escapeAttr(state.currentDate)}` : ''}</h2>
+
+    <section class="today-block">
+      <div class="analyzer-section-title"><span class="section-icon">📊</span> Thị trường</div>
+      ${renderTodayMarket(mc)}
+    </section>
+
+    <section class="today-block">
+      <div class="analyzer-section-title"><span class="section-icon">⚡</span> Tín hiệu nổi bật</div>
+      ${renderTodayTop()}
+    </section>
+
+    <section class="today-block">
+      <div class="analyzer-section-title"><span class="section-icon">🏛️</span> Watchlist đổi trạng thái</div>
+      ${renderTodayChanges(changes)}
+    </section>
+
+    <section class="today-block">
+      <div class="analyzer-section-title"><span class="section-icon">🩺</span> Tình trạng dữ liệu</div>
+      ${renderTodayHealth(health)}
+    </section>`;
+
+  box.querySelectorAll('tr[data-ticker]').forEach(tr => {
+    const open = () => {
+      switchStrategy('analyzer').then(() => analyzeTicker(tr.dataset.ticker));
+    };
+    tr.addEventListener('click', open);
+    tr.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+    });
+  });
 }
 
 /**
