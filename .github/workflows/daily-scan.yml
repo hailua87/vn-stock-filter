@@ -328,13 +328,20 @@ jobs:
             MSG="chore(data): tin hieu $SESSION_DATE [EOD $RUN_TIME_ICT] [skip ci]"
           fi
 
+          # DANH SACH DUOI DAY PHAI PHU HET moi thu run_daily ghi ra web-data-dir.
+          # Script reset ve origin roi CHI chep lai nhung path duoc liet ke, nen
+          # tep khong co ten o day bi vut lang le: chay van xanh, log van bao
+          # "da ghi". Da mac dung loi nay voi health.json va ohlc/ ngay
+          # 23/09/2026. backend/tests/test_bot_push_paths.py doi chieu danh sach
+          # nay voi run_daily.WEB_OUTPUTS de khong tai dien.
           # Push bằng scripts/commit-bot-data.sh: chụp các path dữ liệu, reset về
           # origin mới nhất, chép đè, commit, push (3 lần). Không rebase, không
           # merge driver, không force-push — xem giải thích trong script (audit F9).
           BRANCH="${{ github.ref_name }}" bash scripts/commit-bot-data.sh "$MSG" \
             web/data/latest.json web/data/archive/ \
             web/data/golden_cross_long/ web/data/golden_cross_short/ \
-            web/data/ichimoku/
+            web/data/ichimoku/ \
+            web/data/health.json web/data/ohlc/
 
       # Cảnh báo bằng issue (nhãn workflow-failure): mở/comment khi hỏng, tự đóng
       # khi chạy lại thành công. Xem scripts/ci-alert.sh.

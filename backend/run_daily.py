@@ -67,6 +67,23 @@ FETCH_BUDGET_S = int(os.environ.get('FETCH_BUDGET_S', 45 * 60))
 # lúc tiến trình bắt đầu. 55 phút < timeout 60 phút của workflow. Trước đây chỉ
 # vòng fetch có ngân sách: 21-22/09 nguồn chậm ~5 lần, bộ lọc sự kiện quyền gọi
 # API cho ~250 mã sau phút 45 và job bị chặt ở phút 60, mất cả kết quả đã tính.
+# Moi thu run_daily ghi ra duoi --web-data-dir. Bo day PHAI khop voi danh sach
+# duong dan truyen cho scripts/commit-bot-data.sh trong .github/workflows/
+# daily-scan.yml: script do reset ve origin roi CHI chep lai nhung path duoc
+# liet ke, nen tep khong co ten trong do bi vut lang le — chay van xanh, log
+# van bao "da ghi", va khong ai biet cho toi khi mo web ra thay 404. Da mac
+# dung loi nay voi health.json va ohlc/ ngay 23/09/2026.
+# backend/tests/test_bot_push_paths.py doi chieu hai ben.
+WEB_OUTPUTS = (
+    'latest.json',              # Pre-Breakout
+    'archive/',                 # ban luu phien cua Pre-Breakout + index
+    'golden_cross_long/',
+    'golden_cross_short/',
+    'ichimoku/',
+    'ohlc/',                    # nen 60 phien cho man Chi tiet ma
+    'health.json',              # tinh trang du lieu cho man Hom nay
+)
+
 RUN_BUDGET_S = int(os.environ.get('RUN_BUDGET_S', 55 * 60))
 _STARTED = monotonic()
 
