@@ -34,9 +34,10 @@ window.QV = (function () {
     dilution_mild: 'Pha loãng vừa (5–10%/năm)',
     earnings_cash_gap: 'Lợi nhuận lệch dòng tiền',
     late_filing: 'Công bố BCTC quý chậm',
-    warning_status: 'Đang bị cảnh báo',
-    qualified_opinion: 'Ý kiến kiểm toán ngoại trừ',
   };
+  // 'warning_status' và 'qualified_opinion' đã gỡ 23/09/2026 (§14.2): không có
+  // nguồn nào cung cấp được. Giữ nhãn ở đây thì màn hình vẫn hứa một thứ backend
+  // không bao giờ gửi. Thay bằng notEvaluated() nói thẳng là chưa xét.
   const MISSING_GOV_LABEL = {
     dilution: 'pha loãng', earnings_cash_gap: 'lệch dòng tiền',
     late_filing: 'công bố chậm',
@@ -153,6 +154,20 @@ window.QV = (function () {
     }).join('')}</ul>`;
   }
 
+  /**
+   * Những yếu tố ĐÃ CÂN NHẮC và KHÔNG đánh giá được vì không có nguồn.
+   * `meta` là metadata.governance_not_evaluated + veto_not_evaluated.
+   *
+   * Vì sao phải hiện: điểm Quản trị 100 mà không nói gì thêm sẽ đọc thành
+   * "đã soi hết, sạch". Thật ra là "đã soi 3 thứ, còn 2 thứ chưa soi được".
+   */
+  function notEvaluated(meta) {
+    const items = Object.values(meta || {});
+    if (!items.length) return '';
+    return `<p class="muted wl-not-eval">Chưa xét: ${items.map(esc).join('; ')}
+      — không có nguồn dữ liệu.</p>`;
+  }
+
   function bandBadge(v) {
     const band = v?.band || 'NOT_AVAILABLE';
     return `<span class="band-badge band-${band}" title="${esc(v?.reason || '')}">${esc(v?.label || 'Chưa có')}</span>`;
@@ -165,7 +180,8 @@ window.QV = (function () {
   return {
     DIMS, DIM_LABEL, STATUS_ORDER, STATUS_LABEL, MODEL_LABEL, BAND_ORDER,
     FLAG_LABEL, MISSING_GOV_LABEL, METRIC,
-    esc, fmtMetric, metricLabel, dimBar, metricsTable, flagList, bandBadge, statusBadge,
+    esc, fmtMetric, metricLabel, dimBar, metricsTable, flagList, notEvaluated,
+    bandBadge, statusBadge,
     nf1, nf2,
   };
 })();

@@ -2385,7 +2385,9 @@ function renderLongTerm(ticker, q, qMeta, val) {
         <b>${gov.score ?? '—'}</b>
         <small>· phủ ${Math.round((gov.coverage || 0) * 100)}%</small></div>
       ${flags || '<p class="muted">Không có cờ quản trị.</p>'}
-      ${govMissing ? `<p class="muted">Chưa đánh giá được: ${escapeAttr(govMissing)}</p>` : ''}
+      ${govMissing ? `<p class="muted">Thiếu dữ liệu cho: ${escapeAttr(govMissing)}</p>` : ''}
+      ${QV.notEvaluated({ ...(qMeta?.governance_not_evaluated || {}),
+                          ...(qMeta?.veto_not_evaluated || {}) })}
       ${q.veto ? `<p class="wl-veto">Veto: ${escapeAttr(q.veto)}</p>` : ''}
     </div>
     ${renderValuationBlock(q.valuation, val)}

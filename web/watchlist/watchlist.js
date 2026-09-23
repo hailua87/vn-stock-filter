@@ -206,7 +206,9 @@ function select(ticker) {
     <div class="detail-section">
       <div class="detail-section-title">Quản trị: <b>${gov.score ?? '—'}</b><small> · phủ ${Math.round((gov.coverage || 0) * 100)}%</small></div>
       ${flags || '<p class="muted">Không có cờ.</p>'}
-      ${govMissing ? `<p class="muted">Chưa đánh giá được: ${esc(govMissing)}</p>` : ''}
+      ${govMissing ? `<p class="muted">Thiếu dữ liệu cho: ${esc(govMissing)}</p>` : ''}
+      ${window.QV.notEvaluated({ ...(state.meta.governance_not_evaluated || {}),
+                                 ...(state.meta.veto_not_evaluated || {}) })}
       ${it.veto ? `<p class="wl-veto">Veto: ${esc(it.veto)}</p>` : ''}
     </div>
     <div class="detail-section">

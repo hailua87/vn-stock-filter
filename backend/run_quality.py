@@ -176,6 +176,11 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
                                 for dim, specs in C.MODELS[m].items()}
                             for m in sorted(C.ACTIVE_MODELS)},
             'governance_penalty': C.PENALTY,
+            # Yeu to ĐÃ CAN NHAC va KHONG danh gia duoc vi khong co nguon
+            # (§14.2). Giao dien phai noi ra, neu khong nguoi doc mac dinh
+            # diem Quan tri da xet het moi thu.
+            'governance_not_evaluated': C.GOVERNANCE_NOT_EVALUATED,
+            'veto_not_evaluated': C.VETO_NOT_EVALUATED,
             'note': ('Percentile là thứ hạng trong universe Module B (top thanh khoản), '
                      'không phải toàn thị trường. Ngưỡng là mặc định cấu hình, chưa backtest. '
                      'Không phải khuyến nghị đầu tư.'),

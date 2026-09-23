@@ -114,15 +114,28 @@ MODELS = {
 }
 
 # --- Co quan tri tu dong (blueprint 8.5) ------------------------------------
-# enabled=False: CHUA CO NGUON du lieu -> loai khoi mau so do phu. Neu de
-# enabled=True ma khong co nguon, moi ma deu thieu 2/5 co, do phu 60% < 70%
-# va chieu Quan tri cua TOAN BO universe thanh rong.
 GOVERNANCE_FLAGS = {
     'dilution':          {'enabled': True,  'source': 'bctc'},
     'earnings_cash_gap': {'enabled': True,  'source': 'bctc'},
     'late_filing':       {'enabled': True,  'source': 'snapshot'},
-    'warning_status':    {'enabled': False, 'source': 'chua co'},
-    'qualified_opinion': {'enabled': False, 'source': 'chua co'},
+}
+
+# Hai co da GO ngay 23/09/2026 (§14.2 chot). Chung tung nam trong
+# GOVERNANCE_FLAGS voi enabled=False, tuc khong bao gio bat, nhung giao dien
+# van mang nhan cua chung — noi voi nguoi doc rang diem Quan tri co xet hai
+# yeu to nay, trong khi khong.
+#
+# Da khao sat 23/09/2026: vnstock khong co; TCBS co getListAuditFirm nhung chi
+# cho TEN cong ty kiem toan va nam, KHONG co y kien kiem toan; getTickerOverview
+# khong co truong canh bao/kiem soat. Trang thai canh bao duoc cong bo dang
+# tin/su kien chu khong phai truong co cau truc.
+#
+# Khai o day de giao dien noi duoc "chua xet" thay vi im lang. Co nguon that
+# thi dua nguoc lai GOVERNANCE_FLAGS.
+# Chuoi hien THANG len man hinh nen co dau — cung quy uoc voi ly do veto.
+GOVERNANCE_NOT_EVALUATED = {
+    'warning_status': 'diện cảnh báo / kiểm soát của sở giao dịch',
+    'qualified_opinion': 'ý kiến kiểm toán ngoại trừ',
 }
 DILUTION_STRONG = 0.10     # tang so CP binh quan/nam trong 3 nam
 DILUTION_MILD = 0.05
@@ -131,8 +144,6 @@ PENALTY = {
     'dilution_mild': 8,
     'earnings_cash_gap': 25,
     'late_filing': 10,
-    'warning_status': 25,
-    'qualified_opinion': 30,
 }
 FILING_LAG_DAYS = 45       # BCTC quy: han cong bo + do tre thuc te
 
@@ -140,6 +151,11 @@ FILING_LAG_DAYS = 45       # BCTC quy: han cong bo + do tre thuc te
 VETO_ENABLED = {
     'delisted': True,              # backend/data/delisted_tickers.txt
     'missing_two_quarters': True,  # tu snapshot
-    'suspended_or_controlled': False,  # chua co nguon trang thai
-    'adverse_opinion': False,          # chua co nguon y kien kiem toan
+}
+
+# Hai veto da GO cung luc voi hai co tren, cung mot ly do: khong co nguon
+# (§14.2). Ghi lai day de khong ai tuong la quen.
+VETO_NOT_EVALUATED = {
+    'suspended_or_controlled': 'bị kiểm soát, hạn chế hoặc đình chỉ giao dịch',
+    'adverse_opinion': 'ý kiến kiểm toán trái ngược hoặc từ chối',
 }
