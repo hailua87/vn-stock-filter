@@ -253,3 +253,67 @@ def test_score_group_end_to_end_mot_mo_hinh():
     # tang truong cao nhat phai dung dau chieu growth
     assert res['T9']['growth']['score'] > res['T0']['growth']['score']
     assert res['T9']['growth']['coverage'] >= C.COVERAGE_MIN
+
+
+# ─── §14.2: hai cờ và hai veto đã gỡ vì không có nguồn (chốt 23/09/2026) ───
+
+def test_unsourced_flags_are_gone_not_just_disabled():
+    """
+    Để chúng trong GOVERNANCE_FLAGS với enabled=False vẫn là nói dối: giao diện
+    mang nhãn của chúng, người đọc tưởng điểm Quản trị có xét hai yếu tố này.
+    """
+    assert 'warning_status' not in C.GOVERNANCE_FLAGS
+    assert 'qualified_opinion' not in C.GOVERNANCE_FLAGS
+    assert 'warning_status' not in C.PENALTY
+    assert 'qualified_opinion' not in C.PENALTY
+    assert 'suspended_or_controlled' not in C.VETO_ENABLED
+    assert 'adverse_opinion' not in C.VETO_ENABLED
+
+
+def test_dropped_items_are_recorded_not_forgotten():
+    """Gỡ mà không ghi lại thì lần sau có người tưởng là quên làm."""
+    assert set(C.GOVERNANCE_NOT_EVALUATED) == {'warning_status', 'qualified_opinion'}
+    assert set(C.VETO_NOT_EVALUATED) == {'suspended_or_controlled', 'adverse_opinion'}
+    for d in (C.GOVERNANCE_NOT_EVALUATED, C.VETO_NOT_EVALUATED):
+        for k, v in d.items():
+            assert isinstance(v, str) and len(v) > 10, f'{k} thiếu mô tả cho người đọc'
+
+
+def test_every_enabled_flag_still_has_a_penalty():
+    """Cờ bật mà không có mức phạt thì bật cũng như không."""
+    for name, cfg in C.GOVERNANCE_FLAGS.items():
+        if not cfg['enabled']:
+            continue
+        keys = [k for k in C.PENALTY if k == name or k.startswith(name + '_')]
+        assert keys, f'cờ {name} đang bật nhưng không có mức phạt nào'
+
+
+def test_governance_ignores_leftover_inputs():
+    """Dữ liệu cũ còn mang hai khoá đó thì phải bị bỏ qua, không được phạt lén."""
+    from datetime import date
+    inputs = {
+        'shares_annual': [100.0, 100.0, 100.0],
+        'ni_q': [10.0] * 4, 'cfo_q': [10.0] * 4,
+        'ni_annual': [40.0], 'cfo_annual': [40.0],
+        'latest_quarter_end': date(2026, 6, 30),
+        'warning_status': True, 'qualified_opinion': True,
+    }
+    g = G.score(inputs, as_of=date(2026, 9, 22))
+    gone = {'warning_status', 'qualified_opinion'}
+    # Khong phat len, va cung khong lam ban mau so do phu: hai khoa nay phai
+    # bien mat khoi ca `flags` lan `missing`.
+    assert gone.isdisjoint(g['flags'])
+    assert gone.isdisjoint(g['missing'])
+    # Mau so do phu la 3 co dang bat, khong phai 5.
+    assert len(g['missing']) <= 3
+
+
+def test_not_evaluated_strings_are_display_ready():
+    """Chuỗi này hiện thẳng lên màn hình nên phải có dấu — cùng quy ước với
+    lý do veto. Không dấu thì người đọc thấy 'Y kien kiem toan' giữa trang
+    tiếng Việt có dấu."""
+    accented = set('àáảãạăằắẳẵặâầấẩẫậđèéẻẽẹêềếểễệìíỉĩị'
+                   'òóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ')
+    for d in (C.GOVERNANCE_NOT_EVALUATED, C.VETO_NOT_EVALUATED):
+        for k, v in d.items():
+            assert accented & set(v.lower()), f'{k}: {v!r} không có dấu tiếng Việt'

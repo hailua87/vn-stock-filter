@@ -79,8 +79,11 @@ def score(inputs: dict, as_of: date) -> dict:
       'shares_annual': [...], 'ni_q': [...], 'cfo_q': [...],
       'ni_annual': [...], 'cfo_annual': [...],
       'latest_quarter_end': date|None,
-      'warning_status': bool|None, 'qualified_opinion': bool|None,
     }
+
+    `warning_status` va `qualified_opinion` da go khoi bo co ngay 23/09/2026:
+    khong co nguon nao cung cap duoc chung (§14.2). Xem C.GOVERNANCE_NOT_EVALUATED.
+    
     """
     evaluated, flags, penalty = {}, [], 0
 
@@ -105,13 +108,6 @@ def score(inputs: dict, as_of: date) -> dict:
         if m is not None and m >= 1:
             flags.append('late_filing'); penalty += C.PENALTY['late_filing']
 
-    for key in ('warning_status', 'qualified_opinion'):
-        if C.GOVERNANCE_FLAGS[key]['enabled']:
-            v = inputs.get(key)
-            evaluated[key] = v
-            if v:
-                flags.append(key); penalty += C.PENALTY[key]
-
     enabled = [k for k, v in C.GOVERNANCE_FLAGS.items() if v['enabled']]
     known = [k for k in enabled if evaluated.get(k) is not None]
     coverage = len(known) / len(enabled) if enabled else 0.0
@@ -128,10 +124,6 @@ def veto(ticker: str, inputs: dict, as_of: date, delisted: set) -> Optional[str]
     """Tra ly do veto dau tien gap, hoac None. Chuoi ly do hien thang len UI nen co dau."""
     if C.VETO_ENABLED['delisted'] and ticker in delisted:
         return 'Hủy niêm yết hoặc đình chỉ'
-    if C.VETO_ENABLED['suspended_or_controlled'] and inputs.get('suspended_or_controlled'):
-        return 'Bị kiểm soát, hạn chế hoặc đình chỉ giao dịch'
-    if C.VETO_ENABLED['adverse_opinion'] and inputs.get('adverse_opinion'):
-        return 'Ý kiến kiểm toán trái ngược hoặc từ chối'
     if C.VETO_ENABLED['missing_two_quarters']:
         m = quarters_missing(inputs.get('latest_quarter_end'), as_of)
         if m is not None and m >= 2:
