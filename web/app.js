@@ -583,7 +583,7 @@ async function loadLatestFirst() {
   } catch (e) {
     console.error('Load latest failed:', e);
     document.getElementById('signal-rows').innerHTML =
-      `<tr><td colspan="15" class="empty error-state">
+      `<tr><td colspan="16" class="empty error-state">
          <div class="error-title">Không tải được dữ liệu</div>
          <div class="error-detail">${escapeAttr(e.message)}</div>
          <div class="error-detail">${navigator.onLine ? 'Máy chủ dữ liệu có thể đang bận.' : 'Thiết bị đang offline.'}</div>
@@ -1077,7 +1077,10 @@ function render() {
 }
 
 function applyFilters() {
-  let arr = state.raw.slice();
+  // Ma kich san khong hien thi tin hieu (blueprint v3 muc 7.4). Backend danh dau
+  // m_suppress_signal trong scanner/trade_levels.py; du lieu cu chua co truong
+  // nay nen kiem ca m_limit_status de khong phu thuoc mot lan chay.
+  let arr = state.raw.filter(s => !s.m_suppress_signal && s.m_limit_status !== 'floor');
   if (state.filters.exchange)
     arr = arr.filter(s => s.exchange === state.filters.exchange);
   if (state.filters.rating)
@@ -1142,7 +1145,7 @@ function applyFilters() {
 function renderRows() {
   const tbody = document.getElementById('signal-rows');
   if (!state.filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="15" class="empty">Không có tín hiệu khớp bộ lọc</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="16" class="empty">Không có tín hiệu khớp bộ lọc</td></tr>`;
     return;
   }
   tbody.innerHTML = state.filtered.map((s, i) => renderRow(s, i + 1)).join('');
@@ -1205,6 +1208,26 @@ function escapeAttr(str) {
 // mat o, con hang du lieu giu nguyen => bang LECH COT.
 // Truoc 29/08/2026 co 9/15 cot thieu, nen o 402px tieu de chi con 5 cot ma moi
 // hang du lieu van 15 o: nguoi dung thay HOSE va KLGD duoi tieu de GIA va DIEM.
+/** Thoat chuoi de nhet vao thuoc tinh title. */
+function escAttr(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/**
+ * R:R = (muc tieu - gia) / (gia - cat lo), do backend tinh san (m_rr).
+ * Thieu ho tro hoac khang cu thi de trong va noi ro ly do khi re chuot —
+ * khong bao gio thay bang so mac dinh.
+ */
+function renderRR(s) {
+  if (s.m_rr === null || s.m_rr === undefined) {
+    const why = s.m_levels_note || 'Chưa có dữ liệu mức giá';
+    return `<span class="dim" title="${escAttr(why)}">—</span>`;
+  }
+  const cls = s.m_rr >= 2 ? 'rr-good' : (s.m_rr >= 1 ? 'rr-ok' : 'rr-low');
+  return `<span class="${cls}" title="(mục tiêu − giá) / (giá − cắt lỗ). Mức gợi ý theo chiến lược, không phải lệnh">${Number(s.m_rr).toFixed(2)}</span>`;
+}
+
 function renderRow(s, idx) {
   const change = s.m_change_5d_pct || 0;
   const changeClass = change > 0 ? 'up' : change < 0 ? 'down' : 'flat';
@@ -1224,6 +1247,7 @@ function renderRow(s, idx) {
   const resistances = s.m_resistances || [];
   const supCell = supports.length ? renderFibCell(supports[0], 'support') : '<span class="dim">—</span>';
   const resCell = resistances.length ? renderFibCell(resistances[0], 'resistance') : '<span class="dim">—</span>';
+  const rrCell = renderRR(s);
 
   const selectedClass = s.ticker === state.selectedTicker ? 'selected' : '';
 
@@ -1257,6 +1281,7 @@ function renderRow(s, idx) {
       <td class="num prio-3">${(s.m_rsi14 || 0).toFixed(0)}</td>
       <td class="num prio-4">${supCell}</td>
       <td class="num prio-4">${resCell}</td>
+      <td class="num prio-4">${rrCell}</td>
       <td class="combined-criteria-cell prio-4" style="display:none;"></td>
       <td class="num"><span class="combined-pass ${passCls}">${passCount}/${totalStrats}</span></td>
       <td><span class="rating-tag ${ratingClass}">${s.rating}</span></td>
@@ -1295,6 +1320,7 @@ function renderRow(s, idx) {
     <td class="num prio-3">${(s.m_rsi14 || 0).toFixed(0)}</td>
     <td class="num prio-4">${supCell}</td>
     <td class="num prio-4">${resCell}</td>
+    <td class="num prio-4">${rrCell}</td>
     <td class="prio-4"><div class="criteria-pills">${pills}</div></td>
     <td class="num score-cell ${scoreClass}">${s.total_score}/${currentMaxScore()}</td>
     <td><span class="rating-tag ${ratingClass}">${s.rating}</span></td>
