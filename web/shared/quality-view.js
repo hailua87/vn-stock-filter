@@ -79,6 +79,10 @@ window.QV = (function () {
     margin_loans_cagr3: ['Tăng trưởng dư nợ ký quỹ 3 năm', 'pct'],
     margin_loans_equity: ['Dư nợ ký quỹ / VCSH', 'x'],
     debt_equity: ['Tổng nợ vay / VCSH', 'x'],
+    roe_avg5: ['ROE trung bình 5 năm', 'pct'],
+    gross_margin_avg5: ['Biên gộp trung bình 5 năm', 'pct'],
+    cash_conversion5: ['CFO / LN ròng 5 năm', 'x'],
+    inventory_turnover: ['Vòng quay hàng tồn kho', 'x'],
   };
 
   const nf1 = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 1, minimumFractionDigits: 1 });

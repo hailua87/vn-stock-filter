@@ -65,6 +65,7 @@ Nguyên tắc (giữ từ v2):
 | D19 | Nền màu giao diện | Mockup "Sổ tay phân tích" nền sáng (`tokens.css` --n-*, --px-*) | **Giữ nền tối cho cả app** (quyết định 29/08 trong `web/index.html`: chuyển sáng làm 8 biến đang đạt AA bị hỏng). Màn Phase 2 dùng bảng màu tối của `styles.css` + token phi màu của `tokens.css`; cấu trúc thông tin vẫn theo canvas/mockup (§11) |
 | D20 | Nơi lưu luận điểm cá nhân | Chưa chốt (§14.1: trình duyệt hay backend nhỏ có xác thực) | **localStorage của trình duyệt** (chốt 23/09/2026). Đổi lại: chỉ có trên máy và trình duyệt đó, xóa dữ liệu site là mất — nên ô luận điểm nói rõ điều này ngay trên màn hình và có nút xuất/nhập tệp JSON để mang sang máy khác. Không thêm backend, không có gì rời khỏi máy người dùng (§11.1) |
 | D21 | Ý kiến kiểm toán & trạng thái cảnh báo | Hai cờ + hai veto để `enabled: False`, chờ nguồn | **Gỡ hẳn** (chốt 23/09/2026). Để `enabled: False` vẫn là nói dối: giao diện mang nhãn của chúng, người đọc tưởng điểm Quản trị đã xét. Nay gỡ khỏi cấu hình và khai ở `GOVERNANCE_NOT_EVALUATED` để màn hình hiện dòng "Chưa xét: … — không có nguồn dữ liệu" (§8.5, §14.2) |
+| D22 | Mô hình `REAL_ESTATE` | Chưa kích hoạt (Phase 4) | **Bật 23/09/2026.** Rổ 200 có 36 mã BĐS, 34 trong đó kẹt ở "Thiếu dữ liệu" chỉ vì thiếu bộ chỉ tiêu. Bộ chỉ tiêu ở §8.4; "người mua trả tiền trước" đã thử và bỏ vì xếp mã kiệt quệ lên đầu |
 
 ## 4. Phạm vi
 
@@ -301,6 +302,40 @@ Chỉ giữ chỉ tiêu tính được từ BCTC/chỉ số mà vnstock trả v�
 | Chống chịu | Dư nợ ký quỹ / VCSH (thấp tốt) | 35% |
 | Chống chịu | Tổng nợ / VCSH (thấp tốt) | 35% |
 | Chống chịu | Sụt giảm lợi nhuận lớn nhất 5 năm (thấp tốt) | 30% |
+
+**`REAL_ESTATE`** (chủ đầu tư bất động sản — thiết kế 23/09/2026)
+
+| Chiều | Chỉ tiêu | Trọng số |
+|---|---|---:|
+| Chất lượng | ROE trung bình 5 năm | 25% |
+| Chất lượng | Biên gộp trung bình 5 năm | 25% |
+| Chất lượng | CFO / LN ròng 5 năm | 25% |
+| Chất lượng | Vòng quay hàng tồn kho (doanh thu / tồn kho bình quân) | 25% |
+| Tăng trưởng | CAGR doanh thu 5 năm | 35% |
+| Tăng trưởng | CAGR LN sau thuế 5 năm | 35% |
+| Tăng trưởng | Số năm doanh thu tăng / 5 | 30% |
+| Chống chịu | Tổng nợ vay / VCSH (thấp tốt) | 35% |
+| Chống chịu | Khả năng trả lãi | 25% |
+| Chống chịu | Thanh khoản hiện hành | 15% |
+| Chống chịu | Sụt giảm lợi nhuận lớn nhất 5 năm (thấp tốt) | 25% |
+
+Ba khác biệt so với `NON_FINANCIAL`, mỗi cái dẫn tới một lựa chọn cụ thể:
+
+1. **Lợi nhuận lồi lõm theo chu kỳ bàn giao** → mọi trung bình lấy **5 năm**, không phải 3. Ba năm rơi trọn vào giữa một chu kỳ xây dựng là chuyện bình thường; khi đó số 3 năm nói về giai đoạn chứ không nói về doanh nghiệp.
+2. **EBITDA nhảy theo năm bàn giao** → không dùng `net_debt_ebitda` (năm không bàn giao thì mẫu số gần 0, tỷ số vô nghĩa). Thay bằng `debt_equity` — mẫu số là vốn chủ, ổn định qua chu kỳ.
+3. **Hàng tồn kho là quỹ đất**, không phải hàng ế. Nhưng quỹ đất nằm im vẫn là vốn chết, nên vòng quay tồn kho là chỉ báo chất lượng. Đây là chỉ tiêu bắt đúng NVL (0,05 so với VHM 1,65).
+
+**Đã thử và BỎ — "người mua trả tiền trước".** Đây là chỉ báo dẫn dắt doanh thu, nên ban đầu đưa vào chiều Tăng trưởng. Đo thật trên 11 mã có đủ dữ liệu, ứng trước / doanh thu:
+
+| | NVL | VHM |
+|---|---:|---:|
+| Ứng trước / doanh thu | **2,92** | 0,61 |
+
+NVL — mã kiệt quệ nhất rổ — đứng **đầu**, chỉ vì doanh thu sụp từ ~15.000 xuống 6.966 tỷ nên mẫu số co lại. Đã thử ba mẫu số khác (tồn kho, tổng tài sản, vốn chủ): không cái nào tách được "hợp đồng sắp bàn giao" khỏi "tiền đã thu của dự án đắp chiếu", vì tiền thật sự nằm đó ở cả hai trường hợp. Lý do sâu hơn: **ứng trước là một khoản NỢ**, và với chủ đầu tư kiệt quệ đó là nghĩa vụ không trả được. Ba chỉ tiêu đúng hơn bốn chỉ tiêu có một cái lật ngược.
+
+**Giới hạn đã biết.** Nhóm `REAL_ESTATE` gộp cả chủ đầu tư nhà ở, khu công nghiệp (IDC, BCM) và vận hành cho thuê (VRE). Vòng quay tồn kho của VRE là 33,28 so với NVL 0,05 — ba bậc độ lớn, do mô hình kinh doanh chứ không do chất lượng. Winsorize p5/p95 (áp dụng khi nhóm ≥ 20 mã; rổ 200 có 36 mã BĐS) kéo phần cực trị về, nhưng chưa xử lý gốc. Tách mô hình con cho KCN / cho thuê là việc của Phase 4.
+
+**Kiểm định trên dữ liệu thật (11 mã có cache, 23/09/2026).** Xếp hạng theo tổng 3 chiều: IDC 199, VHM 196, VRE 191, … PDR 89, **NVL 59**. Hai mã cuối bảng đúng là hai chủ đầu tư kiệt quệ nhất thị trường — mô hình tự tìm ra, không được mách.
 
 ### 8.5 Cờ quản trị tự động
 

@@ -222,7 +222,72 @@ def securities(a: dict) -> dict:
     }
 
 
-CALCULATORS = {'NON_FINANCIAL': non_financial, 'BANK': bank, 'SECURITIES': securities}
+def real_estate(a: dict) -> dict:
+    """
+    Chủ đầu tư bất động sản. Khác phi tài chính ở ba chỗ, nên không dùng chung:
+
+    1. Lợi nhuận LỒI LÕM theo chu kỳ bàn giao dự án. Mọi trung bình đều lấy 5
+       năm, không phải 3 — ba năm rơi trọn vào giữa một chu kỳ xây dựng là
+       chuyện bình thường, và khi đó số 3 năm nói về giai đoạn chứ không nói về
+       doanh nghiệp.
+    2. Hàng tồn kho là QUỸ ĐẤT, không phải hàng ế. Nhưng quỹ đất nằm im vẫn là
+       vốn chết, nên vòng quay tồn kho vẫn là chỉ báo chất lượng.
+
+    KHÔNG chấm "người mua trả tiền trước". Đã thử và BỎ ngày 23/09/2026: nó là
+    một khoản NỢ, và cùng một con số cao có thể là hợp đồng sắp bàn giao (VHM)
+    hoặc tiền đã thu của người mua cho dự án đắp chiếu (NVL). Đo thật trên 11 mã
+    có đủ dữ liệu, ứng trước / doanh thu:
+
+        NVL 2,92  —  cao nhất rổ, mà NVL là mã kiệt quệ nhất
+        VHM 0,61  —  mã khỏe nhất rổ
+
+    NVL đứng đầu chỉ vì doanh thu sụp từ ~15.000 xuống 6.966 tỷ, tức mẫu số co
+    lại. Đã thử ba mẫu số khác — tồn kho, tổng tài sản, vốn chủ — không cái nào
+    tách được hai tình huống, vì tiền THẬT SỰ nằm đó ở cả hai. Một chỉ tiêu xếp
+    doanh nghiệp tệ nhất lên đầu thì không được chấm.
+
+    KHÔNG dùng `net_debt_ebitda` như phi tài chính: EBITDA của chủ đầu tư nhảy
+    theo năm bàn giao, năm không bàn giao thì mẫu số gần 0 và tỷ số vô nghĩa.
+    Thay bằng `debt_equity` — mẫu số là vốn chủ, ổn định qua chu kỳ.
+    """
+    rev, gp, ebit = _series(a, 'revenue'), _series(a, 'gross_profit'), _series(a, 'ebit')
+    ni, cfo = _series(a, 'net_income'), _series(a, 'cfo')
+    eq, inv = _series(a, 'equity'), _series(a, 'inventories')
+
+    # CFO/LN 5 năm chứ không phải 3: chủ đầu tư đốt tiền suốt lúc xây, thu về
+    # lúc bàn giao. Cửa sổ 3 năm bắt trọn phần đốt mà trượt phần thu.
+    ni5, cfo5 = ni[-5:], cfo[-5:]
+    cash_conv5 = None
+    if len(ni5) >= 4 and None not in ni5 and None not in cfo5 and sum(ni5) > 0:
+        cash_conv5 = sum(cfo5) / sum(ni5)
+
+    inv_turn = None
+    if len(inv) >= 2 and None not in (rev[-1], inv[-1], inv[-2]):
+        base = (inv[-1] + inv[-2]) / 2
+        inv_turn = _div(rev[-1], base) if base > 0 else None
+
+    interest = _last(a, 'interest_expense')
+    cover = None
+    if ebit and ebit[-1] is not None and interest is not None:
+        cover = 100.0 if abs(interest) < 1e-9 else min(100.0, ebit[-1] / abs(interest))
+
+    return {
+        'roe_avg5': _avg_last(_ratio_series(ni, _avg_base(eq)), 5, 4),
+        'gross_margin_avg5': _avg_last(_ratio_series(gp, rev), 5, 4),
+        'cash_conversion5': cash_conv5,
+        'inventory_turnover': inv_turn,
+        'revenue_cagr5': cagr(rev, 5),
+        'npat_cagr5': cagr(ni, 5),
+        'revenue_up_years5': up_years(rev, 5),
+        'debt_equity': _div(_last(a, 'debt'), _last(a, 'equity')),
+        'interest_coverage': cover,
+        'current_ratio': _div(_last(a, 'current_assets'), _last(a, 'current_liabilities')),
+        'profit_drawdown5': profit_drawdown(ni),
+    }
+
+
+CALCULATORS = {'NON_FINANCIAL': non_financial, 'BANK': bank, 'SECURITIES': securities,
+               'REAL_ESTATE': real_estate}
 
 
 def compute(model: str, annual: dict) -> dict:

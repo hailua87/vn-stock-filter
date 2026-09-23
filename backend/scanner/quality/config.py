@@ -46,7 +46,7 @@ INDUSTRY_TO_MODEL = {
     'Unknown': None,
 }
 DEFAULT_MODEL = 'NON_FINANCIAL'
-ACTIVE_MODELS = {'NON_FINANCIAL', 'BANK', 'SECURITIES'}
+ACTIVE_MODELS = {'NON_FINANCIAL', 'BANK', 'SECURITIES', 'REAL_ESTATE'}
 
 # --- Chi tieu theo mo hinh (blueprint 8.4) ----------------------------------
 # (metric_key, trong_so, cao_hon_tot_hon)
@@ -92,6 +92,37 @@ MODELS = {
             ('equity_assets', 30, True),
             ('credit_cost_std', 20, False),
             ('ldr', 15, False),
+        ],
+    },
+    # Chu dau tu bat dong san. Blueprint §8.4 khong khai bo chi tieu cho nhom
+    # nay; thiet ke 23/09/2026 va ghi nguoc lai vao §8.4.
+    #
+    # Ba khac biet voi NON_FINANCIAL, moi cai dan toi mot lua chon cu the:
+    #  - Loi nhuan loi lom theo chu ky ban giao -> moi trung binh lay 5 nam.
+    #  - EBITDA nhay theo nam ban giao nen net_debt_ebitda vo nghia -> dung
+    #    debt_equity, mau so la von chu, on dinh qua chu ky.
+    #
+    # Chieu Tang truong chi co BA chi tieu chu khong phai bon: da thu them
+    # "nguoi mua tra tien truoc / doanh thu" va BO, vi no xep NVL (ma kiet que
+    # nhat ro) len dau. Xem metrics.real_estate de biet so do va ba mau so da
+    # thu. Ba chi tieu dung con hon bon chi tieu co mot cai lat nguoc.
+    'REAL_ESTATE': {
+        'quality': [
+            ('roe_avg5', 25, True),
+            ('gross_margin_avg5', 25, True),
+            ('cash_conversion5', 25, True),
+            ('inventory_turnover', 25, True),
+        ],
+        'growth': [
+            ('revenue_cagr5', 35, True),
+            ('npat_cagr5', 35, True),
+            ('revenue_up_years5', 30, True),
+        ],
+        'resilience': [
+            ('debt_equity', 35, False),
+            ('interest_coverage', 25, True),
+            ('current_ratio', 15, True),
+            ('profit_drawdown5', 25, False),
         ],
     },
     'SECURITIES': {
