@@ -1509,7 +1509,14 @@ kbd {
 /* ═══════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════ */
-@media (max-width: 1280px) {
+/* Nguong nay VON LA 1280px. Nang len 1440px khi them tab "Hom nay" (tab thu
+   sau): do that o 1600px, mot hang tab can 779px, cong topbar-left 230 +
+   topbar-right 316 + padding 32 + gap 48 = 1405px — va o tab Phan tich ma,
+   o nhap 280px day con so len ~1550px. Tuc 1366 va 1440 khong con du cho.
+   Giu nguyen co che da co (tab xuong hang rieng, tu cuon ngang) thay vi bop
+   chu hay bo cot: bop chu chinh la loi topbar vo dong da ghi o
+   docs/mobile-layout-out-of-scope.md muc 7. */
+@media (max-width: 1440px) {
   :root {
     --col-filter-w: 200px;
     --col-detail-w: 340px;
@@ -2909,3 +2916,65 @@ kbd {
 /* Ghi hỏng thì phải NHÌN THẤY: người dùng vừa gõ chữ và đang tin là đã lưu. */
 .thesis-status.thesis-failed { color: var(--text); font-weight: 600; }
 .thesis-note { flex: 1; min-width: 200px; }
+
+/* ════════════════════════════════════════════════════════════
+   Màn Hôm nay (blueprint v3 §11.1)
+   ════════════════════════════════════════════════════════════ */
+.today-view { flex: 1; overflow-y: auto; padding: 20px 24px 40px; }
+.today-content { max-width: 1100px; margin: 0 auto; }
+.today-title { font-size: 20px; font-weight: 600; color: var(--text); margin: 0 0 4px; }
+.today-block { margin-top: 26px; }
+
+.today-stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px; margin-top: 8px;
+}
+.today-stat {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 10px; background: var(--bg-elev-1);
+  border: 1px solid var(--border); border-radius: 4px;
+}
+.today-stat-k { font-size: 11px; color: var(--text-mute); }
+.today-stat-v { font-family: var(--font-mono); font-size: 15px; color: var(--text); }
+.today-regime { margin: 10px 0 0; font-size: 13px; color: var(--text-dim); }
+
+.today-scroll { overflow-x: auto; margin-top: 8px; }
+.today-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.today-scroll .today-table { min-width: 520px; }
+.today-table th {
+  text-align: left; font-weight: 500; font-size: 11px; color: var(--text-mute);
+  padding: 6px 8px; border-bottom: 1px solid var(--border);
+}
+.today-table th.th-num, .today-table td.td-num { text-align: right; font-family: var(--font-mono); }
+.today-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+.today-table tbody tr[data-ticker] { cursor: pointer; }
+.today-table tbody tr[data-ticker]:hover { background: var(--bg-elev-3); }
+.today-table td.up { color: var(--up); }
+.today-table td.down { color: var(--down); }
+
+/* Bảng tình trạng dữ liệu là cặp nhãn–giá trị, không phải bảng số liệu */
+.today-health { margin-top: 8px; }
+.today-health th[scope="row"] {
+  border-bottom: 1px solid var(--border); font-size: 12px;
+  color: var(--text-dim); width: 190px; font-weight: 400;
+}
+
+.today-changes { margin: 8px 0 0 18px; padding: 0; font-size: 13px; line-height: 2.1; }
+.today-changes b { font-family: var(--font-mono); margin-right: 4px; }
+
+.today-issues { margin: 12px 0 0; padding: 0; list-style: none; font-size: 12px; }
+.today-issues li {
+  display: flex; gap: 8px; align-items: baseline;
+  padding: 6px 0; border-bottom: 1px solid var(--border); color: var(--text-dim);
+}
+/* Mức độ mã hóa bằng kiểu viền như trạng thái watchlist (§11.3), không bằng
+   xanh/đỏ — hai màu đó dành cho giá. */
+.today-issues .sev-tag {
+  flex: none; min-width: 66px; text-align: center; padding: 1px 6px;
+  border-radius: 3px; font-size: 10px; font-weight: 600;
+  border: 1px solid var(--border-strong); color: var(--text-mute);
+}
+.today-issues li.sev-error { color: var(--text); }
+.today-issues li.sev-error .sev-tag { background: var(--text); color: var(--bg-base); border-color: var(--text); }
+.today-issues li.sev-warn .sev-tag { border-style: dashed; color: var(--text-dim); }
+.today-issues li.sev-info .sev-tag { border-style: dotted; }

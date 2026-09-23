@@ -102,7 +102,20 @@ nua ben phai.
 
 Van de thiet ke, khong phai loi bo cuc.
 
-## 5. O nhap ma bi co o 1281-1365px — DA DO, DA CAN NHAC, KHONG SUA
+## 5. O nhap ma bi co — DA DO, DA CAN NHAC, KHONG SUA
+
+> **Cap nhat 23/09/2026 — dai da DOI, van de thi chua het.** Them tab "Hom nay"
+> (tab thu sau) khien topbar mot hang can them ~100px, nen nguong dua dai tab
+> xuong hang rieng duoc nang tu 1280 len **1440**. He qua: dai 1281-1440px
+> nay SACH (ca muc 5 lan muc 7 o do deu het), nhung van de day len dai
+> **1441-1707px**. Do that o 1800px, topbar mot hang o tab Phan tich ma can
+> 1708px: topbar-left 230 + dai tab 778 + o nhap 280 + topbar-right 316 +
+> padding 32 + gap 72. Khong man hinh pho bien nao du rong, va nang tiep nguong
+> se bat MOI man desktop xuong hai hang — nen van giu nguyen quyet dinh khong
+> sua. Diem tot len: o 1441 vung chu con 135px thay vi 82px cua dai cu.
+> Khung canh gac trong `accepted.json` doi sang `bp-1441-mouse`/`bp-1441-touch`.
+
+### Ghi chep goc (dai 1281-1365px, truoc 23/09/2026)
 
 Phep kiem `analyzer:o-nhap-du-rong` (nguong `w >= 200`) bao do o bon khung:
 `bp-1281`, `bp-1281-touch`, `d-1366`, `ipad-1366`.
@@ -185,7 +198,16 @@ Ban mau dat moi ma thanh mot the, hai the mot hang. Tu choi vi:
 - Bang hien tai da co `prio-*` de an cot theo do rong; the khong tan dung duoc.
 - Mat kha nang so sanh theo cot, von la muc dich chinh cua man loc.
 
-## 7. Bon nhan topbar con vo dong o 1281-1299px — DA DO, CHUA SUA
+## 7. Bon nhan topbar con vo dong o 1281-1299px — DA SUA 23/09/2026
+
+> **Da het.** Nguong dua dai tab xuong hang rieng nang tu 1280 len 1440 (xem
+> muc 5), nen o 1281-1299px topbar khong con chen: bon nhan het vo dong. Do
+> lai ngay 23/09/2026 tren ca 49 khung — `bp-1281-mouse` va `bp-1281-touch` moi
+> khung giam 9 muc ve 0. Muc trong `accepted.json` da go. Giu phan ghi chep
+> duoi day lam ho so: no la vi du cho thay nguyen nhan that nam o cho topbar
+> qua day, dung nhu M1 da noi.
+
+### Ghi chep goc (truoc 23/09/2026)
 
 Sau commit 5, phep kiem `textWrap` sach o 1300px tro len. Con lai mot dai hep:
 

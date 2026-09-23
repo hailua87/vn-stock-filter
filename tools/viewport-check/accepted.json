@@ -4,32 +4,19 @@
     {
       "khoa": "fn|analyzer:o-nhap-du-rong",
       "khung": [
-        "bp-1281-mouse",
-        "bp-1281-touch",
-        "d-1366x768",
-        "ipad-1366x1024-touch"
+        "bp-1441-mouse",
+        "bp-1441-touch"
       ],
-      "lyDo": "O nhap bi flex co o dai 1281-1365px (khong con flex-wrap, chua du cho). Chuc nang khong hong: ma co phieu VN dai 3 ky tu, 'FPT'=22px van lot ca o khung hep nhat (vung chu 38px). Chi PHAN GOI Y bi cat, va chi o 1281-1339px — dai rong 59px khong co thiet bi pho bien nao.",
+      "lyDo": "O nhap bi flex co o dai 1441-1707px. Truoc 23/09/2026 dai nay la 1281-1365px; nang nguong dua dai tab xuong hang rieng tu 1280 len 1440 (them tab Hom nay) da don sach dai cu va day van de len tren. Topbar mot hang o tab Phan tich ma can 1708px (do that o 1800px: 230 + 778 + 280 + 316 + padding 32 + gap 72) — khong man hinh pho bien nao du rong, nen khong the chua bang cach nang tiep nguong ma khong bat MOI man desktop xuong hai hang. Chuc nang khong hong: o 1441 vung chu con 135px, ma co phieu VN dai 3 ky tu ('FPT' = 22px) lot thoai mai; chi phan goi y bi cat. Rong hon han 82px cua dai cu.",
       "taiLieu": "docs/mobile-layout-out-of-scope.md muc 5",
       "san": {
         "truong": "w",
         "toiThieu": {
-          "bp-1281-mouse": 82,
-          "bp-1281-touch": 64,
-          "d-1366x768": 167,
-          "ipad-1366x1024-touch": 149
+          "bp-1441-mouse": 135,
+          "bp-1441-touch": 117
         }
       }
-    },
-    {
-      "khoaMau": "^(top|scrolled)\\|voDong\\|span(\\.brand-name|#live-text|#market-text|#clock\\.time)\\|",
-      "khung": [
-        "bp-1281-mouse",
-        "bp-1281-touch"
-      ],
-      "soToiDa": 16,
-      "lyDo": "Bon nhan topbar (.brand-name, #live-text, #market-text, #clock) vo dong o dai 1281-1299px. Dai rong 19px, khong co thiet bi pho bien nao trong do (1280 va 1366 deu ngoai). Cach sua that la bo bot phan tu khoi topbar, tuc M1 — sua vat o day se phai go ra khi lam M1. 16 = 4 nhan x 2 khung x 2 luot do (dau trang / da cuon).",
-      "taiLieu": "docs/mobile-layout-out-of-scope.md muc 7"
     }
-  ]
+  ],
+  "_lichSu": "23/09/2026: muc 'bon nhan topbar vo dong o 1281-1299px' (muc 7) HET han — nang nguong dai tab tu 1280 len 1440 da don sach. Muc 'o nhap bi co' khong het ma CHUYEN DAI, tu 1281-1365px len 1441-1707px."
 }

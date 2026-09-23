@@ -59,6 +59,7 @@
   </div>
 
   <nav class="strategy-tabs">
+    <button class="strat-tab strat-tab-today" data-strategy="today" title="Tóm tắt phiên: thị trường, tín hiệu nổi bật, watchlist đổi trạng thái, tình trạng dữ liệu"><span aria-hidden="true">📅</span> Hôm nay</button>
     <button class="strat-tab active" data-strategy="pre_breakout">Pre-Breakout</button>
     <button class="strat-tab" data-strategy="golden_cross_long">GC dài hạn</button>
     <button class="strat-tab" data-strategy="golden_cross_short">GC ngắn hạn</button>
@@ -300,6 +301,13 @@
       </div>
     </div>
   </aside>
+
+  <!-- ════════════════════════════════════════════════════════════
+       TAB: HOM NAY (full-width takeover) — blueprint v3 §11.1
+       ════════════════════════════════════════════════════════════ -->
+  <section class="today-view" id="today-view" style="display: none;">
+    <div class="today-content" id="today-content"></div>
+  </section>
 
   <!-- ════════════════════════════════════════════════════════════
        TAB 6: TICKER ANALYZER (full-width takeover)

@@ -1,8 +1,14 @@
 // HAI TRUC, khong phai mot.
 //
-// Truc 1 — BE RONG: nguong @media trong styles.css la 1280, 1100, 1024, 900,
+// Truc 1 — BE RONG: nguong @media trong styles.css la 1440, 1100, 1024, 900,
 // 860, 768, 700, 600, 420. Loi cascade khong lo o giua dai, no lo dung luc mot
 // khoi bat/tat, nen moi nguong deu chay ca hai phia.
+//
+// Nguong tren VON LA 1280, doi thanh 1440 khi them tab "Hom nay": tu 1440 tro
+// xuong, dai tab xuong hang rieng. Doi nguong ma khong doi cap ranh gioi thi
+// ranh gioi that KHONG he duoc do — dung lop loi ma bo do nay sinh ra de bat.
+// Giu lai 1281/1279: khong con la ranh gioi @media, nhung van la hai khung da
+// tung hong, va chay them hai khung thi re hon la mat dau vet.
 //
 // Truc 2 — CON TRO: `@media (pointer: coarse)` CAT NGANG moi nguong be rong va
 // dat min-width/min-height 44px cho .chip, .dp-nav, .icon-btn, .strat-tab.
@@ -10,7 +16,7 @@
 // kich thuoc noi dung — chinh la nguyen nhan goc so 2. Baseline lan dau chi
 // bat coarse cho ba viewport mobile, nen 18 nguong ranh gioi deu KHONG di qua
 // duong dan do. Nay moi nguong chay HAI LAN: chuot va cam ung.
-const BOUNDARIES = [1281, 1279, 1101, 1099, 1025, 1023, 901, 899, 861, 859,
+const BOUNDARIES = [1441, 1439, 1281, 1279, 1101, 1099, 1025, 1023, 901, 899, 861, 859,
                     769, 767, 701, 699, 601, 599, 421, 419];
 
 const list = [];
