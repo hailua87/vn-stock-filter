@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-22T19:46:15.524797",
+  "generated_at": "2026-09-23T10:08:37.716567",
   "strategy": "golden_cross_long",
   "total": 1,
   "metadata": {
@@ -9,37 +9,37 @@
       "HNX",
       "UPCOM"
     ],
-    "total_scanned": 499,
+    "total_scanned": 500,
     "market_context": {
       "available": true,
-      "close": 1816.93,
-      "ma50": 1775.25,
-      "ma200": 1793.88,
+      "close": 1801.65,
+      "ma50": 1774.71,
+      "ma200": 1794.43,
       "above_ma50": true,
       "above_ma200": true,
       "ma50_rising": false,
-      "change_20d_pct": 4.77,
-      "drawdown_from_high_pct": -5.76,
+      "change_20d_pct": 1.9,
+      "drawdown_from_high_pct": -6.55,
       "regime": "neutral",
       "label": "Thị trường trung tính — tín hiệu mua nên vào với tỷ trọng nhỏ hơn",
       "position_size_multiplier": 0.6,
       "breadth": {
-        "pct_above_ma50": 30.5,
-        "sample_size": 499
+        "pct_above_ma50": 31.6,
+        "sample_size": 500
       }
     },
-    "session_date": "2026-09-22",
-    "written_at_ict": "2026-09-23 02:46:06+0700",
+    "session_date": "2026-09-23",
+    "written_at_ict": "2026-09-23 17:08:24+0700",
     "run_type": "eod",
-    "session_complete": 0.923,
+    "session_complete": 0.891,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên 2026-09-22 đã đóng dứt khoát (hôm nay 2026-09-23)) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên hôm nay, 17:08 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên 2026-09-22 đã đóng dứt khoát (hôm nay 2026-09-23)"
+        "detail": "phiên hôm nay, 17:08 ICT >= 15:15 — khối lượng đã chốt"
       },
       {
         "name": "gate_coverage",
@@ -50,19 +50,19 @@
     "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 0.998,
-    "fetch_elapsed_s": 188.2,
+    "fetch_coverage": 1.0,
+    "fetch_elapsed_s": 1005.5,
     "intraday": false,
-    "run_time_ict": "02:46",
+    "run_time_ict": "17:08",
     "run_date_ict": "2026-09-23"
   },
   "signals": [
     {
       "ticker": "APH",
       "exchange": "UPCOM",
-      "date": "2026-09-22T00:00:00",
-      "close": 7.32,
-      "volume": 615600,
+      "date": "2026-09-23T00:00:00",
+      "close": 7.06,
+      "volume": 752900,
       "preset": "long",
       "total_score": 4,
       "rating": "A",
@@ -71,18 +71,18 @@
       "gc_ma_stacking": 1,
       "gc_slow_rising": 1,
       "gc_volume_confirm": 0,
-      "m_change_1d_pct": -0.95,
+      "m_change_1d_pct": -3.55,
       "m_limit_status": "normal",
       "m_limit_locked": false,
       "m_tradable_warning": null,
       "m_preset_name": "MA50×MA200",
-      "m_cross_days_ago": 0,
-      "m_fast_ma": 5.96,
+      "m_cross_days_ago": 1,
+      "m_fast_ma": 5.99,
       "m_slow_ma": 5.94,
-      "m_slow_spread_pct": 0.4,
-      "m_change_5d_pct": 5.02,
-      "m_vol_ratio": 1.33,
-      "m_rsi14": 78.0,
+      "m_slow_spread_pct": 0.88,
+      "m_change_5d_pct": 3.82,
+      "m_vol_ratio": 1.52,
+      "m_rsi14": 67.1,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
@@ -92,7 +92,7 @@
           "ratio": 0.236,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 3.96
+          "distance_pct": 0.42
         },
         {
           "price": 6.69,
@@ -100,7 +100,7 @@
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 8.61
+          "distance_pct": 5.24
         },
         {
           "price": 6.42,
@@ -108,7 +108,7 @@
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 12.3
+          "distance_pct": 9.07
         }
       ],
       "m_resistances": [
@@ -118,22 +118,27 @@
           "ratio": 0.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 3.55
+          "distance_pct": 7.37
         }
       ],
       "m_fibo_swing": {
         "high": 7.58,
         "high_date": "2026-09-22",
-        "high_idx": 59,
+        "high_idx": 58,
         "low": 5.25,
         "low_date": "2026-07-23",
-        "low_idx": 19,
+        "low_idx": 18,
         "direction": "up",
         "range": 2.33
       },
-      "m_rs_score": 23.55,
+      "m_rs_score": 21.0,
       "m_rs_rank": 97,
-      "m_rs_63d": 33.39
+      "m_rs_63d": 31.74,
+      "m_stop": 7.03,
+      "m_target": 7.58,
+      "m_rr": 17.33,
+      "m_levels_note": null,
+      "m_suppress_signal": false
     }
   ]
 }
