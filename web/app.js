@@ -2166,6 +2166,143 @@ function computeAnalyzerLevels(s) {
 }
 
 // ── Main analyzer entry point ──
+// ──────────── Luan diem ca nhan (§11.1, quyet dinh §14.1) ────────────
+//
+// Luu trong localStorage cua chinh trinh duyet nay. He qua phai noi ro ra man
+// hinh, khong giau: chi co tren MAY NAY va TRINH DUYET NAY, xoa du lieu site
+// la mat. Co nut xuat/nhap tep de mang sang may khac.
+//
+// Khac voi prefSet: o kia ghi hong thi im lang cho qua, vi mat mot lua chon
+// giao dien khong he gi. O DAY thi khac — day la chu nguoi dung vua go, ghi
+// hong ma im lang la lua ho rang da luu.
+const THESIS_PREFIX = PREF_PREFIX + 'thesis:';
+
+function thesisLoad(ticker) {
+  try {
+    const raw = localStorage.getItem(THESIS_PREFIX + ticker);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Tra ve true neu ghi duoc. Goi phai bao cho nguoi dung khi false. */
+function thesisSave(ticker, data) {
+  try {
+    const empty = !data.thesis?.trim() && !data.sell?.trim();
+    if (empty) localStorage.removeItem(THESIS_PREFIX + ticker);
+    else localStorage.setItem(THESIS_PREFIX + ticker, JSON.stringify(data));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function thesisAll() {
+  const out = {};
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(THESIS_PREFIX)) {
+        out[k.slice(THESIS_PREFIX.length)] = JSON.parse(localStorage.getItem(k));
+      }
+    }
+  } catch { /* khong doc duoc thi tra ve nhung gi da gom duoc */ }
+  return out;
+}
+
+function renderThesisBox(ticker) {
+  const d = thesisLoad(ticker) || {};
+  const when = d.updated ? `Đã lưu ${escapeAttr(d.updated)}` : 'Chưa có ghi chú';
+  return `<div class="thesis" id="thesis-box" data-ticker="${escapeAttr(ticker)}">
+    <div class="analyzer-section-title"><span class="section-icon">📝</span> Luận điểm và điều kiện bán</div>
+    <div class="thesis-grid">
+      <label class="thesis-field">
+        <span class="thesis-label">Vì sao mua ${escapeAttr(ticker)}</span>
+        <textarea id="thesis-why" rows="4" placeholder="Luận điểm của bạn — thứ sẽ đọc lại khi giá đi ngược.">${escapeAttr(d.thesis || '')}</textarea>
+      </label>
+      <label class="thesis-field">
+        <span class="thesis-label">Bán khi nào</span>
+        <textarea id="thesis-sell" rows="4" placeholder="Điều kiện bán, viết trước khi vào lệnh.">${escapeAttr(d.sell || '')}</textarea>
+      </label>
+    </div>
+    <div class="thesis-foot">
+      <span class="thesis-status" id="thesis-status">${when}</span>
+      <span class="thesis-note">Chỉ lưu trên trình duyệt này — xóa dữ liệu site là mất.</span>
+      <button type="button" class="link-btn" id="thesis-export">Xuất tệp</button>
+      <button type="button" class="link-btn" id="thesis-import">Nhập tệp</button>
+    </div>
+  </div>`;
+}
+
+function bindThesisBox(ticker) {
+  const box = document.getElementById('thesis-box');
+  if (!box || box.dataset.ticker !== ticker) return;
+  const why = document.getElementById('thesis-why');
+  const sell = document.getElementById('thesis-sell');
+  const status = document.getElementById('thesis-status');
+
+  const save = () => {
+    const now = new Date().toLocaleString('vi-VN', { hour12: false });
+    const ok = thesisSave(ticker, { thesis: why.value, sell: sell.value, updated: now });
+    if (ok) {
+      status.classList.remove('thesis-failed');
+      status.textContent = (why.value.trim() || sell.value.trim())
+        ? `Đã lưu ${now}` : 'Chưa có ghi chú';
+    } else {
+      // Khong im lang: nguoi dung vua go chu va dang tin rang no duoc giu.
+      status.classList.add('thesis-failed');
+      status.textContent = 'KHÔNG lưu được — trình duyệt đang chặn lưu trữ của trang này. '
+        + 'Hãy copy nội dung ra nơi khác trước khi rời trang.';
+    }
+  };
+  const debounced = debounce(save, 600);
+  [why, sell].forEach(el => {
+    el.addEventListener('input', debounced);
+    el.addEventListener('blur', save);
+  });
+
+  document.getElementById('thesis-export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify({ schema: 1, exported: new Date().toISOString(), thesis: thesisAll() }, null, 2)],
+      { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `luan-diem-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  document.getElementById('thesis-import').addEventListener('click', () => {
+    const inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = 'application/json,.json';
+    inp.addEventListener('change', async () => {
+      const f = inp.files?.[0];
+      if (!f) return;
+      try {
+        const data = JSON.parse(await f.text());
+        const items = data.thesis || {};
+        let n = 0;
+        // Ghi de theo tung ma, KHONG xoa sach roi nhap lai: ghi chu chi co o
+        // may nay ma tep nhap khong co thi van phai con nguyen.
+        for (const [t, v] of Object.entries(items)) {
+          if (v && (v.thesis || v.sell) && thesisSave(t, v)) n++;
+        }
+        status.classList.remove('thesis-failed');
+        status.textContent = `Đã nhập ${n} mã. Mở lại mã để thấy nội dung mới.`;
+        if (items[ticker]) {
+          why.value = items[ticker].thesis || '';
+          sell.value = items[ticker].sell || '';
+        }
+      } catch (e) {
+        status.classList.add('thesis-failed');
+        status.textContent = `Tệp không đọc được: ${e.message}`;
+      }
+    });
+    inp.click();
+  });
+}
+
 /**
  * Goc dai han cua man Chi tiet ma (§11.1): 4 chieu kem tung chi tieu va
  * percentile, chi tieu thieu, dinh gia.
@@ -2426,6 +2563,7 @@ function analyzeTicker(ticker) {
   const levels = computeAnalyzerLevels(primarySignal);
 
   content.innerHTML = renderAnalyzer(ticker, primarySignal, perStrategy, passCount, rec, levels);
+  bindThesisBox(ticker);
   fillDetailSections(ticker);
 }
 
@@ -2649,6 +2787,8 @@ function renderAnalyzer(ticker, signal, perStrategy, passCount, rec, levels) {
       <div class="analyzer-section-title"><span class="section-icon">🏛️</span> Góc dài hạn</div>
       <p class="muted">Đang tải điểm chất lượng và định giá…</p>
     </div>
+
+    ${renderThesisBox(ticker)}
 
     <div style="text-align:center;margin-top:24px">
       <a class="btn-primary" href="https://www.tradingview.com/chart/?symbol=${signal.exchange || 'HOSE'}:${ticker}" target="_blank" rel="noopener">Mở TradingView ↗</a>

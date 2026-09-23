@@ -63,6 +63,7 @@ Nguyên tắc (giữ từ v2):
 | D17 | Ngưỡng "Cần xem lại" | Quản trị < 60, Chất lượng < 60, Chống chịu < 50 | Quản trị < 30, Chất lượng < 30, Chống chịu < 25. Điểm 3 chiều là **percentile** nên trung vị ~50; ngưỡng cũ tự động đưa ~60% mã vào "Cần xem lại" (chạy thật 22/09: 55/100) (§10) |
 | D18 | Cờ pha loãng | Số CP lưu hành tăng | Chỉ tính CP **phát hành lấy tiền**: phần CP tăng × min(1, tiền thu phát hành / phần vốn góp tăng). Cổ tức cổ phiếu, cổ phiếu thưởng không phải pha loãng (chạy thật: 58 → 19 mã bị cờ) (§8.5) |
 | D19 | Nền màu giao diện | Mockup "Sổ tay phân tích" nền sáng (`tokens.css` --n-*, --px-*) | **Giữ nền tối cho cả app** (quyết định 29/08 trong `web/index.html`: chuyển sáng làm 8 biến đang đạt AA bị hỏng). Màn Phase 2 dùng bảng màu tối của `styles.css` + token phi màu của `tokens.css`; cấu trúc thông tin vẫn theo canvas/mockup (§11) |
+| D20 | Nơi lưu luận điểm cá nhân | Chưa chốt (§14.1: trình duyệt hay backend nhỏ có xác thực) | **localStorage của trình duyệt** (chốt 23/09/2026). Đổi lại: chỉ có trên máy và trình duyệt đó, xóa dữ liệu site là mất — nên ô luận điểm nói rõ điều này ngay trên màn hình và có nút xuất/nhập tệp JSON để mang sang máy khác. Không thêm backend, không có gì rời khỏi máy người dùng (§11.1) |
 
 ## 4. Phạm vi
 
@@ -443,10 +444,10 @@ Mọi issue hiển thị trong khối "Tình trạng dữ liệu" của màn Hô
 
 ## 14. Các mục cần chốt
 
-1. **Lưu luận điểm cá nhân.** Ô luận điểm trên trang chi tiết mã cần nơi lưu. Lựa chọn: (a) lưu trong trình duyệt, đơn giản nhưng chỉ trên một máy; (b) một backend nhỏ có xác thực (ví dụ Supabase với một tài khoản). Không được lưu vào repo public.
+1. ~~**Lưu luận điểm cá nhân.**~~ **Đã chốt 23/09/2026 (D20): lưu trong trình duyệt.** Ô luận điểm và điều kiện bán nằm ở cuối màn Chi tiết mã, lưu vào `localStorage` theo từng mã. Hệ quả được nói thẳng trên màn hình chứ không giấu: chỉ có trên máy và trình duyệt đó. Có nút xuất/nhập tệp JSON để mang sang máy khác. Ghi hỏng (trình duyệt chặn lưu trữ) thì **báo ra màn hình** — khác với các lựa chọn giao diện khác vốn im lặng bỏ qua, vì ở đây là chữ người dùng vừa gõ.
 2. **Nguồn ý kiến kiểm toán và trạng thái cảnh báo/kiểm soát.** Nếu vnstock không có, chọn giữa: nhập tay cho các mã trong watchlist, hoặc tạm bỏ các cờ và veto đó (độ phủ Quản trị giảm tương ứng).
 3. **Trường ngân hàng** (nợ xấu, bao phủ nợ xấu, NIM): **đã xác thực là không có** trong vnstock bản cộng đồng (chỉ 2018). Cần chốt: tìm nguồn khác, hoặc chạy mô hình `BANK` với phần chỉ tiêu còn lại và độ phủ thấp hơn. Trong lúc chờ, định giá nhóm tài chính luôn "Chưa có" (§9).
-4. **Vùng vào / cắt lỗ / mục tiêu** của scanner hiện có: **đã xác thực là chưa có** (audit F5). Đề xuất đang chờ chốt: cắt lỗ = hỗ trợ gần nhất dưới giá đóng cửa, mục tiêu = kháng cự gần nhất trên giá, R:R = (mục tiêu − giá) / (giá − cắt lỗ); bỏ cột "vùng vào"; không hiển thị R:R khi thiếu một trong hai mức.
+4. ~~**Vùng vào / cắt lỗ / mục tiêu**~~ **Đã chốt và đã làm 22–23/09/2026.** Cắt lỗ = hỗ trợ gần nhất dưới giá đóng cửa, mục tiêu = kháng cự gần nhất trên giá, R:R = (mục tiêu − giá) / (giá − cắt lỗ); bỏ cột "vùng vào"; không hiển thị R:R khi thiếu một trong hai mức (`backend/scanner/trade_levels.py`, cột trên màn Scan).
 5. **N của universe Module B**: tạm chốt 100 (v3, D10). Nâng lên 200 cần đo thời gian weekly valuation khi nguồn chậm (100 mã đã mất tới ~70 phút).
 6. **Backtest chiến lược trading**: mục tiêu ban đầu có nhắc; xác nhận có đưa vào Phase 4 hay không.
 
@@ -457,10 +458,10 @@ Mọi issue hiển thị trong khối "Tình trạng dữ liệu" của màn Hô
 | 0. Dọn dẹp — **đã xong phần chính** | Không merge `rebuild/vercel-fisher`; lưu tài liệu vào `docs/`; xác thực các mục "Cần xác thực" ở §5.1, §7.1 | Có kết quả xác thực cho từng mục. Còn: trạng thái cảnh báo/kiểm soát, ý kiến kiểm toán (§14.2), tham số chiến lược §7.1 |
 | 0.5. Nền dữ liệu — **đã xong 22/09** | F1 dữ liệu định giá thật; F2 giữ 8 kỳ BCTC; F3 sổ snapshot point-in-time; F9 bot push không rebase | Đã xác nhận trên runner thật |
 | 1. Quality scoring — **đã chạy được 22/09** | Cấu hình, snapshot BCTC, chỉ tiêu 3 mô hình, cờ quản trị, độ phủ, veto, status engine, `quality/latest.json` | Chạy thật 100/100 mã, mỗi trạng thái có lý do: 52 Theo dõi, 16 Cần xem lại, 32 Thiếu dữ liệu (ngân hàng thiếu NPL/NIM, BĐS/bảo hiểm chưa kích hoạt) |
-| 2. Giao diện | 4 màn hình theo canvas v2 trên `web/` hiện có | Hiển thị đúng dữ liệu thật, empty state rõ ràng |
+| 2. Giao diện — **còn màn Hôm nay** | 4 màn hình theo canvas v2 trên `web/` hiện có. Đã xong: Scan (§7.2–7.4), Watchlist, Chi tiết mã (§11.1) | Hiển thị đúng dữ liệu thật, empty state rõ ràng |
 | 3. Liên kết | Quy đổi định giá 4 mức, liên kết Chất lượng sang Module A, `health.json` | Hai module dùng chung universe và quy tắc |
 | 4. Hiệu chỉnh | Backtest ngưỡng định giá (≥ 3 tháng snapshot); backtest chiến lược nếu chốt ở §14.6; xét `INSURANCE`, `REAL_ESTATE` | Ngưỡng được cập nhật có ghi lại lý do |
-| 5. Cá nhân hóa | Lưu luận điểm theo quyết định §14.1 | |
+| 5. Cá nhân hóa — **đã xong 23/09** | Ô luận điểm và điều kiện bán ở màn Chi tiết mã, lưu `localStorage` theo D20 | Gõ vào, đổi mã, quay lại vẫn còn; xuất/nhập tệp JSON chạy được; trình duyệt chặn lưu trữ thì báo ra màn hình |
 
 ## 16. Rủi ro
 
