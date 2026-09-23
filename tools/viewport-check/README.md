@@ -66,7 +66,7 @@ nghia chap nhan chung xuat hien o khung thu ba.
 
 ## Hai truc, khong phai mot
 
-**Be rong** — nguong @media trong styles.css: 1280, 1100, 1024, 900, 860, 768,
+**Be rong** — nguong @media trong styles.css: 1440, 1100, 1024, 900, 860, 768,
 700, 600, 420. Moi nguong chay ca hai phia (vd 769 va 767). Loi cascade khong
 lo o giua dai, no lo dung luc mot khoi bat hoac tat.
 
