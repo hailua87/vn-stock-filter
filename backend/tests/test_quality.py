@@ -241,7 +241,10 @@ def test_anh_xa_nganh_sang_mo_hinh():
     assert ST.model_for('Banking') == 'BANK'
     assert ST.model_for('Technology') == 'NON_FINANCIAL'
     assert ST.model_for('Unknown') is None
-    assert 'REAL_ESTATE' not in C.ACTIVE_MODELS
+    # REAL_ESTATE bat tu 23/09/2026. INSURANCE van chua: ro 200 chi co 2 ma,
+    # percentile tren 2 ma la vo nghia (MIN_PEER_GROUP = 8).
+    assert 'REAL_ESTATE' in C.ACTIVE_MODELS
+    assert 'INSURANCE' not in C.ACTIVE_MODELS
 
 
 def test_score_group_end_to_end_mot_mo_hinh():

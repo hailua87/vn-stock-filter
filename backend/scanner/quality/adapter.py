@@ -52,6 +52,12 @@ ITEMS: Dict[str, tuple] = {
     'provision':           ('income', ['provision_for_credit_losses']),
     'loans':               ('balance_sheet', ['loans_and_advances_to_customers']),
     'deposits':            ('balance_sheet', ['deposits_from_customers']),
+    # bất động sản
+    # `inventories_net` là hàng tồn kho SAU trích lập; với chủ đầu tư BĐS đây
+    # chính là quỹ đất và dự án dở dang, khoản mục lớn nhất bảng cân đối.
+    'inventories':         ('balance_sheet', ['inventories_net', 'inventories']),
+    # KHÔNG lấy 'advances_from_customers' (người mua trả tiền trước): đã thử
+    # chấm và bỏ — xem metrics.real_estate. Không nạp thứ không ai dùng.
     # chứng khoán
     'operating_revenue':   ('income', ['operating_sales']),
     'brokerage_revenue':   ('income', ['revenue_in_brokerage_services']),

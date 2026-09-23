@@ -113,8 +113,12 @@ def universe():
     quarters = {t: dict(fpt_q, ticker=t) for t in years}
     vcb = raw('VCB', 'year'); vcb['overview'] = {'industry': 'Banks'}
     years['VCB'], quarters['VCB'] = vcb, raw('VCB', 'quarter')
-    re_ = copy.deepcopy(fpt_y); re_['overview'] = {'industry': 'Real Estate'}
-    years['REX'], quarters['REX'] = re_, fpt_q
+    # Ma thu duong "mo hinh nganh chua kich hoat". Truoc 23/09/2026 dung
+    # 'Real Estate'; nay nganh do da co mo hinh nen phai doi sang Insurance —
+    # nganh duy nhat con lai chua bat. Khong doi thi test nay im lang chuyen
+    # sang do mot duong khac han.
+    ins = copy.deepcopy(fpt_y); ins['overview'] = {'industry': 'Insurance'}
+    years['REX'], quarters['REX'] = ins, fpt_q
     years['FLC'], quarters['FLC'] = _scaled(fpt_y, 'FLC', 1.0), fpt_q    # có trong danh sách hủy niêm yết
     return years, quarters
 
