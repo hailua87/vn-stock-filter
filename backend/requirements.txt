@@ -14,10 +14,13 @@ pyarrow>=14.0.0          # parquet cache
 # loi cua upstream tu no thanh su co cua repo nay, khong qua mot lan review nao.
 # Nang ban la viec CO Y: sua so o day, xem CI xanh, roi moi merge.
 vnstock==4.0.7          # primary VN market data (4.x API)
-# vnai la phu thuoc KHONG ghim cua vnstock. Ban 2.6.0 tu ghi prompt tai tu
+# vnai la phu thuoc KHONG ghim cua vnstock. No tu ghi prompt tai tu
 # vnstocks.com vao AGENTS.md, ~/.claude/CLAUDE.md, ~/.codex/AGENTS.md,
-# ~/.gemini/GEMINI.md; tat bang VNSTOCK_DISABLE_AGENT_SETUP=1 (da dat trong
-# cac workflow). Ghim de ban moi khong doi hanh vi ma khong qua review.
+# ~/.gemini/GEMINI.md.
+# VNSTOCK_DISABLE_AGENT_SETUP=1 KHONG chan duoc (do that 23/09/2026; bien do
+# khong he duoc vnai doc). Cai chan that la /AGENTS.md trong .gitignore, cong
+# hook don dep o backend/conftest.py. Ghim ban de hanh vi khong doi ma khong
+# qua review.
 vnai==2.6.0
 requests>=2.31.0
 
