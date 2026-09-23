@@ -53,8 +53,17 @@ on:
           - intraday
           - eod
 
-# vnai >= 2.6 (phu thuoc cua vnstock) tu ghi prompt tai tu vnstocks.com vao
-# AGENTS.md cua thu muc dang chay va ~/.claude, ~/.codex, ~/.gemini. Tat han.
+# vnai (phu thuoc cua vnstock) tu ghi prompt tai tu vnstocks.com vao AGENTS.md
+# cua thu muc dang chay va ~/.claude, ~/.codex, ~/.gemini.
+#
+# BIEN DUOI DAY KHONG CHAN DUOC. Do that 23/09/2026: dat hay khong dat, tep van
+# duoc tao. vnai/beam/agents.py ban 2.5.6 khong doc bien nao ten nhu vay, ca tep
+# khong co nhanh tat nao — viec ghi chi phu thuoc co API key hay khong. Giu bien
+# lai phong khi ban sau co ho tro, nhung DUNG tin no.
+#
+# Thu that su bao ve repo la `/AGENTS.md` trong .gitignore: tep co bi ghi cung
+# khong lot vao commit. Chay test o may ca nhan con co them hook don dep trong
+# backend/conftest.py.
 env:
   VNSTOCK_DISABLE_AGENT_SETUP: "1"
 

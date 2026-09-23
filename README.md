@@ -92,10 +92,18 @@ pip install -r backend/requirements.txt
 export VNSTOCK_API_KEY=your_key_here
 export VNSTOCK_DISABLE_AGENT_SETUP=1
 ```
-`VNSTOCK_DISABLE_AGENT_SETUP=1` là bắt buộc: không có nó, `vnai` (đi kèm vnstock)
-sẽ tự ghi một prompt tải từ vnstocks.com vào `AGENTS.md` của thư mục đang chạy và
-`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`. Trên Windows:
-`setx VNSTOCK_DISABLE_AGENT_SETUP 1`.
+`vnai` (đi kèm vnstock) tự ghi một prompt tải từ vnstocks.com vào `AGENTS.md` của
+thư mục đang chạy và `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`,
+`~/.gemini/GEMINI.md`.
+
+**`VNSTOCK_DISABLE_AGENT_SETUP=1` không chặn được việc đó.** Đo thật ngày
+23/09/2026: đặt hay không đặt, tệp vẫn được tạo — `vnai/beam/agents.py` (2.5.6)
+không đọc biến nào tên như vậy. Biến vẫn được đặt trong các workflow phòng khi
+bản sau có hỗ trợ, nhưng đừng tin nó.
+
+Cái chặn thật là `/AGENTS.md` trong `.gitignore`: tệp có bị ghi cũng không lọt vào
+commit. `backend/conftest.py` dọn nốt tệp đó sau mỗi lượt pytest ở máy cá nhân
+(chỉ xóa khi git không theo dõi nó).
 
 ### Chạy scanner kỹ thuật
 ```bash

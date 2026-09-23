@@ -126,7 +126,7 @@ vnstock 4.x (theo README, dùng `VNSTOCK_API_KEY`). Nguồn gốc bên dưới d
 | Số cổ phiếu | `overview.issue_share`; dòng BCTC `common_shares` là **vốn cổ phần bằng tiền** | Dự phòng: vốn góp / mệnh giá 10.000đ (VCB khớp `overview` trong 0,01%) |
 | Giá sau đóng cửa | Đo 16/09, 18/09: Close lúc ~17:00 ICT đã trùng giá chốt; chỉ Volume thiếu nhẹ (trung vị ~0,1%) | Nhận định cũ "giá tạm tới 22:00" không còn đúng với Close; giữ lịch cũ tới khi đo thêm |
 | Tốc độ nguồn | Dao động mạnh: 18/09 lấy 500 mã trong 18 phút; 14, 17, 21/09 `trading.vietcap.com.vn` timeout 30 s liên tục | Ngân sách thời gian, điều tiết theo lượt gọi mạng, hạn chót cho mọi lệnh gọi sau vòng fetch (§7.5) |
-| `vnai` (phụ thuộc của vnstock) | Bản 2.6.0 tự ghi một prompt tải từ vnstocks.com vào `AGENTS.md` của thư mục chạy và `~/.claude`, `~/.codex`, `~/.gemini` | Đặt `VNSTOCK_DISABLE_AGENT_SETUP=1` trong mọi workflow và khi chạy tay; ghim `vnai==2.6.0` |
+| `vnai` (phụ thuộc của vnstock) | Tự ghi một prompt tải từ vnstocks.com vào `AGENTS.md` của thư mục chạy và `~/.claude`, `~/.codex`, `~/.gemini` | `VNSTOCK_DISABLE_AGENT_SETUP=1` **không chặn được** (đo 23/09/2026: `vnai/beam/agents.py` không đọc biến này). Chặn thật bằng `/AGENTS.md` trong `.gitignore` + hook dọn dẹp ở `backend/conftest.py`; ghim `vnai==2.6.0` |
 
 ## 6. Kiến trúc
 
