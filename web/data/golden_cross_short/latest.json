@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-23T13:46:21.978130",
+  "generated_at": "2026-09-23T19:41:30.292910",
   "strategy": "golden_cross_short",
   "total": 6,
   "metadata": {
@@ -11,7 +11,7 @@
     ],
     "base_conditions": {
       "min_avg_value_20d": 10000000000.0,
-      "dropped_low_liquidity": 387,
+      "dropped_low_liquidity": 386,
       "universe_after": 113,
       "exchanges": [
         "HOSE",
@@ -19,7 +19,7 @@
         "UPCOM"
       ]
     },
-    "total_scanned": 500,
+    "total_scanned": 499,
     "market_context": {
       "available": true,
       "close": 1801.65,
@@ -34,22 +34,22 @@
       "label": "Thị trường trung tính — tín hiệu mua nên vào với tỷ trọng nhỏ hơn",
       "position_size_multiplier": 0.6,
       "breadth": {
-        "pct_above_ma50": 31.6,
-        "sample_size": 500
+        "pct_above_ma50": 31.7,
+        "sample_size": 499
       }
     },
     "session_date": "2026-09-23",
-    "written_at_ict": "2026-09-23 20:46:19+0700",
+    "written_at_ict": "2026-09-24 02:41:28+0700",
     "run_type": "eod",
     "session_complete": 0.801,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 20:46 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên 2026-09-23 đã đóng dứt khoát (hôm nay 2026-09-24)) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 20:46 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-09-23 đã đóng dứt khoát (hôm nay 2026-09-24)"
       },
       {
         "name": "gate_coverage",
@@ -60,11 +60,11 @@
     "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 1.0,
-    "fetch_elapsed_s": 1013.1,
+    "fetch_coverage": 0.998,
+    "fetch_elapsed_s": 179.9,
     "intraday": false,
-    "run_time_ict": "20:46",
-    "run_date_ict": "2026-09-23"
+    "run_time_ict": "02:41",
+    "run_date_ict": "2026-09-24"
   },
   "signals": [
     {
@@ -185,7 +185,7 @@
       "m_preset_name": "MA10×MA20",
       "m_cross_days_ago": 1,
       "m_fast_ma": 45.95,
-      "m_slow_ma": 45.78,
+      "m_slow_ma": 45.79,
       "m_slow_spread_pct": 0.35,
       "m_change_5d_pct": 4.42,
       "m_vol_ratio": 1.28,
@@ -467,7 +467,7 @@
         "range": 10.55
       },
       "m_rs_score": 8.55,
-      "m_rs_rank": 93,
+      "m_rs_rank": 92,
       "m_rs_63d": 19.6,
       "m_stop": 36.66,
       "m_target": 39.15,
@@ -711,7 +711,7 @@
         "range": 3.35
       },
       "m_rs_score": -12.49,
-      "m_rs_rank": 39,
+      "m_rs_rank": 38,
       "m_rs_63d": 6.03,
       "m_stop": 18.63,
       "m_target": 19.03,
