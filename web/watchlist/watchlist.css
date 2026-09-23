@@ -26,37 +26,7 @@
 .wl-tab-n { font-family: var(--font-mono); color: var(--text-mute); }
 .wl-tab:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
-/* ─── Trạng thái (§11.3): Đủ chuẩn đặc, Theo dõi viền liền, Cần xem lại viền đứt,
-       Thiếu dữ liệu viền chấm + nền xám, Loại gạch ngang ─── */
-.wl-status {
-  display: inline-block; min-width: 96px; padding: 2px 8px;
-  border-radius: 4px; font-size: 12px; font-weight: 600; text-align: center;
-  border: 1px solid transparent; white-space: nowrap;
-}
-.wl-status.st-QUAL { background: var(--text); color: var(--bg-base); }
-.wl-status.st-MON  { border: 1px solid var(--text-dim); color: var(--text); }
-.wl-status.st-REV  { border: 1px dashed var(--text-dim); color: var(--text-dim); }
-.wl-status.st-RES  { border: 1px dotted var(--text-mute); color: var(--text-dim); background: var(--bg-elev-2); }
-.wl-status.st-EXC  { color: var(--text-mute); text-decoration: line-through; }
-
-.wl-status-swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; border: 1px solid transparent; }
-.wl-status-swatch.st-QUAL { background: var(--text); }
-.wl-status-swatch.st-MON  { border: 1px solid var(--text-dim); }
-.wl-status-swatch.st-REV  { border: 1px dashed var(--text-dim); }
-.wl-status-swatch.st-RES  { border: 1px dotted var(--text-mute); background: var(--bg-elev-2); }
-.wl-status-swatch.st-EXC  { background: linear-gradient(to bottom, transparent 45%, var(--text-mute) 45%, var(--text-mute) 55%, transparent 55%); }
-
-/* ─── Thanh 4 chiều ─── */
-.wl-bar { display: flex; align-items: center; gap: 5px; min-width: 62px; }
-.wl-bar-track { position: relative; flex: 1; height: 6px; background: var(--bg-elev-2); border-radius: 3px; }
-.wl-bar-fill { height: 100%; border-radius: 3px; }
-.wl-bar-fill.pass { background: var(--text); }
-.wl-bar-fill.mid  { background: var(--text-mute); }
-.wl-bar-fill.low  { background: transparent; border: 1px dashed var(--text-mute); box-sizing: border-box; }
-.wl-bar-tick { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--focus); }
-.wl-bar-num { font-family: var(--font-mono); font-size: 12px; min-width: 22px; text-align: right; color: var(--text); }
-.wl-na { color: var(--text-mute); font-family: var(--font-mono); }
-.wl-na small { font-size: 10px; margin-left: 4px; }
+/* Trang thai, thanh 4 chieu: xem web/shared/quality-view.css */
 
 .wl-sub { font-size: 11px; color: var(--text-mute); white-space: nowrap; }
 .wl-col-status { min-width: 128px; max-width: 190px; }
@@ -79,17 +49,7 @@
 .wl-input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 
 /* ─── Chi tiết ─── */
-.wl-period { font-size: 12px; color: var(--text-dim); }
-.wl-metrics { width: 100%; border-collapse: collapse; font-size: 12px; }
-.wl-metrics th { text-align: left; color: var(--text-mute); font-weight: 500; padding: 4px 0; border-bottom: 1px solid var(--border); }
-.wl-metrics th.th-num, .wl-metrics td.td-num { text-align: right; font-family: var(--font-mono); }
-.wl-metrics td { padding: 4px 0; border-bottom: 1px solid var(--border); color: var(--text); }
-.wl-metrics td small { color: var(--text-mute); }
-.wl-metrics tr.wl-miss td { color: var(--text-mute); }
-.wl-flags { margin: 4px 0 0 18px; padding: 0; font-size: 12px; color: var(--text); }
-.wl-flags small { color: var(--text-mute); }
-.wl-veto { color: var(--text); font-weight: 600; }
-.wl-upside { font-family: var(--font-mono); margin-left: 6px; }
+/* Ky BCTC, bang chi tieu, co quan tri: xem web/shared/quality-view.css */
 .detail-section-title small { color: var(--text-mute); font-weight: 400; }
 .wl-back { display: none; }
 
