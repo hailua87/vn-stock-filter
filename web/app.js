@@ -464,12 +464,16 @@ async function loadCombinedData(silent = false) {
   let universeSize = null;   // = metadata.total_scanned, tên khoá backend thực ghi
   let demoFlag = false;
   let scanDate = null;
+  let baseMeta = null;
 
   for (const { key, signals, metadata } of results) {
     state.combined.sourceData[key] = { signals, metadata };
     if (metadata.total_scanned && metadata.total_scanned > universeSize) universeSize = metadata.total_scanned;
     if (metadata.demo) demoFlag = true;
     if (metadata.session_date) scanDate = metadata.session_date;
+    // Dieu kien nen giong nhau o ca 4 nguon (cung mot lan chay run_daily);
+    // lay nguon dau tien co ghi.
+    if (!baseMeta && metadata.base_conditions) baseMeta = metadata;
     if (metadata.market_context && metadata.market_context.available) {
       state.marketContext = metadata.market_context;
       renderMarketContext(metadata.market_context, metadata.intraday);
@@ -511,6 +515,11 @@ async function loadCombinedData(silent = false) {
   state.runMetadata = bestRunMeta;
 
   // Flatten: each ticker becomes a "combined signal"
+  // Ban do ma -> cac chien luoc khop, dung cho MOI tab (khong chi Tong hop):
+  // blueprint v3 muc 7.3 yeu cau liet ke TAT CA chien luoc khop cua tung ma.
+  state.strategyMap = Object.fromEntries(
+    Object.entries(byTicker).map(([t, e]) => [t, Array.from(e.strategies)]));
+
   state.raw = Object.values(byTicker).map(entry => ({
     ...entry.best,
     _strategies: Array.from(entry.strategies),
@@ -527,6 +536,7 @@ async function loadCombinedData(silent = false) {
     // `has-banner` da bo: .dashboard dung flex: 1 nen no tu co lai khi banner
     // chiem cho, khong con hang 33px nao de bat/tat.
     demoBanner.style.display = demoFlag ? 'block' : 'none';
+    renderBaseConditions(baseMeta);
     render();
   }
 }
@@ -578,12 +588,15 @@ async function loadLatestFirst() {
     const demoBanner = document.getElementById('demo-banner');
     // Xem ghi chu ve `has-banner` o loadCombinedData.
     demoBanner.style.display = data.metadata?.demo ? 'block' : 'none';
+    renderBaseConditions(data.metadata);
 
     render();
+    // Ban do chien luoc nap ngam roi ve lai bang: cot MA hien du nhan khop (§7.3)
+    ensureStrategyMap().then(render);
   } catch (e) {
     console.error('Load latest failed:', e);
     document.getElementById('signal-rows').innerHTML =
-      `<tr><td colspan="16" class="empty error-state">
+      `<tr><td colspan="17" class="empty error-state">
          <div class="error-title">Không tải được dữ liệu</div>
          <div class="error-detail">${escapeAttr(e.message)}</div>
          <div class="error-detail">${navigator.onLine ? 'Máy chủ dữ liệu có thể đang bận.' : 'Thiết bị đang offline.'}</div>
@@ -1076,6 +1089,44 @@ function render() {
   renderRows();
 }
 
+/** Nap ngam nguon 4 chien luoc (chi mot lan) de biet moi ma khop nhung gi. */
+async function ensureStrategyMap() {
+  if (state.strategyMap && Object.keys(state.strategyMap).length) return;
+  // loadCombinedData ghi de state.raw (no dung cho tab Tong hop) — giu lai roi tra ve,
+  // neu khong tab dang xem se bi thay bang du lieu gop.
+  const from = activeStrategy;
+  const saved = { raw: state.raw, date: state.currentDate,
+                  latest: state.latestDate, meta: state.runMetadata };
+  try {
+    await loadCombinedData(true);
+  } catch (e) {
+    console.warn('Khong dung duoc ban do chien luoc:', e.message);
+  } finally {
+    // Chi tra lai neu VAN o dung tab da chup: doi tab giua chung thi ban chup
+    // khong con la du lieu dang hien, ghi de se sai.
+    if (from !== 'combined' && activeStrategy === from) {
+      state.raw = saved.raw;
+      state.currentDate = saved.date;
+      state.latestDate = saved.latest;
+      state.runMetadata = saved.meta;
+    }
+  }
+}
+
+/** Dieu kien nen da ap o backend (§7.2) — noi ro ro nay da bi loc nhung gi. */
+function renderBaseConditions(metadata) {
+  const el = document.getElementById('base-conditions');
+  if (!el) return;
+  const bc = metadata?.base_conditions;
+  if (!bc || !bc.min_avg_value_20d) {
+    el.textContent = 'Phiên này không ghi điều kiện nền';
+    return;
+  }
+  const ty = (bc.min_avg_value_20d / 1e9).toFixed(0);
+  const dropped = bc.dropped_low_liquidity;
+  el.textContent = `GTGD TB20 ≥ ${ty} tỷ` + (dropped ? ` · đã loại ${dropped} mã thanh khoản thấp` : '');
+}
+
 function applyFilters() {
   // Ma kich san khong hien thi tin hieu (blueprint v3 muc 7.4). Backend danh dau
   // m_suppress_signal trong scanner/trade_levels.py; du lieu cu chua co truong
@@ -1137,7 +1188,10 @@ function applyFilters() {
       return (b.total_score || 0) - (a.total_score || 0);
     });
   } else {
-    arr.sort((a, b) => (b.total_score || 0) - (a.total_score || 0));
+    // §7.4: số chiến lược khớp ↓, rồi KL/TB20 ↓. Điểm chỉ là mốc phân giải cuối.
+    arr.sort((a, b) => (matchCount(b) - matchCount(a))
+      || ((b.m_vol_ratio || 0) - (a.m_vol_ratio || 0))
+      || ((b.total_score || 0) - (a.total_score || 0)));
   }
   return arr;
 }
@@ -1145,7 +1199,7 @@ function applyFilters() {
 function renderRows() {
   const tbody = document.getElementById('signal-rows');
   if (!state.filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="16" class="empty">Không có tín hiệu khớp bộ lọc</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="17" class="empty">Không có tín hiệu khớp bộ lọc</td></tr>`;
     return;
   }
   tbody.innerHTML = state.filtered.map((s, i) => renderRow(s, i + 1)).join('');
@@ -1208,10 +1262,50 @@ function escapeAttr(str) {
 // mat o, con hang du lieu giu nguyen => bang LECH COT.
 // Truoc 29/08/2026 co 9/15 cot thieu, nen o 402px tieu de chi con 5 cot ma moi
 // hang du lieu van 15 o: nguoi dung thay HOSE va KLGD duoi tieu de GIA va DIEM.
-/** Thoat chuoi de nhet vao thuoc tinh title. */
-function escAttr(v) {
-  return String(v == null ? '' : v).replace(/[&<>"']/g, c =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const STRAT_TAG = {
+  pre_breakout: 'PB', golden_cross_long: 'GCL',
+  golden_cross_short: 'GCS', ichimoku: 'ICH',
+};
+
+/** Cac chien luoc ma nay khop (moi tab, khong chi Tong hop). */
+function strategiesOf(s) {
+  return s._strategies || state.strategyMap?.[s.ticker] || [];
+}
+function matchCount(s) {
+  return s._passCount ?? strategiesOf(s).length;
+}
+
+/**
+ * Nhan cac chien luoc khac cung khop ma nay (§7.3).
+ * O tab mot chien luoc, MOI dong deu khop chien luoc do — in lai nhan ay chi la
+ * nhieu, nen bo di va chi giu phan THEM. O tab Tong hop thi liet ke day du.
+ */
+function renderStrategyTags(s) {
+  const list = strategiesOf(s)
+    .filter(k => activeStrategy === 'combined' || k !== activeStrategy);
+  if (!list.length) return '';
+  const names = list.map(k => STRATEGIES[k]?.name || k).join(', ');
+  const why = activeStrategy === 'combined'
+    ? `Khớp: ${names}` : `Còn khớp: ${names}`;
+  return `<span class="strat-tags" title="${escapeAttr(why)}">${list.map(k =>
+    `<span class="strat-tag">${STRAT_TAG[k] || k}</span>`).join('')}</span>`;
+}
+
+/**
+ * Sparkline 20 phien (§7.3). SVG noi tuyen, khong thu vien.
+ * Duong don sac: day KHONG phai mau gia, nen khong dung --up/--down (§11.3).
+ */
+function renderSpark(values) {
+  const v = (values || []).filter(x => typeof x === 'number');
+  if (v.length < 2) return '<span class="dim">—</span>';
+  const lo = Math.min(...v), hi = Math.max(...v), span = hi - lo || 1;
+  const W = 56, H = 16;
+  const pts = v.map((x, i) => `${(i / (v.length - 1) * W).toFixed(1)},${(H - (x - lo) / span * H).toFixed(1)}`);
+  const first = v[0], last = v[v.length - 1];
+  const pct = first ? ((last - first) / first * 100).toFixed(1) : '0';
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img"
+    aria-label="20 phiên: ${pct}%"><title>20 phiên gần nhất: ${pct}%</title>
+    <polyline points="${pts.join(' ')}" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>`;
 }
 
 /**
@@ -1222,7 +1316,7 @@ function escAttr(v) {
 function renderRR(s) {
   if (s.m_rr === null || s.m_rr === undefined) {
     const why = s.m_levels_note || 'Chưa có dữ liệu mức giá';
-    return `<span class="dim" title="${escAttr(why)}">—</span>`;
+    return `<span class="dim" title="${escapeAttr(why)}">—</span>`;
   }
   const cls = s.m_rr >= 2 ? 'rr-good' : (s.m_rr >= 1 ? 'rr-ok' : 'rr-low');
   return `<span class="${cls}" title="(mục tiêu − giá) / (giá − cắt lỗ). Mức gợi ý theo chiến lược, không phải lệnh">${Number(s.m_rr).toFixed(2)}</span>`;
@@ -1248,6 +1342,8 @@ function renderRow(s, idx) {
   const supCell = supports.length ? renderFibCell(supports[0], 'support') : '<span class="dim">—</span>';
   const resCell = resistances.length ? renderFibCell(resistances[0], 'resistance') : '<span class="dim">—</span>';
   const rrCell = renderRR(s);
+  const sparkCell = renderSpark(s.m_spark20);
+  const stratCell = renderStrategyTags(s);
 
   const selectedClass = s.ticker === state.selectedTicker ? 'selected' : '';
 
@@ -1270,7 +1366,7 @@ function renderRow(s, idx) {
 
     return `<tr data-ticker="${s.ticker}" class="${selectedClass}">
       <td class="th-idx prio-4">${idx}</td>
-      <td class="ticker-with-badges"><span class="ticker-cell">${s.ticker}</span>${eventFlag}<span class="ticker-badges">${badgesInline}</span></td>
+      <td class="ticker-with-badges"><span class="ticker-cell">${s.ticker}</span>${eventFlag}${stratCell}<span class="ticker-badges">${badgesInline}</span></td>
       <td class="prio-3"><span class="exchange-cell">${s.exchange}</span></td>
       <td class="num td-price">${fmtPrice(s.close)}</td>
       <td class="num prio-1">${renderChange1D(s)}</td>
@@ -1278,6 +1374,7 @@ function renderRow(s, idx) {
       <td class="num prio-2">${fmtVolume(s.volume)}</td>
       <td class="num prio-3">${fmtValue(s.close, s.volume)}</td>
       <td class="num prio-3">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
+      <td class="prio-4">${sparkCell}</td>
       <td class="num prio-3">${(s.m_rsi14 || 0).toFixed(0)}</td>
       <td class="num prio-4">${supCell}</td>
       <td class="num prio-4">${resCell}</td>
@@ -1309,7 +1406,7 @@ function renderRow(s, idx) {
 
   return `<tr data-ticker="${s.ticker}" class="${selectedClass}">
     <td class="th-idx prio-4">${idx}</td>
-    <td><span class="ticker-cell">${s.ticker}</span>${tkCrossFlag}${turnaroundFlag}${eventFlag}</td>
+    <td><span class="ticker-cell">${s.ticker}</span>${tkCrossFlag}${turnaroundFlag}${eventFlag}${stratCell}</td>
     <td class="prio-3"><span class="exchange-cell">${s.exchange}</span></td>
     <td class="num td-price">${fmtPrice(s.close)}</td>
     <td class="num prio-1">${renderChange1D(s)}</td>
@@ -1317,6 +1414,7 @@ function renderRow(s, idx) {
     <td class="num prio-2">${fmtVolume(s.volume)}</td>
     <td class="num prio-3">${fmtValue(s.close, s.volume)}</td>
     <td class="num prio-3">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
+    <td class="prio-4">${sparkCell}</td>
     <td class="num prio-3">${(s.m_rsi14 || 0).toFixed(0)}</td>
     <td class="num prio-4">${supCell}</td>
     <td class="num prio-4">${resCell}</td>
