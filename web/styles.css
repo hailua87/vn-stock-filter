@@ -2826,3 +2826,65 @@ kbd {
   border: 1px solid var(--border); border-radius: 2px;
   color: var(--text-mute); font-family: var(--font-mono); white-space: nowrap;
 }
+
+/* ════════════════════════════════════════════════════════════
+   Màn Chi tiết mã (blueprint v3 §11.1)
+   ════════════════════════════════════════════════════════════ */
+
+/* ─── Biểu đồ nến ───
+   Nến LÀ giá, nên dùng đúng bảng màu giá (§11.3). Hai đường MA thì không:
+   chúng là trung bình trượt, không phải giá một phiên. */
+.analyzer-chart { margin: 16px 0 20px; }
+.cd-wrap { background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: 4px; padding: 8px 8px 6px; }
+.cd-chart { width: 100%; height: 240px; display: block; }
+.cd-body.up   { fill: var(--up); }
+.cd-body.down { fill: var(--down); }
+/* Nến tham chiếu (mở = đóng): KHÔNG dùng --limit-ref — đó là mực tối dành cho
+   nền vàng tham chiếu, đặt lên nền tối của trang sẽ mất hút. */
+.cd-body.ref  { fill: var(--text-dim); }
+/* preserveAspectRatio="none" keo giãn SVG theo chiều ngang để biểu đồ lấp đầy
+   khung; không có non-scaling-stroke thì nét dọc bị kéo dày theo, nến 60 phiên
+   nhoè thành một mảng. */
+.cd-chart line, .cd-chart polyline { vector-effect: non-scaling-stroke; }
+.cd-wick { stroke-width: 1; }
+.cd-wick.up   { stroke: var(--up); }
+.cd-wick.down { stroke: var(--down); }
+.cd-wick.ref  { stroke: var(--text-dim); }
+.cd-ma { stroke-width: 1.2; }
+.cd-ma20 { stroke: var(--text); }
+.cd-ma50 { stroke: var(--text-mute); stroke-dasharray: 4 3; }
+.cd-grid { stroke: var(--border); stroke-width: 1; }
+.cd-axis { fill: var(--text-mute); font-family: var(--font-mono); font-size: 10px; }
+.cd-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--text-mute); }
+.cd-key { font-family: var(--font-mono); }
+.cd-key-ma20::before { content: '—'; color: var(--text); margin-right: 4px; }
+.cd-key-ma50::before { content: '- -'; color: var(--text-mute); margin-right: 4px; }
+.cd-range { margin-left: auto; }
+
+/* ─── Lưu ý T+2 và miễn trừ ─── */
+.detail-t2 {
+  margin: 10px 0 0; padding: 8px 10px; font-size: 12px; line-height: 1.5;
+  color: var(--text-dim); background: var(--bg-elev-2);
+  border-left: 2px solid var(--border-strong); border-radius: 0 3px 3px 0;
+}
+.detail-disclaimer { margin: 8px 0 0; font-size: 11px; color: var(--text-mute); }
+
+/* ─── Góc dài hạn ─── */
+.analyzer-longterm { margin-top: 24px; }
+.lt-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 6px; }
+.lt-model { font-size: 12px; color: var(--text-dim); }
+.lt-dims {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 6px 18px; margin: 10px 0 14px;
+}
+.lt-dim { display: flex; align-items: center; gap: 8px; }
+.lt-dim-name { font-size: 12px; color: var(--text-dim); min-width: 84px; }
+.lt-section { margin-top: 14px; }
+.lt-section-title { font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
+.lt-section-title b { color: var(--text); font-family: var(--font-mono); }
+.lt-section-title small { color: var(--text-mute); }
+.lt-band { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lt-guard { font-size: 12px; color: var(--text); margin: 6px 0 0; }
+.lt-warnings { margin-top: 8px; font-size: 12px; color: var(--text-dim); }
+.lt-warnings summary { cursor: pointer; color: var(--text-mute); }
+.lt-warnings ul { margin: 6px 0 0 18px; padding: 0; }

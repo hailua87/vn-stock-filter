@@ -183,6 +183,12 @@ const state = {
     sourceData: {},                // shared with combined when both loaded
     universe: [],                  // list of all known tickers (for suggestions)
   },
+  // ─── Man Chi tiet ma (§11.1) ───
+  // Ba nguon nap NGAM va chi MOT lan, khi nguoi doc mo mot ma. Bang scan
+  // khong can chung, nen nap san se lam cham man dau vi khong ly do.
+  // `null` = chua nap, `{}`/`[]` = da nap nhung khong co du lieu — hai
+  // trang thai khac nhau, gop lai se nap lai vo han khi tep rong.
+  detail: { ohlc: null, quality: null, valuation: null },
 };
 
 // ──────────── Init ────────────
@@ -2160,6 +2166,224 @@ function computeAnalyzerLevels(s) {
 }
 
 // ── Main analyzer entry point ──
+/**
+ * Goc dai han cua man Chi tiet ma (§11.1): 4 chieu kem tung chi tieu va
+ * percentile, chi tieu thieu, dinh gia.
+ *
+ * Doc nguyen tu web/data/quality/latest.json + valuation/latest.json qua
+ * window.QV (web/shared/quality-view.js) — cung tu vung, cung cach dinh dang
+ * voi man Watchlist, khong chep lai nhan hay nguong.
+ */
+function renderLongTerm(ticker, q, qMeta, val) {
+  if (!q) {
+    // Khong co diem 4 chieu nhung VAN co the co dinh gia: hai tep doc lap nhau,
+    // giau khoi dinh gia chi vi thieu diem chat luong la bo mat du lieu da co.
+    return `<div class="analyzer-longterm">
+      <div class="analyzer-section-title"><span class="section-icon">🏛️</span> Góc dài hạn</div>
+      <p class="muted">${escapeAttr(ticker)} không nằm trong universe chấm chất lượng
+        (${qMeta?.universe_size || '100'} mã vốn hóa lớn nhất, chấm hằng tuần),
+        nên chưa có điểm 4 chiều. Phần trên vẫn dùng được: đó là tín hiệu kỹ thuật của phiên.</p>
+      ${val ? renderValuationBlock(null, val) : ''}
+    </div>`;
+  }
+  const QV = window.QV;
+  const spec = (qMeta?.model_specs || {})[q.model] || {};
+  const th = qMeta?.thresholds;
+
+  const bars = QV.DIMS.map(d => `<div class="lt-dim">
+      <span class="lt-dim-name">${QV.DIM_LABEL[d]}</span>
+      ${QV.dimBar(q, d, th)}
+    </div>`).join('');
+
+  const sections = ['quality', 'growth', 'resilience'].map(d => {
+    const dim = q.dims?.[d] || {};
+    const table = QV.metricsTable(q, spec[d]);
+    const missing = (dim.missing || []).map(k => QV.metricLabel(k)).join(', ');
+    return `<div class="lt-section">
+      <div class="lt-section-title">${QV.DIM_LABEL[d]}:
+        <b>${dim.score == null ? '—' : Math.round(dim.score)}</b>
+        <small>· phủ ${Math.round((dim.coverage || 0) * 100)}%</small></div>
+      ${table || '<p class="muted">Mô hình ngành chưa kích hoạt trong dữ liệu tuần này.</p>'}
+      ${missing ? `<p class="muted">Chỉ tiêu thiếu: ${escapeAttr(missing)}</p>` : ''}
+    </div>`;
+  }).join('');
+
+  const gov = q.dims?.governance || {};
+  const flags = QV.flagList(q, qMeta?.governance_penalty);
+  const govMissing = (gov.missing || [])
+    .map(k => QV.MISSING_GOV_LABEL[k] || k).join(', ');
+
+  return `<div class="analyzer-longterm">
+    <div class="analyzer-section-title"><span class="section-icon">🏛️</span> Góc dài hạn</div>
+    <div class="lt-head">
+      ${QV.statusBadge(q.status)}
+      <span class="lt-model">${escapeAttr(QV.MODEL_LABEL[q.model] || q.model || '—')}
+        · ${escapeAttr((q.industry || '').replace(/_/g, ' '))}</span>
+      <span class="wl-period">BCTC năm ${escapeAttr(q.latest_annual || '—')}
+        · quý ${escapeAttr(q.latest_quarter || '—')}</span>
+    </div>
+    <div class="band-reason">${escapeAttr(q.reason || '')}</div>
+    <div class="lt-dims">${bars}</div>
+    ${sections}
+    <div class="lt-section">
+      <div class="lt-section-title">${QV.DIM_LABEL.governance}:
+        <b>${gov.score ?? '—'}</b>
+        <small>· phủ ${Math.round((gov.coverage || 0) * 100)}%</small></div>
+      ${flags || '<p class="muted">Không có cờ quản trị.</p>'}
+      ${govMissing ? `<p class="muted">Chưa đánh giá được: ${escapeAttr(govMissing)}</p>` : ''}
+      ${q.veto ? `<p class="wl-veto">Veto: ${escapeAttr(q.veto)}</p>` : ''}
+    </div>
+    ${renderValuationBlock(q.valuation, val)}
+  </div>`;
+}
+
+/**
+ * Khoi dinh gia. `band` lay tu tep chat luong (da qua lop chan §9), phan chi
+ * tiet phuong phap lay tu tep dinh gia. Khi engine chan cong bo huong (nhom
+ * tai chinh, hoac chi mot phuong phap) thi `guard_reason` phai hien ra —
+ * chi in "Chua co" ma khong noi vi sao la giau mat ly do.
+ */
+function renderValuationBlock(band, val) {
+  const QV = window.QV;
+  const methods = (val?.method_details || []).map(m =>
+    `<tr><td>${escapeAttr(m.method)}<small> ${m.weight}%</small></td>
+       <td class="td-num">${m.fair_value == null ? '—' : Math.round(m.fair_value).toLocaleString('vi-VN')}</td>
+       <td class="td-num">${m.upside_pct == null ? '—' : `${m.upside_pct > 0 ? '+' : ''}${QV.nf1.format(m.upside_pct)}%`}</td></tr>`).join('');
+  const warns = (val?.warnings || []).map(w => `<li>${escapeAttr(w)}</li>`).join('');
+
+  // `band` do tep chat luong cap (da qua lop chan §9). Ma ngoai universe cham
+  // chat luong thi KHONG co band — khi do dung in "Chua co", vi nghia cua no la
+  // "dinh gia khong du tin cay", con o day chi la "chua ai cham".
+  const bandRow = band
+    ? `<div class="lt-band">${QV.bandBadge(band)}
+        ${band.upside_pct == null ? '' :
+          `<span class="wl-upside">${band.upside_pct > 0 ? '+' : ''}${QV.nf1.format(band.upside_pct)}%</span>`}
+        ${band.confidence == null ? '' : `<small class="muted">tin cậy ${Math.round(band.confidence)}%</small>`}
+      </div>
+      ${band.reason ? `<p class="muted">${escapeAttr(band.reason)}</p>` : ''}`
+    : `<p class="muted">Mã này không được chấm chất lượng nên chưa có mức định giá
+        theo §9. Dưới đây là kết quả thô của mô hình định giá.</p>`;
+
+  return `<div class="lt-section">
+    <div class="lt-section-title">Định giá</div>
+    ${bandRow}
+    ${val?.guard_reason ? `<p class="lt-guard">${escapeAttr(val.guard_reason)}</p>` : ''}
+    ${methods ? `<table class="wl-metrics"><thead><tr>
+        <th>Phương pháp</th><th class="th-num">Giá trị hợp lý</th><th class="th-num">Upside</th>
+      </tr></thead><tbody>${methods}</tbody></table>` : ''}
+    ${warns ? `<details class="lt-warnings"><summary>Cảnh báo của mô hình định giá
+        (${(val.warnings || []).length})</summary><ul>${warns}</ul></details>` : ''}
+    <p class="detail-disclaimer">Định giá là ước lượng theo mô hình, không phải khuyến nghị đầu tư.</p>
+  </div>`;
+}
+
+/**
+ * Bieu do nen + MA20/MA50 (§11.1). SVG noi tuyen, khong thu vien.
+ *
+ * Mau nen theo bang dien Viet Nam (§11.3): day LA gia, nen dung dung bang mau
+ * do — xanh la tang, do giam, vang tham chieu. Hai duong MA thi khong: chung
+ * la trung binh truot, khong phai gia mot phien.
+ */
+function renderCandles(series, ticker) {
+  if (!series || !series.c || series.c.length < 2) {
+    return '<p class="muted">Chưa có dữ liệu nến cho mã này.</p>';
+  }
+  const n = series.c.length;
+  const W = 720, H = 240, PAD_L = 4, PAD_R = 46, PAD_T = 8, PAD_B = 18;
+  const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
+
+  // Thang gia phu CA nen LAN hai duong MA: cat mat mot phan duong MA50 se
+  // khien no trong nhu vua "bien mat" khoi bieu do.
+  const pool = [...series.h, ...series.l, ...series.ma20, ...series.ma50]
+    .filter(v => typeof v === 'number');
+  const lo = Math.min(...pool), hi = Math.max(...pool), span = (hi - lo) || 1;
+  const x = i => PAD_L + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
+  const y = v => PAD_T + (1 - (v - lo) / span) * plotH;
+
+  const step = plotW / n;
+  const bodyW = Math.max(1.5, Math.min(7, step * 0.62));
+
+  const candles = series.c.map((c, i) => {
+    const o = series.o[i], h = series.h[i], l = series.l[i];
+    if ([o, h, l, c].some(v => typeof v !== 'number')) return '';
+    const cls = c > o ? 'up' : c < o ? 'down' : 'ref';
+    const top = y(Math.max(o, c)), bot = y(Math.min(o, c));
+    const cx = x(i);
+    return `<line class="cd-wick ${cls}" x1="${cx.toFixed(1)}" y1="${y(h).toFixed(1)}" x2="${cx.toFixed(1)}" y2="${y(l).toFixed(1)}"/>`
+      + `<rect class="cd-body ${cls}" x="${(cx - bodyW / 2).toFixed(1)}" y="${top.toFixed(1)}"`
+      + ` width="${bodyW.toFixed(1)}" height="${Math.max(1, bot - top).toFixed(1)}"/>`;
+  }).join('');
+
+  // Duong MA co the dut quang o dau chuoi (chua du cua so) — tach thanh
+  // nhieu doan thay vi noi qua khoang trong, vi noi qua se ve ra mot doan
+  // thang khong ton tai.
+  const maPath = key => {
+    const segs = [];
+    let cur = [];
+    series[key].forEach((v, i) => {
+      if (typeof v === 'number') cur.push(`${x(i).toFixed(1)},${y(v).toFixed(1)}`);
+      else if (cur.length) { segs.push(cur); cur = []; }
+    });
+    if (cur.length) segs.push(cur);
+    return segs.filter(g => g.length > 1)
+      .map(g => `<polyline class="cd-ma cd-${key}" points="${g.join(' ')}" fill="none"/>`).join('');
+  };
+
+  const last = series.c[n - 1];
+  const gridVals = [hi, (hi + lo) / 2, lo];
+  const grid = gridVals.map(v => `<line class="cd-grid" x1="${PAD_L}" y1="${y(v).toFixed(1)}" x2="${(W - PAD_R).toFixed(1)}" y2="${y(v).toFixed(1)}"/>`
+    + `<text class="cd-axis" x="${(W - PAD_R + 4).toFixed(1)}" y="${(y(v) + 3.5).toFixed(1)}">${fmtQuote(v)}</text>`).join('');
+
+  const d0 = series.dates?.[0] || '', d1 = series.dates?.[n - 1] || '';
+  return `<div class="cd-wrap">
+    <svg class="cd-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img"
+         aria-label="Nến ${n} phiên của ${escapeAttr(ticker)}, từ ${escapeAttr(d0)} đến ${escapeAttr(d1)}">
+      ${grid}${maPath('ma20')}${maPath('ma50')}${candles}
+    </svg>
+    <div class="cd-legend">
+      <span class="cd-key cd-key-ma20">MA20 ${fmtQuote(series.ma20[n - 1])}</span>
+      <span class="cd-key cd-key-ma50">MA50 ${fmtQuote(series.ma50[n - 1])}</span>
+      <span class="cd-range">${escapeAttr(d0)} → ${escapeAttr(d1)} · ${n} phiên · đóng cửa ${fmtQuote(last)} ${fmtPriceUnit()}</span>
+    </div>
+  </div>`;
+}
+
+const fmtQuote = v => (typeof v === 'number' ? v.toFixed(2).replace('.', ',') : '—');
+
+/**
+ * T+2 (§11.1). Co phieu mua hom nay ve tai khoan sang ngay lam viec thu 2 sau
+ * do, nen khong ban lai duoc trong khoang ay. Chi noi quy tac, KHONG tinh ra
+ * mot ngay cu the: lich nghi le khong co trong du lieu nay, doan bua mot ngay
+ * con te hon la de nguoi doc tu tra lich.
+ */
+function renderT2Note() {
+  return `<p class="detail-t2">Lưu ý T+2: cổ phiếu mua phiên này về tài khoản
+    vào sáng ngày làm việc thứ hai sau đó, trong thời gian ấy không bán lại được.
+    Mức cắt lỗ ở trên vì vậy chỉ thực hiện được từ phiên T+2 trở đi.</p>`;
+}
+
+/**
+ * Nap mot tep JSON phu cho man chi tiet, dung mot lan.
+ * Hong thi tra ve gia tri rong chu KHONG nem loi: thieu nen hay thieu diem
+ * chat luong chi lam mat mot phan man hinh, khong duoc lam hong phan con lai.
+ */
+async function loadDetailSource(key, url, empty) {
+  if (state.detail[key] !== null) return state.detail[key];
+  try {
+    const r = await fetch(`${url}?_=${Date.now()}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    state.detail[key] = await r.json();
+  } catch (e) {
+    console.warn(`Khong nap duoc ${key}:`, e.message);
+    state.detail[key] = empty;
+  }
+  return state.detail[key];
+}
+
+const loadOhlc = () => loadDetailSource('ohlc', './data/ohlc/latest.json', { series: {} });
+const loadQuality = () => loadDetailSource('quality', './data/quality/latest.json', { items: [], metadata: {} });
+const loadValuation = () => loadDetailSource('valuation', './data/valuation/latest.json', { signals: [] });
+
 function analyzeTicker(ticker) {
   ticker = ticker.toUpperCase().trim();
   if (!ticker) {
@@ -2202,6 +2426,33 @@ function analyzeTicker(ticker) {
   const levels = computeAnalyzerLevels(primarySignal);
 
   content.innerHTML = renderAnalyzer(ticker, primarySignal, perStrategy, passCount, rec, levels);
+  fillDetailSections(ticker);
+}
+
+/**
+ * Do nen va goc dai han vao cho sau khi ba tep phu ve.
+ * Kiem lai `state.analyzer.ticker` truoc khi ghi: nguoi doc co the da go sang
+ * ma khac trong luc cho, ghi bua se dan ket qua cua ma cu vao ma moi.
+ */
+async function fillDetailSections(ticker) {
+  const stillHere = () => state.analyzer.ticker === ticker;
+
+  loadOhlc().then(d => {
+    if (!stillHere()) return;
+    const box = document.getElementById('analyzer-chart');
+    if (!box) return;
+    box.innerHTML = `<div class="analyzer-section-title"><span class="section-icon">🕯️</span> Nến ${d?.sessions || 60} phiên + MA20/MA50</div>`
+      + renderCandles(d?.series?.[ticker], ticker);
+  });
+
+  Promise.all([loadQuality(), loadValuation()]).then(([q, v]) => {
+    if (!stillHere()) return;
+    const box = document.getElementById('analyzer-longterm');
+    if (!box) return;
+    const item = (q?.items || []).find(x => x.ticker === ticker) || null;
+    const val = (v?.signals || []).find(x => x.ticker === ticker) || null;
+    box.outerHTML = renderLongTerm(ticker, item, q?.metadata, val);
+  });
 }
 
 function showAnalyzerEmpty() {
@@ -2364,6 +2615,11 @@ function renderAnalyzer(ticker, signal, perStrategy, passCount, rec, levels) {
       </div>
     </div>
 
+    <div class="analyzer-chart" id="analyzer-chart">
+      <div class="analyzer-section-title"><span class="section-icon">🕯️</span> Nến 60 phiên + MA20/MA50</div>
+      <p class="muted">Đang tải nến…</p>
+    </div>
+
     <div class="recommendation ${rec.cls}">
       <div class="rec-stars">${rec.stars}</div>
       <div class="rec-body">
@@ -2380,12 +2636,19 @@ function renderAnalyzer(ticker, signal, perStrategy, passCount, rec, levels) {
       ${levelsHtml}
     </div>
 
+    ${levels && passCount >= 2 ? renderT2Note() : ''}
+
     ${warningsHtml}
 
     <div class="analyzer-section-title"><span class="section-icon">🎯</span> Chi tiết từng chiến lược</div>
     <div class="strategy-cards">${cards}</div>
 
     ${fiboHtml}
+
+    <div id="analyzer-longterm">
+      <div class="analyzer-section-title"><span class="section-icon">🏛️</span> Góc dài hạn</div>
+      <p class="muted">Đang tải điểm chất lượng và định giá…</p>
+    </div>
 
     <div style="text-align:center;margin-top:24px">
       <a class="btn-primary" href="https://www.tradingview.com/chart/?symbol=${signal.exchange || 'HOSE'}:${ticker}" target="_blank" rel="noopener">Mở TradingView ↗</a>

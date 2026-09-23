@@ -24,6 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from scanner import BreakoutScanner
 from scanner.trade_levels import attach as attach_trade_levels
 from scanner import base_conditions as BC
+from scanner import ohlc_export as OHLC
 from scanner.exporter import to_excel, to_json, to_html, write_json
 from scanner.data_fetcher import (
     CHECKPOINT_PATH, get_ticker_universe, fetch_universe, fetch_vnindex,
@@ -412,7 +413,11 @@ def write_strategy_outputs(results, web_subdir, session_date, min_score,
                            exchanges, total_scanned, strategy_label,
                            market_context=None, decision=None, completeness=None,
                            fetch_summary=None, base_conditions=None):
-    """Write latest.json + archive/<date>.json + archive/index.json for one strategy."""
+    """Ghi latest.json + archive/<date>.json + archive/index.json cho một chiến lược.
+
+    Trả về danh sách mã ĐÃ CÔNG BỐ (đã qua ngưỡng điểm) — màn Chi tiết mã chỉ
+    cần nến của những mã người đọc mở được từ bảng tín hiệu.
+    """
     web_subdir.mkdir(parents=True, exist_ok=True)
     archive_dir = web_subdir / 'archive'
     archive_dir.mkdir(exist_ok=True)
@@ -423,6 +428,7 @@ def write_strategy_outputs(results, web_subdir, session_date, min_score,
         if r.total_score >= min_score:
             signals.append(r.to_dict())
     signals.sort(key=lambda s: -s['total_score'])
+    published = [s['ticker'] for s in signals]
 
     payload = {
         'generated_at': datetime.now().isoformat(),
@@ -442,11 +448,11 @@ def write_strategy_outputs(results, web_subdir, session_date, min_score,
 
     if not decision['write']:
         log.warning(f"  [{strategy_label}] KHÔNG ghi archive — {decision['reason']}")
-        return
+        return published
     if session_date is None:
         log.warning(f"  [{strategy_label}] KHÔNG ghi archive — không xác định được "
                     f"ngày phiên từ dữ liệu")
-        return
+        return published
 
     # compact=True: archive chỉ máy đọc, giảm ~35% dung lượng repo
     write_json(payload, archive_dir / f'{session_date}.json', compact=True)
@@ -457,6 +463,7 @@ def write_strategy_outputs(results, web_subdir, session_date, min_score,
     with open(archive_dir / 'index.json', 'w') as f:
         json.dump({'latest': session_date, 'dates': available_dates[:90],
                    'count': len(available_dates)}, f, indent=2)
+    return published
 
 
 def main():
@@ -604,6 +611,9 @@ def main():
         log.warning(f"  => Archive: BỎ QUA — hỏng ở "
                     f"{', '.join(decision['gates_failed'])}")
 
+    # Mã đã công bố ở ÍT NHẤT một chiến lược — dùng để chọn mã cần xuất nến.
+    published = set()
+
     # -------- Pre-Breakout --------
     log.info("Running Pre-Breakout strategy...")
     events_deadline = _STARTED + args.run_budget
@@ -626,6 +636,7 @@ def main():
                 lambda t: (rs_map.get(t) or {}).get('rs_rank'))
 
         pb_signals = df_pb[df_pb['total_score'] >= args.min_score].copy()
+        published |= set(pb_signals['ticker'])
         log.info(f"  Pre-Breakout: {len(pb_signals)} signals")
 
         pb_meta = build_metadata(args.min_score, exchanges, total_scanned,
@@ -688,29 +699,40 @@ def main():
     gc_long_results = run_strategy(
         'GC-long', lambda df_t, tk: golden_cross.evaluate(df_t, tk, preset='long'),
         args.min_score_goldencross)
-    write_strategy_outputs(gc_long_results, web_dir / 'golden_cross_long', session_date,
-                           args.min_score_goldencross, exchanges, total_scanned,
-                           'golden_cross_long', market_context, decision, completeness,
-                           fetch_summary, base_conditions)
+    published |= set(write_strategy_outputs(
+        gc_long_results, web_dir / 'golden_cross_long', session_date,
+        args.min_score_goldencross, exchanges, total_scanned,
+        'golden_cross_long', market_context, decision, completeness,
+        fetch_summary, base_conditions))
 
     # -------- Golden Cross — SHORT preset (MA10 × MA20) --------
     log.info("Running Golden Cross strategy (SHORT: MA10×MA20)...")
     gc_short_results = run_strategy(
         'GC-short', lambda df_t, tk: golden_cross.evaluate(df_t, tk, preset='short'),
         args.min_score_goldencross)
-    write_strategy_outputs(gc_short_results, web_dir / 'golden_cross_short', session_date,
-                           args.min_score_goldencross, exchanges, total_scanned,
-                           'golden_cross_short', market_context, decision, completeness,
-                           fetch_summary, base_conditions)
+    published |= set(write_strategy_outputs(
+        gc_short_results, web_dir / 'golden_cross_short', session_date,
+        args.min_score_goldencross, exchanges, total_scanned,
+        'golden_cross_short', market_context, decision, completeness,
+        fetch_summary, base_conditions))
 
     # -------- Ichimoku --------
     log.info("Running Ichimoku strategy...")
     ich_results = run_strategy('Ichimoku', lambda df_t, tk: ichimoku.evaluate(df_t, tk),
                                args.min_score_ichimoku)
-    write_strategy_outputs(ich_results, web_dir / 'ichimoku', session_date,
-                           args.min_score_ichimoku, exchanges, total_scanned,
-                           'ichimoku', market_context, decision, completeness,
-                           fetch_summary, base_conditions)
+    published |= set(write_strategy_outputs(
+        ich_results, web_dir / 'ichimoku', session_date,
+        args.min_score_ichimoku, exchanges, total_scanned,
+        'ichimoku', market_context, decision, completeness,
+        fetch_summary, base_conditions))
+
+    # ── Nến + MA cho màn Chi tiết mã (§11.1) ──────────────────────────────
+    # Một tệp dùng chung, chỉ chứa mã có tín hiệu: cùng một mã hay nằm ở nhiều
+    # chiến lược, nhét nến vào từng latest.json là chép lại 4 lần.
+    series = OHLC.build(by_ticker, published)
+    ohlc_path = OHLC.write(web_dir / 'ohlc' / 'latest.json', series, session_date)
+    log.info(f"  Nến {OHLC.SESSIONS} phiên cho {len(series)}/{len(published)} mã "
+             f"có tín hiệu → {ohlc_path}")
 
     log.info(f"All strategies complete for session {session_date}")
 
