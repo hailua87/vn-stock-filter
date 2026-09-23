@@ -20,19 +20,43 @@ import pytest
 import run_daily
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-WORKFLOW = ROOT / '.github' / 'workflows' / 'daily-scan.yml'
+WF_DIR = ROOT / '.github' / 'workflows'
+WORKFLOW = WF_DIR / 'daily-scan.yml'
 
 
-def pushed_paths() -> list:
+def pushed_paths(name: str = 'daily-scan.yml') -> list:
     r"""Các đối số web/data/... truyền cho commit-bot-data.sh, đã nối dòng \."""
-    text = WORKFLOW.read_text(encoding='utf-8')
-    assert 'commit-bot-data.sh' in text, 'workflow không còn gọi commit-bot-data.sh'
+    text = (WF_DIR / name).read_text(encoding='utf-8')
+    assert 'commit-bot-data.sh' in text, f'{name} không còn gọi commit-bot-data.sh'
     # Nối các dòng kết thúc bằng \ để lệnh nhiều dòng thành một dòng
     joined = re.sub(r'\\s*\n\s*', ' ', text)
     # Lay dong LENH, khong phai dong chu thich — ca hai deu chua ten script.
     cmds = [l for l in joined.splitlines() if 'bash scripts/commit-bot-data.sh' in l]
-    assert len(cmds) == 1, f'mong doi dung mot lenh push, thay {len(cmds)}'
+    assert len(cmds) == 1, f'{name}: mong doi dung mot lenh push, thay {len(cmds)}'
     return re.findall(r'web/data/\S+', cmds[0])
+
+
+# ─── weekly-valuation.yml ───────────────────────────────────────────────────
+# `run_quality` nay cap nhat lai phan hang tuan trong health.json (23/09/2026).
+# Khong day tep do len thi no chi doi tren runner roi bien mat — dung loi da
+# mac voi health.json va ohlc/ o daily-scan.yml.
+
+WEEKLY_OUTPUTS = ('valuation/', 'quality/', 'health.json')
+
+
+@pytest.mark.parametrize('out', WEEKLY_OUTPUTS)
+def test_weekly_workflow_pushes_what_it_writes(out):
+    pushed = [p.rstrip('/') for p in pushed_paths('weekly-valuation.yml')]
+    want = f'web/data/{out}'.rstrip('/')
+    covered = want in pushed or any(want.startswith(p + '/') for p in pushed)
+    assert covered, (f'weekly-valuation ghi ra {want} nhưng không đẩy lên. '
+                     f'Đang đẩy: {pushed}')
+
+
+def test_health_json_is_pushed_by_both_workflows():
+    """Cả hai lượt đều sửa health.json, nên cả hai đều phải đẩy nó."""
+    for wf in ('daily-scan.yml', 'weekly-valuation.yml'):
+        assert 'web/data/health.json' in pushed_paths(wf), f'{wf} thiếu health.json'
 
 
 def test_workflow_still_calls_the_push_script():

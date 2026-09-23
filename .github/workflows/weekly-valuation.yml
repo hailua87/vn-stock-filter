@@ -180,11 +180,16 @@ jobs:
           git config user.name "VN Scanner Bot"
           git config user.email "bot@vn-scanner.local"
 
+          # DANH SACH NAY PHAI PHU HET moi thu hai buoc tren ghi ra. Script reset
+          # ve origin roi CHI chep lai nhung path duoc liet ke — tep khong co ten
+          # o day bi vut lang le, chay van xanh. Da mac dung loi do voi
+          # health.json ngay 23/09/2026 (xem daily-scan.yml).
           # Dữ liệu định giá + chất lượng + sổ snapshot BCTC (audit F3). Push bằng
           # scripts/commit-bot-data.sh: không rebase, không force-push (audit F9).
           BRANCH="${{ github.ref_name }}" bash scripts/commit-bot-data.sh \
             "chore: cập nhật định giá và chất lượng $(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d')" \
-            web/data/valuation/ web/data/quality/ backend/data/snapshots/
+            web/data/valuation/ web/data/quality/ backend/data/snapshots/ \
+            web/data/health.json
 
       - name: Fail if quality failed
         if: steps.quality.outcome == 'failure'

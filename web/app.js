@@ -2780,9 +2780,11 @@ function analyzeTicker(ticker) {
     }
   }
 
-  // If ticker not found anywhere
+  // Khong khop chien luoc nao: van dung khung de con xem duoc goc dai han.
   if (passCount === 0) {
-    content.innerHTML = renderAnalyzerNotFound(ticker);
+    content.innerHTML = renderAnalyzerNoSignal(ticker);
+    bindThesisBox(ticker);
+    fillDetailSections(ticker);
     return;
   }
 
@@ -2826,17 +2828,48 @@ function showAnalyzerEmpty() {
   document.getElementById('analyzer-content').style.display = 'none';
 }
 
-function renderAnalyzerNotFound(ticker) {
-  return `<div class="analyzer-not-found">
-    <div class="analyzer-not-found-icon">❓</div>
-    <div class="analyzer-not-found-title">Không tìm thấy <strong>${ticker}</strong> trong bất kỳ chiến lược nào</div>
-    <div class="analyzer-not-found-desc">
-      Mã này có thể:<br>
-      • Không nằm trong top 623 mã liquid được scan<br>
-      • Đang không có cấu hình kỹ thuật đáp ứng tiêu chí nào<br>
-      • Mã chưa tồn tại hoặc gõ sai
+/**
+ * Ma KHONG khop chien luoc nao trong phien nay.
+ *
+ * Truoc 23/09/2026 o day dung han lai va chi in "Khong tim thay". Nhung goc
+ * dai han KHONG phu thuoc tin hieu ky thuat: VHM co du diem 4 chieu ma van
+ * khong mo duoc, va chi 2/36 ma bat dong san mo duoc man nay. Tuc phan huu ich
+ * nhat voi nguoi theo doi dai han lai bi mot dieu kien khong lien quan chan.
+ *
+ * Nay van dung khung man hinh; `fillDetailSections` do noi dung vao. Neu ca
+ * chat luong lan dinh gia deu khong co thi renderLongTerm tu noi ra.
+ */
+function renderAnalyzerNoSignal(ticker) {
+  return `
+    <div class="analyzer-header">
+      <div class="analyzer-h-left">
+        <div class="analyzer-h-ticker">${escapeAttr(ticker)}</div>
+        <div class="analyzer-h-meta">Không có tín hiệu kỹ thuật phiên ${escapeAttr(state.currentDate || '—')}</div>
+      </div>
     </div>
-  </div>`;
+
+    <div class="analyzer-no-signal">
+      <strong>${escapeAttr(ticker)} không khớp chiến lược nào trong phiên này.</strong>
+      Có thể mã nằm ngoài rổ quét, hoặc chưa có cấu hình kỹ thuật đáp ứng tiêu chí,
+      hoặc bị điều kiện nền loại vì thanh khoản thấp. Phần dài hạn bên dưới không
+      phụ thuộc tín hiệu kỹ thuật nên vẫn đọc được.
+    </div>
+
+    <div class="analyzer-chart" id="analyzer-chart">
+      <div class="analyzer-section-title"><span class="section-icon">🕯️</span> Nến 60 phiên + MA20/MA50</div>
+      <p class="muted">Đang tải nến…</p>
+    </div>
+
+    <div id="analyzer-longterm">
+      <div class="analyzer-section-title"><span class="section-icon">🏛️</span> Góc dài hạn</div>
+      <p class="muted">Đang tải điểm chất lượng và định giá…</p>
+    </div>
+
+    ${renderThesisBox(ticker)}
+
+    <div style="text-align:center;margin-top:24px">
+      <a class="btn-primary" href="https://www.tradingview.com/chart/?symbol=${escapeAttr(ticker)}" target="_blank" rel="noopener">Mở TradingView ↗</a>
+    </div>`;
 }
 
 function renderAnalyzer(ticker, signal, perStrategy, passCount, rec, levels) {

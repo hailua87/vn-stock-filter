@@ -59,8 +59,11 @@ def _weekly_source(path: Path, now: datetime, label: str) -> dict:
     d = _read_json(path)
     if d is None:
         return {'label': label, 'available': False, 'reason': 'chưa có tệp'}
-    as_of = d.get('as_of') or (d.get('metadata') or {}).get('session_date')
     generated = d.get('generated_at')
+    # Tep dinh gia khong co `as_of` lan `metadata.session_date`; truoc day o nay
+    # hien '—' trong khi tep hoan toan biet no duoc sinh ngay nao.
+    as_of = (d.get('as_of') or (d.get('metadata') or {}).get('session_date')
+             or (generated[:10] if isinstance(generated, str) else None))
     n = len(d.get('items') or d.get('signals') or [])
     return {
         'label': label,
@@ -163,6 +166,41 @@ def _issues(daily: dict, sources: dict, previous: dict, now: datetime) -> list:
                 f"(lịch là hằng tuần).")
 
     return out
+
+
+def refresh_weekly(path: Path, web_dir: Path, now: Optional[datetime] = None) -> Optional[dict]:
+    """
+    Cập nhật LẠI phần của hai nguồn hằng tuần trong `health.json`, giữ nguyên
+    phần `daily_scan`.
+
+    Vì sao cần: `run_daily` là người ghi tệp này, nhưng nó chạy theo lịch khác
+    `weekly-valuation`. Lượt chấm chất lượng 23/09 chạy lúc 22:35, sau lượt quét
+    20:46 — nên tới sáng hôm sau màn Hôm nay vẫn báo "Chất lượng 2026-09-22"
+    trong khi dữ liệu thật đã là 23-09. Nói sai trong cả một cửa sổ nhiều giờ.
+
+    Không dựng lại cả tệp: `run_quality` KHÔNG biết gì về lượt quét (độ phủ
+    fetch, tỷ lệ stale, cổng archive). Dựng lại sẽ xoá mất những số đó. Ở đây
+    chỉ thay hai khoá nó thật sự sở hữu, rồi tính lại danh sách vấn đề.
+
+    Trả về payload mới, hoặc None nếu chưa có tệp — khi đó không tạo mới, vì
+    một `health.json` thiếu hẳn phần `daily_scan` còn khó đọc hơn là không có.
+    """
+    now = now or datetime.now()
+    path, web_dir = Path(path), Path(web_dir)
+    payload = _read_json(path)
+    if not payload or not (payload.get('sources') or {}).get('daily_scan'):
+        return None
+
+    sources = payload['sources']
+    sources['valuation'] = _weekly_source(web_dir / 'valuation' / 'latest.json', now, 'Định giá')
+    sources['quality'] = _weekly_source(web_dir / 'quality' / 'latest.json', now, 'Chất lượng')
+    payload['generated_at'] = now.isoformat(timespec='seconds')
+    payload['weekly_refreshed_at'] = payload['generated_at']
+    # `previous` rỗng: kiểm tra "rổ co lại" là việc của lượt quét, không phải
+    # của lượt chấm chất lượng. Tính lại ở đây sẽ so tệp với chính nó.
+    payload['issues'] = _issues(sources['daily_scan'], sources, {}, now)
+    write(path, payload)
+    return payload
 
 
 def write(path: Path, payload: dict) -> Path:

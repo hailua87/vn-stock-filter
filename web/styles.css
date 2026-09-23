@@ -2978,3 +2978,12 @@ kbd {
 .today-issues li.sev-error .sev-tag { background: var(--text); color: var(--bg-base); border-color: var(--text); }
 .today-issues li.sev-warn .sev-tag { border-style: dashed; color: var(--text-dim); }
 .today-issues li.sev-info .sev-tag { border-style: dotted; }
+
+/* Mã không có tín hiệu kỹ thuật — vẫn mở được màn Chi tiết mã vì góc dài hạn
+   không phụ thuộc tín hiệu. Nói rõ tình trạng thay vì để người đọc đoán. */
+.analyzer-no-signal {
+  margin: 12px 0 4px; padding: 10px 12px; font-size: 13px; line-height: 1.6;
+  color: var(--text-dim); background: var(--bg-elev-2);
+  border-left: 2px solid var(--border-strong); border-radius: 0 3px 3px 0;
+}
+.analyzer-no-signal strong { color: var(--text); }

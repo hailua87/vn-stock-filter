@@ -144,3 +144,63 @@ def test_write_is_readable(tmp_path):
     p = H.write(tmp_path / 'health.json', H.build(web_dir=tmp_path, now=NOW, **args()))
     d = json.loads(p.read_text(encoding='utf-8'))
     assert d['schema'] == H.SCHEMA and d['sources']['daily_scan']['session_date'] == '2026-09-22'
+
+
+# ─── refresh_weekly: hai lượt chạy theo hai lịch, mỗi lượt sở hữu phần của nó ──
+
+def test_refresh_weekly_updates_only_its_own_part(tmp_path):
+    """
+    `run_daily` ghi tệp, `run_quality` chạy SAU theo lịch khác. Nếu lượt sau
+    dựng lại cả tệp thì mọi số của lượt quét (độ phủ fetch, tỷ lệ stale, cổng
+    archive) biến mất — run_quality không biết chúng.
+    """
+    write_weekly(tmp_path, 'valuation', '2026-09-20T07:00:00')
+    write_weekly(tmp_path, 'quality', '2026-09-20T07:00:00', as_of='2026-09-20')
+    H.write(tmp_path / 'health.json', H.build(web_dir=tmp_path, now=NOW, **args()))
+
+    # Lượt chấm chất lượng mới hơn
+    write_weekly(tmp_path, 'quality', '2026-09-23T14:00:00', n=200, as_of='2026-09-23')
+    out = H.refresh_weekly(tmp_path / 'health.json', tmp_path, now=NOW)
+
+    assert out['sources']['quality']['as_of'] == '2026-09-23'
+    assert out['sources']['quality']['count'] == 200
+    # Phần của lượt quét còn NGUYÊN
+    d = out['sources']['daily_scan']
+    assert d['universe'] == 480 and d['stale_ratio'] == 0.05
+    assert d['fetch']['coverage'] == 1.0 and d['archive_written'] is True
+
+
+def test_refresh_weekly_does_not_create_a_half_file(tmp_path):
+    """Chưa có tệp thì KHÔNG tạo: một health.json thiếu hẳn phần lượt quét còn
+    khó đọc hơn là không có tệp nào."""
+    write_weekly(tmp_path, 'valuation', '2026-09-20T07:00:00')
+    write_weekly(tmp_path, 'quality', '2026-09-20T07:00:00')
+    assert H.refresh_weekly(tmp_path / 'health.json', tmp_path, now=NOW) is None
+    assert not (tmp_path / 'health.json').exists()
+
+
+def test_refresh_weekly_does_not_claim_universe_shrank(tmp_path):
+    """Kiểm tra 'rổ co lại' là việc của lượt quét. Tính lại ở đây sẽ so tệp với
+    chính nó và luôn ra 0% — vô nghĩa, nhưng tệ hơn là nó có thể ra dương nếu
+    ai đó đổi thứ tự."""
+    write_weekly(tmp_path, 'valuation', '2026-09-20T07:00:00')
+    write_weekly(tmp_path, 'quality', '2026-09-20T07:00:00')
+    H.write(tmp_path / 'health.json', H.build(web_dir=tmp_path, now=NOW, **args()))
+    out = H.refresh_weekly(tmp_path / 'health.json', tmp_path, now=NOW)
+    assert 'universe_shrank' not in {i['code'] for i in out['issues']}
+
+
+def test_valuation_as_of_falls_back_to_generated_at(tmp_path):
+    """Tệp định giá không có `as_of` lẫn `metadata.session_date`. Trước đây ô
+    ngày trên màn Hôm nay hiện '—' trong khi tệp hoàn toàn biết nó sinh ngày nào."""
+    d = tmp_path / 'valuation'
+    d.mkdir(parents=True)
+    (d / 'latest.json').write_text(json.dumps({
+        'generated_at': '2026-09-23T16:30:27.904759',
+        'metadata': {'period': 'year'},
+        'signals': [{}] * 65,
+    }), encoding='utf-8')
+    write_weekly(tmp_path, 'quality', '2026-09-23T14:00:00')
+    p = H.build(web_dir=tmp_path, now=NOW, **args())
+    assert p['sources']['valuation']['as_of'] == '2026-09-23'
+    assert p['sources']['valuation']['count'] == 65
