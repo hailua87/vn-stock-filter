@@ -25,6 +25,7 @@ from scanner import BreakoutScanner
 from scanner.trade_levels import attach as attach_trade_levels
 from scanner import base_conditions as BC
 from scanner import ohlc_export as OHLC
+from scanner import health as HEALTH
 from scanner.exporter import to_excel, to_json, to_html, write_json
 from scanner.data_fetcher import (
     CHECKPOINT_PATH, get_ticker_universe, fetch_universe, fetch_vnindex,
@@ -558,7 +559,7 @@ def main():
     by_ticker = {tk: g.sort_values('Date').reset_index(drop=True)
                  for tk, g in df_all_raw.groupby('Ticker', sort=False)}
 
-    check_stale_universe(by_ticker, fetch_summary)
+    stale = check_stale_universe(by_ticker, fetch_summary)
 
     breadth = compute_breadth(by_ticker)
     rs_map = compute_relative_strength(by_ticker, index_df)
@@ -733,6 +734,25 @@ def main():
     ohlc_path = OHLC.write(web_dir / 'ohlc' / 'latest.json', series, session_date)
     log.info(f"  Nến {OHLC.SESSIONS} phiên cho {len(series)}/{len(published)} mã "
              f"có tín hiệu → {ohlc_path}")
+
+    # ── Tình trạng dữ liệu cho màn Hôm nay (§11.2, §13) ───────────────────
+    # Ghi SAU CÙNG, và đọc lại chính tệp cũ trước khi ghi đè: kiểm tra "rổ co
+    # lại > 5% so với lần trước" của §13 không có nguồn nào khác để so.
+    # run_date/run_time lấy từ `written_at_ict` — cùng một đồng hồ với cổng
+    # archive, không phải nhãn dán lúc job khởi động.
+    stamp = decision['written_at_ict']
+    health = HEALTH.build(
+        session_date=session_date,
+        run_meta={'run_type': decision['run_type'],
+                  'run_date_ict': stamp[:10], 'run_time_ict': stamp[11:16]},
+        fetch_summary=fetch_summary, completeness=completeness,
+        decision=decision, stale_ratio=stale, universe=total_scanned,
+        base_conditions=base_conditions, web_dir=web_dir)
+    HEALTH.write(web_dir / 'health.json', health)
+    sev = [i['severity'] for i in health['issues']]
+    log.info(f"  Tình trạng dữ liệu → {web_dir / 'health.json'} "
+             f"({len(health['issues'])} mục: {sev.count('error')} lỗi, "
+             f"{sev.count('warn')} cảnh báo, {sev.count('info')} thông tin)")
 
     log.info(f"All strategies complete for session {session_date}")
 
