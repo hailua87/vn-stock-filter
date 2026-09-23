@@ -2816,3 +2816,13 @@ kbd {
 .rr-good { color: var(--text); font-weight: 600; }
 .rr-ok   { color: var(--text-dim); }
 .rr-low  { color: var(--text-mute); }
+
+/* Sparkline 20 phien va nhan chien luoc khop (blueprint v3 muc 7.3).
+   Phi sac: khong dung bang mau gia. */
+.spark { color: var(--text-dim); vertical-align: middle; }
+.strat-tags { display: inline-flex; gap: 3px; margin-left: 6px; vertical-align: middle; }
+.strat-tag {
+  font-size: 9px; line-height: 1.4; padding: 0 3px;
+  border: 1px solid var(--border); border-radius: 2px;
+  color: var(--text-mute); font-family: var(--font-mono); white-space: nowrap;
+}

@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from scanner import BreakoutScanner
 from scanner.trade_levels import attach as attach_trade_levels
+from scanner import base_conditions as BC
 from scanner.exporter import to_excel, to_json, to_html, write_json
 from scanner.data_fetcher import (
     CHECKPOINT_PATH, get_ticker_universe, fetch_universe, fetch_vnindex,
@@ -362,7 +363,8 @@ def archive_decision(force: bool = False, now: Optional[datetime] = None,
 
 def build_metadata(min_score, exchanges, total_scanned, market_context,
                    session_date, decision, completeness,
-                   fetch_summary: Optional[dict] = None) -> dict:
+                   fetch_summary: Optional[dict] = None,
+                   base_conditions: Optional[dict] = None) -> dict:
     """
     Metadata dùng chung cho latest.json VÀ file archive.
 
@@ -374,6 +376,9 @@ def build_metadata(min_score, exchanges, total_scanned, market_context,
     return {
         'min_score': min_score,
         'exchanges': list(exchanges),
+        # Điều kiện nền đã áp (§7.2) — giao diện hiển thị để người đọc biết rổ
+        # này đã bị lọc những gì trước khi chạy chiến lược.
+        'base_conditions': base_conditions or {},
         'total_scanned': total_scanned,
         'market_context': market_context or {},
         'session_date': session_date,
@@ -406,7 +411,7 @@ def build_metadata(min_score, exchanges, total_scanned, market_context,
 def write_strategy_outputs(results, web_subdir, session_date, min_score,
                            exchanges, total_scanned, strategy_label,
                            market_context=None, decision=None, completeness=None,
-                           fetch_summary=None):
+                           fetch_summary=None, base_conditions=None):
     """Write latest.json + archive/<date>.json + archive/index.json for one strategy."""
     web_subdir.mkdir(parents=True, exist_ok=True)
     archive_dir = web_subdir / 'archive'
@@ -425,7 +430,8 @@ def write_strategy_outputs(results, web_subdir, session_date, min_score,
         'total': len(signals),
         'metadata': build_metadata(min_score, exchanges, total_scanned,
                                    market_context, session_date, decision,
-                                   completeness, fetch_summary),
+                                   completeness, fetch_summary,
+                                   base_conditions=base_conditions),
         'signals': signals,
     }
 
@@ -466,6 +472,9 @@ def main():
     parser.add_argument('--limit', type=int, default=None)
     parser.add_argument('--web-data-dir', type=str, default='web/data')
     parser.add_argument('--output-dir', type=str, default='backend/data/results')
+    parser.add_argument('--min-avg-value', type=float, default=BC.MIN_AVG_VALUE_20D,
+                        help='Điều kiện nền: GTGD trung bình 20 phiên tối thiểu, ĐỒNG '
+                             '(§7.2; 0 để tắt)')
     parser.add_argument('--run-budget', type=int, default=RUN_BUDGET_S,
                         help='Giây, tính từ lúc bắt đầu: sau mốc này không gọi API '
                              'sự kiện quyền nữa (mặc định 55 phút)')
@@ -549,7 +558,22 @@ def main():
     log.info(f"  Breadth: {breadth.get('pct_above_ma50')}% số mã trên MA50 "
              f"(n={breadth.get('sample_size')}) | RS tính cho {len(rs_map)} mã")
 
+    # ── Điều kiện nền (§7.2): áp TRƯỚC chiến lược, sau khi đã đo độ rộng và RS
+    # trên toàn universe (hai phép đo đó mô tả thị trường, không phải rổ đã lọc).
+    context = BC.build_context(by_ticker)
+    by_ticker, dropped_liquidity = BC.filter_universe(by_ticker, context, args.min_avg_value)
+    if dropped_liquidity:
+        df_all_raw = df_all_raw[~df_all_raw['Ticker'].isin(dropped_liquidity)]
+        log.info(f"  Điều kiện nền: loại {len(dropped_liquidity)} mã có GTGD TB20 < "
+                 f"{args.min_avg_value/1e9:.0f} tỷ — còn {len(by_ticker)} mã")
+
     market_context = {**regime, 'breadth': breadth}
+    base_conditions = {
+        'min_avg_value_20d': args.min_avg_value,
+        'dropped_low_liquidity': len(dropped_liquidity),
+        'universe_after': len(by_ticker),
+        'exchanges': list(exchanges),
+    }
 
     # -------- Cổng archive: quyết định bằng đồng hồ TẠI LÚC GHI --------
     session_date = session_date_from_data(df_all_raw)
@@ -589,6 +613,11 @@ def main():
                               events_min_score=args.min_score)
     df_pb = scanner.scan_from_dataframe(df_all_raw)
     if not df_pb.empty:
+        # Bối cảnh cho cột GTGD TB20 và sparkline 20 phiên (§7.3)
+        df_pb['m_avg_value20'] = df_pb['ticker'].map(
+            lambda t: (context.get(t) or {}).get('avg_value20'))
+        df_pb['m_spark20'] = df_pb['ticker'].map(
+            lambda t: (context.get(t) or {}).get('spark20') or [])
         # Gắn RS vào bảng kết quả Pre-Breakout (scanner trả về DataFrame)
         if rs_map:
             df_pb['m_rs_score'] = df_pb['ticker'].map(
@@ -601,7 +630,8 @@ def main():
 
         pb_meta = build_metadata(args.min_score, exchanges, total_scanned,
                                  market_context, session_date, decision,
-                                 completeness, fetch_summary)
+                                 completeness, fetch_summary,
+                                 base_conditions=base_conditions)
         to_json(pb_signals, web_dir / 'latest.json', metadata=pb_meta)
 
         if decision['write'] and session_date is not None:
@@ -647,6 +677,7 @@ def main():
         log.info(f"  {label}: {len(results)} candidates")
         annotate_results(results, rs_map)
         attach_trade_levels(results)
+        BC.attach(results, context)
         if not args.no_corporate_actions:
             results = apply_event_filter(results, deadline=events_deadline,
                                          min_score=min_score)
@@ -660,7 +691,7 @@ def main():
     write_strategy_outputs(gc_long_results, web_dir / 'golden_cross_long', session_date,
                            args.min_score_goldencross, exchanges, total_scanned,
                            'golden_cross_long', market_context, decision, completeness,
-                           fetch_summary)
+                           fetch_summary, base_conditions)
 
     # -------- Golden Cross — SHORT preset (MA10 × MA20) --------
     log.info("Running Golden Cross strategy (SHORT: MA10×MA20)...")
@@ -670,7 +701,7 @@ def main():
     write_strategy_outputs(gc_short_results, web_dir / 'golden_cross_short', session_date,
                            args.min_score_goldencross, exchanges, total_scanned,
                            'golden_cross_short', market_context, decision, completeness,
-                           fetch_summary)
+                           fetch_summary, base_conditions)
 
     # -------- Ichimoku --------
     log.info("Running Ichimoku strategy...")
@@ -679,7 +710,7 @@ def main():
     write_strategy_outputs(ich_results, web_dir / 'ichimoku', session_date,
                            args.min_score_ichimoku, exchanges, total_scanned,
                            'ichimoku', market_context, decision, completeness,
-                           fetch_summary)
+                           fetch_summary, base_conditions)
 
     log.info(f"All strategies complete for session {session_date}")
 
