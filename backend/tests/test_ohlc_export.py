@@ -86,3 +86,36 @@ def test_write_keeps_price_unit_and_is_readable(tmp_path):
     assert d['session_date'] == '2026-09-22'
     assert d['ma_windows'] == [20, 50]
     assert len(d['series']['FPT']['c']) == 60
+
+
+# ─── universe watchlist: nến cũng phải có cho mã không có tín hiệu ──────────
+
+def test_quality_universe_reads_published_file(tmp_path):
+    p = tmp_path / 'quality' / 'latest.json'
+    p.parent.mkdir(parents=True)
+    p.write_text(json.dumps({'items': [{'ticker': 'VHM'}, {'ticker': 'NVL'}, {}]}),
+                 encoding='utf-8')
+    assert OE.quality_universe(p) == {'VHM', 'NVL'}
+
+
+@pytest.mark.parametrize('content', ['', '{ hong', '{"items": null}', '{}'])
+def test_quality_universe_never_raises(tmp_path, content):
+    """Thiếu hoặc hỏng tệp thì trả rỗng, không làm đổ cả lượt quét: nến chỉ là
+    phần phụ của màn Chi tiết mã."""
+    p = tmp_path / 'q.json'
+    p.write_text(content, encoding='utf-8')
+    assert OE.quality_universe(p) == set()
+    assert OE.quality_universe(tmp_path / 'khong-co.json') == set()
+
+
+def test_build_covers_watchlist_ticker_without_signal():
+    """
+    VHM có đủ điểm 4 chiều nhưng không khớp chiến lược nào. Trước 23/09/2026
+    nó không có nến, và màn Chi tiết mã mở ra thấy "Chưa có dữ liệu nến" —
+    đúng nhóm người ta theo dõi dài hạn nhất.
+    """
+    by_ticker = {'FPT': frame(80), 'VHM': frame(80)}
+    published = {'FPT'}
+    watchlist = {'VHM'}
+    out = OE.build(by_ticker, published | watchlist)
+    assert sorted(out) == ['FPT', 'VHM']

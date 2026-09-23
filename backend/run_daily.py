@@ -747,10 +747,15 @@ def main():
     # ── Nến + MA cho màn Chi tiết mã (§11.1) ──────────────────────────────
     # Một tệp dùng chung, chỉ chứa mã có tín hiệu: cùng một mã hay nằm ở nhiều
     # chiến lược, nhét nến vào từng latest.json là chép lại 4 lần.
-    series = OHLC.build(by_ticker, published)
+    # Mã có tín hiệu CỘNG universe chấm chất lượng: màn Chi tiết mã mở được cho
+    # cả mã không có tín hiệu kỹ thuật, nên nến phải có cho chúng.
+    wl = OHLC.quality_universe(web_dir / 'quality' / 'latest.json')
+    want = published | wl
+    series = OHLC.build(by_ticker, want)
     ohlc_path = OHLC.write(web_dir / 'ohlc' / 'latest.json', series, session_date)
-    log.info(f"  Nến {OHLC.SESSIONS} phiên cho {len(series)}/{len(published)} mã "
-             f"có tín hiệu → {ohlc_path}")
+    log.info(f"  Nến {OHLC.SESSIONS} phiên cho {len(series)}/{len(want)} mã "
+             f"({len(published)} có tín hiệu + {len(wl - published)} chỉ ở watchlist) "
+             f"→ {ohlc_path} ({ohlc_path.stat().st_size // 1024} KB)")
 
     # ── Tình trạng dữ liệu cho màn Hôm nay (§11.2, §13) ───────────────────
     # Ghi SAU CÙNG, và đọc lại chính tệp cũ trước khi ghi đè: kiểm tra "rổ co

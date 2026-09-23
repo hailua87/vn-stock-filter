@@ -87,6 +87,25 @@ def tickers_from(*result_sets) -> set:
     return found
 
 
+def quality_universe(path: Path) -> set:
+    """
+    Mã trong `web/data/quality/latest.json`.
+
+    Màn Chi tiết mã mở được cho cả mã KHÔNG có tín hiệu kỹ thuật (góc dài hạn
+    không phụ thuộc tín hiệu), nên nến cũng phải có cho chúng. Trước đây chỉ
+    xuất mã đã công bố tín hiệu, và hậu quả là 34/36 mã bất động sản mở ra thấy
+    "Chưa có dữ liệu nến" — đúng nhóm người ta theo dõi dài hạn nhất.
+
+    Đọc tệp đã xuất bản chứ không tự tính lại universe: `run_daily` không biết
+    quy tắc chọn rổ của Module B, và hai nơi tự tính sẽ lệch nhau.
+    """
+    try:
+        d = json.loads(Path(path).read_text(encoding='utf-8'))
+        return {i['ticker'] for i in (d.get('items') or []) if i.get('ticker')}
+    except Exception:
+        return set()
+
+
 def write(path: Path, series: Dict[str, dict], session_date: Optional[str],
           sessions: int = SESSIONS) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
