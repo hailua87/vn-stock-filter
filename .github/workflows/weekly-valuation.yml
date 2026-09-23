@@ -26,7 +26,7 @@ on:
       limit:
         description: 'Số mã định giá (sort theo thanh khoản)'
         required: false
-        default: '100'
+        default: '200'
       period:
         description: 'Kỳ báo cáo'
         required: false
@@ -92,13 +92,20 @@ jobs:
           restore-keys: |
             fundamentals-v1-
 
+      # Universe 200 (D10, chot 23/09/2026). Do that run 35874233924, 200 ma:
+      # dinh gia 20 phut, cham chat luong 19 phut — tren tran 90+45. Thoi gian
+      # KHONG tang tuyen tinh theo so ma vi nut that la do tre moi lan goi nguon.
+      # Luu y: luot do do co cache am cho ~mot nua so ma. Luot dau o ro 200 voi
+      # cache lanh se lau hon (uoc 35-40 phut cho rieng buoc dinh gia), va hom
+      # nguon cham nhu 21/09 co the cham tran 90 phut. Hong theo huong an toan:
+      # qua gio thi khong day gi len, du lieu tuan truoc con nguyen.
       - name: Run valuation
         env:
           VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
           PYTHONIOENCODING: utf-8
         run: |
           python backend/run_valuation.py \
-            --limit ${{ github.event.inputs.limit || '100' }} \
+            --limit ${{ github.event.inputs.limit || '200' }} \
             --period ${{ github.event.inputs.period || 'year' }}
         timeout-minutes: 90
 
@@ -165,7 +172,7 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: |
           python backend/run_quality.py \
-            --limit ${{ github.event.inputs.limit || '100' }}
+            --limit ${{ github.event.inputs.limit || '200' }}
         timeout-minutes: 45
 
       - name: Commit valuation output

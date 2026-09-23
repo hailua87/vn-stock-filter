@@ -53,7 +53,7 @@ Nguyên tắc (giữ từ v2):
 | # | Chủ đề | v2 | v3 (chốt 22/09/2026) |
 |---|---|---|---|
 | D9 | Cấu hình Module B | `backend/config/scoring_models.yml` | `backend/scanner/quality/config.py` — tránh thêm phụ thuộc PyYAML (audit §Điều chỉnh 1) |
-| D10 | Universe Module B | Top 200 theo GTGD 60 phiên | Bằng `--limit` của weekly valuation, hiện **100** (audit §Điều chỉnh 2, §14.5) |
+| D10 | Universe Module B | Top 200 theo GTGD 60 phiên | Bằng `--limit` của weekly valuation. Tạm chốt **100** ngày 22/09, nâng lên **200** ngày 23/09 sau khi đo thật (§14.5) |
 | D11 | Cờ quản trị | Pha loãng mạnh / vừa là hai cờ | Một cờ hai mức; phân biệt cờ **tắt vì chưa có nguồn** với **thiếu dữ liệu ở một mã** (audit §Điều chỉnh 3, §8.5) |
 | D12 | Mức định giá | 4 mức theo upside + độ tin cậy | Thêm: mâu thuẫn phương pháp, nhóm tài chính, chỉ 1 phương pháp → "Chưa có"; giới hạn độ tin cậy xét **phương pháp trọng số lớn nhất** (§9) |
 | D13 | Nhãn engine | Không hiển thị | Đã gỡ khỏi web; `verdict` chỉ còn trong JSON cho `backtest.py` (§9) |
@@ -449,7 +449,21 @@ Mọi issue hiển thị trong khối "Tình trạng dữ liệu" của màn Hô
 2. ~~**Nguồn ý kiến kiểm toán và trạng thái cảnh báo/kiểm soát.**~~ **Đã chốt 23/09/2026 (D21): bỏ hai cờ và hai veto.** Khảo sát cùng ngày: vnstock không có; TCBS có `getListAuditFirm` nhưng chỉ cho **tên** công ty kiểm toán và năm, không có ý kiến kiểm toán; `getTickerOverview` không có trường cảnh báo/kiểm soát. Trạng thái cảnh báo được công bố dạng tin/sự kiện chứ không phải trường có cấu trúc. Hai cờ `warning_status`/`qualified_opinion` và hai veto `suspended_or_controlled`/`adverse_opinion` đã gỡ hẳn khỏi cấu hình, và ghi vào `GOVERNANCE_NOT_EVALUATED`/`VETO_NOT_EVALUATED` để giao diện nói rõ "Chưa xét" thay vì im lặng (§8.5).
 3. **Trường ngân hàng** (nợ xấu, bao phủ nợ xấu, NIM): **đã xác thực là không có** trong vnstock bản cộng đồng (chỉ 2018). Cần chốt: tìm nguồn khác, hoặc chạy mô hình `BANK` với phần chỉ tiêu còn lại và độ phủ thấp hơn. Trong lúc chờ, định giá nhóm tài chính luôn "Chưa có" (§9).
 4. ~~**Vùng vào / cắt lỗ / mục tiêu**~~ **Đã chốt và đã làm 22–23/09/2026.** Cắt lỗ = hỗ trợ gần nhất dưới giá đóng cửa, mục tiêu = kháng cự gần nhất trên giá, R:R = (mục tiêu − giá) / (giá − cắt lỗ); bỏ cột "vùng vào"; không hiển thị R:R khi thiếu một trong hai mức (`backend/scanner/trade_levels.py`, cột trên màn Scan).
-5. **N của universe Module B**: tạm chốt 100 (v3, D10). Nâng lên 200 cần đo thời gian weekly valuation khi nguồn chậm (100 mã đã mất tới ~70 phút).
+5. ~~**N của universe Module B**~~ **Đã chốt 23/09/2026: 200.** Đo thật (run 35874233924, `limit=200`): định giá **20 phút**, chấm chất lượng **19 phút** — tổng ~40 phút trên trần 90+45.
+
+   | | 100 mã (22/09) | 200 mã (23/09) |
+   |---|---:|---:|
+   | "Thiếu dữ liệu" | 43% | **35%** |
+   | Có mức định giá dùng được | 5 | **18** |
+   | Đổi trạng thái do đổi rổ | — | **0/100 mã chung** |
+
+   Lo ngại ban đầu — percentile tính trong nội bộ universe nên đổi rổ sẽ làm hàng loạt mã đổi trạng thái — **đã được bác bỏ bằng số liệu**: 0/100 mã chung đổi trạng thái. Điểm có dịch (Chất lượng lệch TB 1,9 điểm, Tăng trưởng 3,0, Chống chịu 1,0) nhưng không đủ vượt ngưỡng nào; Quản trị lệch 0,0 vì nó là 100 trừ mức phạt chứ không phải percentile.
+
+   Tách được phần tăng: **+1 mã do khác ngày, +12 mã do thêm 100 mã mới**. Rổ 100 mã mới có tỷ lệ ra định giá 12%, cao hơn 6% của rổ cũ.
+
+   **Rủi ro còn lại:** lượt đo có cache ấm cho ~một nửa số mã; lượt đầu với cache lạnh sẽ lâu hơn, và hôm nguồn chậm như 21/09 có thể chạm trần 90 phút. Hỏng theo hướng an toàn — quá giờ thì không đẩy gì lên.
+
+   **Hệ quả:** rổ 200 có 36 mã bất động sản, 34 trong đó "Thiếu dữ liệu" vì mô hình `REAL_ESTATE` chưa bật — việc bật mô hình đó nay đáng giá hơn hẳn (15 → 36 mã).
 6. **Backtest chiến lược trading**: mục tiêu ban đầu có nhắc; xác nhận có đưa vào Phase 4 hay không.
 
 ## 15. Lộ trình
