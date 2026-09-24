@@ -27,10 +27,11 @@ tru `web/data/**`, hoac `tools/viewport-check/**`).
 
 | tep | vai tro |
 | --- | --- |
-| `check.mjs` | trinh chay: duyet 45 khung, goi probe + functional, ghi ket qua |
+| `check.mjs` | trinh chay: duyet (khung x trang), goi probe + functional, ghi ket qua |
+| `pages.mjs` | BA trang va khung nao chay cho trang nao |
 | `probe.mjs` | do TRONG TRANG: tran, tran chu, vo dong, chong lan, cot, tri so |
 | `functional.mjs` | bam that: drawer mo/dong, tab, o nhap |
-| `viewports.mjs` | danh sach 45 khung tren hai truc |
+| `viewports.mjs` | danh sach 49 khung tren hai truc |
 | `diff.mjs` | so hai ket qua, in ba cot, ap `accepted.json` |
 | `accepted.json` | muc da do, da can nhac, quyet dinh khong sua |
 | `baseline.json` | moc chuan tai may (Windows) |
@@ -63,6 +64,56 @@ Hai kieu muc, khac nhau o cach canh gac:
 
 Chap nhan 16 muc o hai khung KHONG co nghia chap nhan 20 muc, cung khong co
 nghia chap nhan chung xuat hien o khung thu ba.
+
+## BA TRANG, khong phai mot
+
+Bo do nay von chi chay `index.html`. Nhung ba trang dung CHUNG `styles.css` va
+`shared/quality-view.css`, nen moi lan sua bo cuc la sua ca ba ma chi mot trang
+duoc do.
+
+| trang | khoa ket qua | so khung | vi sao bay nhieu |
+| --- | --- | ---: | --- |
+| `index.html` | (khong tien to) | 49 | trang phuc tap nhat: dai tab, hai drawer, bang 17 cot |
+| `watchlist/` | `wl:` | 13 | quanh nguong @media that cua no: 1440, 1024, 480 |
+| `valuation/` | `val:` | 11 | quanh nguong @media that cua no: 1280, 1024 |
+
+`index.html` KHONG co tien to — de `baseline.json` va `baseline-ci.json` cu con
+dung duoc, chi them khoa moi cho hai trang kia.
+
+Chay ca 49 khung cho ba trang la 147 luot, khoang 15 phut — dat hon phan gia
+tri no them vao. Moi trang chi chay quanh nguong @media cua CHINH no, cong hai
+khung desktop va ba khung dien thoai.
+
+`runFunctional` chi viet cho `index.html` (drawer, dai tab, o nhap) nen chi chay
+o trang do. PROBE thi trung lap: no quet `body *`, va cac phep do rieng cua
+index (`.strategy-tabs`, `.signal-table`, `.list-head`) deu tra `null` khi khong
+co phan tu — khong can sua gi cho trang moi.
+
+Da thu cho no do: nhet mot `<div>` rong 3000px vao `watchlist/` thi
+`overflow` bat duoc; nhet mot `<span>` `white-space: nowrap` hep hon chu thi
+`textOverflow` bat duoc. Mot phep kiem khong the do duoc thi vo dung.
+
+## CHU DOI THEO GIO — dong bang truoc khi do
+
+Topbar co dong ho chay va nhan trang thai thi truong doi theo phien. Be rong
+cua chung doi theo NOI DUNG, nen ket qua do co the doi TUY GIO CHAY.
+
+Da lam do mot lan chay CI vi dieu nay (24/09/2026): moc chuan do luc 19:20 ICT,
+lan chay PR luc 19:48 — `#clock` 75px so voi 64px, 8 muc "moi phat sinh" khong
+he lien quan toi thay doi nao trong PR.
+
+`check.mjs` nay dat chu ve chuoi co dinh truoc khi do, va chon TRUONG HOP RONG
+NHAT trang co the hien:
+
+| phan tu | dat thanh | vi sao |
+| --- | --- | --- |
+| `#market-text` | `ĐANG GIAO DỊCH` | 14 ky tu, khong phai `NGOÀI GIỜ` (9) |
+| `#live-text` | `GIỮA PHIÊN 01/01 00:00` | dai hon `EOD ...` |
+| `#clock` | `00:00:00 ICT` | font mono nen moi gio bang nhau |
+
+Dong bang vao chuoi NGAN la tu cho minh diem: bo cuc se xanh o day va vo dong
+that trong gio giao dich. Chinh viec doi sang chuoi dai da tim ra mot loi that
+o `m-375x667` — xem `docs/mobile-layout-out-of-scope.md` muc 7.
 
 ## Hai truc, khong phai mot
 

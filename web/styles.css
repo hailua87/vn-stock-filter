@@ -2987,3 +2987,14 @@ kbd {
   border-left: 2px solid var(--border-strong); border-radius: 0 3px 3px 0;
 }
 .analyzer-no-signal strong { color: var(--text); }
+
+/* Đồng hồ ICT: ẩn dưới 420px.
+   Phát hiện 24/09/2026 khi bộ đo bắt đầu đóng băng chữ vào trường hợp rộng
+   nhất: trong GIỜ GIAO DỊCH, #market-text là "ĐANG GIAO DỊCH" (14 ký tự) chứ
+   không phải "NGOÀI GIỜ" (9), và ở 375px cả nó lẫn đồng hồ đều vỡ hai dòng.
+   Mọi lần đo trước đều chạy ngoài giờ nên không ai thấy.
+   Bỏ đồng hồ chứ không bỏ trạng thái thị trường: điện thoại nào cũng có sẵn
+   đồng hồ, còn "thị trường đang mở hay đóng" thì không. */
+@media (max-width: 420px) {
+  .time { display: none; }
+}

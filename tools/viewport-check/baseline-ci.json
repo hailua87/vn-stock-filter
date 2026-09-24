@@ -1,8 +1,9 @@
 {
   "base": "http://127.0.0.1:8765",
-  "at": "2026-09-23T12:32:00.534Z",
+  "at": "2026-09-24T13:09:40.281Z",
   "viewports": {
     "d-1440x900": {
+      "trang": "index",
       "w": 1440,
       "h": 900,
       "touch": false,
@@ -64,7 +65,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -162,7 +163,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -281,7 +282,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1440"
+          "detail": "right=567 vw=1440"
         }
       ],
       "errors": [],
@@ -293,7 +294,270 @@
         "maxTouchPoints": 0
       }
     },
+    "wl:d-1440x900": {
+      "trang": "watchlist",
+      "w": 1440,
+      "h": 900,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 1440,
+          "vh": 900,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 848,
+              "scrollHeight": 848,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 53,
+              "scrollHeight": 52,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1440,
+          "vh": 900,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 848,
+              "scrollHeight": 848,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 53,
+              "scrollHeight": 52,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
+    "val:d-1440x900": {
+      "trang": "valuation",
+      "w": 1440,
+      "h": 900,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 1440,
+          "vh": 900,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 848,
+              "scrollHeight": 848,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1440,
+          "vh": 900,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 848,
+              "scrollHeight": 848,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
     "d-1366x768": {
+      "trang": "index",
       "w": 1366,
       "h": 768,
       "touch": false,
@@ -328,7 +592,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 167,
+          "overflowRawCount": 6,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -355,7 +619,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -426,7 +690,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 167,
+          "overflowRawCount": 6,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -453,7 +717,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -572,7 +836,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1366"
+          "detail": "right=567 vw=1366"
         }
       ],
       "errors": [],
@@ -584,7 +848,270 @@
         "maxTouchPoints": 0
       }
     },
+    "wl:d-1366x768": {
+      "trang": "watchlist",
+      "w": 1366,
+      "h": 768,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 1366,
+          "vh": 768,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 716,
+              "scrollHeight": 716,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1366,
+          "vh": 768,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 716,
+              "scrollHeight": 716,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
+    "val:d-1366x768": {
+      "trang": "valuation",
+      "w": 1366,
+      "h": 768,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 1366,
+          "vh": 768,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 716,
+              "scrollHeight": 716,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1366,
+          "vh": 768,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 716,
+              "scrollHeight": 716,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
     "d-1280x800": {
+      "trang": "index",
       "w": 1280,
       "h": 800,
       "touch": false,
@@ -619,7 +1146,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 430,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -646,7 +1173,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -717,7 +1244,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 430,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -744,7 +1271,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -863,7 +1390,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1280"
+          "detail": "right=567 vw=1280"
         }
       ],
       "errors": [],
@@ -876,6 +1403,7 @@
       }
     },
     "ipad-1366x1024-touch": {
+      "trang": "index",
       "w": 1366,
       "h": 1024,
       "touch": true,
@@ -910,7 +1438,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 167,
+          "overflowRawCount": 6,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -937,7 +1465,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -1008,7 +1536,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 167,
+          "overflowRawCount": 6,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -1035,7 +1563,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -1154,7 +1682,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1366"
+          "detail": "right=567 vw=1366"
         }
       ],
       "errors": [],
@@ -1167,6 +1695,7 @@
       }
     },
     "ipad-1024x1366-touch": {
+      "trang": "index",
       "w": 1024,
       "h": 1366,
       "touch": true,
@@ -1228,7 +1757,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -1326,7 +1855,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -1445,7 +1974,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1024"
+          "detail": "right=567 vw=1024"
         }
       ],
       "errors": [],
@@ -1458,6 +1987,7 @@
       }
     },
     "bp-1441-mouse": {
+      "trang": "index",
       "w": 1441,
       "h": 800,
       "touch": false,
@@ -1492,10 +2022,35 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 115,
+          "overflowRawCount": 6,
           "overflow": [],
           "textOverflow": [],
-          "textWrap": [],
+          "textWrap": [
+            {
+              "el": "span.brand-name",
+              "text": "VN-SCANNER",
+              "soDong": 2,
+              "w": 87
+            },
+            {
+              "el": "span#live-text",
+              "text": "GIỮA PHIÊN 01/01 00:00",
+              "soDong": 2,
+              "w": 129
+            },
+            {
+              "el": "span#market-text",
+              "text": "ĐANG GIAO DỊCH",
+              "soDong": 2,
+              "w": 84
+            },
+            {
+              "el": "span#clock.time",
+              "text": "00:00:00 ICT",
+              "soDong": 2,
+              "w": 84
+            }
+          ],
           "overlap": [],
           "axis": [
             {
@@ -1519,7 +2074,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -1590,10 +2145,35 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 115,
+          "overflowRawCount": 6,
           "overflow": [],
           "textOverflow": [],
-          "textWrap": [],
+          "textWrap": [
+            {
+              "el": "span.brand-name",
+              "text": "VN-SCANNER",
+              "soDong": 2,
+              "w": 87
+            },
+            {
+              "el": "span#live-text",
+              "text": "GIỮA PHIÊN 01/01 00:00",
+              "soDong": 2,
+              "w": 129
+            },
+            {
+              "el": "span#market-text",
+              "text": "ĐANG GIAO DỊCH",
+              "soDong": 2,
+              "w": 84
+            },
+            {
+              "el": "span#clock.time",
+              "text": "00:00:00 ICT",
+              "soDong": 2,
+              "w": 84
+            }
+          ],
           "overlap": [],
           "axis": [
             {
@@ -1617,7 +2197,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -1748,7 +2328,149 @@
         "maxTouchPoints": 0
       }
     },
+    "wl:bp-1441-mouse": {
+      "trang": "watchlist",
+      "w": 1441,
+      "h": 800,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 1441,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 53,
+              "scrollHeight": 52,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1441,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 53,
+              "scrollHeight": 52,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
     "bp-1441-touch": {
+      "trang": "index",
       "w": 1441,
       "h": 800,
       "touch": true,
@@ -1783,10 +2505,35 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 115,
+          "overflowRawCount": 6,
           "overflow": [],
           "textOverflow": [],
-          "textWrap": [],
+          "textWrap": [
+            {
+              "el": "span.brand-name",
+              "text": "VN-SCANNER",
+              "soDong": 2,
+              "w": 84
+            },
+            {
+              "el": "span#live-text",
+              "text": "GIỮA PHIÊN 01/01 00:00",
+              "soDong": 2,
+              "w": 125
+            },
+            {
+              "el": "span#market-text",
+              "text": "ĐANG GIAO DỊCH",
+              "soDong": 2,
+              "w": 78
+            },
+            {
+              "el": "span#clock.time",
+              "text": "00:00:00 ICT",
+              "soDong": 2,
+              "w": 78
+            }
+          ],
           "overlap": [],
           "axis": [
             {
@@ -1810,7 +2557,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -1881,10 +2628,35 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 115,
+          "overflowRawCount": 6,
           "overflow": [],
           "textOverflow": [],
-          "textWrap": [],
+          "textWrap": [
+            {
+              "el": "span.brand-name",
+              "text": "VN-SCANNER",
+              "soDong": 2,
+              "w": 84
+            },
+            {
+              "el": "span#live-text",
+              "text": "GIỮA PHIÊN 01/01 00:00",
+              "soDong": 2,
+              "w": 125
+            },
+            {
+              "el": "span#market-text",
+              "text": "ĐANG GIAO DỊCH",
+              "soDong": 2,
+              "w": 78
+            },
+            {
+              "el": "span#clock.time",
+              "text": "00:00:00 ICT",
+              "soDong": 2,
+              "w": 78
+            }
+          ],
           "overlap": [],
           "axis": [
             {
@@ -1908,7 +2680,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -2040,6 +2812,7 @@
       }
     },
     "bp-1439-mouse": {
+      "trang": "index",
       "w": 1439,
       "h": 800,
       "touch": false,
@@ -2101,7 +2874,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -2199,7 +2972,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -2318,7 +3091,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1439"
+          "detail": "right=567 vw=1439"
         }
       ],
       "errors": [],
@@ -2330,7 +3103,149 @@
         "maxTouchPoints": 0
       }
     },
+    "wl:bp-1439-mouse": {
+      "trang": "watchlist",
+      "w": 1439,
+      "h": 800,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 1439,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 53,
+              "scrollHeight": 52,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1439,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 53,
+              "scrollHeight": 52,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
     "bp-1439-touch": {
+      "trang": "index",
       "w": 1439,
       "h": 800,
       "touch": true,
@@ -2392,7 +3307,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -2490,7 +3405,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -2609,7 +3524,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1439"
+          "detail": "right=567 vw=1439"
         }
       ],
       "errors": [],
@@ -2622,6 +3537,7 @@
       }
     },
     "bp-1281-mouse": {
+      "trang": "index",
       "w": 1281,
       "h": 800,
       "touch": false,
@@ -2656,7 +3572,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 430,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -2683,7 +3599,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -2754,7 +3670,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 430,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -2781,7 +3697,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -2900,7 +3816,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1281"
+          "detail": "right=567 vw=1281"
         }
       ],
       "errors": [],
@@ -2912,7 +3828,129 @@
         "maxTouchPoints": 0
       }
     },
+    "val:bp-1281-mouse": {
+      "trang": "valuation",
+      "w": 1281,
+      "h": 800,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 1281,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1281,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
     "bp-1281-touch": {
+      "trang": "index",
       "w": 1281,
       "h": 800,
       "touch": true,
@@ -2947,7 +3985,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 430,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -2974,7 +4012,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -3045,7 +4083,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 430,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -3072,7 +4110,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -3191,7 +4229,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1281"
+          "detail": "right=567 vw=1281"
         }
       ],
       "errors": [],
@@ -3204,6 +4242,7 @@
       }
     },
     "bp-1279-mouse": {
+      "trang": "index",
       "w": 1279,
       "h": 800,
       "touch": false,
@@ -3238,7 +4277,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 430,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -3265,7 +4304,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -3336,7 +4375,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 430,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -3363,7 +4402,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -3482,7 +4521,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1279"
+          "detail": "right=567 vw=1279"
         }
       ],
       "errors": [],
@@ -3494,7 +4533,129 @@
         "maxTouchPoints": 0
       }
     },
+    "val:bp-1279-mouse": {
+      "trang": "valuation",
+      "w": 1279,
+      "h": 800,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 1279,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1279,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
     "bp-1279-touch": {
+      "trang": "index",
       "w": 1279,
       "h": 800,
       "touch": true,
@@ -3529,7 +4690,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 430,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -3556,7 +4717,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -3627,7 +4788,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 430,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -3654,7 +4815,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 39,
               "scrollHeight": 38,
               "minHeight": "auto",
@@ -3773,7 +4934,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1279"
+          "detail": "right=567 vw=1279"
         }
       ],
       "errors": [],
@@ -3786,6 +4947,7 @@
       }
     },
     "bp-1101-mouse": {
+      "trang": "index",
       "w": 1101,
       "h": 800,
       "touch": false,
@@ -3820,7 +4982,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 1210,
+          "overflowRawCount": 376,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -3847,7 +5009,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -3918,7 +5080,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 1210,
+          "overflowRawCount": 376,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -3945,7 +5107,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -4064,7 +5226,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1101"
+          "detail": "right=567 vw=1101"
         }
       ],
       "errors": [],
@@ -4077,6 +5239,7 @@
       }
     },
     "bp-1101-touch": {
+      "trang": "index",
       "w": 1101,
       "h": 800,
       "touch": true,
@@ -4111,7 +5274,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 1210,
+          "overflowRawCount": 376,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -4138,7 +5301,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -4209,7 +5372,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 1210,
+          "overflowRawCount": 376,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -4236,7 +5399,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -4355,7 +5518,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1101"
+          "detail": "right=567 vw=1101"
         }
       ],
       "errors": [],
@@ -4368,6 +5531,7 @@
       }
     },
     "bp-1099-mouse": {
+      "trang": "index",
       "w": 1099,
       "h": 800,
       "touch": false,
@@ -4429,7 +5593,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -4527,7 +5691,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -4646,7 +5810,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1099"
+          "detail": "right=567 vw=1099"
         }
       ],
       "errors": [],
@@ -4659,6 +5823,7 @@
       }
     },
     "bp-1099-touch": {
+      "trang": "index",
       "w": 1099,
       "h": 800,
       "touch": true,
@@ -4720,7 +5885,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -4818,7 +5983,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -4937,7 +6102,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1099"
+          "detail": "right=567 vw=1099"
         }
       ],
       "errors": [],
@@ -4950,6 +6115,7 @@
       }
     },
     "bp-1025-mouse": {
+      "trang": "index",
       "w": 1025,
       "h": 800,
       "touch": false,
@@ -5011,7 +6177,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -5109,7 +6275,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -5228,9 +6394,271 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1025"
+          "detail": "right=567 vw=1025"
         }
       ],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
+    "wl:bp-1025-mouse": {
+      "trang": "watchlist",
+      "w": 1025,
+      "h": 800,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 1025,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1025,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
+    "val:bp-1025-mouse": {
+      "trang": "valuation",
+      "w": 1025,
+      "h": 800,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 1025,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 63,
+              "scrollHeight": 61,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 88,
+              "scrollHeight": 87,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1025,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 63,
+              "scrollHeight": 61,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 88,
+              "scrollHeight": 87,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
       "errors": [],
       "env": {
         "coarse": false,
@@ -5241,6 +6669,7 @@
       }
     },
     "bp-1025-touch": {
+      "trang": "index",
       "w": 1025,
       "h": 800,
       "touch": true,
@@ -5302,7 +6731,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -5400,7 +6829,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -5519,7 +6948,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1025"
+          "detail": "right=567 vw=1025"
         }
       ],
       "errors": [],
@@ -5531,7 +6960,270 @@
         "maxTouchPoints": 1
       }
     },
+    "wl:bp-1025-touch": {
+      "trang": "watchlist",
+      "w": 1025,
+      "h": 800,
+      "touch": true,
+      "runs": {
+        "top": {
+          "vw": 1025,
+          "vh": 800,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1025,
+          "vh": 800,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": true,
+        "fine": false,
+        "hover": false,
+        "dpr": 3,
+        "maxTouchPoints": 1
+      }
+    },
+    "val:bp-1025-touch": {
+      "trang": "valuation",
+      "w": 1025,
+      "h": 800,
+      "touch": true,
+      "runs": {
+        "top": {
+          "vw": 1025,
+          "vh": 800,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 63,
+              "scrollHeight": 61,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 88,
+              "scrollHeight": 87,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1025,
+          "vh": 800,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 63,
+              "scrollHeight": 61,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 88,
+              "scrollHeight": 87,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": true,
+        "fine": false,
+        "hover": false,
+        "dpr": 3,
+        "maxTouchPoints": 1
+      }
+    },
     "bp-1023-mouse": {
+      "trang": "index",
       "w": 1023,
       "h": 800,
       "touch": false,
@@ -5593,7 +7285,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -5691,7 +7383,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -5810,7 +7502,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1023"
+          "detail": "right=567 vw=1023"
         }
       ],
       "errors": [],
@@ -5822,7 +7514,270 @@
         "maxTouchPoints": 0
       }
     },
+    "wl:bp-1023-mouse": {
+      "trang": "watchlist",
+      "w": 1023,
+      "h": 800,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 1023,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 13949,
+              "scrollHeight": 13949,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1023,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 13949,
+              "scrollHeight": 13949,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
+    "val:bp-1023-mouse": {
+      "trang": "valuation",
+      "w": 1023,
+      "h": 800,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 1023,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 63,
+              "scrollHeight": 61,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 88,
+              "scrollHeight": 87,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1023,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 63,
+              "scrollHeight": 61,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 88,
+              "scrollHeight": 87,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
     "bp-1023-touch": {
+      "trang": "index",
       "w": 1023,
       "h": 800,
       "touch": true,
@@ -5884,7 +7839,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -5982,7 +7937,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -6101,7 +8056,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=1023"
+          "detail": "right=567 vw=1023"
         }
       ],
       "errors": [],
@@ -6113,7 +8068,270 @@
         "maxTouchPoints": 1
       }
     },
+    "wl:bp-1023-touch": {
+      "trang": "watchlist",
+      "w": 1023,
+      "h": 800,
+      "touch": true,
+      "runs": {
+        "top": {
+          "vw": 1023,
+          "vh": 800,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 13949,
+              "scrollHeight": 13949,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1023,
+          "vh": 800,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 52,
+              "scrollHeight": 50,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 51,
+              "scrollHeight": 50,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 13949,
+              "scrollHeight": 13949,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 70,
+              "scrollHeight": 69,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": true,
+        "fine": false,
+        "hover": false,
+        "dpr": 3,
+        "maxTouchPoints": 1
+      }
+    },
+    "val:bp-1023-touch": {
+      "trang": "valuation",
+      "w": 1023,
+      "h": 800,
+      "touch": true,
+      "runs": {
+        "top": {
+          "vw": 1023,
+          "vh": 800,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 63,
+              "scrollHeight": 61,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 88,
+              "scrollHeight": 87,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 1023,
+          "vh": 800,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 0,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 63,
+              "scrollHeight": 61,
+              "minHeight": "52px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 748,
+              "scrollHeight": 748,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 88,
+              "scrollHeight": 87,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": true,
+        "fine": false,
+        "hover": false,
+        "dpr": 3,
+        "maxTouchPoints": 1
+      }
+    },
     "bp-901-mouse": {
+      "trang": "index",
       "w": 901,
       "h": 800,
       "touch": false,
@@ -6148,7 +8366,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 221,
+          "overflowRawCount": 71,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -6175,7 +8393,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -6246,7 +8464,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 221,
+          "overflowRawCount": 71,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -6273,7 +8491,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -6392,7 +8610,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=901"
+          "detail": "right=567 vw=901"
         }
       ],
       "errors": [],
@@ -6405,6 +8623,7 @@
       }
     },
     "bp-901-touch": {
+      "trang": "index",
       "w": 901,
       "h": 800,
       "touch": true,
@@ -6439,7 +8658,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 221,
+          "overflowRawCount": 71,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -6466,7 +8685,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -6537,7 +8756,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 221,
+          "overflowRawCount": 71,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -6564,7 +8783,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -6683,7 +8902,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=901"
+          "detail": "right=567 vw=901"
         }
       ],
       "errors": [],
@@ -6696,6 +8915,7 @@
       }
     },
     "bp-899-mouse": {
+      "trang": "index",
       "w": 899,
       "h": 800,
       "touch": false,
@@ -6730,7 +8950,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 221,
+          "overflowRawCount": 71,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -6757,7 +8977,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -6828,7 +9048,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 221,
+          "overflowRawCount": 71,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -6855,7 +9075,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -6974,7 +9194,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=899"
+          "detail": "right=567 vw=899"
         }
       ],
       "errors": [],
@@ -6987,6 +9207,7 @@
       }
     },
     "bp-899-touch": {
+      "trang": "index",
       "w": 899,
       "h": 800,
       "touch": true,
@@ -7021,7 +9242,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 221,
+          "overflowRawCount": 71,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -7048,7 +9269,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -7119,7 +9340,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 221,
+          "overflowRawCount": 71,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -7146,7 +9367,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -7265,7 +9486,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=899"
+          "detail": "right=567 vw=899"
         }
       ],
       "errors": [],
@@ -7278,6 +9499,7 @@
       }
     },
     "bp-861-mouse": {
+      "trang": "index",
       "w": 861,
       "h": 800,
       "touch": false,
@@ -7312,7 +9534,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 275,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -7339,7 +9561,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -7410,7 +9632,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 275,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -7437,7 +9659,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -7556,7 +9778,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=861"
+          "detail": "right=567 vw=861"
         }
       ],
       "errors": [],
@@ -7569,6 +9791,7 @@
       }
     },
     "bp-861-touch": {
+      "trang": "index",
       "w": 861,
       "h": 800,
       "touch": true,
@@ -7603,7 +9826,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 275,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -7630,7 +9853,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -7701,7 +9924,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 275,
+          "overflowRawCount": 93,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -7728,7 +9951,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -7847,7 +10070,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=861"
+          "detail": "right=567 vw=861"
         }
       ],
       "errors": [],
@@ -7860,6 +10083,7 @@
       }
     },
     "bp-859-mouse": {
+      "trang": "index",
       "w": 859,
       "h": 800,
       "touch": false,
@@ -7921,7 +10145,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -8019,7 +10243,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -8138,7 +10362,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=859"
+          "detail": "right=567 vw=859"
         }
       ],
       "errors": [],
@@ -8151,6 +10375,7 @@
       }
     },
     "bp-859-touch": {
+      "trang": "index",
       "w": 859,
       "h": 800,
       "touch": true,
@@ -8212,7 +10437,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -8310,7 +10535,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 69,
               "scrollHeight": 68,
               "minHeight": "auto",
@@ -8429,7 +10654,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=859"
+          "detail": "right=567 vw=859"
         }
       ],
       "errors": [],
@@ -8442,6 +10667,7 @@
       }
     },
     "bp-769-mouse": {
+      "trang": "index",
       "w": 769,
       "h": 800,
       "touch": false,
@@ -8503,7 +10729,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -8601,7 +10827,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -8720,7 +10946,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=769"
+          "detail": "right=567 vw=769"
         }
       ],
       "errors": [],
@@ -8733,6 +10959,7 @@
       }
     },
     "bp-769-touch": {
+      "trang": "index",
       "w": 769,
       "h": 800,
       "touch": true,
@@ -8794,7 +11021,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -8892,7 +11119,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -9011,7 +11238,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=569 vw=769"
+          "detail": "right=567 vw=769"
         }
       ],
       "errors": [],
@@ -9024,6 +11251,7 @@
       }
     },
     "bp-767-mouse": {
+      "trang": "index",
       "w": 767,
       "h": 800,
       "touch": false,
@@ -9085,7 +11313,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -9106,8 +11334,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -9193,7 +11421,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -9214,8 +11442,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -9342,7 +11570,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=543 vw=767"
+          "detail": "right=541 vw=767"
         }
       ],
       "errors": [],
@@ -9355,6 +11583,7 @@
       }
     },
     "bp-767-touch": {
+      "trang": "index",
       "w": 767,
       "h": 800,
       "touch": true,
@@ -9416,7 +11645,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -9437,8 +11666,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -9524,7 +11753,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -9545,8 +11774,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -9673,7 +11902,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=543 vw=767"
+          "detail": "right=541 vw=767"
         }
       ],
       "errors": [],
@@ -9686,6 +11915,7 @@
       }
     },
     "bp-701-mouse": {
+      "trang": "index",
       "w": 701,
       "h": 800,
       "touch": false,
@@ -9747,7 +11977,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -9768,8 +11998,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -9855,7 +12085,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -9876,8 +12106,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10004,7 +12234,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=543 vw=701"
+          "detail": "right=541 vw=701"
         }
       ],
       "errors": [],
@@ -10017,6 +12247,7 @@
       }
     },
     "bp-701-touch": {
+      "trang": "index",
       "w": 701,
       "h": 800,
       "touch": true,
@@ -10078,7 +12309,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -10099,8 +12330,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10186,7 +12417,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -10207,8 +12438,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10335,7 +12566,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=543 vw=701"
+          "detail": "right=541 vw=701"
         }
       ],
       "errors": [],
@@ -10348,6 +12579,7 @@
       }
     },
     "bp-699-mouse": {
+      "trang": "index",
       "w": 699,
       "h": 800,
       "touch": false,
@@ -10409,7 +12641,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -10430,8 +12662,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10517,7 +12749,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -10538,8 +12770,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10666,7 +12898,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=543 vw=699"
+          "detail": "right=541 vw=699"
         }
       ],
       "errors": [],
@@ -10679,6 +12911,7 @@
       }
     },
     "bp-699-touch": {
+      "trang": "index",
       "w": 699,
       "h": 800,
       "touch": true,
@@ -10740,7 +12973,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -10761,8 +12994,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10848,7 +13081,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -10869,8 +13102,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -10997,7 +13230,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=543 vw=699"
+          "detail": "right=541 vw=699"
         }
       ],
       "errors": [],
@@ -11010,6 +13243,7 @@
       }
     },
     "bp-601-mouse": {
+      "trang": "index",
       "w": 601,
       "h": 800,
       "touch": false,
@@ -11062,8 +13296,8 @@
             },
             {
               "el": "header.topbar",
-              "height": 76,
-              "scrollHeight": 74,
+              "height": 100,
+              "scrollHeight": 98,
               "minHeight": "48px",
               "flexShrink": "0",
               "position": "relative",
@@ -11071,7 +13305,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -11092,8 +13326,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -11113,8 +13347,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 223,
-              "bottom": 263,
+              "top": 247,
+              "bottom": 287,
               "height": 40
             },
             "atTopEdge": "div.list-head",
@@ -11170,8 +13404,8 @@
             },
             {
               "el": "header.topbar",
-              "height": 76,
-              "scrollHeight": 74,
+              "height": 100,
+              "scrollHeight": 98,
               "minHeight": "48px",
               "flexShrink": "0",
               "position": "relative",
@@ -11179,7 +13413,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -11200,8 +13434,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -11221,8 +13455,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 223,
-              "bottom": 263,
+              "top": 247,
+              "bottom": 287,
               "height": 40
             },
             "atTopEdge": "div.list-head",
@@ -11333,7 +13567,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=543 vw=601"
+          "detail": "right=541 vw=601"
         }
       ],
       "errors": [],
@@ -11346,6 +13580,7 @@
       }
     },
     "bp-601-touch": {
+      "trang": "index",
       "w": 601,
       "h": 800,
       "touch": true,
@@ -11398,8 +13633,8 @@
             },
             {
               "el": "header.topbar",
-              "height": 114,
-              "scrollHeight": 112,
+              "height": 138,
+              "scrollHeight": 136,
               "minHeight": "48px",
               "flexShrink": "0",
               "position": "relative",
@@ -11407,7 +13642,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -11428,8 +13663,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -11449,8 +13684,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 261,
-              "bottom": 301,
+              "top": 285,
+              "bottom": 325,
               "height": 40
             },
             "atTopEdge": "div.list-head",
@@ -11506,8 +13741,8 @@
             },
             {
               "el": "header.topbar",
-              "height": 114,
-              "scrollHeight": 112,
+              "height": 138,
+              "scrollHeight": 136,
               "minHeight": "48px",
               "flexShrink": "0",
               "position": "relative",
@@ -11515,7 +13750,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -11536,8 +13771,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -11557,8 +13792,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 261,
-              "bottom": 301,
+              "top": 285,
+              "bottom": 325,
               "height": 40
             },
             "atTopEdge": "div.list-head",
@@ -11669,7 +13904,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=543 vw=601"
+          "detail": "right=541 vw=601"
         }
       ],
       "errors": [],
@@ -11682,6 +13917,7 @@
       }
     },
     "bp-599-mouse": {
+      "trang": "index",
       "w": 599,
       "h": 800,
       "touch": false,
@@ -11734,8 +13970,8 @@
             },
             {
               "el": "header.topbar",
-              "height": 76,
-              "scrollHeight": 74,
+              "height": 100,
+              "scrollHeight": 98,
               "minHeight": "48px",
               "flexShrink": "0",
               "position": "relative",
@@ -11743,7 +13979,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -11764,8 +14000,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -11785,8 +14021,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 223,
-              "bottom": 263,
+              "top": 247,
+              "bottom": 287,
               "height": 40
             },
             "atTopEdge": "div.list-head",
@@ -11842,8 +14078,8 @@
             },
             {
               "el": "header.topbar",
-              "height": 76,
-              "scrollHeight": 74,
+              "height": 100,
+              "scrollHeight": 98,
               "minHeight": "48px",
               "flexShrink": "0",
               "position": "relative",
@@ -11851,7 +14087,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -11872,8 +14108,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -11893,8 +14129,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 223,
-              "bottom": 263,
+              "top": 247,
+              "bottom": 287,
               "height": 40
             },
             "atTopEdge": "div.list-head",
@@ -12005,7 +14241,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=543 vw=599"
+          "detail": "right=541 vw=599"
         }
       ],
       "errors": [],
@@ -12018,6 +14254,7 @@
       }
     },
     "bp-599-touch": {
+      "trang": "index",
       "w": 599,
       "h": 800,
       "touch": true,
@@ -12070,8 +14307,8 @@
             },
             {
               "el": "header.topbar",
-              "height": 114,
-              "scrollHeight": 112,
+              "height": 138,
+              "scrollHeight": 136,
               "minHeight": "48px",
               "flexShrink": "0",
               "position": "relative",
@@ -12079,7 +14316,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -12100,8 +14337,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -12121,8 +14358,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 261,
-              "bottom": 301,
+              "top": 285,
+              "bottom": 325,
               "height": 40
             },
             "atTopEdge": "div.list-head",
@@ -12178,8 +14415,8 @@
             },
             {
               "el": "header.topbar",
-              "height": 114,
-              "scrollHeight": 112,
+              "height": 138,
+              "scrollHeight": 136,
               "minHeight": "48px",
               "flexShrink": "0",
               "position": "relative",
@@ -12187,7 +14424,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 97,
               "scrollHeight": 96,
               "minHeight": "auto",
@@ -12208,8 +14445,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -12229,8 +14466,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 261,
-              "bottom": 301,
+              "top": 285,
+              "bottom": 325,
               "height": 40
             },
             "atTopEdge": "div.list-head",
@@ -12341,7 +14578,7 @@
         {
           "name": "analyzer:khong-tran-mep",
           "ok": true,
-          "detail": "right=543 vw=599"
+          "detail": "right=541 vw=599"
         }
       ],
       "errors": [],
@@ -12354,6 +14591,7 @@
       }
     },
     "bp-421-mouse": {
+      "trang": "index",
       "w": 421,
       "h": 800,
       "touch": false,
@@ -12415,9 +14653,9 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
-              "height": 143,
-              "scrollHeight": 142,
+              "el": "div#market-context.market-context.mc-off",
+              "height": 161,
+              "scrollHeight": 160,
               "minHeight": "auto",
               "flexShrink": "1",
               "position": "static",
@@ -12436,8 +14674,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -12457,8 +14695,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 293,
-              "bottom": 333,
+              "top": 311,
+              "bottom": 351,
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
@@ -12523,9 +14761,9 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
-              "height": 143,
-              "scrollHeight": 142,
+              "el": "div#market-context.market-context.mc-off",
+              "height": 161,
+              "scrollHeight": 160,
               "minHeight": "auto",
               "flexShrink": "1",
               "position": "static",
@@ -12544,8 +14782,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -12565,8 +14803,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 293,
-              "bottom": 333,
+              "top": 311,
+              "bottom": 351,
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
@@ -12689,7 +14927,149 @@
         "maxTouchPoints": 0
       }
     },
+    "wl:bp-421-mouse": {
+      "trang": "watchlist",
+      "w": 421,
+      "h": 800,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 421,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 3177,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 83,
+              "scrollHeight": 82,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 14596,
+              "scrollHeight": 14596,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 105,
+              "scrollHeight": 104,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 421,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 3177,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 83,
+              "scrollHeight": 82,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 14596,
+              "scrollHeight": 14596,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 105,
+              "scrollHeight": 104,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
     "bp-421-touch": {
+      "trang": "index",
       "w": 421,
       "h": 800,
       "touch": true,
@@ -12751,9 +15131,9 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
-              "height": 143,
-              "scrollHeight": 142,
+              "el": "div#market-context.market-context.mc-off",
+              "height": 161,
+              "scrollHeight": 160,
               "minHeight": "auto",
               "flexShrink": "1",
               "position": "static",
@@ -12772,8 +15152,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -12793,8 +15173,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 331,
-              "bottom": 371,
+              "top": 349,
+              "bottom": 389,
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
@@ -12859,9 +15239,9 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
-              "height": 143,
-              "scrollHeight": 142,
+              "el": "div#market-context.market-context.mc-off",
+              "height": 161,
+              "scrollHeight": 160,
               "minHeight": "auto",
               "flexShrink": "1",
               "position": "static",
@@ -12880,8 +15260,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -12901,8 +15281,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 331,
-              "bottom": 371,
+              "top": 349,
+              "bottom": 389,
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
@@ -13026,6 +15406,7 @@
       }
     },
     "bp-419-mouse": {
+      "trang": "index",
       "w": 419,
       "h": 800,
       "touch": false,
@@ -13087,9 +15468,9 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
-              "height": 143,
-              "scrollHeight": 142,
+              "el": "div#market-context.market-context.mc-off",
+              "height": 161,
+              "scrollHeight": 160,
               "minHeight": "auto",
               "flexShrink": "1",
               "position": "static",
@@ -13108,8 +15489,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -13129,8 +15510,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 293,
-              "bottom": 333,
+              "top": 311,
+              "bottom": 351,
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
@@ -13195,9 +15576,9 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
-              "height": 143,
-              "scrollHeight": 142,
+              "el": "div#market-context.market-context.mc-off",
+              "height": 161,
+              "scrollHeight": 160,
               "minHeight": "auto",
               "flexShrink": "1",
               "position": "static",
@@ -13216,8 +15597,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -13237,8 +15618,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 293,
-              "bottom": 333,
+              "top": 311,
+              "bottom": 351,
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
@@ -13361,7 +15742,149 @@
         "maxTouchPoints": 0
       }
     },
+    "wl:bp-419-mouse": {
+      "trang": "watchlist",
+      "w": 419,
+      "h": 800,
+      "touch": false,
+      "runs": {
+        "top": {
+          "vw": 419,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 3177,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 83,
+              "scrollHeight": 82,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 14596,
+              "scrollHeight": 14596,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 105,
+              "scrollHeight": 104,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 419,
+          "vh": 800,
+          "env": {
+            "coarse": false,
+            "fine": true,
+            "hover": true,
+            "dpr": 3,
+            "maxTouchPoints": 0
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 3177,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 83,
+              "scrollHeight": 82,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 14596,
+              "scrollHeight": 14596,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 105,
+              "scrollHeight": 104,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": false,
+        "fine": true,
+        "hover": true,
+        "dpr": 3,
+        "maxTouchPoints": 0
+      }
+    },
     "bp-419-touch": {
+      "trang": "index",
       "w": 419,
       "h": 800,
       "touch": true,
@@ -13423,9 +15946,9 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
-              "height": 143,
-              "scrollHeight": 142,
+              "el": "div#market-context.market-context.mc-off",
+              "height": 161,
+              "scrollHeight": 160,
               "minHeight": "auto",
               "flexShrink": "1",
               "position": "static",
@@ -13444,8 +15967,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -13465,8 +15988,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 331,
-              "bottom": 371,
+              "top": 349,
+              "bottom": 389,
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
@@ -13531,9 +16054,9 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
-              "height": 143,
-              "scrollHeight": 142,
+              "el": "div#market-context.market-context.mc-off",
+              "height": 161,
+              "scrollHeight": 160,
               "minHeight": "auto",
               "flexShrink": "1",
               "position": "static",
@@ -13552,8 +16075,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -13573,8 +16096,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 331,
-              "bottom": 371,
+              "top": 349,
+              "bottom": 389,
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
@@ -13698,6 +16221,7 @@
       }
     },
     "m-375x667": {
+      "trang": "index",
       "w": 375,
       "h": 667,
       "touch": true,
@@ -13732,7 +16256,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 173,
+          "overflowRawCount": 64,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -13759,7 +16283,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 161,
               "scrollHeight": 160,
               "minHeight": "auto",
@@ -13780,8 +16304,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -13840,7 +16364,7 @@
             "khop": true
           },
           "scrollY": 0,
-          "overflowRawCount": 173,
+          "overflowRawCount": 64,
           "overflow": [],
           "textOverflow": [],
           "textWrap": [],
@@ -13867,7 +16391,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 161,
               "scrollHeight": 160,
               "minHeight": "auto",
@@ -13888,8 +16412,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -14033,7 +16557,270 @@
         "maxTouchPoints": 1
       }
     },
+    "wl:m-375x667": {
+      "trang": "watchlist",
+      "w": 375,
+      "h": 667,
+      "touch": true,
+      "runs": {
+        "top": {
+          "vw": 375,
+          "vh": 667,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 3970,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 83,
+              "scrollHeight": 82,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 14616,
+              "scrollHeight": 14616,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 123,
+              "scrollHeight": 122,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 375,
+          "vh": 667,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 3970,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 83,
+              "scrollHeight": 82,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 14616,
+              "scrollHeight": 14616,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 123,
+              "scrollHeight": 122,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": true,
+        "fine": false,
+        "hover": false,
+        "dpr": 3,
+        "maxTouchPoints": 1
+      }
+    },
+    "val:m-375x667": {
+      "trang": "valuation",
+      "w": 375,
+      "h": 667,
+      "touch": true,
+      "runs": {
+        "top": {
+          "vw": 375,
+          "vh": 667,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 819,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 615,
+              "scrollHeight": 615,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 158,
+              "scrollHeight": 157,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 375,
+          "vh": 667,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 819,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 615,
+              "scrollHeight": 615,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 158,
+              "scrollHeight": 157,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": true,
+        "fine": false,
+        "hover": false,
+        "dpr": 3,
+        "maxTouchPoints": 1
+      }
+    },
     "m-402x874": {
+      "trang": "index",
       "w": 402,
       "h": 874,
       "touch": true,
@@ -14095,7 +16882,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 161,
               "scrollHeight": 160,
               "minHeight": "auto",
@@ -14116,8 +16903,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -14203,7 +16990,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 161,
               "scrollHeight": 160,
               "minHeight": "auto",
@@ -14224,8 +17011,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -14369,7 +17156,270 @@
         "maxTouchPoints": 1
       }
     },
+    "wl:m-402x874": {
+      "trang": "watchlist",
+      "w": 402,
+      "h": 874,
+      "touch": true,
+      "runs": {
+        "top": {
+          "vw": 402,
+          "vh": 874,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 3569,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 83,
+              "scrollHeight": 82,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 14616,
+              "scrollHeight": 14616,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 105,
+              "scrollHeight": 104,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 402,
+          "vh": 874,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 3569,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 83,
+              "scrollHeight": 82,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 14616,
+              "scrollHeight": 14616,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 105,
+              "scrollHeight": 104,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": true,
+        "fine": false,
+        "hover": false,
+        "dpr": 3,
+        "maxTouchPoints": 1
+      }
+    },
+    "val:m-402x874": {
+      "trang": "valuation",
+      "w": 402,
+      "h": 874,
+      "touch": true,
+      "runs": {
+        "top": {
+          "vw": 402,
+          "vh": 874,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 819,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 822,
+              "scrollHeight": 822,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 158,
+              "scrollHeight": 157,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 402,
+          "vh": 874,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 819,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 822,
+              "scrollHeight": 822,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 158,
+              "scrollHeight": 157,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": true,
+        "fine": false,
+        "hover": false,
+        "dpr": 3,
+        "maxTouchPoints": 1
+      }
+    },
     "m-440x956": {
+      "trang": "index",
       "w": 440,
       "h": 956,
       "touch": true,
@@ -14431,9 +17481,9 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
-              "height": 115,
-              "scrollHeight": 114,
+              "el": "div#market-context.market-context.mc-off",
+              "height": 161,
+              "scrollHeight": 160,
               "minHeight": "auto",
               "flexShrink": "1",
               "position": "static",
@@ -14452,8 +17502,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -14473,8 +17523,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 303,
-              "bottom": 343,
+              "top": 349,
+              "bottom": 389,
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
@@ -14539,9 +17589,9 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
-              "height": 115,
-              "scrollHeight": 114,
+              "el": "div#market-context.market-context.mc-off",
+              "height": 161,
+              "scrollHeight": 160,
               "minHeight": "auto",
               "flexShrink": "1",
               "position": "static",
@@ -14560,8 +17610,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -14581,8 +17631,8 @@
           ],
           "listHead": {
             "rect": {
-              "top": 303,
-              "bottom": 343,
+              "top": 349,
+              "bottom": 389,
               "height": 40
             },
             "atTopEdge": "div.list-head-right",
@@ -14705,7 +17755,270 @@
         "maxTouchPoints": 1
       }
     },
+    "wl:m-440x956": {
+      "trang": "watchlist",
+      "w": 440,
+      "h": 956,
+      "touch": true,
+      "runs": {
+        "top": {
+          "vw": 440,
+          "vh": 956,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 2976,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 48,
+              "scrollHeight": 46,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 83,
+              "scrollHeight": 82,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 14596,
+              "scrollHeight": 14596,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 105,
+              "scrollHeight": 104,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 440,
+          "vh": 956,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 2976,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 48,
+              "scrollHeight": 46,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "nav#wl-tabs.wl-tabs",
+              "height": 83,
+              "scrollHeight": 82,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard.wl-dashboard",
+              "height": 14596,
+              "scrollHeight": 14596,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 105,
+              "scrollHeight": 104,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": true,
+        "fine": false,
+        "hover": false,
+        "dpr": 3,
+        "maxTouchPoints": 1
+      }
+    },
+    "val:m-440x956": {
+      "trang": "valuation",
+      "w": 440,
+      "h": 956,
+      "touch": true,
+      "runs": {
+        "top": {
+          "vw": 440,
+          "vh": 956,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 757,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 904,
+              "scrollHeight": 904,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 141,
+              "scrollHeight": 140,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        },
+        "scrolled": {
+          "vw": 440,
+          "vh": 956,
+          "env": {
+            "coarse": true,
+            "fine": false,
+            "hover": false,
+            "dpr": 3,
+            "maxTouchPoints": 1
+          },
+          "metrics": null,
+          "cols": null,
+          "scrollY": 0,
+          "overflowRawCount": 757,
+          "overflow": [],
+          "textOverflow": [],
+          "textWrap": [],
+          "overlap": [],
+          "axis": [
+            {
+              "el": "header.topbar",
+              "height": 72,
+              "scrollHeight": 70,
+              "minHeight": "48px",
+              "flexShrink": "0",
+              "position": "relative",
+              "zIndex": "10",
+              "overflowsY": false
+            },
+            {
+              "el": "main.val-dashboard",
+              "height": 904,
+              "scrollHeight": 904,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            },
+            {
+              "el": "footer.site-disclaimer",
+              "height": 141,
+              "scrollHeight": 140,
+              "minHeight": "auto",
+              "flexShrink": "1",
+              "position": "static",
+              "zIndex": "auto",
+              "overflowsY": false
+            }
+          ],
+          "listHead": null
+        }
+      },
+      "functional": [],
+      "errors": [],
+      "env": {
+        "coarse": true,
+        "fine": false,
+        "hover": false,
+        "dpr": 3,
+        "maxTouchPoints": 1
+      }
+    },
     "safari-ios-thuc-402x714": {
+      "trang": "index",
       "w": 402,
       "h": 714,
       "touch": true,
@@ -14767,7 +18080,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 161,
               "scrollHeight": 160,
               "minHeight": "auto",
@@ -14788,8 +18101,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",
@@ -14875,7 +18188,7 @@
               "overflowsY": false
             },
             {
-              "el": "div#market-context.market-context.mc-neutral",
+              "el": "div#market-context.market-context.mc-off",
               "height": 161,
               "scrollHeight": 160,
               "minHeight": "auto",
@@ -14896,8 +18209,8 @@
             },
             {
               "el": "main#dashboard.dashboard",
-              "height": 2085,
-              "scrollHeight": 2085,
+              "height": 852,
+              "scrollHeight": 852,
               "minHeight": "0px",
               "flexShrink": "0",
               "position": "relative",

@@ -3,6 +3,7 @@ import { writeFileSync } from 'node:fs';
 import { VIEWPORTS } from './viewports.mjs';
 import { PROBE } from './probe.mjs';
 import { runFunctional } from './functional.mjs';
+import { PAGES, trangChoKhung } from './pages.mjs';
 
 const BASE = process.env.BASE_URL || 'http://127.0.0.1:8765';
 const OUT  = process.argv[2] || 'result.json';
@@ -79,11 +80,46 @@ async function choOnDinh(page) {
   return false;                            // het tran: bao de ghi vao ket qua
 }
 
-async function moTrang(page) {
-  await page.goto(BASE + '/index.html', { waitUntil: 'domcontentloaded', timeout: HAN_MS });
+// DONG BANG CHU DOI THEO GIO truoc khi do.
+//
+// Topbar co dong ho chay va nhan trang thai thi truong doi theo phien. Be rong
+// cua chung doi theo NOI DUNG, nen o nhung be rong topbar chat — 1441px chang
+// han — cung mot trang co the vo dong hay khong TUY GIO CHAY.
+//
+// Da lam ca mot lan chay CI do vi dieu nay (24/09/2026): moc chuan do luc
+// 19:20 ICT, lan chay PR luc 19:48, #clock 75px so voi 64px va #market-text
+// 49px so voi 44px — 8 muc "moi phat sinh" khong he lien quan toi thay doi
+// nao trong PR.
+//
+// Mot phep kiem bo cuc ma ket qua phu thuoc dong ho tuong thi khong dung duoc.
+// Dat chu ve chuoi CO DINH va go moi setInterval de dong ho khong ghi de lai.
+//
+// Chon TRUONG HOP RONG NHAT trang co the hien, khong phai chuoi bat ky:
+//   #market-text  'ĐANG GIAO DỊCH' (14 ky tu) chu khong phai 'NGOÀI GIỜ' (9)
+//   #live-text    'GIỮA PHIÊN ...' chu khong phai 'EOD ...'
+//   #clock        do dai co dinh, font mono nen moi gio deu bang nhau
+// Dong bang vao chuoi ngan la tu cho minh diem: bo cuc se xanh o day va vo
+// dong that trong gio giao dich.
+async function dongBangChuDong(page) {
+  await page.evaluate(() => {
+    // Go moi bo dem dang chay. Phep do chi doc BO CUC, khong can trang song.
+    const cao = setInterval(() => {}, 99999);
+    for (let i = 1; i <= cao; i++) clearInterval(i);
+    const dat = (sel, t) => { const e = document.querySelector(sel); if (e) e.textContent = t; };
+    dat('#clock', '00:00:00 ICT');
+    dat('#live-text', 'GIỮA PHIÊN 01/01 00:00');
+    dat('#market-text', 'ĐANG GIAO DỊCH');
+  });
+}
+
+async function moTrang(page, trang) {
+  await page.goto(BASE + trang.duongDan, { waitUntil: 'domcontentloaded', timeout: HAN_MS });
   // Cho DUNG thu can chu khong cho mang im: hang dau tien cua bang da render.
-  await page.waitForSelector('.table-wrap tbody tr', { timeout: HAN_MS });
-  return await choOnDinh(page);
+  // Moi trang mot dau hieu khac nhau — xem pages.mjs.
+  await page.waitForSelector(trang.sanSang, { timeout: HAN_MS });
+  const onDinh = await choOnDinh(page);
+  await dongBangChuDong(page);
+  return onDinh;
 }
 
 if (!(await kiemMayChu())) {
@@ -95,66 +131,71 @@ if (!(await kiemMayChu())) {
   process.exit(2);
 }
 
-const TONG = ONLY ? VIEWPORTS.filter(v => ONLY.includes(v.name)).length : VIEWPORTS.length;
+// So luot = tong (khung x trang chay khung do), khong phai so khung.
+const KHUNG = VIEWPORTS.filter(v => !ONLY || ONLY.includes(v.name));
+const TONG = KHUNG.reduce((n, v) => n + trangChoKhung(v.name).length, 0);
 let dem = 0;
-for (const v of VIEWPORTS) {
-  if (ONLY && !ONLY.includes(v.name)) continue;
-  const ctx = await browser.newContext({
-    viewport: { width: v.w, height: v.h },
-    deviceScaleFactor: 3,
-    // isMobile keo theo viewport meta + touch events; hasTouch quyet dinh
-    // `pointer: coarse`. Tach ro de truc con tro doc lap voi be rong.
-    isMobile: !!v.touch,
-    hasTouch: !!v.touch,
-  });
-  const page = await ctx.newPage();
-  const entry = { w: v.w, h: v.h, touch: !!v.touch, runs: {}, functional: [], errors: [] };
-  page.on('pageerror', e => entry.errors.push(String(e).slice(0, 120)));
+for (const v of KHUNG) {
+  for (const trang of trangChoKhung(v.name)) {
+    const khoa = trang.khoa + v.name;
+    const ctx = await browser.newContext({
+      viewport: { width: v.w, height: v.h },
+      deviceScaleFactor: 3,
+      // isMobile keo theo viewport meta + touch events; hasTouch quyet dinh
+      // `pointer: coarse`. Tach ro de truc con tro doc lap voi be rong.
+      isMobile: !!v.touch,
+      hasTouch: !!v.touch,
+    });
+    const page = await ctx.newPage();
+    const entry = { trang: trang.ten, w: v.w, h: v.h, touch: !!v.touch,
+                    runs: {}, functional: [], errors: [] };
+    page.on('pageerror', e => entry.errors.push(String(e).slice(0, 120)));
 
-  dem++;
-  const giay = Math.round((Date.now() - batDau) / 1000);
-  process.stdout.write(`[${String(dem).padStart(2)}/${TONG}] ${v.name.padEnd(22)} (${giay}s) ... `);
-  if (Date.now() - batDau > TONG_HAN_MS) {
-    console.error(`
+    dem++;
+    const giay = Math.round((Date.now() - batDau) / 1000);
+    process.stdout.write(`[${String(dem).padStart(3)}/${TONG}] ${khoa.padEnd(26)} (${giay}s) ... `);
+    if (Date.now() - batDau > TONG_HAN_MS) {
+      console.error(`
 QUA HAN TONG ${Math.round(TONG_HAN_MS / 60000)} phut — dung lai.`);
-    await ctx.close(); break;
+      await ctx.close(); break;
+    }
+    if (!(await kiemMayChu())) {
+      console.error(`
+MAY CHU CHET giua chung tai ${khoa}. Dung ngay.`);
+      await ctx.close(); process.exit(2);
+    }
+
+    try {
+      const onDinh = await moTrang(page, trang);
+      if (!onDinh) entry.errors.push('BO CUC KHONG ON DINH sau 8s — so do khung nay dang ngo');
+
+      // Lan 1: dau trang
+      entry.runs.top = await page.evaluate(PROBE);
+      if (SHOTS) await page.screenshot({ path: `shot-${khoa.replace(':', '-')}-top.png`, fullPage: true });
+
+      // Lan 2: sau khi cuon — loi sticky chi lo khi da cuon
+      await page.evaluate(() => window.scrollBy(0, 300));
+      await page.waitForTimeout(300);
+      entry.runs.scrolled = await page.evaluate(PROBE);
+      if (SHOTS) await page.screenshot({ path: `shot-${khoa.replace(':', '-')}-scrolled.png` });
+
+      // Kiem chuc nang chi viet cho index.html (drawer, dai tab, o nhap).
+      if (trang.chucNang) entry.functional = await runFunctional(page, !!v.touch, BASE);
+    } catch (e) {
+      entry.errors.push('FATAL: ' + String(e).slice(0, 160));
+    }
+    report.viewports[khoa] = entry;
+    await ctx.close();
+
+    // Ghi lai cau hinh THUC TE trang nhin thay, khong tin khai bao cua context.
+    entry.env = entry.runs.top?.env || null;
+    const t = entry.runs.top || {};
+    const nf = entry.functional.filter(f => !f.ok).length;
+    console.log(`${khoa.padEnd(25)} tran=${String((t.overflow||[]).length).padStart(3)}  ` +
+                `tranChu=${String((t.textOverflow||[]).length).padStart(3)}  ` +
+                `che=${String((t.overlap||[]).length).padStart(3)}  ` +
+                `chucNangHong=${String(nf).padStart(2)}  ${entry.errors.length ? 'ERR' : ''}`);
   }
-  if (!(await kiemMayChu())) {
-    console.error(`
-MAY CHU CHET giua chung tai khung ${v.name}. Dung ngay.`);
-    await ctx.close(); process.exit(2);
-  }
-
-  try {
-    const onDinh = await moTrang(page);
-    if (!onDinh) entry.errors.push('BO CUC KHONG ON DINH sau 8s — so do khung nay dang ngo');
-
-    // Lan 1: dau trang
-    entry.runs.top = await page.evaluate(PROBE);
-    if (SHOTS) await page.screenshot({ path: `shot-${v.name}-top.png`, fullPage: true });
-
-    // Lan 2: sau khi cuon — loi sticky chi lo khi da cuon
-    await page.evaluate(() => window.scrollBy(0, 300));
-    await page.waitForTimeout(300);
-    entry.runs.scrolled = await page.evaluate(PROBE);
-    if (SHOTS) await page.screenshot({ path: `shot-${v.name}-scrolled.png` });
-
-    // Kiem chuc nang: moi nhom tu tai lai trang (xem functional.mjs)
-    entry.functional = await runFunctional(page, !!v.touch, BASE);
-  } catch (e) {
-    entry.errors.push('FATAL: ' + String(e).slice(0, 160));
-  }
-  report.viewports[v.name] = entry;
-  await ctx.close();
-
-  // Ghi lai cau hinh THUC TE trang nhin thay, khong tin khai bao cua context.
-  entry.env = entry.runs.top?.env || null;
-  const t = entry.runs.top || {};
-  const nf = entry.functional.filter(f => !f.ok).length;
-  console.log(`${v.name.padEnd(21)} tran=${String((t.overflow||[]).length).padStart(3)}  ` +
-              `tranChu=${String((t.textOverflow||[]).length).padStart(3)}  ` +
-              `che=${String((t.overlap||[]).length).padStart(3)}  ` +
-              `chucNangHong=${String(nf).padStart(2)}  ${entry.errors.length ? 'ERR' : ''}`);
 }
 await browser.close();
 writeFileSync(OUT, JSON.stringify(report, null, 2));

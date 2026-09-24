@@ -16,6 +16,16 @@
           "bp-1441-touch": 117
         }
       }
+    },
+    {
+      "khoaMau": "^(top|scrolled)\\|voDong\\|span(\\.brand-name|#live-text|#market-text|#clock\\.time)\\|",
+      "khung": [
+        "bp-1441-mouse",
+        "bp-1441-touch"
+      ],
+      "soToiDa": 16,
+      "lyDo": "Bon nhan topbar vo dong o dai 1441-1707px, VA CHI TRONG GIO GIAO DICH. Do 23/09 bao dai nay sach, nhung do sai: luc ay thi truong dong nen #market-text la 'NGOÀI GIỜ' (9 ky tu). Trong gio giao dich no la 'ĐANG GIAO DỊCH' (14 ky tu) va topbar chen. Tu 24/09 bo do dong bang chu dong vao TRUONG HOP RONG NHAT nen bat duoc. Cung goc voi muc 5: topbar mot hang o tab Phan tich ma can 1708px. Cach sua that la bo bot phan tu khoi topbar, tuc M1 — sua vat o day se phai go ra khi lam M1. 16 = 4 nhan x 2 khung x 2 luot do.",
+      "taiLieu": "docs/mobile-layout-out-of-scope.md muc 7"
     }
   ],
   "_lichSu": "23/09/2026: muc 'bon nhan topbar vo dong o 1281-1299px' (muc 7) HET han — nang nguong dai tab tu 1280 len 1440 da don sach. Muc 'o nhap bi co' khong het ma CHUYEN DAI, tu 1281-1365px len 1441-1707px."
