@@ -1,22 +1,22 @@
 {
  "schema": 1,
- "generated_at": "2026-09-24T11:20:52",
+ "generated_at": "2026-09-24T12:05:57",
  "as_of": "2026-09-24",
  "metadata": {
   "universe_size": 200,
   "scored": 200,
   "failures": [],
   "status_counts": {
-   "MON": 128,
-   "REV": 30,
-   "RES": 34,
+   "MON": 142,
+   "REV": 34,
+   "RES": 16,
    "EXC": 8
   },
   "model_counts": {
    "NON_FINANCIAL": 124,
    "REAL_ESTATE": 39,
-   "SECURITIES": 15,
    "BANK": 18,
+   "SECURITIES": 15,
    "INSURANCE": 2,
    "null": 2
   },
@@ -46,27 +46,22 @@
     "quality": [
      {
       "key": "roa_avg3",
-      "weight": 25,
+      "weight": 30,
       "higher_better": true
      },
      {
       "key": "roe_avg3",
-      "weight": 15,
+      "weight": 20,
       "higher_better": true
      },
      {
       "key": "nim_std",
-      "weight": 20,
-      "higher_better": false
-     },
-     {
-      "key": "npl_ratio",
-      "weight": 20,
+      "weight": 25,
       "higher_better": false
      },
      {
       "key": "cost_income",
-      "weight": 20,
+      "weight": 25,
       "higher_better": false
      }
     ],
@@ -94,23 +89,18 @@
     ],
     "resilience": [
      {
-      "key": "npl_coverage",
-      "weight": 35,
-      "higher_better": true
-     },
-     {
       "key": "equity_assets",
-      "weight": 30,
+      "weight": 45,
       "higher_better": true
      },
      {
       "key": "credit_cost_std",
-      "weight": 20,
+      "weight": 30,
       "higher_better": false
      },
      {
       "key": "ldr",
-      "weight": 15,
+      "weight": 25,
       "higher_better": false
      }
     ]
@@ -316,6 +306,10 @@
    "earnings_cash_gap": 25,
    "late_filing": 10
   },
+  "bank_not_evaluated": {
+   "npl_ratio": "tỷ lệ nợ xấu",
+   "npl_coverage": "bao phủ nợ xấu"
+  },
   "governance_not_evaluated": {
    "warning_status": "diện cảnh báo / kiểm soát của sở giao dịch",
    "qualified_opinion": "ý kiến kiểm toán ngoại trừ"
@@ -466,6 +460,75 @@
     "interest_coverage": 71.1,
     "current_ratio": 28.9,
     "profit_drawdown5": 55.3
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "HDB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Đạt 4 ngưỡng nhưng chưa có định giá đủ tin cậy",
+   "dims": {
+    "quality": {
+     "score": 87.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 87.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 66.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 53.2,
+    "confidence": 30.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roa_avg3": 0.0205,
+    "roe_avg3": 0.2507,
+    "nim_std": 0.0026,
+    "cost_income": 0.2717,
+    "toi_cagr5": 0.2538,
+    "pbt_cagr5": 0.2969,
+    "loans_cagr5": 0.251,
+    "nonint_income_cagr3": 0.262,
+    "equity_assets": 0.0841,
+    "credit_cost_std": 0.0027,
+    "ldr": 0.9744
+   },
+   "percentiles": {
+    "roa_avg3": 82.4,
+    "roe_avg3": 100.0,
+    "nim_std": 82.4,
+    "cost_income": 88.2,
+    "toi_cagr5": 100.0,
+    "pbt_cagr5": 82.4,
+    "loans_cagr5": 88.2,
+    "nonint_income_cagr3": 76.5,
+    "equity_assets": 41.2,
+    "credit_cost_std": 82.4,
+    "ldr": 94.1
    },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
@@ -1345,6 +1408,77 @@
     "interest_coverage": 81.6,
     "current_ratio": 1.3,
     "profit_drawdown5": 98.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "LPB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 74 dưới 75, Chống chịu 39 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 74.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 86.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 38.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 92,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0193,
+    "roe_avg3": 0.2316,
+    "nim_std": 0.0039,
+    "cost_income": 0.2829,
+    "toi_cagr5": 0.23,
+    "pbt_cagr5": 0.4252,
+    "loans_cagr5": 0.1727,
+    "nonint_income_cagr3": 0.3707,
+    "equity_assets": 0.0779,
+    "credit_cost_std": 0.0037,
+    "ldr": 1.1604
+   },
+   "percentiles": {
+    "roa_avg3": 76.5,
+    "roe_avg3": 94.1,
+    "nim_std": 47.1,
+    "cost_income": 82.4,
+    "toi_cagr5": 94.1,
+    "pbt_cagr5": 100.0,
+    "loans_cagr5": 52.9,
+    "nonint_income_cagr3": 88.2,
+    "equity_assets": 35.3,
+    "credit_cost_std": 47.1,
+    "ldr": 35.3
    },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
@@ -2515,6 +2649,75 @@
    "sharp_drops": []
   },
   {
+   "ticker": "MBB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 66 dưới 75, Chống chịu 37 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 66.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 83.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 36.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0224,
+    "roe_avg3": 0.2216,
+    "nim_std": 0.0071,
+    "cost_income": 0.2907,
+    "toi_cagr5": 0.1986,
+    "pbt_cagr5": 0.2624,
+    "loans_cagr5": 0.2944,
+    "nonint_income_cagr3": 0.1889,
+    "equity_assets": 0.0879,
+    "credit_cost_std": 0.0046,
+    "ldr": 1.1765
+   },
+   "percentiles": {
+    "roa_avg3": 94.1,
+    "roe_avg3": 88.2,
+    "nim_std": 5.9,
+    "cost_income": 76.5,
+    "toi_cagr5": 88.2,
+    "pbt_cagr5": 76.5,
+    "loans_cagr5": 100.0,
+    "nonint_income_cagr3": 70.6,
+    "equity_assets": 52.9,
+    "credit_cost_std": 23.5,
+    "ldr": 23.5
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
    "ticker": "HII",
    "industry": "Chemicals",
    "model": "NON_FINANCIAL",
@@ -2657,6 +2860,77 @@
     "interest_coverage": 36.8,
     "current_ratio": 7.9,
     "profit_drawdown5": 44.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "ACB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 65 dưới 75, Tăng trưởng 38 dưới 70, Chống chịu 60 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 65.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 38.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 60.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 75,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "earnings_cash_gap"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0206,
+    "roe_avg3": 0.2137,
+    "nim_std": 0.0051,
+    "cost_income": 0.3232,
+    "toi_cagr5": 0.1323,
+    "pbt_cagr5": 0.1528,
+    "loans_cagr5": 0.1713,
+    "nonint_income_cagr3": 0.0945,
+    "equity_assets": 0.0921,
+    "credit_cost_std": 0.0032,
+    "ldr": 1.1736
+   },
+   "percentiles": {
+    "roa_avg3": 88.2,
+    "roe_avg3": 82.4,
+    "nim_std": 29.4,
+    "cost_income": 58.8,
+    "toi_cagr5": 41.2,
+    "pbt_cagr5": 23.5,
+    "loans_cagr5": 47.1,
+    "nonint_income_cagr3": 47.1,
+    "equity_assets": 70.6,
+    "credit_cost_std": 70.6,
+    "ldr": 29.4
    },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
@@ -2959,6 +3233,75 @@
     "interest_coverage": 32.5,
     "current_ratio": 26.0,
     "profit_drawdown5": 71.5
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "CTG",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 63 dưới 75, Tăng trưởng 46 dưới 70, Chống chịu 32 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 63.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 46.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 31.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0118,
+    "roe_avg3": 0.1898,
+    "nim_std": 0.0013,
+    "cost_income": 0.3042,
+    "toi_cagr5": 0.1399,
+    "pbt_cagr5": 0.2047,
+    "loans_cagr5": 0.1443,
+    "nonint_income_cagr3": 0.0848,
+    "equity_assets": 0.0649,
+    "credit_cost_std": 0.0036,
+    "ldr": 1.1107
+   },
+   "percentiles": {
+    "roa_avg3": 29.4,
+    "roe_avg3": 58.8,
+    "nim_std": 100.0,
+    "cost_income": 70.6,
+    "toi_cagr5": 52.9,
+    "pbt_cagr5": 58.8,
+    "loans_cagr5": 29.4,
+    "nonint_income_cagr3": 35.3,
+    "equity_assets": 11.8,
+    "credit_cost_std": 52.9,
+    "ldr": 41.2
    },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
@@ -4095,6 +4438,75 @@
    "sharp_drops": []
   },
   {
+   "ticker": "SHB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 59 dưới 75, Chống chịu 46 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 59.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 81.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 45.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0135,
+    "roe_avg3": 0.1731,
+    "nim_std": 0.0038,
+    "cost_income": 0.2213,
+    "toi_cagr5": 0.1891,
+    "pbt_cagr5": 0.3567,
+    "loans_cagr5": 0.15,
+    "nonint_income_cagr3": 0.7003,
+    "equity_assets": 0.0764,
+    "credit_cost_std": 0.0035,
+    "ldr": 1.0747
+   },
+   "percentiles": {
+    "roa_avg3": 35.3,
+    "roe_avg3": 52.9,
+    "nim_std": 52.9,
+    "cost_income": 100.0,
+    "toi_cagr5": 82.4,
+    "pbt_cagr5": 94.1,
+    "loans_cagr5": 41.2,
+    "nonint_income_cagr3": 100.0,
+    "equity_assets": 29.4,
+    "credit_cost_std": 58.8,
+    "ldr": 58.8
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
    "ticker": "BSR",
    "industry": "Oil_Gas",
    "model": "NON_FINANCIAL",
@@ -4316,6 +4728,75 @@
     "interest_coverage": 82.9,
     "current_ratio": 82.9,
     "profit_drawdown5": 56.1
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VCB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 58 dưới 75, Tăng trưởng 16 dưới 70, Chống chịu 64 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 58.2,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 16.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 63.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -3.1,
+    "confidence": 61.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Nhóm tài chính (Banking): chưa có NPL/CAR nên chưa đưa ra kết luận định giá"
+   },
+   "metrics": {
+    "roa_avg3": 0.017,
+    "roe_avg3": 0.1917,
+    "nim_std": 0.0027,
+    "cost_income": 0.3484,
+    "toi_cagr5": 0.0811,
+    "pbt_cagr5": 0.1381,
+    "loans_cagr5": 0.1479,
+    "nonint_income_cagr3": -0.0266,
+    "equity_assets": 0.0919,
+    "credit_cost_std": 0.0042,
+    "ldr": 1.0006
+   },
+   "percentiles": {
+    "roa_avg3": 52.9,
+    "roe_avg3": 64.7,
+    "nim_std": 76.5,
+    "cost_income": 41.2,
+    "toi_cagr5": 5.9,
+    "pbt_cagr5": 17.6,
+    "loans_cagr5": 35.3,
+    "nonint_income_cagr3": 11.8,
+    "equity_assets": 64.7,
+    "credit_cost_std": 41.2,
+    "ldr": 88.2
    },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
@@ -4900,6 +5381,75 @@
     "interest_coverage": 94.7,
     "current_ratio": 83.7,
     "profit_drawdown5": 78.9
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "TCB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 56 dưới 75, Tăng trưởng 58 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 56.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 57.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 79.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0237,
+    "roe_avg3": 0.1542,
+    "nim_std": 0.0059,
+    "cost_income": 0.3078,
+    "toi_cagr5": 0.1457,
+    "pbt_cagr5": 0.1554,
+    "loans_cagr5": 0.2257,
+    "nonint_income_cagr3": 0.1417,
+    "equity_assets": 0.1505,
+    "credit_cost_std": 0.0013,
+    "ldr": 1.2403
+   },
+   "percentiles": {
+    "roa_avg3": 100.0,
+    "roe_avg3": 29.4,
+    "nim_std": 17.6,
+    "cost_income": 64.7,
+    "toi_cagr5": 64.7,
+    "pbt_cagr5": 29.4,
+    "loans_cagr5": 82.4,
+    "nonint_income_cagr3": 64.7,
+    "equity_assets": 100.0,
+    "credit_cost_std": 100.0,
+    "ldr": 17.6
    },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
@@ -7126,6 +7676,75 @@
    "sharp_drops": []
   },
   {
+   "ticker": "TPB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 46 dưới 75, Tăng trưởng 44 dưới 70, Chống chịu 47 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 45.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 44.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 47.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 91.7,
+    "confidence": 60.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Nhóm tài chính (Banking): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho STRONG BUY, đã hạ về HOLD"
+   },
+   "metrics": {
+    "roa_avg3": 0.0149,
+    "roe_avg3": 0.1623,
+    "nim_std": 0.0039,
+    "cost_income": 0.3461,
+    "toi_cagr5": 0.1287,
+    "pbt_cagr5": 0.1603,
+    "loans_cagr5": 0.2058,
+    "nonint_income_cagr3": 0.0995,
+    "equity_assets": 0.091,
+    "credit_cost_std": 0.0045,
+    "ldr": 1.0959
+   },
+   "percentiles": {
+    "roa_avg3": 47.1,
+    "roe_avg3": 47.1,
+    "nim_std": 41.2,
+    "cost_income": 47.1,
+    "toi_cagr5": 29.4,
+    "pbt_cagr5": 35.3,
+    "loans_cagr5": 70.6,
+    "nonint_income_cagr3": 52.9,
+    "equity_assets": 58.8,
+    "credit_cost_std": 29.4,
+    "ldr": 47.1
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
    "ticker": "ANV",
    "industry": "Agriculture_Livestock",
    "model": "NON_FINANCIAL",
@@ -7425,6 +8044,146 @@
     "interest_coverage": 94.7,
     "current_ratio": 76.4,
     "profit_drawdown5": 90.2
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "VPB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 45 dưới 75, Tăng trưởng 51 dưới 70, Chống chịu 42 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 44.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 50.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 42.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 92,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_mild"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0175,
+    "roe_avg3": 0.11,
+    "nim_std": 0.0082,
+    "cost_income": 0.2496,
+    "toi_cagr5": 0.1385,
+    "pbt_cagr5": 0.1866,
+    "loans_cagr5": 0.2655,
+    "nonint_income_cagr3": -0.0158,
+    "equity_assets": 0.1431,
+    "credit_cost_std": 0.0101,
+    "ldr": 1.5029
+   },
+   "percentiles": {
+    "roa_avg3": 58.8,
+    "roe_avg3": 17.6,
+    "nim_std": 0.0,
+    "cost_income": 94.1,
+    "toi_cagr5": 47.1,
+    "pbt_cagr5": 47.1,
+    "loans_cagr5": 94.1,
+    "nonint_income_cagr3": 17.6,
+    "equity_assets": 94.1,
+    "credit_cost_std": 0.0,
+    "ldr": 0.0
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "MSB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 44 dưới 75, Tăng trưởng 62 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 44.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 62.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 65.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 60.3,
+    "confidence": 30.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roa_avg3": 0.0179,
+    "roe_avg3": 0.1548,
+    "nim_std": 0.0046,
+    "cost_income": 0.3608,
+    "toi_cagr5": 0.1435,
+    "pbt_cagr5": 0.2284,
+    "loans_cagr5": 0.2093,
+    "nonint_income_cagr3": 0.093,
+    "equity_assets": 0.1041,
+    "credit_cost_std": 0.0042,
+    "ldr": 1.0434
+   },
+   "percentiles": {
+    "roa_avg3": 70.6,
+    "roe_avg3": 35.3,
+    "nim_std": 35.3,
+    "cost_income": 29.4,
+    "toi_cagr5": 58.8,
+    "pbt_cagr5": 70.6,
+    "loans_cagr5": 76.5,
+    "nonint_income_cagr3": 41.2,
+    "equity_assets": 82.4,
+    "credit_cost_std": 35.3,
+    "ldr": 70.6
    },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
@@ -8116,6 +8875,75 @@
    "sharp_drops": []
   },
   {
+   "ticker": "VIB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 42 dưới 75, Tăng trưởng 28 dưới 70, Chống chịu 28 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 42.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 27.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 27.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0175,
+    "roe_avg3": 0.1958,
+    "nim_std": 0.0068,
+    "cost_income": 0.3716,
+    "toi_cagr5": 0.1227,
+    "pbt_cagr5": 0.0943,
+    "loans_cagr5": 0.1764,
+    "nonint_income_cagr3": 0.0814,
+    "equity_assets": 0.0843,
+    "credit_cost_std": 0.0048,
+    "ldr": 1.2967
+   },
+   "percentiles": {
+    "roa_avg3": 64.7,
+    "roe_avg3": 76.5,
+    "nim_std": 11.8,
+    "cost_income": 17.6,
+    "toi_cagr5": 17.6,
+    "pbt_cagr5": 11.8,
+    "loans_cagr5": 64.7,
+    "nonint_income_cagr3": 29.4,
+    "equity_assets": 47.1,
+    "credit_cost_std": 11.8,
+    "ldr": 11.8
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
    "ticker": "SSI",
    "industry": "Securities",
    "model": "SECURITIES",
@@ -8178,6 +9006,75 @@
     "margin_loans_equity": 42.9,
     "debt_equity": 28.6,
     "profit_drawdown5": 92.9
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "STB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 42 dưới 75, Tăng trưởng 25 dưới 70, Chống chịu 30 dưới 65",
+   "dims": {
+    "quality": {
+     "score": 41.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 25.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 30.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -13.9,
+    "confidence": 30.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
+   },
+   "metrics": {
+    "roa_avg3": 0.0112,
+    "roe_avg3": 0.1623,
+    "nim_std": 0.002,
+    "cost_income": 0.4069,
+    "toi_cagr5": 0.1317,
+    "pbt_cagr5": 0.1796,
+    "loans_cagr5": 0.1298,
+    "nonint_income_cagr3": -0.1576,
+    "equity_assets": 0.0653,
+    "credit_cost_std": 0.0068,
+    "ldr": 1.013
+   },
+   "percentiles": {
+    "roa_avg3": 23.5,
+    "roe_avg3": 41.2,
+    "nim_std": 94.1,
+    "cost_income": 11.8,
+    "toi_cagr5": 35.3,
+    "pbt_cagr5": 41.2,
+    "loans_cagr5": 11.8,
+    "nonint_income_cagr3": 0.0,
+    "equity_assets": 17.6,
+    "credit_cost_std": 5.9,
+    "ldr": 82.4
    },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
@@ -8321,6 +9218,75 @@
     "interest_coverage": 94.7,
     "current_ratio": 91.1,
     "profit_drawdown5": 40.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "OCB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "MON",
+   "status_label": "Theo dõi",
+   "reason": "Chất lượng 41 dưới 75, Tăng trưởng 25 dưới 70",
+   "dims": {
+    "quality": {
+     "score": 40.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 25.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 69.4,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0136,
+    "roe_avg3": 0.1168,
+    "nim_std": 0.0029,
+    "cost_income": 0.3626,
+    "toi_cagr5": 0.0766,
+    "pbt_cagr5": 0.0259,
+    "loans_cagr5": 0.1737,
+    "nonint_income_cagr3": 0.1386,
+    "equity_assets": 0.105,
+    "credit_cost_std": 0.0016,
+    "ldr": 1.3248
+   },
+   "percentiles": {
+    "roa_avg3": 41.2,
+    "roe_avg3": 23.5,
+    "nim_std": 70.6,
+    "cost_income": 23.5,
+    "toi_cagr5": 0.0,
+    "pbt_cagr5": 5.9,
+    "loans_cagr5": 58.8,
+    "nonint_income_cagr3": 58.8,
+    "equity_assets": 88.2,
+    "credit_cost_std": 94.1,
+    "ldr": 5.9
    },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
@@ -10662,6 +11628,75 @@
    "sharp_drops": []
   },
   {
+   "ticker": "BID",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "REV",
+   "status_label": "Cần xem lại",
+   "reason": "Chống chịu 22 dưới 25",
+   "dims": {
+    "quality": {
+     "score": 47.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 54.7,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 21.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.01,
+    "roe_avg3": 0.1921,
+    "nim_std": 0.003,
+    "cost_income": 0.3336,
+    "toi_cagr5": 0.1276,
+    "pbt_cagr5": 0.3316,
+    "loans_cagr5": 0.1434,
+    "nonint_income_cagr3": 0.2734,
+    "equity_assets": 0.0521,
+    "credit_cost_std": 0.0047,
+    "ldr": 1.0675
+   },
+   "percentiles": {
+    "roa_avg3": 11.8,
+    "roe_avg3": 70.6,
+    "nim_std": 64.7,
+    "cost_income": 52.9,
+    "toi_cagr5": 23.5,
+    "pbt_cagr5": 88.2,
+    "loans_cagr5": 23.5,
+    "nonint_income_cagr3": 82.4,
+    "equity_assets": 0.0,
+    "credit_cost_std": 17.6,
+    "ldr": 64.7
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
    "ticker": "NKG",
    "industry": "Steel_Metals",
    "model": "NON_FINANCIAL",
@@ -11482,6 +12517,75 @@
    "sharp_drops": []
   },
   {
+   "ticker": "EIB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "REV",
+   "status_label": "Cần xem lại",
+   "reason": "Chất lượng 24 dưới 30",
+   "dims": {
+    "quality": {
+     "score": 23.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 5.9,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 76.5,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0102,
+    "roe_avg3": 0.0951,
+    "nim_std": 0.0035,
+    "cost_income": 0.5833,
+    "toi_cagr5": 0.104,
+    "pbt_cagr5": 0.0245,
+    "loans_cagr5": 0.1282,
+    "nonint_income_cagr3": -0.0821,
+    "equity_assets": 0.0952,
+    "credit_cost_std": 0.003,
+    "ldr": 1.039
+   },
+   "percentiles": {
+    "roa_avg3": 17.6,
+    "roe_avg3": 11.8,
+    "nim_std": 58.8,
+    "cost_income": 5.9,
+    "toi_cagr5": 11.8,
+    "pbt_cagr5": 0.0,
+    "loans_cagr5": 5.9,
+    "nonint_income_cagr3": 5.9,
+    "equity_assets": 76.5,
+    "credit_cost_std": 76.5,
+    "ldr": 76.5
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
    "ticker": "HPX",
    "industry": "Real_Estate",
    "model": "REAL_ESTATE",
@@ -11545,6 +12649,77 @@
     "interest_coverage": 18.4,
     "current_ratio": 36.8,
     "profit_drawdown5": 13.2
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "BVB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "REV",
+   "status_label": "Cần xem lại",
+   "reason": "Chất lượng 22 dưới 30",
+   "dims": {
+    "quality": {
+     "score": 22.1,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 48.8,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 42.3,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 80,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [
+    "dilution_strong"
+   ],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
+   },
+   "metrics": {
+    "roa_avg3": 0.0025,
+    "roe_avg3": 0.0412,
+    "nim_std": 0.0025,
+    "cost_income": 0.5869,
+    "toi_cagr5": 0.155,
+    "pbt_cagr5": 0.2097,
+    "loans_cagr5": 0.1429,
+    "nonint_income_cagr3": 0.0411,
+    "equity_assets": 0.0561,
+    "credit_cost_std": 0.0022,
+    "ldr": 1.0879
+   },
+   "percentiles": {
+    "roa_avg3": 0.0,
+    "roe_avg3": 0.0,
+    "nim_std": 88.2,
+    "cost_income": 0.0,
+    "toi_cagr5": 70.6,
+    "pbt_cagr5": 64.7,
+    "loans_cagr5": 17.6,
+    "nonint_income_cagr3": 23.5,
+    "equity_assets": 5.9,
+    "credit_cost_std": 88.2,
+    "ldr": 52.9
    },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
@@ -11624,6 +12799,75 @@
     "interest_coverage": 21.1,
     "current_ratio": 8.9,
     "profit_drawdown5": 30.1
+   },
+   "latest_annual": "2025-12-31",
+   "latest_quarter": "2026-06-30",
+   "sharp_drops": []
+  },
+  {
+   "ticker": "ABB",
+   "industry": "Banking",
+   "model": "BANK",
+   "status": "REV",
+   "status_label": "Cần xem lại",
+   "reason": "Chất lượng 18 dưới 30",
+   "dims": {
+    "quality": {
+     "score": 17.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "growth": {
+     "score": 57.6,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "resilience": {
+     "score": 55.0,
+     "coverage": 1.0,
+     "missing": []
+    },
+    "governance": {
+     "score": 100,
+     "coverage": 1.0,
+     "missing": []
+    }
+   },
+   "governance_flags": [],
+   "veto": null,
+   "valuation": {
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -15.1,
+    "confidence": 48.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Nhóm tài chính (Banking): chưa có NPL/CAR nên chưa đưa ra kết luận định giá"
+   },
+   "metrics": {
+    "roa_avg3": 0.0069,
+    "roe_avg3": 0.0863,
+    "nim_std": 0.0055,
+    "cost_income": 0.3502,
+    "toi_cagr5": 0.1781,
+    "pbt_cagr5": 0.2034,
+    "loans_cagr5": 0.1247,
+    "nonint_income_cagr3": 0.6898,
+    "equity_assets": 0.0762,
+    "credit_cost_std": 0.0033,
+    "ldr": 0.8537
+   },
+   "percentiles": {
+    "roa_avg3": 5.9,
+    "roe_avg3": 5.9,
+    "nim_std": 23.5,
+    "cost_income": 35.3,
+    "toi_cagr5": 76.5,
+    "pbt_cagr5": 52.9,
+    "loans_cagr5": 0.0,
+    "nonint_income_cagr3": 94.1,
+    "equity_assets": 23.5,
+    "credit_cost_std": 64.7,
+    "ldr": 100.0
    },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
@@ -12998,1182 +14242,6 @@
    "sharp_drops": []
   },
   {
-   "ticker": "TCB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 57.6,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
-   },
-   "metrics": {
-    "roa_avg3": 0.0237,
-    "roe_avg3": 0.1542,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.3078,
-    "toi_cagr5": 0.1457,
-    "pbt_cagr5": 0.1554,
-    "loans_cagr5": 0.2257,
-    "nonint_income_cagr3": 0.1417,
-    "npl_coverage": null,
-    "equity_assets": 0.1505,
-    "credit_cost_std": 0.0013,
-    "ldr": 1.2403
-   },
-   "percentiles": {
-    "roa_avg3": 100.0,
-    "roe_avg3": 29.4,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 64.7,
-    "toi_cagr5": 64.7,
-    "pbt_cagr5": 29.4,
-    "loans_cagr5": 82.4,
-    "nonint_income_cagr3": 64.7,
-    "npl_coverage": null,
-    "equity_assets": 100.0,
-    "credit_cost_std": 100.0,
-    "ldr": 17.6
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "SHB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 81.2,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
-   },
-   "metrics": {
-    "roa_avg3": 0.0135,
-    "roe_avg3": 0.1731,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.2213,
-    "toi_cagr5": 0.1891,
-    "pbt_cagr5": 0.3567,
-    "loans_cagr5": 0.15,
-    "nonint_income_cagr3": 0.7003,
-    "npl_coverage": null,
-    "equity_assets": 0.0764,
-    "credit_cost_std": 0.0035,
-    "ldr": 1.0747
-   },
-   "percentiles": {
-    "roa_avg3": 35.3,
-    "roe_avg3": 52.9,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 100.0,
-    "toi_cagr5": 82.4,
-    "pbt_cagr5": 94.1,
-    "loans_cagr5": 41.2,
-    "nonint_income_cagr3": 100.0,
-    "npl_coverage": null,
-    "equity_assets": 29.4,
-    "credit_cost_std": 58.8,
-    "ldr": 58.8
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "VPB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 50.6,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 92,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [
-    "dilution_mild"
-   ],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
-   },
-   "metrics": {
-    "roa_avg3": 0.0175,
-    "roe_avg3": 0.11,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.2496,
-    "toi_cagr5": 0.1385,
-    "pbt_cagr5": 0.1866,
-    "loans_cagr5": 0.2655,
-    "nonint_income_cagr3": -0.0158,
-    "npl_coverage": null,
-    "equity_assets": 0.1431,
-    "credit_cost_std": 0.0101,
-    "ldr": 1.5029
-   },
-   "percentiles": {
-    "roa_avg3": 58.8,
-    "roe_avg3": 17.6,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 94.1,
-    "toi_cagr5": 47.1,
-    "pbt_cagr5": 47.1,
-    "loans_cagr5": 94.1,
-    "nonint_income_cagr3": 17.6,
-    "npl_coverage": null,
-    "equity_assets": 94.1,
-    "credit_cost_std": 0.0,
-    "ldr": 0.0
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "HDB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 87.7,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": 53.2,
-    "confidence": 30.0,
-    "method": "P/B-ROE Justified",
-    "reason": "Các phương pháp định giá mâu thuẫn"
-   },
-   "metrics": {
-    "roa_avg3": 0.0205,
-    "roe_avg3": 0.2507,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.2717,
-    "toi_cagr5": 0.2538,
-    "pbt_cagr5": 0.2969,
-    "loans_cagr5": 0.251,
-    "nonint_income_cagr3": 0.262,
-    "npl_coverage": null,
-    "equity_assets": 0.0841,
-    "credit_cost_std": 0.0027,
-    "ldr": 0.9744
-   },
-   "percentiles": {
-    "roa_avg3": 82.4,
-    "roe_avg3": 100.0,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 88.2,
-    "toi_cagr5": 100.0,
-    "pbt_cagr5": 82.4,
-    "loans_cagr5": 88.2,
-    "nonint_income_cagr3": 76.5,
-    "npl_coverage": null,
-    "equity_assets": 41.2,
-    "credit_cost_std": 82.4,
-    "ldr": 94.1
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "VCB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 16.5,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": -3.1,
-    "confidence": 61.0,
-    "method": "P/B-ROE Justified",
-    "reason": "Nhóm tài chính (Banking): chưa có NPL/CAR nên chưa đưa ra kết luận định giá"
-   },
-   "metrics": {
-    "roa_avg3": 0.017,
-    "roe_avg3": 0.1917,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.3484,
-    "toi_cagr5": 0.0811,
-    "pbt_cagr5": 0.1381,
-    "loans_cagr5": 0.1479,
-    "nonint_income_cagr3": -0.0266,
-    "npl_coverage": null,
-    "equity_assets": 0.0919,
-    "credit_cost_std": 0.0042,
-    "ldr": 1.0006
-   },
-   "percentiles": {
-    "roa_avg3": 52.9,
-    "roe_avg3": 64.7,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 41.2,
-    "toi_cagr5": 5.9,
-    "pbt_cagr5": 17.6,
-    "loans_cagr5": 35.3,
-    "nonint_income_cagr3": 11.8,
-    "npl_coverage": null,
-    "equity_assets": 64.7,
-    "credit_cost_std": 41.2,
-    "ldr": 88.2
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "STB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 25.3,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": -13.9,
-    "confidence": 30.0,
-    "method": "P/B-ROE Justified",
-    "reason": "Các phương pháp định giá mâu thuẫn"
-   },
-   "metrics": {
-    "roa_avg3": 0.0112,
-    "roe_avg3": 0.1623,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.4069,
-    "toi_cagr5": 0.1317,
-    "pbt_cagr5": 0.1796,
-    "loans_cagr5": 0.1298,
-    "nonint_income_cagr3": -0.1576,
-    "npl_coverage": null,
-    "equity_assets": 0.0653,
-    "credit_cost_std": 0.0068,
-    "ldr": 1.013
-   },
-   "percentiles": {
-    "roa_avg3": 23.5,
-    "roe_avg3": 41.2,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 11.8,
-    "toi_cagr5": 35.3,
-    "pbt_cagr5": 41.2,
-    "loans_cagr5": 11.8,
-    "nonint_income_cagr3": 0.0,
-    "npl_coverage": null,
-    "equity_assets": 17.6,
-    "credit_cost_std": 5.9,
-    "ldr": 82.4
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "MBB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 83.5,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
-   },
-   "metrics": {
-    "roa_avg3": 0.0224,
-    "roe_avg3": 0.2216,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.2907,
-    "toi_cagr5": 0.1986,
-    "pbt_cagr5": 0.2624,
-    "loans_cagr5": 0.2944,
-    "nonint_income_cagr3": 0.1889,
-    "npl_coverage": null,
-    "equity_assets": 0.0879,
-    "credit_cost_std": 0.0046,
-    "ldr": 1.1765
-   },
-   "percentiles": {
-    "roa_avg3": 94.1,
-    "roe_avg3": 88.2,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 76.5,
-    "toi_cagr5": 88.2,
-    "pbt_cagr5": 76.5,
-    "loans_cagr5": 100.0,
-    "nonint_income_cagr3": 70.6,
-    "npl_coverage": null,
-    "equity_assets": 52.9,
-    "credit_cost_std": 23.5,
-    "ldr": 23.5
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "CTG",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 46.5,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
-   },
-   "metrics": {
-    "roa_avg3": 0.0118,
-    "roe_avg3": 0.1898,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.3042,
-    "toi_cagr5": 0.1399,
-    "pbt_cagr5": 0.2047,
-    "loans_cagr5": 0.1443,
-    "nonint_income_cagr3": 0.0848,
-    "npl_coverage": null,
-    "equity_assets": 0.0649,
-    "credit_cost_std": 0.0036,
-    "ldr": 1.1107
-   },
-   "percentiles": {
-    "roa_avg3": 29.4,
-    "roe_avg3": 58.8,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 70.6,
-    "toi_cagr5": 52.9,
-    "pbt_cagr5": 58.8,
-    "loans_cagr5": 29.4,
-    "nonint_income_cagr3": 35.3,
-    "npl_coverage": null,
-    "equity_assets": 11.8,
-    "credit_cost_std": 52.9,
-    "ldr": 41.2
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "ACB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 38.2,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 75,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [
-    "earnings_cash_gap"
-   ],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
-   },
-   "metrics": {
-    "roa_avg3": 0.0206,
-    "roe_avg3": 0.2137,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.3232,
-    "toi_cagr5": 0.1323,
-    "pbt_cagr5": 0.1528,
-    "loans_cagr5": 0.1713,
-    "nonint_income_cagr3": 0.0945,
-    "npl_coverage": null,
-    "equity_assets": 0.0921,
-    "credit_cost_std": 0.0032,
-    "ldr": 1.1736
-   },
-   "percentiles": {
-    "roa_avg3": 88.2,
-    "roe_avg3": 82.4,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 58.8,
-    "toi_cagr5": 41.2,
-    "pbt_cagr5": 23.5,
-    "loans_cagr5": 47.1,
-    "nonint_income_cagr3": 47.1,
-    "npl_coverage": null,
-    "equity_assets": 70.6,
-    "credit_cost_std": 70.6,
-    "ldr": 29.4
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "BID",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 54.7,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
-   },
-   "metrics": {
-    "roa_avg3": 0.01,
-    "roe_avg3": 0.1921,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.3336,
-    "toi_cagr5": 0.1276,
-    "pbt_cagr5": 0.3316,
-    "loans_cagr5": 0.1434,
-    "nonint_income_cagr3": 0.2734,
-    "npl_coverage": null,
-    "equity_assets": 0.0521,
-    "credit_cost_std": 0.0047,
-    "ldr": 1.0675
-   },
-   "percentiles": {
-    "roa_avg3": 11.8,
-    "roe_avg3": 70.6,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 52.9,
-    "toi_cagr5": 23.5,
-    "pbt_cagr5": 88.2,
-    "loans_cagr5": 23.5,
-    "nonint_income_cagr3": 82.4,
-    "npl_coverage": null,
-    "equity_assets": 0.0,
-    "credit_cost_std": 17.6,
-    "ldr": 64.7
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "TPB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 44.1,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": 91.7,
-    "confidence": 60.0,
-    "method": "P/B-ROE Justified",
-    "reason": "Nhóm tài chính (Banking): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho STRONG BUY, đã hạ về HOLD"
-   },
-   "metrics": {
-    "roa_avg3": 0.0149,
-    "roe_avg3": 0.1623,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.3461,
-    "toi_cagr5": 0.1287,
-    "pbt_cagr5": 0.1603,
-    "loans_cagr5": 0.2058,
-    "nonint_income_cagr3": 0.0995,
-    "npl_coverage": null,
-    "equity_assets": 0.091,
-    "credit_cost_std": 0.0045,
-    "ldr": 1.0959
-   },
-   "percentiles": {
-    "roa_avg3": 47.1,
-    "roe_avg3": 47.1,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 47.1,
-    "toi_cagr5": 29.4,
-    "pbt_cagr5": 35.3,
-    "loans_cagr5": 70.6,
-    "nonint_income_cagr3": 52.9,
-    "npl_coverage": null,
-    "equity_assets": 58.8,
-    "credit_cost_std": 29.4,
-    "ldr": 47.1
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "LPB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 86.5,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 92,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [
-    "dilution_mild"
-   ],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
-   },
-   "metrics": {
-    "roa_avg3": 0.0193,
-    "roe_avg3": 0.2316,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.2829,
-    "toi_cagr5": 0.23,
-    "pbt_cagr5": 0.4252,
-    "loans_cagr5": 0.1727,
-    "nonint_income_cagr3": 0.3707,
-    "npl_coverage": null,
-    "equity_assets": 0.0779,
-    "credit_cost_std": 0.0037,
-    "ldr": 1.1604
-   },
-   "percentiles": {
-    "roa_avg3": 76.5,
-    "roe_avg3": 94.1,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 82.4,
-    "toi_cagr5": 94.1,
-    "pbt_cagr5": 100.0,
-    "loans_cagr5": 52.9,
-    "nonint_income_cagr3": 88.2,
-    "npl_coverage": null,
-    "equity_assets": 35.3,
-    "credit_cost_std": 47.1,
-    "ldr": 35.3
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "MSB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 62.4,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": 60.3,
-    "confidence": 30.0,
-    "method": "P/B-ROE Justified",
-    "reason": "Các phương pháp định giá mâu thuẫn"
-   },
-   "metrics": {
-    "roa_avg3": 0.0179,
-    "roe_avg3": 0.1548,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.3608,
-    "toi_cagr5": 0.1435,
-    "pbt_cagr5": 0.2284,
-    "loans_cagr5": 0.2093,
-    "nonint_income_cagr3": 0.093,
-    "npl_coverage": null,
-    "equity_assets": 0.1041,
-    "credit_cost_std": 0.0042,
-    "ldr": 1.0434
-   },
-   "percentiles": {
-    "roa_avg3": 70.6,
-    "roe_avg3": 35.3,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 29.4,
-    "toi_cagr5": 58.8,
-    "pbt_cagr5": 70.6,
-    "loans_cagr5": 76.5,
-    "nonint_income_cagr3": 41.2,
-    "npl_coverage": null,
-    "equity_assets": 82.4,
-    "credit_cost_std": 35.3,
-    "ldr": 70.6
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "EIB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 5.9,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
-   },
-   "metrics": {
-    "roa_avg3": 0.0102,
-    "roe_avg3": 0.0951,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.5833,
-    "toi_cagr5": 0.104,
-    "pbt_cagr5": 0.0245,
-    "loans_cagr5": 0.1282,
-    "nonint_income_cagr3": -0.0821,
-    "npl_coverage": null,
-    "equity_assets": 0.0952,
-    "credit_cost_std": 0.003,
-    "ldr": 1.039
-   },
-   "percentiles": {
-    "roa_avg3": 17.6,
-    "roe_avg3": 11.8,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 5.9,
-    "toi_cagr5": 11.8,
-    "pbt_cagr5": 0.0,
-    "loans_cagr5": 5.9,
-    "nonint_income_cagr3": 5.9,
-    "npl_coverage": null,
-    "equity_assets": 76.5,
-    "credit_cost_std": 76.5,
-    "ldr": 76.5
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "VIB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 27.6,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
-   },
-   "metrics": {
-    "roa_avg3": 0.0175,
-    "roe_avg3": 0.1958,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.3716,
-    "toi_cagr5": 0.1227,
-    "pbt_cagr5": 0.0943,
-    "loans_cagr5": 0.1764,
-    "nonint_income_cagr3": 0.0814,
-    "npl_coverage": null,
-    "equity_assets": 0.0843,
-    "credit_cost_std": 0.0048,
-    "ldr": 1.2967
-   },
-   "percentiles": {
-    "roa_avg3": 64.7,
-    "roe_avg3": 76.5,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 17.6,
-    "toi_cagr5": 17.6,
-    "pbt_cagr5": 11.8,
-    "loans_cagr5": 64.7,
-    "nonint_income_cagr3": 29.4,
-    "npl_coverage": null,
-    "equity_assets": 47.1,
-    "credit_cost_std": 11.8,
-    "ldr": 11.8
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
    "ticker": "BVH",
    "industry": "Insurance",
    "model": "INSURANCE",
@@ -14204,242 +14272,6 @@
    },
    "metrics": {},
    "percentiles": {},
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "OCB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 25.3,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
-   },
-   "metrics": {
-    "roa_avg3": 0.0136,
-    "roe_avg3": 0.1168,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.3626,
-    "toi_cagr5": 0.0766,
-    "pbt_cagr5": 0.0259,
-    "loans_cagr5": 0.1737,
-    "nonint_income_cagr3": 0.1386,
-    "npl_coverage": null,
-    "equity_assets": 0.105,
-    "credit_cost_std": 0.0016,
-    "ldr": 1.3248
-   },
-   "percentiles": {
-    "roa_avg3": 41.2,
-    "roe_avg3": 23.5,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 23.5,
-    "toi_cagr5": 0.0,
-    "pbt_cagr5": 5.9,
-    "loans_cagr5": 58.8,
-    "nonint_income_cagr3": 58.8,
-    "npl_coverage": null,
-    "equity_assets": 88.2,
-    "credit_cost_std": 94.1,
-    "ldr": 5.9
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "ABB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 57.6,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 100,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": -15.1,
-    "confidence": 48.0,
-    "method": "P/B-ROE Justified",
-    "reason": "Nhóm tài chính (Banking): chưa có NPL/CAR nên chưa đưa ra kết luận định giá"
-   },
-   "metrics": {
-    "roa_avg3": 0.0069,
-    "roe_avg3": 0.0863,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.3502,
-    "toi_cagr5": 0.1781,
-    "pbt_cagr5": 0.2034,
-    "loans_cagr5": 0.1247,
-    "nonint_income_cagr3": 0.6898,
-    "npl_coverage": null,
-    "equity_assets": 0.0762,
-    "credit_cost_std": 0.0033,
-    "ldr": 0.8537
-   },
-   "percentiles": {
-    "roa_avg3": 5.9,
-    "roe_avg3": 5.9,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 35.3,
-    "toi_cagr5": 76.5,
-    "pbt_cagr5": 52.9,
-    "loans_cagr5": 0.0,
-    "nonint_income_cagr3": 94.1,
-    "npl_coverage": null,
-    "equity_assets": 23.5,
-    "credit_cost_std": 64.7,
-    "ldr": 100.0
-   },
-   "latest_annual": "2025-12-31",
-   "latest_quarter": "2026-06-30",
-   "sharp_drops": []
-  },
-  {
-   "ticker": "BVB",
-   "industry": "Banking",
-   "model": "BANK",
-   "status": "RES",
-   "status_label": "Thiếu dữ liệu",
-   "reason": "Thiếu hoặc độ phủ dưới 70%: Chất lượng, Chống chịu",
-   "dims": {
-    "quality": {
-     "score": null,
-     "coverage": 0.6,
-     "missing": [
-      "nim_std",
-      "npl_ratio"
-     ]
-    },
-    "growth": {
-     "score": 48.8,
-     "coverage": 1.0,
-     "missing": []
-    },
-    "resilience": {
-     "score": null,
-     "coverage": 0.65,
-     "missing": [
-      "npl_coverage"
-     ]
-    },
-    "governance": {
-     "score": 80,
-     "coverage": 1.0,
-     "missing": []
-    }
-   },
-   "governance_flags": [
-    "dilution_strong"
-   ],
-   "veto": null,
-   "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
-   },
-   "metrics": {
-    "roa_avg3": 0.0025,
-    "roe_avg3": 0.0412,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.5869,
-    "toi_cagr5": 0.155,
-    "pbt_cagr5": 0.2097,
-    "loans_cagr5": 0.1429,
-    "nonint_income_cagr3": 0.0411,
-    "npl_coverage": null,
-    "equity_assets": 0.0561,
-    "credit_cost_std": 0.0022,
-    "ldr": 1.0879
-   },
-   "percentiles": {
-    "roa_avg3": 0.0,
-    "roe_avg3": 0.0,
-    "nim_std": null,
-    "npl_ratio": null,
-    "cost_income": 0.0,
-    "toi_cagr5": 70.6,
-    "pbt_cagr5": 64.7,
-    "loans_cagr5": 17.6,
-    "nonint_income_cagr3": 23.5,
-    "npl_coverage": null,
-    "equity_assets": 5.9,
-    "credit_cost_std": 88.2,
-    "ldr": 52.9
-   },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
    "sharp_drops": []
