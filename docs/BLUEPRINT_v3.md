@@ -66,6 +66,7 @@ Nguyên tắc (giữ từ v2):
 | D20 | Nơi lưu luận điểm cá nhân | Chưa chốt (§14.1: trình duyệt hay backend nhỏ có xác thực) | **localStorage của trình duyệt** (chốt 23/09/2026). Đổi lại: chỉ có trên máy và trình duyệt đó, xóa dữ liệu site là mất — nên ô luận điểm nói rõ điều này ngay trên màn hình và có nút xuất/nhập tệp JSON để mang sang máy khác. Không thêm backend, không có gì rời khỏi máy người dùng (§11.1) |
 | D21 | Ý kiến kiểm toán & trạng thái cảnh báo | Hai cờ + hai veto để `enabled: False`, chờ nguồn | **Gỡ hẳn** (chốt 23/09/2026). Để `enabled: False` vẫn là nói dối: giao diện mang nhãn của chúng, người đọc tưởng điểm Quản trị đã xét. Nay gỡ khỏi cấu hình và khai ở `GOVERNANCE_NOT_EVALUATED` để màn hình hiện dòng "Chưa xét: … — không có nguồn dữ liệu" (§8.5, §14.2) |
 | D22 | Mô hình `REAL_ESTATE` | Chưa kích hoạt (Phase 4) | **Bật 23/09/2026.** Rổ 200 có 36 mã BĐS, 34 trong đó kẹt ở "Thiếu dữ liệu" chỉ vì thiếu bộ chỉ tiêu. Bộ chỉ tiêu ở §8.4; "người mua trả tiền trước" đã thử và bỏ vì xếp mã kiệt quệ lên đầu |
+| D23 | Xếp hạng universe theo thanh khoản | Một thang điểm gộp: thanh khoản đo được và thứ hạng danh sách curated (`(623 − hạng) × 1e9`) | **Hai bậc tách rời** (sửa 24/09/2026). Bậc 1: mã có số đo trong 30 ngày, xếp theo GTGD; bậc 2: mã chưa có số đo, xếp theo danh sách curated. Hai đại lượng này không cùng đơn vị nên không bao giờ so sánh được — ép chung một thang khiến **mọi** mã curated đứng trên **mọi** mã đo được, và số đo thật chưa bao giờ được dùng (§7.2) |
 
 ## 4. Phạm vi
 
@@ -467,6 +468,7 @@ Không chạy hai workflow có gọi vnstock cùng lúc: chung một `VNSTOCK_AP
 | Kiểm tra | Hành động khi lỗi |
 |---|---|
 | Lần lấy trả rỗng hoặc lỗi | Giữ bản cũ, gắn `stale`, tạo issue |
+| Cache thanh khoản cũ hơn 30 ngày | Coi như **không có số đo**, mã rơi xuống bậc 2 khi xếp universe (D23) |
 | Số mã trong danh sách giảm > 5% so với lần trước | Dừng ghi đè, tạo issue |
 | OHLC sai logic (high < low, giá ≤ 0) | Loại phiên đó, tạo issue |
 | Giá nhảy > biên độ sàn mà không có sự kiện điều chỉnh | Tạo issue, không phát tín hiệu cho mã đó |

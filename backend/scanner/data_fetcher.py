@@ -35,7 +35,7 @@ import os
 import sys
 import threading
 import time
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Iterable, Optional
 import logging
@@ -43,6 +43,8 @@ import logging
 import pandas as pd
 
 from .trading_calendar import last_expected_session, now_ict
+
+from .price_units import quote_to_vnd
 
 log = logging.getLogger(__name__)
 
@@ -227,24 +229,49 @@ def _fetch_full_universe(exchanges: tuple) -> pd.DataFrame:
         return _load_fallback_universe(exchanges)
 
 
-def _sort_by_liquidity(universe: pd.DataFrame, limit: int) -> pd.DataFrame:
-    """
-    Sort universe by liquidity (avg turnover) and return top N.
+# Cửa sổ đo thanh khoán và hạn dùng của số đo.
+#
+# Vì sao cần hạn dùng: tệp cache của một mã ĐÃ NGỪNG GIAO DỊCH vẫn còn nguyên
+# các phiên cũ. `tail(20)` không hỏi 20 dòng đó từ bao giờ, nên ART/TTB/SJF —
+# phiên cuối 2024-07-25, cũ 14 tháng — vẫn được coi là có số đo. Quá hạn thì
+# coi như KHÔNG CÓ số đo, chứ không phải có số đo bằng 0.
+LIQUIDITY_WINDOW = 20
+LIQUIDITY_MAX_AGE_DAYS = 30
 
-    Strategy:
-      1. Read existing parquet cache files — each contains historical OHLCV.
-         Compute avg(Close * Volume) over last 20 days = avg turnover (VND).
-      2. For tickers without cache, use the curated TOP_LIQUID list as proxy
-         (these are known liquid stocks).
-      3. Combine: cached liquidity scores + curated list = ranked universe.
-    """
-    from .top_liquid import get_top_liquid_tickers
 
-    # Step 1: compute liquidity from cache
-    # FIX: glob cả *_adj.parquet (default mới) và *_raw.parquet (legacy fallback).
-    # Trước đó chỉ glob *_adj.parquet với suffix='_raw' khiến luôn miss.
-    liquidity = {}  # ticker → avg turnover
-    seen = set()
+def measure_liquidity(df: pd.DataFrame, today: Optional[date] = None,
+                      window: int = LIQUIDITY_WINDOW,
+                      max_age_days: int = LIQUIDITY_MAX_AGE_DAYS) -> Optional[float]:
+    """
+    GTGD trung bình `window` phiên gần nhất, tính bằng ĐỒNG. None nếu số liệu
+    quá cũ hoặc không đủ để nói gì.
+
+    Đổi đơn vị qua `price_units.quote_to_vnd`: vnstock báo giá theo NGHÌN đồng.
+    Bản cũ nhân thẳng Close × Volume rồi gọi kết quả là "VND" — sai 1000 lần, và
+    chính chỗ đó làm hỏng xếp hạng (xem `_sort_by_liquidity`).
+    """
+    if df is None or df.empty or 'Close' not in df or 'Volume' not in df:
+        return None
+    today = today or date.today()
+    if 'Date' in df:
+        cutoff = pd.Timestamp(today) - pd.Timedelta(days=max_age_days)
+        df = df[pd.to_datetime(df['Date'], errors='coerce') >= cutoff]
+    if df.empty:
+        return None
+    recent = df.tail(window)
+    vals = [quote_to_vnd(float(c)) * float(v)
+            for c, v in zip(recent['Close'], recent['Volume'])
+            if pd.notna(c) and pd.notna(v)]
+    if not vals:
+        return None
+    avg = sum(vals) / len(vals)
+    return avg if avg > 0 else None
+
+
+def _cached_liquidity(today: Optional[date] = None) -> dict:
+    """{ticker: GTGD trung bình, ĐỒNG} từ các tệp parquet đã cache."""
+    out, seen = {}, set()
+    # Glob cả *_adj.parquet (mặc định mới) và *_raw.parquet (fallback cũ).
     for pattern, strip in (('*_adj.parquet', '_adj'), ('*_raw.parquet', '_raw')):
         for cache_file in CACHE_DIR.glob(pattern):
             ticker = cache_file.stem.replace(strip, '')
@@ -252,38 +279,54 @@ def _sort_by_liquidity(universe: pd.DataFrame, limit: int) -> pd.DataFrame:
                 continue
             seen.add(ticker)
             try:
-                df = pd.read_parquet(cache_file)
-                if len(df) < 5:
-                    continue
-                recent = df.tail(20)
-                avg_turnover = (recent['Close'] * recent['Volume']).mean()
-                if pd.notna(avg_turnover) and avg_turnover > 0:
-                    liquidity[ticker] = avg_turnover
+                v = measure_liquidity(pd.read_parquet(cache_file), today)
             except Exception:
                 continue
+            if v is not None:
+                out[ticker] = v
+    return out
 
-    log.info(f"  Liquidity cache: {len(liquidity)} tickers with historical data")
 
-    # Step 2: rank universe
-    # Tickers with cache: use actual liquidity
-    # Tickers without cache: use position in TOP_LIQUID curated list (higher = better)
-    curated = get_top_liquid_tickers()
-    curated_score = {tk: (len(curated) - i) * 1e9
-                     for i, (tk, _) in enumerate(curated)}
-    # Note: curated_score is in same units as liquidity (VND) so they're comparable.
-    # 1e9 multiplier ensures even unknown stocks are ranked sensibly.
+def _sort_by_liquidity(universe: pd.DataFrame, limit: int,
+                       today: Optional[date] = None) -> pd.DataFrame:
+    """
+    Xếp universe theo thanh khoản và lấy top N.
 
-    def score(row):
-        if row['ticker'] in liquidity:
-            return liquidity[row['ticker']]
-        return curated_score.get(row['ticker'], 0)
+    HAI BẬC, không trộn vào một thang điểm:
+
+      bậc 1 — mã CÓ số đo thật trong 30 ngày qua, xếp theo GTGD giảm dần;
+      bậc 2 — mã không có số đo, xếp theo thứ tự danh sách curated.
+
+    Vì sao tách bậc: bản cũ cho mã curated điểm `(623 − hạng) × 1e9`, tức từ
+    1 tỷ tới 623 tỷ, rồi so thẳng với thanh khoản đo được — mà thanh khoản đo
+    được cao nhất (FPT) chỉ là 4,3e8 vì quên đổi nghìn đồng sang đồng. Kết quả
+    là MỌI mã curated đều đứng trên MỌI mã đo được, và số đo thật chưa bao giờ
+    thực sự được dùng. Đó là lý do ART (ngừng giao dịch từ 07/2024) vẫn lọt vào
+    rổ 200 mã của Module B.
+
+    Hai đại lượng này không cùng đơn vị và không bao giờ so sánh được với nhau;
+    ép chung một thang là cách tự lừa mình. Danh sách curated chỉ còn đúng vai
+    trò của nó: đoán tạm khi CHƯA có số đo.
+    """
+    from .top_liquid import get_top_liquid_tickers
+
+    liquidity = _cached_liquidity(today)
+    curated_rank = {tk: i for i, (tk, _) in enumerate(get_top_liquid_tickers())}
+    log.info(f"  Thanh khoản đo được (≤{LIQUIDITY_MAX_AGE_DAYS} ngày): "
+             f"{len(liquidity)} mã")
 
     universe = universe.copy()
-    universe['liquidity'] = universe.apply(score, axis=1)
-    universe = universe.sort_values('liquidity', ascending=False)
-    top_n = universe.head(limit)[['ticker', 'exchange']].reset_index(drop=True)
+    universe['_measured'] = universe['ticker'].isin(liquidity)
+    universe['_liq'] = universe['ticker'].map(liquidity).fillna(0.0)
+    # Chưa có số đo: xếp theo thứ tự curated; ngoài danh sách thì xuống cuối.
+    universe['_curated'] = universe['ticker'].map(curated_rank).fillna(10 ** 9)
+    universe = universe.sort_values(
+        ['_measured', '_liq', '_curated'], ascending=[False, False, True])
 
-    log.info(f"  Selected top {len(top_n)} by liquidity (limit={limit})")
+    top_n = universe.head(limit)[['ticker', 'exchange']].reset_index(drop=True)
+    n_measured = int(universe.head(limit)['_measured'].sum())
+    log.info(f"  Chọn {len(top_n)} mã (limit={limit}): {n_measured} theo số đo thật, "
+             f"{len(top_n) - n_measured} theo danh sách curated")
     return top_n
 
 
