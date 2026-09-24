@@ -93,6 +93,28 @@ Da thu cho no do: nhet mot `<div>` rong 3000px vao `watchlist/` thi
 `overflow` bat duoc; nhet mot `<span>` `white-space: nowrap` hep hon chu thi
 `textOverflow` bat duoc. Mot phep kiem khong the do duoc thi vo dung.
 
+## CHU DOI THEO GIO — dong bang truoc khi do
+
+Topbar co dong ho chay va nhan trang thai thi truong doi theo phien. Be rong
+cua chung doi theo NOI DUNG, nen ket qua do co the doi TUY GIO CHAY.
+
+Da lam do mot lan chay CI vi dieu nay (24/09/2026): moc chuan do luc 19:20 ICT,
+lan chay PR luc 19:48 — `#clock` 75px so voi 64px, 8 muc "moi phat sinh" khong
+he lien quan toi thay doi nao trong PR.
+
+`check.mjs` nay dat chu ve chuoi co dinh truoc khi do, va chon TRUONG HOP RONG
+NHAT trang co the hien:
+
+| phan tu | dat thanh | vi sao |
+| --- | --- | --- |
+| `#market-text` | `ĐANG GIAO DỊCH` | 14 ky tu, khong phai `NGOÀI GIỜ` (9) |
+| `#live-text` | `GIỮA PHIÊN 01/01 00:00` | dai hon `EOD ...` |
+| `#clock` | `00:00:00 ICT` | font mono nen moi gio bang nhau |
+
+Dong bang vao chuoi NGAN la tu cho minh diem: bo cuc se xanh o day va vo dong
+that trong gio giao dich. Chinh viec doi sang chuoi dai da tim ra mot loi that
+o `m-375x667` — xem `docs/mobile-layout-out-of-scope.md` muc 7.
+
 ## Hai truc, khong phai mot
 
 **Be rong** — nguong @media trong styles.css: 1440, 1100, 1024, 900, 860, 768,

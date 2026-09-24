@@ -198,14 +198,31 @@ Ban mau dat moi ma thanh mot the, hai the mot hang. Tu choi vi:
 - Bang hien tai da co `prio-*` de an cot theo do rong; the khong tan dung duoc.
 - Mat kha nang so sanh theo cot, von la muc dich chinh cua man loc.
 
-## 7. Bon nhan topbar con vo dong o 1281-1299px — DA SUA 23/09/2026
+## 7. Bon nhan topbar vo dong — DAI DA DOI, CHUA HET
 
-> **Da het.** Nguong dua dai tab xuong hang rieng nang tu 1280 len 1440 (xem
-> muc 5), nen o 1281-1299px topbar khong con chen: bon nhan het vo dong. Do
-> lai ngay 23/09/2026 tren ca 49 khung — `bp-1281-mouse` va `bp-1281-touch` moi
-> khung giam 9 muc ve 0. Muc trong `accepted.json` da go. Giu phan ghi chep
-> duoi day lam ho so: no la vi du cho thay nguyen nhan that nam o cho topbar
-> qua day, dung nhu M1 da noi.
+> **Dinh chinh 24/09/2026.** Hom 23/09 toi ghi muc nay "DA SUA" sau khi nang
+> nguong dai tab tu 1280 len 1440. **Ket luan do SAI**, va sai vi phep do:
+> luc do thi truong dang dong nen `#market-text` la "NGOÀI GIỜ" (9 ky tu).
+> Trong gio giao dich no la **"ĐANG GIAO DỊCH" (14 ky tu)** va topbar chen.
+>
+> Tu 24/09 bo do **dong bang chu doi theo gio vao truong hop RONG NHAT** truoc
+> khi do (`check.mjs`, `dongBangChuDong`), nen bat duoc. Do lai: `bp-1441-mouse`
+> va `bp-1441-touch` moi khung 8 muc, on dinh qua nhieu luot.
+>
+> Dai cu 1281-1299px **da sach that**. Dai moi la **1441-1707px**, cung goc voi
+> muc 5: topbar mot hang o tab Phan tich ma can 1708px. Van giu quyet dinh
+> khong sua vat — cach sua that la M1. `accepted.json` doi khung sang
+> `bp-1441-mouse` / `bp-1441-touch`.
+>
+> **Va viec doi sang chuoi dai tim ra mot loi THAT, da sua ngay.** O
+> `m-375x667` (iPhone SE), trong gio giao dich ca `#market-text` lan `#clock`
+> deu vo hai dong. Khong ai thay suot tu truoc toi nay vi moi lan do deu chay
+> ngoai gio. Sua: an dong ho duoi 420px (`styles.css`, `@media max-width: 420px`).
+> Bo dong ho chu khong bo trang thai thi truong — dien thoai nao cung co san
+> dong ho, con "thi truong dang mo hay dong" thi khong.
+>
+> Bai hoc: mot phep do phu thuoc dong ho tuong co the noi bat ky dieu gi tuy
+> luc chay. Bo do bay gio khong con phu thuoc do nua.
 
 ### Ghi chep goc (truoc 23/09/2026)
 

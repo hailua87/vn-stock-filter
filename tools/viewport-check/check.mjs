@@ -80,12 +80,46 @@ async function choOnDinh(page) {
   return false;                            // het tran: bao de ghi vao ket qua
 }
 
+// DONG BANG CHU DOI THEO GIO truoc khi do.
+//
+// Topbar co dong ho chay va nhan trang thai thi truong doi theo phien. Be rong
+// cua chung doi theo NOI DUNG, nen o nhung be rong topbar chat — 1441px chang
+// han — cung mot trang co the vo dong hay khong TUY GIO CHAY.
+//
+// Da lam ca mot lan chay CI do vi dieu nay (24/09/2026): moc chuan do luc
+// 19:20 ICT, lan chay PR luc 19:48, #clock 75px so voi 64px va #market-text
+// 49px so voi 44px — 8 muc "moi phat sinh" khong he lien quan toi thay doi
+// nao trong PR.
+//
+// Mot phep kiem bo cuc ma ket qua phu thuoc dong ho tuong thi khong dung duoc.
+// Dat chu ve chuoi CO DINH va go moi setInterval de dong ho khong ghi de lai.
+//
+// Chon TRUONG HOP RONG NHAT trang co the hien, khong phai chuoi bat ky:
+//   #market-text  'ĐANG GIAO DỊCH' (14 ky tu) chu khong phai 'NGOÀI GIỜ' (9)
+//   #live-text    'GIỮA PHIÊN ...' chu khong phai 'EOD ...'
+//   #clock        do dai co dinh, font mono nen moi gio deu bang nhau
+// Dong bang vao chuoi ngan la tu cho minh diem: bo cuc se xanh o day va vo
+// dong that trong gio giao dich.
+async function dongBangChuDong(page) {
+  await page.evaluate(() => {
+    // Go moi bo dem dang chay. Phep do chi doc BO CUC, khong can trang song.
+    const cao = setInterval(() => {}, 99999);
+    for (let i = 1; i <= cao; i++) clearInterval(i);
+    const dat = (sel, t) => { const e = document.querySelector(sel); if (e) e.textContent = t; };
+    dat('#clock', '00:00:00 ICT');
+    dat('#live-text', 'GIỮA PHIÊN 01/01 00:00');
+    dat('#market-text', 'ĐANG GIAO DỊCH');
+  });
+}
+
 async function moTrang(page, trang) {
   await page.goto(BASE + trang.duongDan, { waitUntil: 'domcontentloaded', timeout: HAN_MS });
   // Cho DUNG thu can chu khong cho mang im: hang dau tien cua bang da render.
   // Moi trang mot dau hieu khac nhau — xem pages.mjs.
   await page.waitForSelector(trang.sanSang, { timeout: HAN_MS });
-  return await choOnDinh(page);
+  const onDinh = await choOnDinh(page);
+  await dongBangChuDong(page);
+  return onDinh;
 }
 
 if (!(await kiemMayChu())) {
