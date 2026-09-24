@@ -25,6 +25,7 @@ from fixture_scale import FIXTURE_SCALE  # fixture đã biến đổi, xem fixtu
 from run_quality import build_quality, write_outputs
 from scanner.financial_fetcher import statement_to_records
 from scanner.quality import adapter, governance, metrics
+from scanner.quality import config as C
 
 FIX = Path(__file__).resolve().parent / 'fixtures'
 AS_OF = date(2026, 9, 22)
@@ -53,13 +54,53 @@ def test_revenue_cagr_through_adapter_matches_hand_calc():
     assert m['revenue_cagr5'] == pytest.approx((70_112.8 / 29_830.4) ** 0.2 - 1, abs=1e-3)
 
 
-def test_bank_fields_and_missing_npl_are_none_not_zero():
+def test_bank_fields_and_missing_nim_are_none_not_zero():
     a = adapter.annual_schema(raw('VCB', 'year'))
     assert a['nonint_income'][-1] == pytest.approx((72_454.62 - 58_771.41) * FIXTURE_SCALE, abs=0.01)
-    assert a['npl_ratio'] == [None] * 8 and a['nim'] == [None] * 8
+    # NIM không có trong 3 bảng BCTC; phải đổ vào từ nguồn KBS (D24).
+    assert a['nim'] == [None] * 8
     m = metrics.compute('BANK', a)
-    assert m['npl_ratio'] is None and m['npl_coverage'] is None
+    assert m['nim_std'] is None
     assert m['equity_assets'] is not None
+
+
+def test_npl_fields_are_gone_from_the_bank_model():
+    """
+    Tỷ lệ nợ xấu và bao phủ nợ xấu đã gỡ 24/09/2026 (D24): không nguồn nào có.
+    Để chúng lại với giá trị None vĩnh viễn là kéo độ phủ xuống dưới ngưỡng và
+    khóa cả 18 ngân hàng ở "Thiếu dữ liệu" — mà không nói vì sao.
+    """
+    keys = {k for specs in C.MODELS['BANK'].values() for k, _, _ in specs}
+    assert 'npl_ratio' not in keys and 'npl_coverage' not in keys
+    m = metrics.compute('BANK', adapter.annual_schema(raw('VCB', 'year')))
+    assert 'npl_ratio' not in m and 'npl_coverage' not in m
+    # Gỡ mà không ghi lại thì lần sau có người tưởng là quên làm.
+    assert set(C.BANK_NOT_EVALUATED) == {'npl_ratio', 'npl_coverage'}
+
+
+def test_attaching_kbs_nim_makes_the_quality_dimension_scoreable():
+    """
+    Trước khi nối KBS: độ phủ Chất lượng của ngân hàng là 3/4 chỉ tiêu vì thiếu
+    nim_std. Sau khi nối: đủ 4/4.
+
+    KBS trả PHẦN TRĂM (2,64 = 2,64%); mọi chỉ tiêu khác trong hệ thống là tỷ lệ,
+    nên adapter phải chia 100 — không thì NIM hiện thành 264% trên màn hình.
+    """
+    a = adapter.annual_schema(raw('VCB', 'year'))
+    years = [int(str(p)[:4]) for p in a['period_end'] if p]
+    kbs = {'nim': {y: 2.5 + i * 0.3 for i, y in enumerate(years[-4:])}}
+    adapter.attach_bank_ratios(a, kbs)
+
+    assert a['nim'][-1] == pytest.approx((2.5 + 3 * 0.3) / 100)   # đã đổi sang tỷ lệ
+    assert a['nim'][0] is None                                     # năm KBS không phủ
+    assert metrics.compute('BANK', a)['nim_std'] is not None
+
+
+def test_attach_bank_ratios_is_a_no_op_without_data():
+    a = adapter.annual_schema(raw('VCB', 'year'))
+    for empty in (None, {}, {'nim': {}}):
+        adapter.attach_bank_ratios(a, empty)
+        assert a['nim'] == [None] * 8
 
 
 def test_securities_recurring_share():

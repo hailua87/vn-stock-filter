@@ -18,6 +18,7 @@ Usage:
 from __future__ import annotations
 import os
 import sys
+import re
 import time
 import json
 import logging
@@ -260,6 +261,61 @@ def fetch_financial_statements(ticker: str, source: str = 'vci',
                     time.sleep(2 + attempt * 2)
 
     return results if results else None
+
+
+# Nguồn 'KBS' của vnstock — KHÁC nguồn mặc định 'VCI' của dự án.
+#
+# Bảng `ratio` của VCI dừng ở 2018 (§5.4), nên ba chỉ tiêu ngân hàng NIM /
+# nợ xấu / bao phủ nợ xấu bị coi là không có. Khảo sát 24/09/2026 tìm ra KBS:
+# cùng thư viện, chỉ khác tham số `source`, có dữ liệu 2022–2025 và phủ 18/18
+# ngân hàng trong rổ.
+#
+# KBS vẫn KHÔNG có nợ xấu — 32 chỉ tiêu, không cái nào về nợ xấu. Nên hàm này
+# chỉ lấy NIM; `npl_ratio` và `npl_coverage` đã gỡ khỏi mô hình BANK (D24).
+BANK_RATIO_SOURCE = 'KBS'
+BANK_RATIO_ITEMS = {'net_interest_margin_nim': 'nim'}
+
+
+def fetch_bank_ratios(ticker: str) -> Optional[Dict[str, Dict[int, float]]]:
+    """
+    Chỉ số riêng ngành ngân hàng theo năm, từ nguồn KBS.
+
+    Trả `{'nim': {2025: 2.64, 2024: 2.86, ...}}` — đơn vị PHẦN TRĂM đúng như
+    nguồn trả về; đổi sang tỷ lệ là việc của adapter, để chỗ đổi đơn vị chỉ có
+    một. None nếu không lấy được.
+    """
+    setup_api_key()
+    try:
+        from vnstock.api.financial import Finance
+    except ImportError as e:
+        log.error(f"vnstock Finance import failed: {e}")
+        return None
+    try:
+        df = Finance(symbol=ticker, source=BANK_RATIO_SOURCE).ratio(period='year')
+    except Exception as e:
+        log.warning(f"  {ticker} KBS ratio: {type(e).__name__}: {str(e)[:110]}")
+        return None
+    if df is None or df.empty or 'item_id' not in df:
+        return None
+
+    # Nhãn cột đổi theo CHỖ truyền `period`: '2025' nếu truyền vào hàm dựng,
+    # '2025-Năm' nếu truyền vào phương thức. Tách năm bằng regex để không phụ
+    # thuộc cách gọi — `str(c).isdigit()` im lặng trả rỗng ở dạng thứ hai.
+    years = [(c, int(m.group(1))) for c in df.columns
+             if (m := re.match(r'^(\d{4})', str(c)))]
+    out: Dict[str, Dict[int, float]] = {}
+    for _, row in df.iterrows():
+        field = BANK_RATIO_ITEMS.get(str(row['item_id']))
+        if not field:
+            continue
+        vals = {}
+        for col, year in years:
+            v = _num(row[col])
+            if v is not None:
+                vals[year] = v
+        if vals:
+            out[field] = vals
+    return out or None
 
 
 def fetch_current_price(ticker: str, source: str = 'vci') -> Optional[float]:

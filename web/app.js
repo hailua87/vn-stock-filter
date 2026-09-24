@@ -2387,7 +2387,10 @@ function renderLongTerm(ticker, q, qMeta, val) {
       ${flags || '<p class="muted">Không có cờ quản trị.</p>'}
       ${govMissing ? `<p class="muted">Thiếu dữ liệu cho: ${escapeAttr(govMissing)}</p>` : ''}
       ${QV.notEvaluated({ ...(qMeta?.governance_not_evaluated || {}),
-                          ...(qMeta?.veto_not_evaluated || {}) })}
+                          ...(qMeta?.veto_not_evaluated || {}),
+                          // Chỉ ngân hàng mới thiếu hai chỉ tiêu chất lượng tài sản;
+                          // hiện dòng này cho mã phi ngân hàng là nói sai.
+                          ...(q.model === 'BANK' ? (qMeta?.bank_not_evaluated || {}) : {}) })}
       ${q.veto ? `<p class="wl-veto">Veto: ${escapeAttr(q.veto)}</p>` : ''}
     </div>
     ${renderValuationBlock(q.valuation, val)}

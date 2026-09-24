@@ -73,13 +73,20 @@ MODELS = {
             ('profit_drawdown5', 20, False),
         ],
     },
+    # Ngan hang. Hai chi tieu ve chat luong tai san — ty le no xau va bao phu
+    # no xau — DA GO ngay 24/09/2026 (D24): khong nguon nao co. Da khao sat
+    # vnstock/VCI (bang ratio dung o 2018), vnstock/KBS (32 chi tieu, khong cai
+    # nao ve no xau) va TCBS (co du lieu nhung la API noi bo). Trong so cua
+    # chung chia lai cho cac chi tieu con lai, giu nguyen thu tu uu tien.
+    #
+    # He qua phai noi ra tren man hinh: chong chiu cua ngan hang o day do bang
+    # VON va THANH KHOAN, khong do chat luong tai san. Xem BANK_NOT_EVALUATED.
     'BANK': {
         'quality': [
-            ('roa_avg3', 25, True),
-            ('roe_avg3', 15, True),
-            ('nim_std', 20, False),
-            ('npl_ratio', 20, False),
-            ('cost_income', 20, False),
+            ('roa_avg3', 30, True),
+            ('roe_avg3', 20, True),
+            ('nim_std', 25, False),
+            ('cost_income', 25, False),
         ],
         'growth': [
             ('toi_cagr5', 30, True),
@@ -88,10 +95,9 @@ MODELS = {
             ('nonint_income_cagr3', 20, True),
         ],
         'resilience': [
-            ('npl_coverage', 35, True),
-            ('equity_assets', 30, True),
-            ('credit_cost_std', 20, False),
-            ('ldr', 15, False),
+            ('equity_assets', 45, True),
+            ('credit_cost_std', 30, False),
+            ('ldr', 25, False),
         ],
     },
     # Chu dau tu bat dong san. Blueprint §8.4 khong khai bo chi tieu cho nhom
@@ -164,6 +170,13 @@ GOVERNANCE_FLAGS = {
 # Khai o day de giao dien noi duoc "chua xet" thay vi im lang. Co nguon that
 # thi dua nguoc lai GOVERNANCE_FLAGS.
 # Chuoi hien THANG len man hinh nen co dau — cung quy uoc voi ly do veto.
+# Chi tieu cua rieng mo hinh BANK da can nhac va khong do duoc (D24).
+# Giao dien hien "Chua xet" cho nhom ngan hang, giong cach lam voi §14.2.
+BANK_NOT_EVALUATED = {
+    'npl_ratio': 'tỷ lệ nợ xấu',
+    'npl_coverage': 'bao phủ nợ xấu',
+}
+
 GOVERNANCE_NOT_EVALUATED = {
     'warning_status': 'diện cảnh báo / kiểm soát của sở giao dịch',
     'qualified_opinion': 'ý kiến kiểm toán ngoại trừ',
