@@ -67,6 +67,7 @@ Nguyên tắc (giữ từ v2):
 | D21 | Ý kiến kiểm toán & trạng thái cảnh báo | Hai cờ + hai veto để `enabled: False`, chờ nguồn | **Gỡ hẳn** (chốt 23/09/2026). Để `enabled: False` vẫn là nói dối: giao diện mang nhãn của chúng, người đọc tưởng điểm Quản trị đã xét. Nay gỡ khỏi cấu hình và khai ở `GOVERNANCE_NOT_EVALUATED` để màn hình hiện dòng "Chưa xét: … — không có nguồn dữ liệu" (§8.5, §14.2) |
 | D22 | Mô hình `REAL_ESTATE` | Chưa kích hoạt (Phase 4) | **Bật 23/09/2026.** Rổ 200 có 36 mã BĐS, 34 trong đó kẹt ở "Thiếu dữ liệu" chỉ vì thiếu bộ chỉ tiêu. Bộ chỉ tiêu ở §8.4; "người mua trả tiền trước" đã thử và bỏ vì xếp mã kiệt quệ lên đầu |
 | D23 | Xếp hạng universe theo thanh khoản | Một thang điểm gộp: thanh khoản đo được và thứ hạng danh sách curated (`(623 − hạng) × 1e9`) | **Hai bậc tách rời** (sửa 24/09/2026). Bậc 1: mã có số đo trong 30 ngày, xếp theo GTGD; bậc 2: mã chưa có số đo, xếp theo danh sách curated. Hai đại lượng này không cùng đơn vị nên không bao giờ so sánh được — ép chung một thang khiến **mọi** mã curated đứng trên **mọi** mã đo được, và số đo thật chưa bao giờ được dùng (§7.2) |
+| D24 | Chỉ tiêu ngân hàng | NIM / nợ xấu / bao phủ nợ xấu để `None`, chờ nguồn | **NIM lấy từ `vnstock` nguồn KBS; nợ xấu và bao phủ nợ xấu gỡ hẳn** (24/09/2026). Khảo sát ba nguồn: VCI dừng 2018, KBS không có trường nợ xấu nào, TCBS có nhưng là API nội bộ. Trọng số chia lại; `BANK_NOT_EVALUATED` để màn hình nói "Chưa xét" thay vì khóa 18 mã ở "Thiếu dữ liệu" không lý do (§8.4, §14.3) |
 
 ## 4. Phạm vi
 
@@ -272,23 +273,37 @@ Chỉ giữ chỉ tiêu tính được từ BCTC/chỉ số mà vnstock trả v�
 | Chống chịu | Thanh khoản hiện hành | TS ngắn hạn / nợ ngắn hạn | 15% |
 | Chống chịu | Sụt giảm lợi nhuận lớn nhất 5 năm | Thấp tốt | 20% |
 
-**`BANK`** (các trường đánh dấu * cần xác thực có trong vnstock)
+**`BANK`** (cập nhật 24/09/2026 — xem D24)
 
 | Chiều | Chỉ tiêu | Trọng số |
 |---|---|---:|
-| Chất lượng | ROA trung bình 3 năm | 25% |
-| Chất lượng | ROE trung bình 3 năm | 15% |
-| Chất lượng | Ổn định NIM* | 20% |
-| Chất lượng | Tỷ lệ nợ xấu* (thấp tốt) | 20% |
-| Chất lượng | Chi phí / thu nhập hoạt động (thấp tốt) | 20% |
+| Chất lượng | ROA trung bình 3 năm | 30% |
+| Chất lượng | ROE trung bình 3 năm | 20% |
+| Chất lượng | Ổn định NIM (nguồn **KBS**) | 25% |
+| Chất lượng | Chi phí / thu nhập hoạt động (thấp tốt) | 25% |
 | Tăng trưởng | CAGR thu nhập hoạt động 5 năm | 30% |
 | Tăng trưởng | CAGR lợi nhuận trước thuế 5 năm | 30% |
 | Tăng trưởng | CAGR cho vay khách hàng 5 năm | 20% |
 | Tăng trưởng | Tăng trưởng thu nhập ngoài lãi 3 năm | 20% |
-| Chống chịu | Bao phủ nợ xấu* | 35% |
-| Chống chịu | VCSH / tổng tài sản | 30% |
-| Chống chịu | Ổn định chi phí tín dụng (độ lệch chuẩn chi phí dự phòng / dư nợ) | 20% |
-| Chống chịu | Cho vay / tiền gửi khách hàng (thấp tốt) | 15% |
+| Chống chịu | VCSH / tổng tài sản | 45% |
+| Chống chịu | Ổn định chi phí tín dụng (độ lệch chuẩn chi phí dự phòng / dư nợ) | 30% |
+| Chống chịu | Cho vay / tiền gửi khách hàng (thấp tốt) | 25% |
+
+**NIM lấy từ nguồn `KBS` của chính `vnstock`** — không phải API bên ngoài. Bảng `ratio` của nguồn mặc định `VCI` dừng ở 2018 (§5.4); `Finance(source='KBS')` có 2022–2025 và phủ **18/18** ngân hàng trong rổ. KBS trả phần trăm, `adapter.attach_bank_ratios` đổi sang tỷ lệ — chỗ đổi đơn vị duy nhất.
+
+**Đã gỡ: tỷ lệ nợ xấu và bao phủ nợ xấu.** Khảo sát 24/09/2026 ba nguồn:
+
+| Nguồn | Nợ xấu |
+|---|---|
+| vnstock / VCI | bảng `ratio` dừng ở 2018 |
+| vnstock / KBS | 32 chỉ tiêu, **không cái nào** về nợ xấu |
+| TCBS | có `nonPerformingLoans`, `provisionOnNonPerformingLoans` — nhưng là **API nội bộ của công ty chứng khoán**, không tài liệu, GitHub Actions không gọi được qua MCP |
+
+Để hai chỉ tiêu lại với giá trị `None` vĩnh viễn nghĩa là độ phủ Chất lượng 0,60 và Chống chịu 0,65 — dưới ngưỡng 0,70 — nên **cả 18 ngân hàng bị khóa ở "Thiếu dữ liệu" mà màn hình không nói vì sao**. Trọng số của chúng chia lại cho các chỉ tiêu còn lại, giữ nguyên thứ tự ưu tiên.
+
+**Hệ quả phải nói ra:** chiều Chống chịu của ngân hàng ở đây đo bằng **vốn và thanh khoản**, không đo chất lượng tài sản. `BANK_NOT_EVALUATED` đẩy điều này ra metadata, và màn Watchlist / Chi tiết mã hiện dòng "Chưa xét" cho riêng mã ngân hàng.
+
+**Kiểm định (12 mã có cache, 24/09/2026):** độ phủ **100% cả ba chiều**. HDB 83/87/69 cao nhất; EIB 16/4/80 — vốn dày nhưng sinh lời kém; STB 36/26/31 thấp đều, đúng với ngân hàng còn nợ tồn đọng.
 
 **`SECURITIES`**
 
@@ -484,7 +499,7 @@ Mọi issue hiển thị trong khối "Tình trạng dữ liệu" của màn Hô
 
 1. ~~**Lưu luận điểm cá nhân.**~~ **Đã chốt 23/09/2026 (D20): lưu trong trình duyệt.** Ô luận điểm và điều kiện bán nằm ở cuối màn Chi tiết mã, lưu vào `localStorage` theo từng mã. Hệ quả được nói thẳng trên màn hình chứ không giấu: chỉ có trên máy và trình duyệt đó. Có nút xuất/nhập tệp JSON để mang sang máy khác. Ghi hỏng (trình duyệt chặn lưu trữ) thì **báo ra màn hình** — khác với các lựa chọn giao diện khác vốn im lặng bỏ qua, vì ở đây là chữ người dùng vừa gõ.
 2. ~~**Nguồn ý kiến kiểm toán và trạng thái cảnh báo/kiểm soát.**~~ **Đã chốt 23/09/2026 (D21): bỏ hai cờ và hai veto.** Khảo sát cùng ngày: vnstock không có; TCBS có `getListAuditFirm` nhưng chỉ cho **tên** công ty kiểm toán và năm, không có ý kiến kiểm toán; `getTickerOverview` không có trường cảnh báo/kiểm soát. Trạng thái cảnh báo được công bố dạng tin/sự kiện chứ không phải trường có cấu trúc. Hai cờ `warning_status`/`qualified_opinion` và hai veto `suspended_or_controlled`/`adverse_opinion` đã gỡ hẳn khỏi cấu hình, và ghi vào `GOVERNANCE_NOT_EVALUATED`/`VETO_NOT_EVALUATED` để giao diện nói rõ "Chưa xét" thay vì im lặng (§8.5).
-3. **Trường ngân hàng** (nợ xấu, bao phủ nợ xấu, NIM): **đã xác thực là không có** trong vnstock bản cộng đồng (chỉ 2018). Cần chốt: tìm nguồn khác, hoặc chạy mô hình `BANK` với phần chỉ tiêu còn lại và độ phủ thấp hơn. Trong lúc chờ, định giá nhóm tài chính luôn "Chưa có" (§9).
+3. ~~**Trường ngân hàng**~~ **Đã chốt 24/09/2026 (D24).** NIM lấy được từ `vnstock` nguồn **KBS** (2022–2025, phủ 18/18 mã) — không cần API bên ngoài. Nợ xấu và bao phủ nợ xấu **không nguồn nào có**, đã gỡ khỏi mô hình và ghi vào `BANK_NOT_EVALUATED` để màn hình nói "Chưa xét". Chi tiết ở §8.4. Định giá nhóm tài chính vẫn "Chưa có" (§9) — đó là lớp chặn riêng, không liên quan.
 4. ~~**Vùng vào / cắt lỗ / mục tiêu**~~ **Đã chốt và đã làm 22–23/09/2026.** Cắt lỗ = hỗ trợ gần nhất dưới giá đóng cửa, mục tiêu = kháng cự gần nhất trên giá, R:R = (mục tiêu − giá) / (giá − cắt lỗ); bỏ cột "vùng vào"; không hiển thị R:R khi thiếu một trong hai mức (`backend/scanner/trade_levels.py`, cột trên màn Scan).
 5. ~~**N của universe Module B**~~ **Đã chốt 23/09/2026: 200.** Đo thật (run 35874233924, `limit=200`): định giá **20 phút**, chấm chất lượng **19 phút** — tổng ~40 phút trên trần 90+45.
 

@@ -71,7 +71,8 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
                   fetch_quarter: Callable[[str], Optional[dict]],
                   valuation_signals: Dict[str, dict], as_of: date,
                   delisted: set, previous: Dict[str, dict],
-                  on_fetched: Optional[Callable[[dict], None]] = None) -> dict:
+                  on_fetched: Optional[Callable[[dict], None]] = None,
+                  fetch_bank_ratio: Optional[Callable] = None) -> dict:
     """Chấm cả universe. Không gọi mạng trực tiếp — mọi dữ liệu qua fetch_year/fetch_quarter."""
     classifier = IndustryClassifier()
     rows: Dict[str, dict] = {}
@@ -91,6 +92,10 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
         industry = classifier.classify(t, raw_y.get('overview') or {}).valuation_industry.value
         model = model_for(industry)
         annual = adapter.annual_schema(raw_y)
+        # NIM chỉ có ở nguồn KBS và chỉ dùng cho mô hình BANK — gọi thêm một
+        # lượt API cho ~18 mã, không phải cả rổ 200.
+        if model == 'BANK' and fetch_bank_ratio:
+            adapter.attach_bank_ratios(annual, fetch_bank_ratio(t))
         rows[t] = {
             'industry': industry,
             'model': model,
@@ -180,6 +185,7 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
             # Yeu to ĐÃ CAN NHAC va KHONG danh gia duoc vi khong co nguon
             # (§14.2). Giao dien phai noi ra, neu khong nguoi doc mac dinh
             # diem Quan tri da xet het moi thu.
+            'bank_not_evaluated': C.BANK_NOT_EVALUATED,
             'governance_not_evaluated': C.GOVERNANCE_NOT_EVALUATED,
             'veto_not_evaluated': C.VETO_NOT_EVALUATED,
             'note': ('Percentile là thứ hạng trong universe Module B (top thanh khoản), '
@@ -219,7 +225,7 @@ def main(argv=None) -> int:
                         datefmt='%H:%M:%S')
 
     from scanner.data_fetcher import get_ticker_universe, setup_api_key
-    from scanner.financial_fetcher import fetch_fundamentals, fetch_quarterly_statements
+    from scanner.financial_fetcher import fetch_bank_ratios, fetch_fundamentals, fetch_quarterly_statements
     from scanner.snapshots import record_snapshot
     setup_api_key()
 
@@ -238,6 +244,7 @@ def main(argv=None) -> int:
         tickers,
         fetch_year=lambda t: fetch_fundamentals(t, period='year'),
         fetch_quarter=fetch_quarterly_statements,
+        fetch_bank_ratio=fetch_bank_ratios,
         valuation_signals=load_valuation_signals(web / 'valuation' / 'latest.json'),
         as_of=as_of,
         delisted=load_delisted(Path(__file__).resolve().parent / 'data' / 'delisted_tickers.txt'),

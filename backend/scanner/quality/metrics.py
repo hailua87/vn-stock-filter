@@ -191,13 +191,11 @@ def bank(a: dict) -> dict:
         'roa_avg3': _avg_last(_ratio_series(ni, _avg_base(ta)), 3, 3),
         'roe_avg3': _avg_last(_ratio_series(ni, _avg_base(eq)), 3, 3),
         'nim_std': _std_last(_series(a, 'nim'), 5, 4),
-        'npl_ratio': _last(a, 'npl_ratio'),
         'cost_income': _div(_last(a, 'opex'), _last(a, 'toi')),
         'toi_cagr5': cagr(toi, 5),
         'pbt_cagr5': cagr(_series(a, 'pbt'), 5),
         'loans_cagr5': cagr(loans, 5),
         'nonint_income_cagr3': cagr(_series(a, 'nonint_income'), 3),
-        'npl_coverage': _last(a, 'npl_coverage'),
         'equity_assets': _div(_last(a, 'equity'), _last(a, 'total_assets')),
         # chi phi du phong co the ghi am; do lech chuan khong phu thuoc dau
         'credit_cost_std': _std_last([abs(v) if v is not None else None for v in credit_cost], 5, 4),

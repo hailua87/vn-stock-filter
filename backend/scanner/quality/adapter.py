@@ -124,10 +124,39 @@ def annual_schema(raw: dict) -> dict:
     out['shares_outstanding'] = [
         (shares_from_paid_in_capital(tables['balance_sheet'].get(p)) or None) for p in periods
     ]
-    # Không có trong 3 bảng BCTC (§5.4 blueprint v3)
-    for field in ('nim', 'npl_ratio', 'npl_coverage'):
-        out[field] = [None] * len(periods)
+    # Không có trong 3 bảng BCTC (§5.4 blueprint v3). `nim` được đổ vào sau
+    # bằng attach_bank_ratios() cho riêng nhóm ngân hàng; `npl_ratio` và
+    # `npl_coverage` đã gỡ khỏi mô hình BANK (D24) vì không nguồn nào có.
+    out['nim'] = [None] * len(periods)
     return out
+
+
+def attach_bank_ratios(annual: dict, ratios: Optional[dict]) -> dict:
+    """
+    Đổ NIM từ nguồn KBS vào `annual`, căn theo năm của từng kỳ.
+
+    KBS trả PHẦN TRĂM (2,64 nghĩa là 2,64%). Mọi chỉ tiêu khác trong hệ thống
+    là TỶ LỆ (0,0264), và giao diện nhân 100 khi hiển thị — không chia ở đây
+    thì NIM hiện thành 264%. Đổi đúng một chỗ, tại đây.
+
+    Năm nào KBS không có thì để None: `_std_last` bỏ qua None và vẫn tính được
+    nếu còn đủ 4 điểm. KBS phủ 2022–2025, tức 4 điểm trên cửa sổ 5 năm.
+    """
+    nim = (ratios or {}).get('nim') or {}
+    if not nim:
+        return annual
+    out = []
+    for pe in annual.get('period_end') or []:
+        year = None
+        if pe:
+            try:
+                year = int(str(pe)[:4])
+            except ValueError:
+                year = None
+        v = nim.get(year)
+        out.append(v / 100.0 if v is not None else None)
+    annual['nim'] = out
+    return annual
 
 
 def cash_issued_shares(shares: Sequence, paid_in: Sequence, proceeds: Sequence) -> List[Optional[float]]:
