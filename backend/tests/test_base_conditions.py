@@ -82,3 +82,21 @@ def test_attach_puts_context_into_metrics():
 def test_default_threshold_is_ten_billion():
     """Ngưỡng §7.2 là mặc định cấu hình — đổi thì phải sửa blueprint."""
     assert BC.MIN_AVG_VALUE_20D == 10_000_000_000
+
+
+def test_filter_universe_does_not_mutate_the_original():
+    """
+    `run_daily` giữ lại bản chưa lọc để xuất nến: ngưỡng GTGD là điều kiện
+    GIAO DỊCH, không được chặn biểu đồ của mã theo dõi dài hạn. Nếu
+    filter_universe sửa tại chỗ thì bản giữ lại cũng mất mã — và lỗi đó im
+    lặng, chỉ lộ ra khi mở màn Chi tiết mã.
+    """
+    by_ticker = {
+        'BIG': frame([66.4] * 20, [7_000_000] * 20),
+        'SMALL': frame([5.0] * 20, [10_000] * 20),
+    }
+    ctx = BC.build_context(by_ticker)
+    kept, dropped = BC.filter_universe(by_ticker, ctx)
+    assert sorted(by_ticker) == ['BIG', 'SMALL'], 'bản gốc đã bị sửa tại chỗ'
+    assert kept is not by_ticker
+    assert sorted(kept) == ['BIG'] and dropped == ['SMALL']

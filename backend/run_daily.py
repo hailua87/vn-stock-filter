@@ -586,6 +586,10 @@ def main():
     # ── Điều kiện nền (§7.2): áp TRƯỚC chiến lược, sau khi đã đo độ rộng và RS
     # trên toàn universe (hai phép đo đó mô tả thị trường, không phải rổ đã lọc).
     context = BC.build_context(by_ticker)
+    # Giữ bản CHƯA lọc để xuất nến. Ngưỡng GTGD là điều kiện GIAO DỊCH — nó lọc
+    # mã không vào lệnh được ở giá đã quét. Nó không liên quan gì tới việc xem
+    # biểu đồ một mã mình theo dõi dài hạn, nên không được chặn phần đó.
+    by_ticker_all = by_ticker
     by_ticker, dropped_liquidity = BC.filter_universe(by_ticker, context, args.min_avg_value)
     if dropped_liquidity:
         df_all_raw = df_all_raw[~df_all_raw['Ticker'].isin(dropped_liquidity)]
@@ -751,11 +755,21 @@ def main():
     # cả mã không có tín hiệu kỹ thuật, nên nến phải có cho chúng.
     wl = OHLC.quality_universe(web_dir / 'quality' / 'latest.json')
     want = published | wl
-    series = OHLC.build(by_ticker, want)
+    # `by_ticker_all` chứ không phải `by_ticker`: bản sau đã bị điều kiện nền
+    # lọc, và lượt 24/09 cho thấy hậu quả — chỉ 17/36 mã bất động sản có nến,
+    # 19 mã còn lại rớt vì thanh khoản thấp dù chúng nằm trong watchlist.
+    series = OHLC.build(by_ticker_all, want)
     ohlc_path = OHLC.write(web_dir / 'ohlc' / 'latest.json', series, session_date)
+    missing = want - set(series)
     log.info(f"  Nến {OHLC.SESSIONS} phiên cho {len(series)}/{len(want)} mã "
              f"({len(published)} có tín hiệu + {len(wl - published)} chỉ ở watchlist) "
              f"→ {ohlc_path} ({ohlc_path.stat().st_size // 1024} KB)")
+    if missing:
+        # Thiếu ở đây nghĩa là vòng fetch không lấy được mã đó, không phải do
+        # điều kiện nền — nói rõ để lần sau không ai đi tìm nhầm chỗ.
+        log.info(f"  {len(missing)} mã không có nến vì không lấy được OHLCV: "
+                 f"{', '.join(sorted(missing)[:10])}"
+                 + (f" (+{len(missing) - 10})" if len(missing) > 10 else ""))
 
     # ── Tình trạng dữ liệu cho màn Hôm nay (§11.2, §13) ───────────────────
     # Ghi SAU CÙNG, và đọc lại chính tệp cũ trước khi ghi đè: kiểm tra "rổ co
