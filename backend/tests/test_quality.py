@@ -320,3 +320,27 @@ def test_not_evaluated_strings_are_display_ready():
     for d in (C.GOVERNANCE_NOT_EVALUATED, C.VETO_NOT_EVALUATED):
         for k, v in d.items():
             assert accented & set(v.lower()), f'{k}: {v!r} không có dấu tiếng Việt'
+
+
+# ─── D25: INSURANCE cố ý không bật ────────────────────────────────────────
+
+def test_insurance_is_deliberately_inactive_with_a_reason():
+    """
+    Gỡ khỏi ACTIVE_MODELS mà không ghi lại thì lần sau có người tưởng là quên.
+    Rổ 200 chỉ có 2 mã bảo hiểm; percentile trên 2 mã chỉ ra được 0 và 100.
+    """
+    assert 'INSURANCE' not in C.ACTIVE_MODELS
+    assert 'INSURANCE' in C.INACTIVE_MODEL_REASON
+    assert len(C.INACTIVE_MODEL_REASON['INSURANCE']) > 20
+
+
+def test_every_inactive_reason_names_a_real_model():
+    """Lý do trỏ tới mô hình không tồn tại là rác — và sẽ không bao giờ hiện ra."""
+    for m in C.INACTIVE_MODEL_REASON:
+        assert m in C.MODELS or m in C.INDUSTRY_TO_MODEL.values(), m
+        assert m not in C.ACTIVE_MODELS, f'{m} đang bật mà vẫn khai lý do không bật'
+
+
+def test_active_models_all_have_metric_specs():
+    for m in C.ACTIVE_MODELS:
+        assert m in C.MODELS, f'{m} bật nhưng không có bộ chỉ tiêu'

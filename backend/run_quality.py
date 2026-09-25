@@ -130,7 +130,8 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
         band = valuation_band(valuation_signals.get(t))
         if t not in valuation_signals:
             band['reason'] = 'Không có trong đầu ra định giá tuần này'
-        status = classify(dim_scores, band, veto_reason=veto, model_active=r['active'])
+        status = classify(dim_scores, band, veto_reason=veto, model_active=r['active'],
+                          model=r['model'])
         periods = [p for p in r['annual']['period_end'] if p]
         lq = r['gov_inputs']['latest_quarter_end']
         items.append({
@@ -186,6 +187,10 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
             # (§14.2). Giao dien phai noi ra, neu khong nguoi doc mac dinh
             # diem Quan tri da xet het moi thu.
             'bank_not_evaluated': C.BANK_NOT_EVALUATED,
+            # Mo hinh chua bat va VI SAO. Khong co cho nay thi man hinh chi noi
+            # "Mo hinh nganh chua kich hoat" — nghe nhu sap lam den noi, trong
+            # khi that ra la khong lam duoc voi ro nay.
+            'inactive_model_reason': C.INACTIVE_MODEL_REASON,
             'governance_not_evaluated': C.GOVERNANCE_NOT_EVALUATED,
             'veto_not_evaluated': C.VETO_NOT_EVALUATED,
             'note': ('Percentile là thứ hạng trong universe Module B (top thanh khoản), '
