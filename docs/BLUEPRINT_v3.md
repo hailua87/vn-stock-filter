@@ -68,6 +68,9 @@ Nguyên tắc (giữ từ v2):
 | D22 | Mô hình `REAL_ESTATE` | Chưa kích hoạt (Phase 4) | **Bật 23/09/2026.** Rổ 200 có 36 mã BĐS, 34 trong đó kẹt ở "Thiếu dữ liệu" chỉ vì thiếu bộ chỉ tiêu. Bộ chỉ tiêu ở §8.4; "người mua trả tiền trước" đã thử và bỏ vì xếp mã kiệt quệ lên đầu |
 | D23 | Xếp hạng universe theo thanh khoản | Một thang điểm gộp: thanh khoản đo được và thứ hạng danh sách curated (`(623 − hạng) × 1e9`) | **Hai bậc tách rời** (sửa 24/09/2026). Bậc 1: mã có số đo trong 30 ngày, xếp theo GTGD; bậc 2: mã chưa có số đo, xếp theo danh sách curated. Hai đại lượng này không cùng đơn vị nên không bao giờ so sánh được — ép chung một thang khiến **mọi** mã curated đứng trên **mọi** mã đo được, và số đo thật chưa bao giờ được dùng (§7.2) |
 | D24 | Chỉ tiêu ngân hàng | NIM / nợ xấu / bao phủ nợ xấu để `None`, chờ nguồn | **NIM lấy từ `vnstock` nguồn KBS; nợ xấu và bao phủ nợ xấu gỡ hẳn** (24/09/2026). Khảo sát ba nguồn: VCI dừng 2018, KBS không có trường nợ xấu nào, TCBS có nhưng là API nội bộ. Trọng số chia lại; `BANK_NOT_EVALUATED` để màn hình nói "Chưa xét" thay vì khóa 18 mã ở "Thiếu dữ liệu" không lý do (§8.4, §14.3) |
+| D25 | Mô hình `INSURANCE` | Chưa kích hoạt, chưa rõ lý do | **Cố ý không bật** (chốt 25/09/2026). Rổ 200 chỉ có **2 mã** (BVH, MIG); điểm ba chiều là percentile trong nhóm, mà percentile trên 2 mã chỉ ra được 0 và 100 — không nói gì về doanh nghiệp. `INACTIVE_MODEL_REASON` đẩy lý do ra màn hình thay vì để "chưa kích hoạt" nghe như sắp làm đến nơi (§8.4) |
+| D26 | Nhánh `rebuild/vercel-fisher` | Giữ, không merge (D6) | **Xóa 25/09/2026.** Quyết định và lý do đã nằm ở D6; nhánh code cũ không thêm thông tin gì mà còn làm người mới tưởng đó là hướng đang làm dở |
+| D27 | Backtest chiến lược trading | Chưa chốt (§14.6) | **Đưa vào Phase 4** (chốt 25/09/2026). Archive tín hiệu theo phiên đã chạy từ 18/09 nên dữ liệu đang tích lũy sẵn; chỉ còn chờ đủ dài và viết phần đo (§15) |
 
 ## 4. Phạm vi
 
@@ -516,7 +519,7 @@ Mọi issue hiển thị trong khối "Tình trạng dữ liệu" của màn Hô
    **Rủi ro còn lại:** lượt đo có cache ấm cho ~một nửa số mã; lượt đầu với cache lạnh sẽ lâu hơn, và hôm nguồn chậm như 21/09 có thể chạm trần 90 phút. Hỏng theo hướng an toàn — quá giờ thì không đẩy gì lên.
 
    **Hệ quả:** rổ 200 có 36 mã bất động sản, 34 trong đó "Thiếu dữ liệu" vì mô hình `REAL_ESTATE` chưa bật — việc bật mô hình đó nay đáng giá hơn hẳn (15 → 36 mã).
-6. **Backtest chiến lược trading**: mục tiêu ban đầu có nhắc; xác nhận có đưa vào Phase 4 hay không.
+6. ~~**Backtest chiến lược trading**~~ **Đã chốt 25/09/2026 (D27): có, đưa vào Phase 4.** Archive tín hiệu theo phiên đã chạy từ 18/09 (`web/data/*/archive/<ngày>.json`), nên dữ liệu đầu vào đang tích lũy sẵn — không cần thêm gì để bắt đầu thu thập. Còn thiếu: phần đo (giá sau N phiên so với tín hiệu) và quy ước tính. Xem §16 về survivorship và look-ahead trước khi công bố bất kỳ con số nào.
 
 ## 15. Lộ trình
 
@@ -527,7 +530,7 @@ Mọi issue hiển thị trong khối "Tình trạng dữ liệu" của màn Hô
 | 1. Quality scoring — **đã chạy được 22/09** | Cấu hình, snapshot BCTC, chỉ tiêu 3 mô hình, cờ quản trị, độ phủ, veto, status engine, `quality/latest.json` | Chạy thật 100/100 mã, mỗi trạng thái có lý do: 52 Theo dõi, 16 Cần xem lại, 32 Thiếu dữ liệu (ngân hàng thiếu NPL/NIM, BĐS/bảo hiểm chưa kích hoạt) |
 | 2. Giao diện — **còn màn Hôm nay** | 4 màn hình theo canvas v2 trên `web/` hiện có. Đã xong: Scan (§7.2–7.4), Watchlist, Chi tiết mã (§11.1) | Hiển thị đúng dữ liệu thật, empty state rõ ràng |
 | 3. Liên kết | Quy đổi định giá 4 mức, liên kết Chất lượng sang Module A, `health.json` | Hai module dùng chung universe và quy tắc |
-| 4. Hiệu chỉnh | Backtest ngưỡng định giá (≥ 3 tháng snapshot); backtest chiến lược nếu chốt ở §14.6; xét `INSURANCE`, `REAL_ESTATE` | Ngưỡng được cập nhật có ghi lại lý do |
+| 4. Hiệu chỉnh | Backtest ngưỡng định giá (≥ 3 tháng snapshot); **backtest chiến lược trading (D27)**; tách mô hình con cho KCN / cho thuê trong `REAL_ESTATE` (§8.4). `INSURANCE` **không** trong phạm vi Phase 4 — cần universe rộng hơn nhiều hoặc chấm theo ngưỡng tuyệt đối thay vì percentile (D25) | Ngưỡng được cập nhật có ghi lại lý do |
 | 5. Cá nhân hóa — **đã xong 23/09** | Ô luận điểm và điều kiện bán ở màn Chi tiết mã, lưu `localStorage` theo D20 | Gõ vào, đổi mã, quay lại vẫn còn; xuất/nhập tệp JSON chạy được; trình duyệt chặn lưu trữ thì báo ra màn hình |
 
 ## 16. Rủi ro

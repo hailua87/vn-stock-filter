@@ -46,7 +46,23 @@ INDUSTRY_TO_MODEL = {
     'Unknown': None,
 }
 DEFAULT_MODEL = 'NON_FINANCIAL'
+
+# INSURANCE CO Y KHONG BAT (chot 25/09/2026, D25) — khong phai quen lam.
+#
+# Ro 200 ma chi co 2 ma bao hiem (BVH, MIG). Diem ba chieu Chat luong / Tang
+# truong / Chong chiu deu la PERCENTILE TRONG NHOM, va percentile tren 2 ma chi
+# co the ra 0 va 100 — no khong noi gi ve doanh nghiep, chi noi cai nao lon hon
+# cai kia. MIN_PEER_GROUP = 8 da chan dieu do, nen co bat mo hinh thi hai ma van
+# rong diem; khac biet duy nhat la ly do hien ra man hinh se sai: "Thieu du
+# lieu" thay vi "nhom qua nho de xep hang".
+#
+# Dieu kien de bat: nhom du MIN_PEER_GROUP ma. Voi universe 200 thi khong dat;
+# can universe rong hon nhieu, hoac cham bao hiem theo nguong tuyet doi thay vi
+# percentile — ca hai deu la viec cua Phase 4.
 ACTIVE_MODELS = {'NON_FINANCIAL', 'BANK', 'SECURITIES', 'REAL_ESTATE'}
+INACTIVE_MODEL_REASON = {
+    'INSURANCE': 'nhóm chỉ có 2 mã trong rổ, quá nhỏ để xếp hạng percentile',
+}
 
 # --- Chi tieu theo mo hinh (blueprint 8.4) ----------------------------------
 # (metric_key, trong_so, cao_hon_tot_hon)

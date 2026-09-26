@@ -85,7 +85,7 @@ def _fmt(v: float) -> str:
 
 
 def classify(dims: dict, valuation: dict, veto_reason: Optional[str] = None,
-             model_active: bool = True) -> dict:
+             model_active: bool = True, model: Optional[str] = None) -> dict:
     """
     dims = {'quality': float|None, 'growth': ..., 'governance': ..., 'resilience': ...}
     Thu tu danh gia co y nghia: veto truoc, thieu du lieu truoc nguong. Dao thu tu
@@ -95,8 +95,13 @@ def classify(dims: dict, valuation: dict, veto_reason: Optional[str] = None,
         return {'status': 'EXC', 'label': STATUS_LABEL['EXC'], 'reason': f'Veto: {veto_reason}'}
 
     if not model_active:
+        # Nói RÕ vì sao chưa kích hoạt khi biết. "Mô hình ngành chưa kích hoạt"
+        # nghe như sắp làm đến nơi; với Bảo hiểm thì thật ra là KHÔNG LÀM ĐƯỢC
+        # với rổ này — 2 mã thì percentile chỉ ra được 0 và 100.
+        ly_do = C.INACTIVE_MODEL_REASON.get(model)
         return {'status': 'RES', 'label': STATUS_LABEL['RES'],
-                'reason': 'Mô hình ngành chưa kích hoạt'}
+                'reason': (f'Mô hình ngành chưa kích hoạt — {ly_do}' if ly_do
+                           else 'Mô hình ngành chưa kích hoạt')}
 
     missing = [d for d in DIMS if dims.get(d) is None]
     if missing:
