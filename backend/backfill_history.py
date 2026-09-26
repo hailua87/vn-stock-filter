@@ -53,7 +53,7 @@ log = logging.getLogger('backfill')
 
 VNINDEX_CACHE = Path(__file__).resolve().parent / 'data' / 'vnindex_cache.parquet'
 
-# vnstock giới hạn khoảng thời gian mỗi request; chia nhỏ theo năm cho an toàn
+# Chia mỗi request theo năm cho an toàn (thời vnstock nguồn giới hạn khoảng thời gian)
 CHUNK_DAYS = 365
 
 
@@ -134,36 +134,22 @@ def preflight() -> None:
     """
     Kiểm tra điều kiện tiên quyết TRƯỚC khi chạy vòng lặp dài.
 
-    Vì sao cần: nếu vnstock chưa cài, mỗi lần gọi fetch_ohlcv chỉ log một dòng
-    lỗi rồi trả None, nên script cứ thế lặp qua cả 400 mã × 6 đoạn = 2.400 lần
-    in đúng một thông báo trong ~14 phút mà không làm được gì. Phải dừng ngay
-    và nói rõ cách sửa.
+    Vì sao cần: nếu nguồn không gọi được (mất mạng, bị chặn), mỗi lần gọi
+    fetch_ohlcv chỉ log một dòng lỗi rồi trả None, nên script cứ thế lặp qua
+    cả 400 mã × 6 đoạn = 2.400 lần in đúng một thông báo trong ~14 phút mà
+    không làm được gì. Thử một lượt VN-Index trước; hỏng thì dừng ngay.
+
+    (Trước 26/09/2026 bước này kiểm `import vnstock` và VNSTOCK_API_KEY; nguồn
+    nay gọi thẳng Vietcap, không cần thư viện hay khóa.)
     """
-    try:
-        import vnstock  # noqa: F401
-    except ImportError:
+    idx = fetch_vnindex(lookback_days=10)
+    if idx is None or idx.empty:
         log.error("=" * 70)
-        log.error("THIẾU THƯ VIỆN vnstock — không thể lấy dữ liệu.")
+        log.error("KHÔNG LẤY ĐƯỢC DỮ LIỆU TỪ VIETCAP (thử VN-Index 10 ngày).")
         log.error("")
-        log.error("  Sửa:  pip install -r backend/requirements.txt")
-        log.error("  hoặc: pip install -U vnstock")
+        log.error("  Kiểm tra kết nối mạng, rồi chạy lại. Chi tiết lỗi ở dòng log phía trên.")
         log.error("=" * 70)
         sys.exit(1)
-
-    import os
-    if not os.environ.get('VNSTOCK_API_KEY'):
-        log.warning("=" * 70)
-        log.warning("CHƯA CÓ VNSTOCK_API_KEY — đang ở chế độ ẩn danh.")
-        log.warning("")
-        log.warning("  Chế độ ẩn danh bị giới hạn rất chặt (vài request/phút).")
-        log.warning("  Backfill vài trăm mã × 6 năm gần như chắc chắn sẽ bị chặn giữa chừng.")
-        log.warning("")
-        log.warning("  Đăng ký key miễn phí (60 req/phút) tại https://vnstocks.com/login")
-        log.warning("  rồi đặt biến môi trường trước khi chạy:")
-        log.warning("")
-        log.warning('    PowerShell:  $env:VNSTOCK_API_KEY = "khoa-cua-ban"')
-        log.warning('    Git Bash:    export VNSTOCK_API_KEY="khoa-cua-ban"')
-        log.warning("=" * 70)
 
 
 def probe_tickers(tickers: list[str], delay: float = 2.0,
@@ -256,7 +242,7 @@ def main():
                    help='File txt chứa mã bổ sung (mã đã huỷ niêm yết) — QUAN TRỌNG '
                         'để tránh survivorship bias')
     p.add_argument('--delay', type=float, default=2.0,
-                   help='Giây nghỉ giữa các request (tôn trọng rate limit vnstock)')
+                   help='Giây nghỉ giữa các request (tôn trọng rate limit của nguồn)')
     p.add_argument('--resume', action='store_true', default=True,
                    help='Bỏ qua mã đã đủ lịch sử (mặc định bật)')
     p.add_argument('--no-resume', dest='resume', action='store_false')
@@ -344,14 +330,14 @@ def main():
             fail_list.append(ticker)
 
         # Ngắt mạch: hỏng liên tiếp nghĩa là lỗi hệ thống (mất mạng, hết quota,
-        # sai API key), không phải mã lỗi lẻ tẻ. Chạy tiếp hàng chục phút chỉ để
+        # bị chặn), không phải mã lỗi lẻ tẻ. Chạy tiếp hàng chục phút chỉ để
         # in cùng một thông báo là vô ích.
         consecutive_fail = consecutive_fail + 1 if status == 'fail' else 0
         if consecutive_fail >= 10:
             log.error("=" * 70)
             log.error(f"DỪNG: {consecutive_fail} mã liên tiếp thất bại — nhiều khả năng "
                       f"là lỗi hệ thống chứ không phải từng mã.")
-            log.error("  Kiểm tra: kết nối mạng · VNSTOCK_API_KEY · quota vnstock")
+            log.error("  Kiểm tra: kết nối mạng · nguồn Vietcap có đang chặn/429 không")
             log.error("  Đã backfill xong sẽ được giữ lại; chạy lại với --resume để tiếp tục.")
             log.error("=" * 70)
             break

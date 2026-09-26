@@ -1,9 +1,9 @@
 """
-Financial data fetcher for Vietnam stocks — vnstock 4.x compatible.
+Financial data fetcher for Vietnam stocks — gọi thẳng Vietcap (VCI) / KBS.
 
-Lấy financial statements (BS/IS/CF) + ratios + company overview cho định giá.
-Tái sử dụng pattern từ data_fetcher.py: API key setup, sys.exit patch, retry,
-parquet cache.
+Lấy financial statements (BS/IS/CF) + company overview cho định giá, và NIM
+ngân hàng. Nguồn là `scanner/sources/` (thay vnstock từ 26/09/2026 — lý do ở
+docstring của gói đó); định dạng bảng giữ đúng như vnstock 4.0.7 trả về.
 
 Khác data_fetcher (chuyên OHLCV) ở chỗ:
   - Chu kỳ refresh dài hơn (quý/năm thay vì ngày)
@@ -16,9 +16,6 @@ Usage:
     # → {'overview': {...}, 'balance_sheet': df, 'income': df, ...}
 """
 from __future__ import annotations
-import os
-import sys
-import re
 import time
 import json
 import logging
@@ -28,13 +25,9 @@ from typing import Optional, Dict, Any
 
 import pandas as pd
 
-# Tái sử dụng monkey-patch và setup từ data_fetcher
-from .snapshots import vnstock_version
-from .data_fetcher import (
-    setup_api_key,
-    RateLimitError,
-    patch_sys_exit,
-)
+from .data_fetcher import RateLimitError
+from .sources import kbs, vci
+from .sources.http import SOURCE_VERSION
 
 log = logging.getLogger(__name__)
 
@@ -166,20 +159,10 @@ def fetch_company_overview(ticker: str, source: str = 'vci') -> Optional[Dict[st
     Fetch company overview (industry, sector, listed date, etc.).
     Returns dict or None on error.
     """
-    setup_api_key()
     try:
-        from vnstock.api.company import Company
-    except ImportError:
-        log.error("vnstock not installed")
-        return None
-
-    try:
-        c = Company(symbol=ticker, source=source)
-        df = c.overview()
-        if df is None or df.empty:
+        row = vci.company_overview(ticker)
+        if not row:
             return None
-        # vnstock 4.x trả về DataFrame 1 hàng; convert thành dict
-        row = df.iloc[0].to_dict()
         # Normalize keys (vnstock có thể đổi tên cột giữa versions).
         # vnstock 4.0.7 (VCI) không còn icb_name2..4: cột `sector` là tên ngành
         # ICB cấp 2 tiếng Anh ('Banks', 'Real Estate') kèm icb_code_lv2/lv4.
@@ -216,64 +199,51 @@ def fetch_financial_statements(ticker: str, source: str = 'vci',
 
     Args:
         period: 'year' or 'quarter'
+        tables: tập con của ('balance_sheet', 'income', 'cash_flow'); mỗi
+            bảng là một lượt gọi API.
     Returns:
-        {'balance_sheet': df, 'income': df, 'cash_flow': df, 'ratio': df}
-        Each DataFrame is long-format as returned by vnstock 4.x: rows = line
-        items (item, item_en, item_id), one column per period, latest first.
-        Values in VND. See statement_to_records() / ratio_to_records().
+        {'balance_sheet': df, 'income': df, 'cash_flow': df}
+        Each DataFrame is long-format như vnstock 4.x: rows = line items
+        (item, item_en, item_id), one column per period. Values in VND.
+        See statement_to_records().
+
+    Không còn bảng 'ratio' (26/09/2026). Bảng ratio của VCI chỉ có các quý
+    2018 (§5.4), nên `ratio_to_records` luôn loại nó vì cũ hơn BCTC — lấy về
+    chỉ tốn một lượt gọi. Kết quả định giá không đổi: normalizer vốn đã tự
+    tính từ BCTC khi ratio rỗng.
     """
-    setup_api_key()
-    try:
-        from vnstock.api.financial import Finance
-    except ImportError as e:
-        log.error(f"vnstock Finance import failed: {e}")
-        return None
+    wanted = tuple(vci.STATEMENT_SECTIONS) if tables is None else \
+        tuple(t for t in tables if t in vci.STATEMENT_SECTIONS)
 
     results = {}
-    fin = Finance(symbol=ticker, source=source)
-
-    fetchers = {
-        'balance_sheet': lambda: fin.balance_sheet(period=period, lang='en'),
-        'income': lambda: fin.income_statement(period=period, lang='en'),
-        'cash_flow': lambda: fin.cash_flow(period=period, lang='en'),
-        'ratio': lambda: fin.ratio(period=period, lang='en'),
-    }
-    if tables is not None:
-        # Bỏ bớt bảng không dùng: mỗi bảng là một lượt gọi API
-        fetchers = {k: v for k, v in fetchers.items() if k in tables}
-
-    for name, fn in fetchers.items():
+    for name in wanted:
         for attempt in range(3):
             try:
-                df = fn()
+                df = vci.financial_statement(ticker, name, period=period)
                 if df is not None and not df.empty:
                     results[name] = df
                 break
             except RateLimitError:
                 log.warning(f"  {ticker} {name} rate-limited, waiting 65s")
                 time.sleep(65)
+            except ValueError as e:
+                log.error(f"  {ticker} {name}: {e}")
+                break
             except Exception as e:
-                err_str = str(e).lower()
-                if 'rate' in err_str or '429' in err_str:
-                    time.sleep(60)
-                else:
-                    log.warning(f"  {ticker} {name} attempt {attempt+1}: {type(e).__name__}: {str(e)[:120]}")
-                    time.sleep(2 + attempt * 2)
+                log.warning(f"  {ticker} {name} attempt {attempt+1}: {type(e).__name__}: {str(e)[:120]}")
+                time.sleep(2 + attempt * 2)
 
     return results if results else None
 
 
-# Nguồn 'KBS' của vnstock — KHÁC nguồn mặc định 'VCI' của dự án.
+# NIM ngân hàng lấy từ KBS — KHÁC nguồn VCI của phần còn lại.
 #
 # Bảng `ratio` của VCI dừng ở 2018 (§5.4), nên ba chỉ tiêu ngân hàng NIM /
-# nợ xấu / bao phủ nợ xấu bị coi là không có. Khảo sát 24/09/2026 tìm ra KBS:
-# cùng thư viện, chỉ khác tham số `source`, có dữ liệu 2022–2025 và phủ 18/18
-# ngân hàng trong rổ.
+# nợ xấu / bao phủ nợ xấu bị coi là không có. Khảo sát 24/09/2026 tìm ra KBS
+# có dữ liệu 2022–2025 và phủ 18/18 ngân hàng trong rổ.
 #
 # KBS vẫn KHÔNG có nợ xấu — 32 chỉ tiêu, không cái nào về nợ xấu. Nên hàm này
 # chỉ lấy NIM; `npl_ratio` và `npl_coverage` đã gỡ khỏi mô hình BANK (D24).
-BANK_RATIO_SOURCE = 'KBS'
-BANK_RATIO_ITEMS = {'net_interest_margin_nim': 'nim'}
 
 
 def fetch_bank_ratios(ticker: str) -> Optional[Dict[str, Dict[int, float]]]:
@@ -284,45 +254,19 @@ def fetch_bank_ratios(ticker: str) -> Optional[Dict[str, Dict[int, float]]]:
     nguồn trả về; đổi sang tỷ lệ là việc của adapter, để chỗ đổi đơn vị chỉ có
     một. None nếu không lấy được.
     """
-    setup_api_key()
     try:
-        from vnstock.api.financial import Finance
-    except ImportError as e:
-        log.error(f"vnstock Finance import failed: {e}")
-        return None
-    try:
-        df = Finance(symbol=ticker, source=BANK_RATIO_SOURCE).ratio(period='year')
+        nim = kbs.bank_nim(ticker)
     except Exception as e:
         log.warning(f"  {ticker} KBS ratio: {type(e).__name__}: {str(e)[:110]}")
         return None
-    if df is None or df.empty or 'item_id' not in df:
-        return None
-
-    # Nhãn cột đổi theo CHỖ truyền `period`: '2025' nếu truyền vào hàm dựng,
-    # '2025-Năm' nếu truyền vào phương thức. Tách năm bằng regex để không phụ
-    # thuộc cách gọi — `str(c).isdigit()` im lặng trả rỗng ở dạng thứ hai.
-    years = [(c, int(m.group(1))) for c in df.columns
-             if (m := re.match(r'^(\d{4})', str(c)))]
-    out: Dict[str, Dict[int, float]] = {}
-    for _, row in df.iterrows():
-        field = BANK_RATIO_ITEMS.get(str(row['item_id']))
-        if not field:
-            continue
-        vals = {}
-        for col, year in years:
-            v = _num(row[col])
-            if v is not None:
-                vals[year] = v
-        if vals:
-            out[field] = vals
-    return out or None
+    return {'nim': nim} if nim else None
 
 
 def fetch_current_price(ticker: str, source: str = 'vci') -> Optional[float]:
     """
     Giá đóng cửa gần nhất, trả về theo **VND/cp** (đã nhân 1.000).
 
-    vnstock trả giá theo nghìn VND (ACB = 24.30) trong khi EPS/BVPS của bảng
+    Nguồn trả giá theo nghìn VND (ACB = 24.30) trong khi EPS/BVPS của bảng
     ratio theo VND (EPS = 3.500). Toàn bộ valuation engine làm việc bằng VND nên
     quy đổi phải xảy ra ở đây — xem `scanner/price_units.py`.
     """
@@ -384,7 +328,7 @@ def fetch_fundamentals(ticker: str, period: str = 'year',
         'schema': CACHE_SCHEMA,
         'ticker': ticker,
         'fetched_at': datetime.now().isoformat(),
-        'vnstock_version': vnstock_version(),
+        'vnstock_version': SOURCE_VERSION,  # tên khóa cũ, sổ snapshot đọc khóa này
         'period': period,
         'current_price': price,
         'overview': overview or {},
@@ -441,7 +385,7 @@ def fetch_quarterly_statements(ticker: str, use_cache: bool = True,
         'schema': CACHE_SCHEMA,
         'ticker': ticker,
         'fetched_at': datetime.now().isoformat(),
-        'vnstock_version': vnstock_version(),
+        'vnstock_version': SOURCE_VERSION,  # tên khóa cũ, sổ snapshot đọc khóa này
         'period': 'quarter',
         **{k: statement_to_records(statements.get(k)) for k in QUARTER_TABLES},
     }

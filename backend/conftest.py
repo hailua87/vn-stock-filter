@@ -3,24 +3,15 @@ Cấu hình chung cho mọi lượt chạy test của backend.
 
 Vì sao tệp này tồn tại: `vnai` (phụ thuộc của `vnstock`) tải một prompt từ
 vnstocks.com và GHI ĐÈ vào tệp cấu hình của các trợ lý AI — `AGENTS.md` của thư
-mục đang chạy, `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`.
-Nó làm việc đó khi `import vnstock`, mà suite này có `test_financial_fetcher_
-import.py` import thật để kiểm API. Kết quả: `AGENTS.md` mọc lại sau mỗi lượt
-pytest, mang theo chỉ dẫn của bên thứ ba cho mọi trợ lý mở repo này.
+mục đang chạy, `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`
+— mỗi lần `import vnstock` (đo thật 23/09/2026; CHANGELOG 4.0.9 của vnstock
+xác nhận các bản trước 4.0.9 làm vậy). PyPI cách ly vnstock + vnai 24–25/09.
 
-ĐO THẬT 23/09/2026 — `VNSTOCK_DISABLE_AGENT_SETUP=1` KHÔNG chặn được:
-
-    VNSTOCK_DISABLE_AGENT_SETUP=1      -> AGENTS.md DUOC TAO
-    VNSTOCK_DISABLE_AGENT_SETUP=unset  -> AGENTS.md DUOC TAO
-
-`vnai/beam/agents.py` (bản 2.5.6) không đọc biến nào tên như vậy; cả tệp không
-có một nhánh tắt nào. Việc ghi chỉ phụ thuộc có API key hay không. Biến đó đang
-được đặt trong 4 workflow và được nhắc tới trong README, BLUEPRINT_v3 và
-requirements.txt — những chỗ ấy mô tả SAI tác dụng của nó.
-
-Thứ thật sự bảo vệ repo là `/AGENTS.md` trong `.gitignore`: tệp có bị ghi cũng
-không bao giờ lọt vào commit. Hook dưới đây dọn nốt phần rác trên đĩa, để lượt
-pytest không để lại thứ gì.
+Từ 26/09/2026 dự án KHÔNG còn import vnstock (xem `scanner/sources/`), nên
+đường ghi đó không còn chạy từ repo này. Hook dưới đây giữ lại như lớp phòng
+thủ cuối: máy cá nhân đã cài vnstock từ trước vẫn có thể bị ghi khi có thứ
+khác import nó. `/AGENTS.md` trong .gitignore vẫn là thứ chặn chính — tệp có
+bị ghi cũng không lọt vào commit.
 """
 import subprocess
 from pathlib import Path

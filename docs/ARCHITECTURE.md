@@ -10,7 +10,7 @@
 ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
 │   DATA SOURCES   │    │   SCANNER CORE   │    │    PRESENTATION  │
 ├──────────────────┤    ├──────────────────┤    ├──────────────────┤
-│ vnstock (VCI)    │───>│  data_fetcher   │───>│  Excel (analyst) │
+│ VCI / KBS API    │───>│  data_fetcher   │───>│  Excel (analyst) │
 │ TCBS REST        │    │       ↓          │    │  JSON (web/API)  │
 │ SSI iBoard       │    │  indicators     │    │  HTML (report)   │
 │                  │    │       ↓          │    │  Web Dashboard   │

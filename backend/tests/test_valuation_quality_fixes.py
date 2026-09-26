@@ -15,7 +15,6 @@ FIXTURE_SCALE nên số tuyệt đối trong test nhân thêm hệ số, tỷ l�
   VCB 2025: vốn góp 83.556,8 tỷ; overview trả 8.355.675.094 cp
 """
 import sys
-import types
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -50,13 +49,9 @@ def _raw(ticker, overview=None, ratio=None):
 # --- 1. Ngành -------------------------------------------------------------
 
 def _overview_from_vnstock_407(monkeypatch, row):
-    class _Company:
-        def __init__(self, symbol, source): pass
-        def overview(self): return pd.DataFrame([row])
-    mod = types.ModuleType('vnstock.api.company')
-    mod.Company = _Company
-    monkeypatch.setitem(sys.modules, 'vnstock.api.company', mod)
-    monkeypatch.setattr(ff, 'setup_api_key', lambda: False)
+    """`row` là bản ghi tổng quan đúng dạng vnstock 4.0.7 trả — nay do
+    sources.vci.company_overview dựng ra với cùng khóa."""
+    monkeypatch.setattr(ff.vci, 'company_overview', lambda ticker: dict(row))
     return ff.fetch_company_overview('X')
 
 

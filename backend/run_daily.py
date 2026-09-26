@@ -542,7 +542,7 @@ def main():
     fetch_summary = df_all_raw.attrs.get('fetch_summary', {})
 
     if df_all_raw.empty:
-        log.error("No data fetched from vnstock "
+        log.error("No data fetched from VCI "
                   f"(stop_reason={fetch_summary.get('stop_reason')})")
         sys.exit(1)
 

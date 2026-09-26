@@ -1,7 +1,8 @@
 # VN-SCANNER + Valuation Engine
 
 Dashboard quét tín hiệu kỹ thuật + định giá đa phương pháp cho thị trường chứng khoán
-Việt Nam, dựa trên vnstock 4.x.
+Việt Nam. Dữ liệu lấy thẳng từ API công khai của Vietcap (VCI) và KBS
+(`backend/scanner/sources/`; trước 26/09/2026 qua thư viện vnstock).
 
 ## Tổng quan
 
@@ -42,7 +43,7 @@ vn-scanner/
 │   ├── backtest.py                        # ★ MỚI — backtest framework
 │   ├── scanner/
 │   │   ├── data_fetcher.py                # OHLCV fetch (đã có)
-│   │   ├── financial_fetcher.py           # ★ MỚI — fetch BCTC vnstock
+│   │   ├── financial_fetcher.py           # ★ MỚI — fetch BCTC (VCI) + NIM (KBS)
 │   │   ├── market_metrics.py              # ★ MỚI — beta + historical multiples
 │   │   ├── peer_database.py               # ★ MỚI — peer median DB
 │   │   ├── criteria.py
@@ -89,21 +90,15 @@ vn-scanner/
 ### Setup
 ```bash
 pip install -r backend/requirements.txt
-export VNSTOCK_API_KEY=your_key_here
-export VNSTOCK_DISABLE_AGENT_SETUP=1
+python backend/check_sources.py   # tùy chọn: kiểm nguồn dữ liệu thật (cần mạng)
 ```
-`vnai` (đi kèm vnstock) tự ghi một prompt tải từ vnstocks.com vào `AGENTS.md` của
-thư mục đang chạy và `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`,
-`~/.gemini/GEMINI.md`.
-
-**`VNSTOCK_DISABLE_AGENT_SETUP=1` không chặn được việc đó.** Đo thật ngày
-23/09/2026: đặt hay không đặt, tệp vẫn được tạo — `vnai/beam/agents.py` (2.5.6)
-không đọc biến nào tên như vậy. Biến vẫn được đặt trong các workflow phòng khi
-bản sau có hỗ trợ, nhưng đừng tin nó.
-
-Cái chặn thật là `/AGENTS.md` trong `.gitignore`: tệp có bị ghi cũng không lọt vào
-commit. `backend/conftest.py` dọn nốt tệp đó sau mỗi lượt pytest ở máy cá nhân
-(chỉ xóa khi git không theo dõi nó).
+Không cần API key. Từ 26/09/2026 dự án không còn dùng `vnstock`: PyPI đã cách ly
+`vnstock` và `vnai` (24–25/09/2026), và các bản vnstock trước 4.0.9 tự ghi một khối
+chỉ dẫn vào `AGENTS.md` của thư mục đang chạy cùng `~/.claude/CLAUDE.md`,
+`~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md` mỗi lần `import vnstock`. Máy nào đã
+từng cài vnstock nên mở các tệp đó và xóa khối liên quan tới vnstocks.com.
+`/AGENTS.md` vẫn nằm trong `.gitignore` và `backend/conftest.py` vẫn dọn tệp đó sau
+mỗi lượt pytest, phòng máy cá nhân còn bản vnstock cũ.
 
 ### Chạy scanner kỹ thuật
 ```bash
@@ -158,10 +153,8 @@ Thêm vào `.github/workflows/daily-scan.yml`:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with: { python-version: '3.10' }
-      - run: pip install vnstock pyarrow pandas numpy
-      - env:
-          VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
-        run: |
+      - run: pip install -r backend/requirements.txt
+      - run: |
           cd backend
           python run_valuation.py --limit 150 --min-confidence 0.4
       - run: |

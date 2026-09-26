@@ -1,5 +1,23 @@
 # Nguồn dữ liệu & Cách thu thập
 
+> **Cập nhật 26/09/2026 — dự án không còn dùng `vnstock`.** PyPI cách ly `vnstock`
+> và `vnai` từ 24–25/09/2026 (các bản trước 4.0.9 ghi chỉ dẫn vào tệp cấu hình trợ
+> lý AI mỗi lần import). Backend gọi thẳng API công khai qua `backend/scanner/sources/`:
+>
+> | Việc | Nguồn | Hàm |
+> |---|---|---|
+> | Danh sách mã theo sàn | KBS `stock/search/data` | `kbs.listing()` |
+> | Giá ngày, VN-Index | VCI `chart/OHLCChart/gap-chart` | `vci.ohlcv()` |
+> | Tổng quan công ty (ICB) | VCI IQ `company/details` | `vci.company_overview()` |
+> | BCTC năm/quý | VCI IQ `financial-statement` (+ `metrics` cho nhãn) | `vci.financial_statement()` |
+> | Sự kiện quyền | VCI IQ `events` | `vci.events()` |
+> | NIM ngân hàng | KBS `stock/finance-info` (CSTC) | `kbs.bank_nim()` |
+>
+> Đầu ra giữ đúng hình dạng vnstock 4.0.7 trả về. `python backend/check_sources.py`
+> kiểm trên API thật và so BCTC với fixture vnstock 4.0.7 (chạy trong CI, job
+> `sources-live`). Giới hạn tần suất: 1 lượt/giây cho mọi nguồn cộng lại
+> (`SOURCE_MIN_INTERVAL`). Phần dưới đây là tài liệu thời vnstock, giữ để tham khảo.
+
 ## 1. Tổng quan các nguồn dữ liệu thị trường Việt Nam
 
 | Nguồn | Loại | Miễn phí | Lịch sử | API chính thức | Ghi chú |

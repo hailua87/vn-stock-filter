@@ -14,20 +14,6 @@ on:
     paths-ignore:
       - 'web/data/**'
 
-# vnai (phu thuoc cua vnstock) tu ghi prompt tai tu vnstocks.com vao AGENTS.md
-# cua thu muc dang chay va ~/.claude, ~/.codex, ~/.gemini.
-#
-# BIEN DUOI DAY KHONG CHAN DUOC. Do that 23/09/2026: dat hay khong dat, tep van
-# duoc tao. vnai/beam/agents.py ban 2.5.6 khong doc bien nao ten nhu vay, ca tep
-# khong co nhanh tat nao — viec ghi chi phu thuoc co API key hay khong. Giu bien
-# lai phong khi ban sau co ho tro, nhung DUNG tin no.
-#
-# Thu that su bao ve repo la `/AGENTS.md` trong .gitignore: tep co bi ghi cung
-# khong lot vao commit. Chay test o may ca nhan con co them hook don dep trong
-# backend/conftest.py.
-env:
-  VNSTOCK_DISABLE_AGENT_SETUP: "1"
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -62,3 +48,26 @@ jobs:
         env:
           PYTHONIOENCODING: utf-8
         run: python backend/test_backtest.py
+
+  # Kiểm lớp nguồn trên API THẬT của Vietcap/KBS (cần mạng). Tách job riêng để
+  # khi nguồn đổi định dạng hay chặn runner, CI báo đúng chỗ thay vì lẫn vào
+  # unit test. So BCTC với fixture vnstock 4.0.7 — chi tiết ở docstring
+  # backend/check_sources.py.
+  sources-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+      - name: Install
+        run: |
+          pip install --upgrade pip
+          pip install -r backend/requirements.txt
+      - name: Kiểm nguồn dữ liệu thật
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python backend/check_sources.py
