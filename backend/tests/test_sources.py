@@ -113,6 +113,8 @@ def test_ohlcv_request_payload(monkeypatch):
     assert p['symbols'] == ['VNINDEX'] and p['timeFrame'] == 'ONE_DAY'
     # 21→26/09 (end + 1 ngày): 5 ngày làm việc + 1
     assert p['countBack'] == 6
+    # giá ngày chờ ngắn: lượt treo phải hỏng nhanh để thử lại (http.OHLCV_TIMEOUT)
+    assert seen['timeout'] == http.OHLCV_TIMEOUT < http.TIMEOUT
 
 
 def test_ohlcv_rejects_start_after_end(monkeypatch):
@@ -488,6 +490,16 @@ def test_request_json_errors(monkeypatch, resp, exc):
     monkeypatch.setattr(http, 'MIN_INTERVAL', 0)
     with pytest.raises(exc):
         http.request_json('GET', 'https://x')
+
+
+def test_request_json_passes_timeout(monkeypatch):
+    sess = _Sess(_Resp(200, {}))
+    monkeypatch.setattr(http, '_session', lambda: sess)
+    monkeypatch.setattr(http, 'MIN_INTERVAL', 0)
+    http.request_json('GET', 'https://x')
+    assert sess.kw['timeout'] == http.TIMEOUT
+    http.request_json('GET', 'https://x', timeout=7)
+    assert sess.kw['timeout'] == 7
 
 
 def test_request_json_merges_headers(monkeypatch):
