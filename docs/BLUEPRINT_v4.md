@@ -1,8 +1,9 @@
-# VN Stock Filter — Hồ sơ tổng hợp dự án (v3)
+# VN Stock Filter — Hồ sơ tổng hợp dự án (v4)
 
 > **Vai trò tài liệu:** nguồn tham chiếu thống nhất cho phạm vi, dữ liệu, logic sàng lọc/chấm điểm, kiến trúc, giao diện và lộ trình.
 >
-> **Phiên bản:** v3, cập nhật 2026-09-22. Thay v2 (2026-09-21): đưa vào 6 điều chỉnh của `docs/PHASE0_AUDIT_v1.md` và kết quả Phase 0 / 0.5 đã xác thực trên dữ liệu thật. v2 thay thế hoàn toàn v1 (hướng "chỉ dùng công bố chính thức + rebuild").  
+> **Phiên bản:** v4, cập nhật 2026-09-26. Thay v3 (2026-09-22, sửa tới 25/09): **bỏ thư viện vnstock, gọi thẳng API Vietcap/KBS** (D28, §5.1, §5.4); đồng bộ lộ trình với code (màn Hôm nay và `health.json` đã có từ 23/09). Tên tệp đổi `BLUEPRINT_v3.md` → `BLUEPRINT_v4.md`; số mục giữ nguyên nên mọi tham chiếu "§x.y" trong code vẫn đúng.  
+> v3 thay v2 (2026-09-21): đưa vào 6 điều chỉnh của `docs/PHASE0_AUDIT_v1.md` và kết quả Phase 0 / 0.5 đã xác thực trên dữ liệu thật. v2 thay thế hoàn toàn v1 (hướng "chỉ dùng công bố chính thức + rebuild").  
 > **Repository:** `hailua87/vn-stock-filter` (nhánh `main`)  
 > **Production:** <https://vn-stock-filter.vercel.app>  
 > **Mockup giao diện:** canvas "VN Stock Filter — Bố cục 2 module v2" (4 màn hình, số liệu minh họa)
@@ -11,7 +12,7 @@
 
 ## 1. Tóm tắt điều hành
 
-VN Stock Filter là công cụ cá nhân, không thương mại hóa, gồm hai module dùng chung một nền dữ liệu vnstock:
+VN Stock Filter là công cụ cá nhân, không thương mại hóa, gồm hai module dùng chung một nền dữ liệu lấy từ API công khai của Vietcap (VCI) và KBS:
 
 | | **Module A — Scan hằng ngày** | **Module B — Watchlist dài hạn** |
 |---|---|---|
@@ -24,7 +25,7 @@ VN Stock Filter là công cụ cá nhân, không thương mại hóa, gồm hai 
 Nguyên tắc (giữ từ v2):
 
 1. **Giữ backend hiện tại** (scanner kỹ thuật + Valuation Engine, chạy bằng GitHub Actions, web trên Vercel). Chỉ bổ sung phần chấm điểm chất lượng và làm lại giao diện theo bố cục đã chốt.
-2. **Lấy dữ liệu qua vnstock**, không tự parse PDF báo cáo tài chính.
+2. **Lấy dữ liệu qua API công khai của Vietcap/KBS** (trước 26/09/2026 qua thư viện vnstock — D28), không tự parse PDF báo cáo tài chính.
 3. **Không gán điểm trung tính cho dữ liệu thiếu**; thiếu thì hiển thị là thiếu.
 4. **Kết quả là thứ tự ưu tiên nghiên cứu**, không phải khuyến nghị mua bán, không đặt lệnh.
 
@@ -34,10 +35,10 @@ Nguyên tắc (giữ từ v2):
 |---|---|
 | **Đã có** | Đã tồn tại trong repo `main` (theo README hiện tại) |
 | **Cần xây** | Đã thống nhất logic, chưa có mã nguồn |
-| **Cần xác thực** | Phải kiểm tra trong mã nguồn hoặc dữ liệu vnstock thực tế trước khi dựa vào |
+| **Cần xác thực** | Phải kiểm tra trong mã nguồn hoặc dữ liệu thực tế của nguồn trước khi dựa vào |
 | **Cần chốt** | Còn là quyết định mở, xem §14 |
 
-## 3. Nhật ký quyết định (v1 → v2 → v3)
+## 3. Nhật ký quyết định (v1 → v2 → v3 → v4)
 
 | # | Chủ đề | v1 | v2 (đã chốt 21/09/2026) |
 |---|---|---|---|
@@ -71,6 +72,7 @@ Nguyên tắc (giữ từ v2):
 | D25 | Mô hình `INSURANCE` | Chưa kích hoạt, chưa rõ lý do | **Cố ý không bật** (chốt 25/09/2026). Rổ 200 chỉ có **2 mã** (BVH, MIG); điểm ba chiều là percentile trong nhóm, mà percentile trên 2 mã chỉ ra được 0 và 100 — không nói gì về doanh nghiệp. `INACTIVE_MODEL_REASON` đẩy lý do ra màn hình thay vì để "chưa kích hoạt" nghe như sắp làm đến nơi (§8.4) |
 | D26 | Nhánh `rebuild/vercel-fisher` | Giữ, không merge (D6) | **Xóa 25/09/2026.** Quyết định và lý do đã nằm ở D6; nhánh code cũ không thêm thông tin gì mà còn làm người mới tưởng đó là hướng đang làm dở |
 | D27 | Backtest chiến lược trading | Chưa chốt (§14.6) | **Đưa vào Phase 4** (chốt 25/09/2026). Archive tín hiệu theo phiên đã chạy từ 18/09 nên dữ liệu đang tích lũy sẵn; chỉ còn chờ đủ dài và viết phần đo (§15) |
+| D28 | Lớp lấy dữ liệu | Thư viện `vnstock==4.0.7` (+ `vnai`) | **Gọi thẳng API Vietcap/KBS qua `backend/scanner/sources/`** (26/09/2026). PyPI cách ly `vnstock` và `vnai` từ 24–25/09: `pip install` hỏng, Daily Scan EOD 25/09 đỏ (issue #44), CI đỏ từ 24/09. CHANGELOG 4.0.9 của vnstock xác nhận các bản trước ghi chỉ dẫn vào tệp cấu hình trợ lý AI mỗi lần import (§16). Dự án chỉ dùng 6 việc của thư viện nên viết lại lớp mỏng thay vì cài vnstock từ nguồn khác. Đầu ra giữ **đúng hình dạng vnstock 4.0.7** nên adapter, normalizer, fixture, sổ snapshot không đổi. Vẫn là **API không chính thức** — rủi ro nguồn đổi định dạng không giảm, chỉ chuyển từ người bảo trì thư viện sang repo này; `backend/check_sources.py` (job CI `sources-live`) là chuông báo |
 
 ## 4. Phạm vi
 
@@ -94,46 +96,57 @@ Nguyên tắc (giữ từ v2):
 
 ### 5.1 Nguồn
 
-vnstock 4.x (theo README, dùng `VNSTOCK_API_KEY`). Nguồn gốc bên dưới do thư viện chọn; đây là API không chính thức, có thể thay đổi hoặc giới hạn bất cứ lúc nào.
+API công khai của **Vietcap (VCI)** và **KBS**, gọi qua `backend/scanner/sources/` (D28; trước 26/09/2026 qua vnstock). Đây là API **không chính thức**, không tài liệu, có thể đổi định dạng hoặc chặn bất cứ lúc nào; không cần khóa API. Giới hạn tần suất do repo tự đặt: 1 lượt/giây cho mọi nguồn cộng lại (`SOURCE_MIN_INTERVAL`, đúng mức 60 lượt/phút vnstock từng áp).
+
+| Việc | Endpoint | Hàm |
+|---|---|---|
+| Danh sách mã, sàn | KBS `iis-server/investment/stock/search/data` | `kbs.listing()` |
+| Giá ngày, VN-Index | VCI `api/chart/OHLCChart/gap-chart` | `vci.ohlcv()` |
+| Tổng quan, ngành ICB | VCI IQ `v1/company/details` | `vci.company_overview()` |
+| BCTC năm/quý | VCI IQ `v1/company/{mã}/financial-statement` (+ `/metrics` cho nhãn khoản mục) | `vci.financial_statement()` |
+| Sự kiện quyền | VCI IQ `v1/events` | `vci.events()` |
+| NIM ngân hàng | KBS `stock/finance-info/{mã}` (nhóm CSTC) | `kbs.bank_nim()` |
 
 | Tập dữ liệu | Dùng cho | Trạng thái |
 |---|---|---|
 | Danh sách mã, sàn, ngành | Universe, phân loại mô hình | Đã có, **đã xác thực** — xem §5.4 |
 | OHLCV ngày | Module A, beta, định giá lịch sử | Đã có (`data_fetcher.py`) |
 | BCTC quý/năm | Module B, Valuation Engine | Đã có (`financial_fetcher.py`), **đã xác thực** dạng bảng và đơn vị — xem §5.4 |
-| Chỉ số tài chính đặc thù ngân hàng (nợ xấu, bao phủ nợ xấu, NIM) | Mô hình `BANK` | **Đã xác thực: không dùng được** — bảng `ratio` bản cộng đồng chỉ có 2018; 3 bảng BCTC không đủ để tính (§5.4, §14.3) |
-| Trạng thái cảnh báo / kiểm soát / hạn chế / đình chỉ | Veto, cờ quản trị, lọc Module A | Cần xác thực |
-| Ý kiến kiểm toán | Veto, cờ quản trị | Cần xác thực; nhiều khả năng vnstock không có (xem §14) |
+| Chỉ số tài chính đặc thù ngân hàng | Mô hình `BANK` | NIM **đã có** từ KBS (D24); nợ xấu, bao phủ nợ xấu **không nguồn nào có**, đã gỡ khỏi mô hình (§8.4, §14.3) |
+| Trạng thái cảnh báo / kiểm soát / hạn chế / đình chỉ | Veto, cờ quản trị, lọc Module A | **Không có nguồn có cấu trúc** — gỡ (D21, §14.2) |
+| Ý kiến kiểm toán | Veto, cờ quản trị | **Không có nguồn** — gỡ (D21, §14.2) |
 
 ### 5.2 Quy tắc dữ liệu bắt buộc
 
 1. **Giá đã điều chỉnh** cổ tức và chia tách cho mọi chỉ báo kỹ thuật và phép tính lịch sử. Giá hiển thị trên bảng là giá chưa điều chỉnh của phiên.
 2. **Không ghi đè bằng dữ liệu rỗng.** Khi một lần lấy thất bại hoặc trả rỗng, giữ bản gần nhất, gắn cờ `stale` kèm ngày của bản đang dùng.
-3. **Snapshot theo ngày lấy.** Mỗi lần lấy BCTC lưu kèm `fetched_at`, phiên bản vnstock và hash nội dung. Đây là cách duy nhất để sau này biết hệ thống đã thấy gì vào ngày nào, vì vnstock chỉ trả phiên bản số liệu mới nhất.
-   *Đã có (Phase 0.5):* sổ `backend/data/snapshots/fundamentals_registry.json` ghi cho mỗi (mã, loại kỳ, kỳ) `first_seen`, `last_seen`, hash 3 bảng BCTC và lịch sử sửa số liệu kèm phiên bản vnstock. Sổ **chỉ chứa metadata, không chứa số liệu** (repo public, §4.2); số liệu đã chuẩn hóa sẽ lưu ở `web/data/quality/archive/` (Phase 1). Độ phân giải ngày giới hạn bởi lịch weekly và TTL cache 7 ngày: `first_seen` là "chậm nhất là ngày này".
-4. **Quy tắc độ trễ công bố cho backtest.** Với dữ liệu lịch sử lấy lại từ vnstock (không có ngày công bố), coi số liệu kỳ quý chỉ khả dụng sau ngày kết thúc kỳ + 45 ngày, kỳ năm + 90 ngày. Từ ngày bắt đầu lưu snapshot, dùng `fetched_at` đầu tiên thay cho quy tắc này.
+3. **Snapshot theo ngày lấy.** Mỗi lần lấy BCTC lưu kèm `fetched_at`, phiên bản lớp nguồn và hash nội dung. Đây là cách duy nhất để sau này biết hệ thống đã thấy gì vào ngày nào, vì nguồn chỉ trả phiên bản số liệu mới nhất.
+   *Đã có (Phase 0.5):* sổ `backend/data/snapshots/fundamentals_registry.json` ghi cho mỗi (mã, loại kỳ, kỳ) `first_seen`, `last_seen`, hash 3 bảng BCTC và lịch sử sửa số liệu kèm phiên bản nguồn (khóa `vnstock` giữ tên cũ; từ 26/09/2026 giá trị là `direct-1`). **Sau lượt weekly đầu tiên với lớp nguồn mới, số kỳ "revised" phải bằng 0** — nếu không, lớp nguồn đọc số khác vnstock 4.0.7 và phải kiểm trước khi tin điểm Chất lượng. Sổ **chỉ chứa metadata, không chứa số liệu** (repo public, §4.2); số liệu đã chuẩn hóa sẽ lưu ở `web/data/quality/archive/` (Phase 1). Độ phân giải ngày giới hạn bởi lịch weekly và TTL cache 7 ngày: `first_seen` là "chậm nhất là ngày này".
+4. **Quy tắc độ trễ công bố cho backtest.** Với dữ liệu lịch sử lấy lại từ nguồn (không có ngày công bố), coi số liệu kỳ quý chỉ khả dụng sau ngày kết thúc kỳ + 45 ngày, kỳ năm + 90 ngày. Từ ngày bắt đầu lưu snapshot, dùng `fetched_at` đầu tiên thay cho quy tắc này.
 5. **Chuẩn hóa đơn vị** (đồng, triệu, tỷ) ngay khi nạp, kiểm tra theo từng trường.
-6. **Survivorship:** danh sách mã từ vnstock là danh sách hiện tại. Kết quả backtest phải ghi rõ giới hạn này.
-7. **Giá điều chỉnh bị tính lại hồi tố.** Khi có sự kiện quyền, vnstock điều chỉnh lại MỌI phiên trước đó của chuỗi giá adjusted (FPT: giá lưu 16/09 là 73,8, giá hiện tại của cùng phiên là 67,09, tỷ lệ đúng 1,1000 = cổ tức cổ phiếu 10%). Archive giữ giá tại thời điểm ghi nên vẫn đúng cho ngày đó, nhưng **backtest không được so trực tiếp giá archive cũ với giá hiện tại** — phải điều chỉnh lại theo các sự kiện quyền phát sinh sau.
+6. **Survivorship:** danh sách mã từ nguồn là danh sách hiện tại. Kết quả backtest phải ghi rõ giới hạn này.
+7. **Giá điều chỉnh bị tính lại hồi tố.** Khi có sự kiện quyền, VCI điều chỉnh lại MỌI phiên trước đó của chuỗi giá adjusted (FPT: giá lưu 16/09 là 73,8, giá hiện tại của cùng phiên là 67,09, tỷ lệ đúng 1,1000 = cổ tức cổ phiếu 10%). Archive giữ giá tại thời điểm ghi nên vẫn đúng cho ngày đó, nhưng **backtest không được so trực tiếp giá archive cũ với giá hiện tại** — phải điều chỉnh lại theo các sự kiện quyền phát sinh sau.
 
 ### 5.3 Provenance tối thiểu cho mỗi số liệu dùng để chấm điểm
 
-`ticker`, `metric`, `period`, `value`, `unit`, `source` (vnstock + nguồn con nếu biết), `fetched_at`, `snapshot_hash`, `is_stale`.
+`ticker`, `metric`, `period`, `value`, `unit`, `source` (VCI / KBS), `fetched_at`, `snapshot_hash`, `is_stale`.
 
-### 5.4 Đặc điểm vnstock 4.0.7 đã xác thực (Phase 0 / 0.5)
+### 5.4 Đặc điểm nguồn đã xác thực (Phase 0 / 0.5, qua vnstock 4.0.7)
+
+Đo qua vnstock 4.0.7 nhưng là đặc điểm của **API Vietcap/KBS** bên dưới, nên vẫn đúng sau D28: lớp `scanner/sources/` tái tạo đúng các biến đổi vnstock làm (đổi tên cột, chia 1.000 giá cổ phiếu, `item_id` từ nhãn tiếng Anh, ô trống = 0). Test `test_sources.py` dựng ngược phản hồi API từ 18 bảng fixture vnstock 4.0.7 và kiểm lớp mới cho ra cùng record; `check_sources.py` so trên API thật.
 
 | Chủ đề | Thực tế | Hệ quả trong code |
 |---|---|---|
-| Module Finance | `vnstock.api.financial` (không có `vnstock.api.finance`) | Import sai từng làm weekly valuation đỏ 4 tuần (30/08–20/09) |
+| Module Finance (lịch sử) | `vnstock.api.financial` (không có `vnstock.api.finance`) | Import sai từng làm weekly valuation đỏ 4 tuần (30/08–20/09). Hết áp dụng sau D28 |
 | Dạng bảng BCTC | **Dòng = khoản mục** (`item`, `item_en`, `item_id`), **cột = kỳ**, kỳ mới trước | `statement_to_records`: mỗi kỳ một record, khóa theo `item_id`; `item_id` trùng lấy giá trị khác rỗng đầu tiên |
 | Đơn vị BCTC | **Đồng** | Chia 1e9 sang tỷ đồng khi nạp; normalizer làm việc bằng tỷ đồng |
-| Số kỳ | Bản cộng đồng tối đa **8 kỳ** | Giữ cả 8 (`MAX_PERIODS = 8`), đủ 6 điểm cho CAGR 5 năm |
-| Bảng `ratio` | Chỉ trả dữ liệu **2018** (16 cột cùng tên, Q1–Q4 lặp) | Bị bỏ khi cũ hơn BCTC quá 1 năm; ROE, EPS/BVPS lịch sử tính từ BCTC; NPL/NIM/CAR không có |
+| Số kỳ | vnstock bản cộng đồng trả tối đa **8 kỳ**; API có thể trả nhiều hơn | Giữ 8 kỳ mới nhất (`MAX_PERIODS = 8`), đủ 6 điểm cho CAGR 5 năm |
+| Bảng `ratio` (VCI) | Chỉ trả dữ liệu **2018** (16 cột cùng tên, Q1–Q4 lặp) | Luôn bị bỏ vì cũ hơn BCTC; từ D28 **không lấy nữa** (bớt một lượt gọi/mã). ROE, EPS/BVPS lịch sử tính từ BCTC; NIM từ KBS (D24) |
 | Ngành (`Company.overview`) | Không có `icb_name2..4`; cột `sector` là **tên ICB cấp 2** tiếng Anh, kèm `icb_code_lv2`, `icb_code_lv4` | `industry` lấy từ `sector` khi có `icb_code_lv2`; phân loại cấp 4 theo mã số (`ICB_LV4_OVERRIDE`). 100/100 mã universe có ngành |
 | Số cổ phiếu | `overview.issue_share`; dòng BCTC `common_shares` là **vốn cổ phần bằng tiền** | Dự phòng: vốn góp / mệnh giá 10.000đ (VCB khớp `overview` trong 0,01%) |
 | Giá sau đóng cửa | Đo 16/09, 18/09: Close lúc ~17:00 ICT đã trùng giá chốt; chỉ Volume thiếu nhẹ (trung vị ~0,1%) | Nhận định cũ "giá tạm tới 22:00" không còn đúng với Close; giữ lịch cũ tới khi đo thêm |
 | Tốc độ nguồn | Dao động mạnh: 18/09 lấy 500 mã trong 18 phút; 14, 17, 21/09 `trading.vietcap.com.vn` timeout 30 s liên tục | Ngân sách thời gian, điều tiết theo lượt gọi mạng, hạn chót cho mọi lệnh gọi sau vòng fetch (§7.5) |
-| `vnai` (phụ thuộc của vnstock) | Tự ghi một prompt tải từ vnstocks.com vào `AGENTS.md` của thư mục chạy và `~/.claude`, `~/.codex`, `~/.gemini` | `VNSTOCK_DISABLE_AGENT_SETUP=1` **không chặn được** (đo 23/09/2026: `vnai/beam/agents.py` không đọc biến này). Chặn thật bằng `/AGENTS.md` trong `.gitignore` + hook dọn dẹp ở `backend/conftest.py`; ghim `vnai==2.6.0` |
+| `vnai` (phụ thuộc của vnstock, lịch sử) | Tự ghi một prompt tải từ vnstocks.com vào `AGENTS.md` của thư mục chạy và `~/.claude`, `~/.codex`, `~/.gemini`; `VNSTOCK_DISABLE_AGENT_SETUP=1` không chặn được (đo 23/09/2026) | Là lý do PyPI cách ly gói (24–25/09). Đã bỏ cùng vnstock (D28); giữ `/AGENTS.md` trong `.gitignore` + hook ở `backend/conftest.py` phòng máy cá nhân còn bản cũ |
 
 ## 6. Kiến trúc
 
@@ -141,7 +154,7 @@ vnstock 4.x (theo README, dùng `VNSTOCK_API_KEY`). Nguồn gốc bên dưới d
 
 ```mermaid
 flowchart LR
-    A["vnstock"] --> B["GitHub Actions: backend Python"]
+    A["API Vietcap / KBS<br/>(backend/scanner/sources)"] --> B["GitHub Actions: backend Python"]
     B --> C["JSON trong web/data (commit vào repo)"]
     C --> D["Web tĩnh trên Vercel"]
 ```
@@ -152,22 +165,22 @@ flowchart LR
 | `backend/run_valuation.py` + `strategies/valuation/` | Đã có; lớp quy đổi 4 mức **đã có** | Còn: nguồn NPL/CAR cho nhóm tài chính (§14.3) |
 | `backend/backtest.py` | Đã có (cho định giá) | Dùng để hiệu chỉnh ngưỡng định giá |
 | `industry_classifier.py`, `peer_database.py` | Đã có | Dùng lại để ánh xạ sang 5 mô hình chấm điểm (§8.2) |
-| Quality scoring | **Đã có** (Phase 1): lõi `backend/scanner/quality/`, adapter BCTC → schema chỉ tiêu (`adapter.py`), `backend/run_quality.py`, `web/data/quality/latest.json` + `archive/` | Còn: nguồn NPL/NIM cho `BANK`, kích hoạt `INSURANCE`, `REAL_ESTATE` |
+| Quality scoring | **Đã có** (Phase 1): lõi `backend/scanner/quality/`, adapter BCTC → schema chỉ tiêu (`adapter.py`), `backend/run_quality.py`, `web/data/quality/latest.json` + `archive/`; `BANK` có NIM (D24), `REAL_ESTATE` đã bật (D22) | `INSURANCE` cố ý không bật (D25) |
 | Status engine (veto + phân loại watchlist) | Logic **đã có** (`scanner/quality/status.py`) | Nối vào `run_quality.py` |
 | Push dữ liệu của bot | `scripts/commit-bot-data.sh` | Không rebase, không merge driver, không force-push (audit F9) |
 | Cảnh báo CI | `scripts/ci-alert.sh` + `data-freshness-alert.yml` | Issue nhãn `workflow-failure` mở khi daily-scan/weekly-valuation hỏng, tự đóng khi hồi phục; chuông độ tươi bắt trường hợp không có run |
 | Sổ snapshot BCTC | `backend/data/snapshots/fundamentals_registry.json` | Bot weekly-valuation commit; chỉ metadata (§5.2.3) |
-| `web/` | Đã có (scanner + valuation dashboard) | Làm lại theo 4 màn hình (§11) |
+| `web/` | **Đã có 4 màn hình** (§11) | Còn: cột P/E so với 5 năm ở Watchlist |
 | `.github/workflows/daily-scan.yml` | Đã có | Thêm job quality, xem §10 |
 
 ### 6.2 Không làm
 
-- Không merge nhánh `rebuild/vercel-fisher`. Giữ lại để tham chiếu (schema, ý tưởng RLS) hoặc đóng PR nếu đã mở.
+- Không merge nhánh `rebuild/vercel-fisher` — **đã xóa 25/09/2026** (D26).
 - Không đưa Supabase vào cho đến khi quyết định mục §14.1 cần đến nó.
 
 ### 6.3 Lưu ý bảo mật
 
-Repo đang ở chế độ public và dữ liệu đầu ra được commit vào `web/data`. Kết quả scan và điểm số công khai là chấp nhận được. **Ghi chú luận điểm cá nhân và danh sách nắm giữ tuyệt đối không được commit vào repo** (xem §14.1). `VNSTOCK_API_KEY` chỉ nằm trong GitHub Secret.
+Repo đang ở chế độ public và dữ liệu đầu ra được commit vào `web/data`. Kết quả scan và điểm số công khai là chấp nhận được. **Ghi chú luận điểm cá nhân và danh sách nắm giữ tuyệt đối không được commit vào repo** (xem §14.1). Nguồn dữ liệu không cần khóa API (D28); secret `VNSTOCK_API_KEY` không còn dùng và có thể xóa khỏi GitHub.
 
 ## 7. Module A — Scan hằng ngày
 
@@ -255,7 +268,7 @@ Bảng ánh xạ 19 → 5 nằm trong `backend/scanner/quality/config.py` (v3, D
 
 ### 8.4 Chỉ tiêu theo mô hình
 
-Chỉ giữ chỉ tiêu tính được từ BCTC/chỉ số mà vnstock trả về. Chiều "cao hơn tốt hơn" hay "thấp hơn tốt hơn" khai báo trong cấu hình.
+Chỉ giữ chỉ tiêu tính được từ BCTC/chỉ số mà nguồn trả về. Chiều "cao hơn tốt hơn" hay "thấp hơn tốt hơn" khai báo trong cấu hình.
 
 **`NON_FINANCIAL`**
 
@@ -292,7 +305,7 @@ Chỉ giữ chỉ tiêu tính được từ BCTC/chỉ số mà vnstock trả v�
 | Chống chịu | Ổn định chi phí tín dụng (độ lệch chuẩn chi phí dự phòng / dư nợ) | 30% |
 | Chống chịu | Cho vay / tiền gửi khách hàng (thấp tốt) | 25% |
 
-**NIM lấy từ nguồn `KBS` của chính `vnstock`** — không phải API bên ngoài. Bảng `ratio` của nguồn mặc định `VCI` dừng ở 2018 (§5.4); `Finance(source='KBS')` có 2022–2025 và phủ **18/18** ngân hàng trong rổ. KBS trả phần trăm, `adapter.attach_bank_ratios` đổi sang tỷ lệ — chỗ đổi đơn vị duy nhất.
+**NIM lấy từ nguồn `KBS`** (`kbs.bank_nim`; lúc chốt D24 là qua `Finance(source='KBS')` của vnstock, cùng endpoint). Bảng `ratio` của `VCI` dừng ở 2018 (§5.4); KBS có 2022–2025 và phủ **18/18** ngân hàng trong rổ. Lấy 4 năm như vnstock từng trả, để điểm không đổi chỉ vì đổi lớp nguồn. KBS trả phần trăm, `adapter.attach_bank_ratios` đổi sang tỷ lệ — chỗ đổi đơn vị duy nhất.
 
 **Đã gỡ: tỷ lệ nợ xấu và bao phủ nợ xấu.** Khảo sát 24/09/2026 ba nguồn:
 
@@ -479,7 +492,7 @@ Các ngưỡng là mặc định cấu hình, không phải bằng chứng về 
 | Data freshness alert (đã có) | Kiểm độ tươi `web/data/latest.json` theo lịch giao dịch | 08:07 ICT hằng ngày |
 | Weekly quality (đã có) | `run_quality.py` trong workflow weekly-valuation: chấm 4 chiều, veto, trạng thái; lấy thêm BCTC quý (~3 lượt/mã) | Ngay sau bước định giá, cùng job và universe; hỏng thì định giá vẫn công bố, job đỏ để mở issue |
 
-Không chạy hai workflow có gọi vnstock cùng lúc: chung một `VNSTOCK_API_KEY` (bản cộng đồng 60 request/phút) thì cả hai cùng chậm.
+Không chạy hai workflow có gọi nguồn cùng lúc: mỗi workflow tự giữ 1 lượt/giây, chạy song song là gấp đôi tần suất vào cùng máy chủ Vietcap.
 
 ## 13. Kiểm soát chất lượng dữ liệu
 
@@ -496,13 +509,13 @@ Không chạy hai workflow có gọi vnstock cùng lúc: chung một `VNSTOCK_AP
 
 Mọi issue hiển thị trong khối "Tình trạng dữ liệu" của màn Hôm nay.
 
-**Đã có (v3):** cổng độ phủ và cổng thời gian của archive (§7.5); cổng stale (tỷ lệ mã StaleCache); cổng đơn vị giá và upside ±300% ở bước Verify của weekly valuation; issue `workflow-failure` khi workflow hỏng; chuông độ tươi `data-freshness`. **Chưa có:** các kiểm tra còn lại trong bảng trên và `health.json`.
+**Đã có (v3):** cổng độ phủ và cổng thời gian của archive (§7.5); cổng stale (tỷ lệ mã StaleCache); cổng đơn vị giá và upside ±300% ở bước Verify của weekly valuation; issue `workflow-failure` khi workflow hỏng; chuông độ tươi `data-freshness`. `health.json` **đã có** (23/09, khối "Tình trạng dữ liệu" của màn Hôm nay); `check_sources.py` kiểm lớp nguồn trên API thật mỗi PR (D28). **Chưa có:** các kiểm tra còn lại trong bảng trên.
 
 ## 14. Các mục cần chốt
 
 1. ~~**Lưu luận điểm cá nhân.**~~ **Đã chốt 23/09/2026 (D20): lưu trong trình duyệt.** Ô luận điểm và điều kiện bán nằm ở cuối màn Chi tiết mã, lưu vào `localStorage` theo từng mã. Hệ quả được nói thẳng trên màn hình chứ không giấu: chỉ có trên máy và trình duyệt đó. Có nút xuất/nhập tệp JSON để mang sang máy khác. Ghi hỏng (trình duyệt chặn lưu trữ) thì **báo ra màn hình** — khác với các lựa chọn giao diện khác vốn im lặng bỏ qua, vì ở đây là chữ người dùng vừa gõ.
 2. ~~**Nguồn ý kiến kiểm toán và trạng thái cảnh báo/kiểm soát.**~~ **Đã chốt 23/09/2026 (D21): bỏ hai cờ và hai veto.** Khảo sát cùng ngày: vnstock không có; TCBS có `getListAuditFirm` nhưng chỉ cho **tên** công ty kiểm toán và năm, không có ý kiến kiểm toán; `getTickerOverview` không có trường cảnh báo/kiểm soát. Trạng thái cảnh báo được công bố dạng tin/sự kiện chứ không phải trường có cấu trúc. Hai cờ `warning_status`/`qualified_opinion` và hai veto `suspended_or_controlled`/`adverse_opinion` đã gỡ hẳn khỏi cấu hình, và ghi vào `GOVERNANCE_NOT_EVALUATED`/`VETO_NOT_EVALUATED` để giao diện nói rõ "Chưa xét" thay vì im lặng (§8.5).
-3. ~~**Trường ngân hàng**~~ **Đã chốt 24/09/2026 (D24).** NIM lấy được từ `vnstock` nguồn **KBS** (2022–2025, phủ 18/18 mã) — không cần API bên ngoài. Nợ xấu và bao phủ nợ xấu **không nguồn nào có**, đã gỡ khỏi mô hình và ghi vào `BANK_NOT_EVALUATED` để màn hình nói "Chưa xét". Chi tiết ở §8.4. Định giá nhóm tài chính vẫn "Chưa có" (§9) — đó là lớp chặn riêng, không liên quan.
+3. ~~**Trường ngân hàng**~~ **Đã chốt 24/09/2026 (D24).** NIM lấy được từ nguồn **KBS** (qua vnstock khi đó; từ D28 gọi thẳng) (2022–2025, phủ 18/18 mã) — không cần API bên ngoài. Nợ xấu và bao phủ nợ xấu **không nguồn nào có**, đã gỡ khỏi mô hình và ghi vào `BANK_NOT_EVALUATED` để màn hình nói "Chưa xét". Chi tiết ở §8.4. Định giá nhóm tài chính vẫn "Chưa có" (§9) — đó là lớp chặn riêng, không liên quan.
 4. ~~**Vùng vào / cắt lỗ / mục tiêu**~~ **Đã chốt và đã làm 22–23/09/2026.** Cắt lỗ = hỗ trợ gần nhất dưới giá đóng cửa, mục tiêu = kháng cự gần nhất trên giá, R:R = (mục tiêu − giá) / (giá − cắt lỗ); bỏ cột "vùng vào"; không hiển thị R:R khi thiếu một trong hai mức (`backend/scanner/trade_levels.py`, cột trên màn Scan).
 5. ~~**N của universe Module B**~~ **Đã chốt 23/09/2026: 200.** Đo thật (run 35874233924, `limit=200`): định giá **20 phút**, chấm chất lượng **19 phút** — tổng ~40 phút trên trần 90+45.
 
@@ -528,8 +541,8 @@ Mọi issue hiển thị trong khối "Tình trạng dữ liệu" của màn Hô
 | 0. Dọn dẹp — **đã xong phần chính** | Không merge `rebuild/vercel-fisher`; lưu tài liệu vào `docs/`; xác thực các mục "Cần xác thực" ở §5.1, §7.1 | Có kết quả xác thực cho từng mục. Còn: trạng thái cảnh báo/kiểm soát, ý kiến kiểm toán (§14.2), tham số chiến lược §7.1 |
 | 0.5. Nền dữ liệu — **đã xong 22/09** | F1 dữ liệu định giá thật; F2 giữ 8 kỳ BCTC; F3 sổ snapshot point-in-time; F9 bot push không rebase | Đã xác nhận trên runner thật |
 | 1. Quality scoring — **đã chạy được 22/09** | Cấu hình, snapshot BCTC, chỉ tiêu 3 mô hình, cờ quản trị, độ phủ, veto, status engine, `quality/latest.json` | Chạy thật 100/100 mã, mỗi trạng thái có lý do: 52 Theo dõi, 16 Cần xem lại, 32 Thiếu dữ liệu (ngân hàng thiếu NPL/NIM, BĐS/bảo hiểm chưa kích hoạt) |
-| 2. Giao diện — **còn màn Hôm nay** | 4 màn hình theo canvas v2 trên `web/` hiện có. Đã xong: Scan (§7.2–7.4), Watchlist, Chi tiết mã (§11.1) | Hiển thị đúng dữ liệu thật, empty state rõ ràng |
-| 3. Liên kết | Quy đổi định giá 4 mức, liên kết Chất lượng sang Module A, `health.json` | Hai module dùng chung universe và quy tắc |
+| 2. Giao diện — **đã xong 23/09** | 4 màn hình theo canvas v2 trên `web/` hiện có: Hôm nay (PR #32), Scan (§7.2–7.4), Watchlist, Chi tiết mã (§11.1). Còn lẻ: P/E so với 5 năm ở Watchlist | Hiển thị đúng dữ liệu thật, empty state rõ ràng |
+| 3. Liên kết — **một phần** | Đã có: quy đổi định giá 4 mức (`valuation_band`), `health.json`. **Còn:** liên kết Chất lượng sang Module A (điều kiện "Chất lượng ≥ 60" ở §7.2 chưa có trên màn Scan) | Hai module dùng chung universe và quy tắc |
 | 4. Hiệu chỉnh | Backtest ngưỡng định giá (≥ 3 tháng snapshot); **backtest chiến lược trading (D27)**; tách mô hình con cho KCN / cho thuê trong `REAL_ESTATE` (§8.4). `INSURANCE` **không** trong phạm vi Phase 4 — cần universe rộng hơn nhiều hoặc chấm theo ngưỡng tuyệt đối thay vì percentile (D25) | Ngưỡng được cập nhật có ghi lại lý do |
 | 5. Cá nhân hóa — **đã xong 23/09** | Ô luận điểm và điều kiện bán ở màn Chi tiết mã, lưu `localStorage` theo D20 | Gõ vào, đổi mã, quay lại vẫn còn; xuất/nhập tệp JSON chạy được; trình duyệt chặn lưu trữ thì báo ra màn hình |
 
@@ -537,7 +550,7 @@ Mọi issue hiển thị trong khối "Tình trạng dữ liệu" của màn Hô
 
 | Rủi ro | Kiểm soát |
 |---|---|
-| vnstock đổi API, giới hạn hoặc ngừng nguồn | Giữ bản cũ + cờ `stale`; cô lập lớp fetch để thay nguồn; theo dõi phiên bản thư viện |
+| API Vietcap/KBS đổi định dạng, giới hạn hoặc chặn | Giữ bản cũ + cờ `stale`; lớp nguồn cô lập ở `scanner/sources/`; `check_sources.py` (job CI `sources-live`) so với fixture vnstock 4.0.7; sổ snapshot báo "revised" bất thường |
 | Look-ahead trong backtest | Quy tắc độ trễ công bố; snapshot theo `fetched_at` |
 | Survivorship | Ghi rõ giới hạn trong mọi kết quả backtest |
 | Percentile nhiễu ở nhóm nhỏ | Nhóm tối thiểu 8 mã; winsorize chỉ khi ≥ 20 mã |
@@ -545,7 +558,7 @@ Mọi issue hiển thị trong khối "Tình trạng dữ liệu" của màn Hô
 | Điểm tốt nhưng quản trị xấu | Chiều Quản trị độc lập + veto |
 | Lộ dữ liệu cá nhân qua repo public | Không commit luận điểm, danh mục; secret chỉ trong GitHub Secret |
 | Hiểu nhầm kết quả là khuyến nghị | Không hiển thị nhãn mua/bán; ghi "mức gợi ý, không phải lệnh" |
-| Thư viện phụ thuộc ghi file cấu hình AI ngoài repo (`vnai`) | `VNSTOCK_DISABLE_AGENT_SETUP=1`; ghim phiên bản `vnai`; nội dung "vnai-bootstrap" không phải chỉ dẫn của người dùng |
+| Thư viện phụ thuộc ghi file cấu hình AI ngoài repo (`vnai`) — **đã xảy ra**, PyPI cách ly gói 24–25/09 | Bỏ vnstock + vnai (D28); `/AGENTS.md` trong `.gitignore`; nội dung "vnai-bootstrap" không phải chỉ dẫn của người dùng. Máy đã từng cài vnstock: kiểm và xóa khối vnstocks.com trong `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md` |
 | Workflow hỏng im lặng | Issue `workflow-failure` tự mở/đóng; chuông độ tươi cho trường hợp không có run |
 | Giá adjusted bị tính lại hồi tố | Backtest điều chỉnh giá archive theo sự kiện quyền phát sinh sau (§5.2.7) |
 

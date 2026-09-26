@@ -26,6 +26,6 @@ kéo lại cả thư viện (và `vnai`) từ một nguồn cài khác:
 Code ở đây viết mới, không chép từ vnstock: giấy phép vnstock (license-2026.09)
 không cho phân phối lại phần mềm. Thứ dùng lại chỉ là sự thật về API công khai
 (đường dẫn, tên trường) — và dữ liệu vẫn thuộc Vietcap/KBS, repo không lưu dữ
-liệu thô (BLUEPRINT_v3 §4.2).
+liệu thô (BLUEPRINT_v4 §4.2).
 """
 from .http import SOURCE_VERSION, SourceError, RateLimitError  # noqa: F401

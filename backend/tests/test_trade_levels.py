@@ -1,5 +1,5 @@
 """
-Cắt lỗ / mục tiêu / R:R (blueprint v3 §7.3, §14.4 — audit F5).
+Cắt lỗ / mục tiêu / R:R (blueprint v4 §7.3, §14.4 — audit F5).
 
 Số kiểm tay lấy từ TIP phiên 22/09/2026 trong web/data/latest.json:
   giá 16,35 · hỗ trợ 16,21 và 15,60 · kháng cự 16,59 / 16,90 / 17,21

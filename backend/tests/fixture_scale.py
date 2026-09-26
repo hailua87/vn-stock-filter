@@ -1,7 +1,7 @@
 """
 Hệ số biến đổi fixture BCTC (tests/fixtures/vnstock407_*.json).
 
-Repo public, blueprint v3 §4.2 không cho phân phối lại dữ liệu thô của bên thứ
+Repo public, blueprint v4 §4.2 không cho phân phối lại dữ liệu thô của bên thứ
 ba, nên fixture KHÔNG phải BCTC thô: chỉ giữ các dòng code dùng tới (216/1.682
 dòng) và mọi giá trị tiền trong 3 bảng BCTC đã nhân với FIXTURE_SCALE.
 

@@ -1,5 +1,5 @@
 """
-Chuỗi nến + MA cho màn Chi tiết mã (blueprint v3 §11.1).
+Chuỗi nến + MA cho màn Chi tiết mã (blueprint v4 §11.1).
 
 Ghi một tệp DÙNG CHUNG `web/data/ohlc/latest.json` thay vì nhét nến vào từng
 `latest.json` của 4 chiến lược: cùng một mã hay xuất hiện ở nhiều chiến lược,

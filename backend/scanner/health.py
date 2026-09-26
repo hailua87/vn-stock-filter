@@ -1,6 +1,6 @@
 """
 `web/data/health.json` — tình trạng dữ liệu cho khối "Tình trạng dữ liệu" của
-màn Hôm nay (blueprint v3 §11.2, §13).
+màn Hôm nay (blueprint v4 §11.2, §13).
 
 Một người ghi duy nhất: `run_daily`. Trạng thái của hai nguồn chạy hằng tuần
 (định giá, chất lượng) được ĐỌC từ chính tệp chúng đã xuất bản, chứ không phải

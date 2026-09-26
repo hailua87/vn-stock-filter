@@ -1,7 +1,7 @@
 """
 KBS: danh sách mã theo sàn, và NIM ngân hàng.
 
-NIM lấy từ KBS vì bảng chỉ số của VCI dừng ở 2018 (BLUEPRINT_v3 §5.4, D24).
+NIM lấy từ KBS vì bảng chỉ số của VCI dừng ở 2018 (BLUEPRINT_v4 §5.4, D24).
 """
 from __future__ import annotations
 

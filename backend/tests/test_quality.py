@@ -1,7 +1,7 @@
 """
 Test loi cham diem Module B (scanner/quality). Du lieu tong hop, khong can mang.
 
-Moi test kiem mot quy tac trong docs/BLUEPRINT_v3.md; ten test noi quy tac do.
+Moi test kiem mot quy tac trong docs/BLUEPRINT_v4.md; ten test noi quy tac do.
 """
 import sys
 from datetime import date
