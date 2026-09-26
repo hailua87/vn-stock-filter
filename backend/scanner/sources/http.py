@@ -24,6 +24,13 @@ SOURCE_VERSION = 'direct-1'
 
 TIMEOUT = 30
 
+# Giá ngày (OHLCV) chờ ngắn hơn. Đo trên runner GitHub 26/09/2026 (bài đo
+# tạm, PR #46): lượt gọi thành công xong trong 0,3–2 s (trung vị 0,33 s, p90
+# 1,8 s); lượt hỏng là TREO hẳn tới hết thời gian chờ, chờ lâu hơn cũng không
+# ra. Với 30 s × 3 lần thử, một mã treo tốn ~1,5 phút — Daily Scan 26/09 chỉ
+# lấy thêm ~90 mã mỗi lượt 45 phút. 10 s vẫn gấp 5 lần p90 của lượt thành công.
+OHLCV_TIMEOUT = float(os.environ.get('SOURCE_OHLCV_TIMEOUT', '10'))
+
 # Khoảng cách tối thiểu giữa hai lượt gọi, cho MỌI nguồn cộng lại.
 #
 # vnstock tự giới hạn 60 lượt/phút (bản có API key) ở phía máy khách. Bỏ
@@ -76,7 +83,8 @@ def _throttle() -> None:
 
 def request_json(method: str, url: str, *, headers: Optional[Dict[str, str]] = None,
                  params: Optional[Dict[str, Any]] = None,
-                 payload: Optional[Dict[str, Any]] = None) -> Any:
+                 payload: Optional[Dict[str, Any]] = None,
+                 timeout: float = TIMEOUT) -> Any:
     """Gọi và trả JSON đã parse. Mọi lỗi mạng/HTTP/JSON thành SourceError."""
     _throttle()
     h = dict(BASE_HEADERS)
@@ -84,7 +92,7 @@ def request_json(method: str, url: str, *, headers: Optional[Dict[str, str]] = N
         h.update(headers)
     try:
         r = _session().request(method, url, headers=h, params=params,
-                               json=payload, timeout=TIMEOUT)
+                               json=payload, timeout=timeout)
     except requests.RequestException as e:
         raise SourceError(f'{method} {url}: {type(e).__name__}: {e}') from e
     if r.status_code == 429:

@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 
-from .http import SourceError, request_json
+from .http import OHLCV_TIMEOUT, SourceError, request_json
 from .naming import camel_to_snake, english_to_snake
 
 TRADING_URL = 'https://trading.vietcap.com.vn/api'
@@ -91,7 +91,7 @@ def ohlcv(symbol: str, start: str, end: Optional[str] = None) -> pd.DataFrame:
         'countBack': count_back,
     }
     resp = request_json('POST', f'{TRADING_URL}/chart/OHLCChart/gap-chart',
-                        headers=HEADERS, payload=payload)
+                        headers=HEADERS, payload=payload, timeout=OHLCV_TIMEOUT)
     return _ohlcv_frame(resp, is_index)
 
 
