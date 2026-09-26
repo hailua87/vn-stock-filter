@@ -1,34 +1,34 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-26T11:25:27",
+  "generated_at": "2026-09-26T13:05:38",
   "sources": {
     "daily_scan": {
       "label": "Scan hằng ngày",
       "session_date": "2026-09-25",
       "run_type": "eod",
       "run_date_ict": "2026-09-26",
-      "run_time_ict": "18:17",
-      "universe": 112,
-      "universe_after_base": 112,
-      "dropped_low_liquidity": 0,
+      "run_time_ict": "19:57",
+      "universe": 202,
+      "universe_after_base": 114,
+      "dropped_low_liquidity": 88,
       "fetch": {
-        "coverage": 0.224,
-        "succeeded": 112,
-        "skipped": 388,
+        "coverage": 0.404,
+        "succeeded": 202,
+        "skipped": 298,
         "failed": 0,
         "stop_reason": "time_budget"
       },
-      "stale_ratio": 0.196,
-      "session_completeness": 0.869,
+      "stale_ratio": 0.109,
+      "session_completeness": 0.835,
       "archive_written": false,
-      "archive_reason": "gate_time: pass (phiên 2026-09-25 đã đóng dứt khoát (hôm nay 2026-09-26)) | gate_coverage: fail (22% < 80%, vòng fetch dừng sớm (time_budget))"
+      "archive_reason": "gate_time: pass (phiên 2026-09-25 đã đóng dứt khoát (hôm nay 2026-09-26)) | gate_coverage: fail (40% < 80%, vòng fetch dừng sớm (time_budget))"
     },
     "valuation": {
       "label": "Định giá",
       "available": true,
       "as_of": "2026-09-24",
       "generated_at": "2026-09-24T11:59:36.939310",
-      "age_days": 1,
+      "age_days": 2,
       "count": 61
     },
     "quality": {
@@ -36,7 +36,7 @@
       "available": true,
       "as_of": "2026-09-24",
       "generated_at": "2026-09-24T12:05:57",
-      "age_days": 1,
+      "age_days": 2,
       "count": 200
     }
   },
@@ -44,17 +44,12 @@
     {
       "code": "fetch_stopped",
       "severity": "warn",
-      "message": "Vòng lấy dữ liệu dừng sớm (time_budget) — độ phủ 0.224. Rổ quét nhỏ hơn bình thường."
+      "message": "Vòng lấy dữ liệu dừng sớm (time_budget) — độ phủ 0.404. Rổ quét nhỏ hơn bình thường."
     },
     {
       "code": "archive_skipped",
       "severity": "info",
-      "message": "Chưa ghi bản lưu phiên: gate_time: pass (phiên 2026-09-25 đã đóng dứt khoát (hôm nay 2026-09-26)) | gate_coverage: fail (22% < 80%, vòng fetch dừng sớm (time_budget))."
-    },
-    {
-      "code": "universe_shrank",
-      "severity": "error",
-      "message": "Danh sách mã giảm 78% so với lần chạy trước (500 → 112). Nguồn danh sách có thể đang lỗi."
+      "message": "Chưa ghi bản lưu phiên: gate_time: pass (phiên 2026-09-25 đã đóng dứt khoát (hôm nay 2026-09-26)) | gate_coverage: fail (40% < 80%, vòng fetch dừng sớm (time_budget))."
     }
   ]
 }
