@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-26T14:03:15.249479",
+  "generated_at": "2026-09-26T14:59:23.229960",
   "strategy": "ichimoku",
   "total": 37,
   "metadata": {
@@ -11,7 +11,7 @@
     ],
     "base_conditions": {
       "min_avg_value_20d": 10000000000.0,
-      "dropped_low_liquidity": 178,
+      "dropped_low_liquidity": 263,
       "universe_after": 113,
       "exchanges": [
         "HOSE",
@@ -19,24 +19,24 @@
         "UPCOM"
       ]
     },
-    "total_scanned": 291,
+    "total_scanned": 376,
     "market_context": {
       "available": false,
       "regime": "unknown",
       "label": "Không lấy được VN-Index — không đánh giá được bối cảnh thị trường",
       "position_size_multiplier": 1.0,
       "breadth": {
-        "pct_above_ma50": 30.2,
-        "sample_size": 291
+        "pct_above_ma50": 26.6,
+        "sample_size": 376
       }
     },
     "session_date": "2026-09-25",
-    "written_at_ict": "2026-09-26 20:56:28+0700",
+    "written_at_ict": "2026-09-26 21:52:37+0700",
     "run_type": "eod",
     "session_complete": 0.836,
     "archive_written": false,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên 2026-09-25 đã đóng dứt khoát (hôm nay 2026-09-26)) | gate_coverage: fail (58% < 80%, vòng fetch dừng sớm (time_budget))",
+    "archive_gate": "gate_time: pass (phiên 2026-09-25 đã đóng dứt khoát (hôm nay 2026-09-26)) | gate_coverage: fail (75% < 80%, vòng fetch dừng sớm (time_budget))",
     "archive_gates": [
       {
         "name": "gate_time",
@@ -46,7 +46,7 @@
       {
         "name": "gate_coverage",
         "passed": false,
-        "detail": "58% < 80%, vòng fetch dừng sớm (time_budget)"
+        "detail": "75% < 80%, vòng fetch dừng sớm (time_budget)"
       }
     ],
     "archive_gates_failed": [
@@ -54,10 +54,10 @@
     ],
     "fetch_truncated": true,
     "fetch_stop_reason": "time_budget",
-    "fetch_coverage": 0.582,
-    "fetch_elapsed_s": 2794.4,
+    "fetch_coverage": 0.752,
+    "fetch_elapsed_s": 2792.7,
     "intraday": false,
-    "run_time_ict": "21:03",
+    "run_time_ict": "21:59",
     "run_date_ict": "2026-09-26"
   },
   "signals": [
