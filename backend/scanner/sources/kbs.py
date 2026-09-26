@@ -86,6 +86,8 @@ def _parse_nim(resp: Dict[str, Any]) -> Optional[Dict[int, float]]:
             except (TypeError, ValueError):
                 continue
             if f == f:  # bỏ NaN
-                out.setdefault(int(m.group(1)), f)
+                # Năm trùng: giá trị SAU thắng, như fetch_bank_ratios cũ đọc
+                # bảng vnstock ('2025', '2025_1' cùng ra năm 2025).
+                out[int(m.group(1))] = f
         return out or None
     return None

@@ -27,7 +27,7 @@ import pandas as pd
 
 from .data_fetcher import RateLimitError
 from .sources import kbs, vci
-from .sources.http import SOURCE_VERSION
+from .sources.http import SOURCE_VERSION, with_retry
 
 log = logging.getLogger(__name__)
 
@@ -160,7 +160,7 @@ def fetch_company_overview(ticker: str, source: str = 'vci') -> Optional[Dict[st
     Returns dict or None on error.
     """
     try:
-        row = vci.company_overview(ticker)
+        row = with_retry(vci.company_overview, ticker)
         if not row:
             return None
         # Normalize keys (vnstock có thể đổi tên cột giữa versions).
@@ -255,7 +255,7 @@ def fetch_bank_ratios(ticker: str) -> Optional[Dict[str, Dict[int, float]]]:
     một. None nếu không lấy được.
     """
     try:
-        nim = kbs.bank_nim(ticker)
+        nim = with_retry(kbs.bank_nim, ticker)
     except Exception as e:
         log.warning(f"  {ticker} KBS ratio: {type(e).__name__}: {str(e)[:110]}")
         return None
@@ -344,7 +344,10 @@ def fetch_fundamentals(ticker: str, period: str = 'year',
             break
     result['ratio'] = ratio_to_records(statements.get('ratio'), latest_year)
 
-    if use_cache:
+    # Tổng quan rỗng (nguồn lỗi) thì KHÔNG ghi cache: cache sống 7 ngày, suốt
+    # tuần đó mã mất ngành ICB và có thể bị định giá sai mô hình (ngân hàng
+    # thành phi tài chính). Lượt sau sẽ lấy lại.
+    if use_cache and overview:
         try:
             with open(cache_path, 'w', encoding='utf-8') as f:
                 json.dump(result, f, ensure_ascii=False, indent=2, default=str)

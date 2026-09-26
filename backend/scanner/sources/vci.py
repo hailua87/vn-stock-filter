@@ -173,8 +173,9 @@ def _statement_labels(symbol: str) -> Dict[str, Tuple[Optional[str], Optional[st
 
 
 def _period_label(rec: Dict[str, Any], quarterly: bool) -> str:
-    year = rec.get('yearReport', rec.get('year'))
-    q = rec.get('lengthReport', rec.get('quarter'))
+    # Như vnstock: ưu tiên year/quarter nếu có, sau đó yearReport/lengthReport.
+    year = rec['year'] if 'year' in rec else rec.get('yearReport')
+    q = rec['quarter'] if 'quarter' in rec else rec.get('lengthReport')
     try:
         y, qn = int(year), int(q)
     except (TypeError, ValueError):
@@ -214,15 +215,22 @@ def _statement_frame(records: List[Dict[str, Any]],
     fields = [c for c in report.columns if c in labels]
     if not fields:
         return pd.DataFrame()
-    values = report[fields].apply(pd.to_numeric, errors='coerce').T
+    raw = report[fields]
+    numeric = raw.apply(pd.to_numeric, errors='coerce')
+    # Ô trống (None/NaN) → 0 như vnstock (dropna=True làm fillna(0)). Ô có chữ
+    # không phải số: vnstock giữ nguyên chuỗi, statement_to_records bỏ qua nó —
+    # ở đây để NaN cho cùng kết quả, KHÔNG thành 0.
+    text_cells = raw.notna() & numeric.isna()
+    values = numeric.fillna(0.0).mask(text_cells).T
     values.columns = periods
-    values = values.fillna(0.0)
-    # Bỏ kỳ mà mọi khoản mục đều 0 (vnstock dropna=True làm vậy).
-    # iloc + mảng bool: nhãn kỳ có thể trùng, .loc với nhãn trùng sẽ lỗi.
+    # Bỏ kỳ mà mọi khoản mục đều 0 (vnstock dropna=True làm vậy; ô chữ tính là
+    # khác 0). iloc + mảng bool: nhãn kỳ có thể trùng, .loc với nhãn trùng sẽ lỗi.
     values = values.iloc[:, (values != 0).any(axis=0).to_numpy()]
     vi = [labels[f][0] for f in fields]
     en = [labels[f][1] for f in fields]
-    ids = [english_to_snake(e) if e else f for e, f in zip(en, fields)]
+    # Không có nhãn tiếng Anh: vnstock cho item_id NaN rồi fillna(0) thành 0 —
+    # giữ đúng '0' để hash sổ snapshot không đổi. Chưa gặp trên dữ liệu thật.
+    ids = [english_to_snake(e) if e else '0' for e in en]
     out = pd.DataFrame({'item': vi, 'item_en': en, 'item_id': ids})
     return pd.concat([out, values.reset_index(drop=True)], axis=1)
 

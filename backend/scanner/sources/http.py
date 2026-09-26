@@ -1,16 +1,19 @@
 """
-Gọi HTTP dùng chung cho VCI và KBS: header, timeout, điều tiết, lỗi.
+Gọi HTTP dùng chung cho VCI và KBS: header, timeout, điều tiết, lỗi, thử lại.
 
-Không tự thử lại: `data_fetcher.fetch_ohlcv` và `financial_fetcher` đã có vòng
-thử lại riêng (kèm chờ khi bị giới hạn tần suất); thêm một vòng ở đây sẽ nhân
-số lần gọi và thời gian chờ lên.
+`request_json` KHÔNG tự thử lại: `data_fetcher.fetch_ohlcv` và
+`financial_fetcher.fetch_financial_statements` đã có vòng thử lại riêng; thêm
+một vòng ở tầng này sẽ nhân số lần gọi. Các lời gọi còn lại (tổng quan công
+ty, VN-Index, danh sách mã, sự kiện, NIM) bọc bằng `with_retry` — thời vnstock
+chúng được thư viện thử lại 3 lần, bỏ đi thì một lỗi lẻ có thể kéo dài cả tuần
+(tổng quan rỗng nằm trong cache 7 ngày).
 """
 from __future__ import annotations
 
 import os
 import threading
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 import requests
 
@@ -92,3 +95,26 @@ def request_json(method: str, url: str, *, headers: Optional[Dict[str, str]] = N
         return r.json()
     except ValueError as e:
         raise SourceError(f'{method} {url}: phản hồi không phải JSON') from e
+
+
+T = TypeVar('T')
+
+
+def with_retry(fn: Callable[..., T], *args: Any, tries: int = 3, **kwargs: Any) -> T:
+    """
+    Gọi `fn`, thử lại khi nguồn lỗi: chờ 2 s, 4 s giữa các lần; bị 429 thì chờ
+    65 s. Lỗi không phải của nguồn (ValueError do tham số sai …) ném ra ngay.
+    Hết lượt thì ném lỗi cuối cùng.
+    """
+    for attempt in range(tries):
+        try:
+            return fn(*args, **kwargs)
+        except RateLimitError:
+            if attempt == tries - 1:
+                raise
+            time.sleep(65)
+        except SourceError:
+            if attempt == tries - 1:
+                raise
+            time.sleep(2 * (attempt + 1))
+    raise AssertionError('unreachable')

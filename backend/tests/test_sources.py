@@ -29,6 +29,7 @@ def _no_network(monkeypatch):
     def boom(*a, **k):
         raise AssertionError('test không được gọi mạng')
     monkeypatch.setattr(http, '_session', boom)
+    monkeypatch.setattr(http.time, 'sleep', lambda s: None)   # with_retry không ngủ thật
     vci._metrics_cache.clear()
 
 
@@ -168,6 +169,21 @@ def test_statement_frame_zero_fill_drop_empty_period_and_keep_order():
     assert rec['short_term_borrowings'] == 0.0  # dòng ĐẦU thắng, như vnstock
 
 
+def test_statement_frame_edge_cases_match_vnstock():
+    """Ba trường hợp vnstock xử lý khác trực giác — giữ đúng để hash sổ snapshot không đổi."""
+    labels = {'a': ('Có nhãn', 'Total Assets'), 'b': ('Không nhãn Anh', None)}
+    records = [{'yearReport': 2025, 'lengthReport': 5, 'a': 'n/a', 'b': 3e9},
+               {'year': 2024, 'quarter': 5, 'yearReport': 1999, 'lengthReport': 5, 'a': 5e9, 'b': 0}]
+    df = vci._statement_frame(records, labels, quarterly=False)
+    # year/quarter thắng yearReport/lengthReport khi có cả hai
+    assert list(df.columns[3:]) == ['2025', '2024']
+    # không có nhãn tiếng Anh → item_id '0' (vnstock: NaN rồi fillna(0))
+    assert list(df['item_id']) == ['total_assets', '0']
+    recs = {r['period']: r for r in ff.statement_to_records(df)}
+    # ô chữ không thành 0: statement_to_records bỏ qua, như với chuỗi của vnstock
+    assert 'total_assets' not in recs['2025'] and recs['2024']['total_assets'] == 5.0
+
+
 def test_period_labels():
     assert vci._period_label({'yearReport': 2026, 'lengthReport': 2}, quarterly=True) == '2026-Q2'
     assert vci._period_label({'yearReport': 2025, 'lengthReport': 5}, quarterly=True) == '2025'
@@ -244,6 +260,16 @@ def test_events_shape(monkeypatch):
     assert df.loc[0, 'event_title'] == 'Trả cổ tức bằng tiền'
 
 
+def test_events_null_and_iso_dates(monkeypatch):
+    monkeypatch.setattr(vci, 'request_json', lambda *a, **k: {'data': {'content': [
+        {'eventTitle': 'A', 'publicDate': '2026-09-01T07:00:00', 'recordDate': None},
+        {'eventTitle': 'B', 'publicDate': None, 'recordDate': 'khong ro'}]}})
+    df = vci.events('FPT')
+    assert df['public_date'].tolist()[0] == '2026-09-01'
+    assert pd.isna(df['public_date'].tolist()[1])
+    assert df['record_date'].tolist()[1] == 'khong ro'   # không parse được thì giữ nguyên
+
+
 def test_events_empty(monkeypatch):
     monkeypatch.setattr(vci, 'request_json', lambda *a, **k: {'data': {'content': []}})
     assert vci.events('FPT').empty
@@ -312,6 +338,14 @@ def test_full_universe_keeps_real_stocks_with_exchange(monkeypatch):
     assert df.set_index('ticker')['exchange'].to_dict() == {'ZZZ': 'HNX', 'QQQ': 'UPCOM'}
 
 
+def test_full_universe_falls_back_when_filter_leaves_nothing(monkeypatch):
+    """Nguồn đổi mã sàn ('HSX') thì lọc ra rỗng mà không lỗi — phải về danh sách curated."""
+    monkeypatch.setattr(kbs, 'listing', lambda: pd.DataFrame([
+        {'symbol': 'FPT', 'exchange': 'HSX', 'type': 'stock', 'organ_name': ''}]))
+    monkeypatch.setattr(data_fetcher, '_load_fallback_universe', lambda ex: 'fallback')
+    assert data_fetcher._fetch_full_universe(('HOSE', 'HNX', 'UPCOM')) == 'fallback'
+
+
 def test_full_universe_falls_back_when_listing_fails(monkeypatch):
     def boom():
         raise http.SourceError('HTTP 503')
@@ -343,6 +377,28 @@ def test_fetch_ohlcv_waits_on_rate_limit_then_retries(monkeypatch):
     assert len(calls) == 2 and sleeps == [65]
 
 
+def test_fetch_vnindex_retries_then_returns_close(monkeypatch):
+    calls = []
+
+    def flaky(sym, start, end):
+        calls.append(sym)
+        if len(calls) == 1:
+            raise http.SourceError('timeout')
+        return vci._ohlcv_frame([{'t': [T24], 'o': [1], 'h': [1], 'l': [1], 'c': [1655.5], 'v': [1]}],
+                                is_index=True)
+    monkeypatch.setattr(data_fetcher._vci, 'ohlcv', flaky)
+    idx = data_fetcher.fetch_vnindex(30)
+    assert calls == ['VNINDEX', 'VNINDEX']
+    assert list(idx.columns) == ['Date', 'Close'] and idx['Close'].iloc[0] == 1655.5
+
+
+def test_fetch_vnindex_none_when_source_keeps_failing(monkeypatch):
+    def boom(*a):
+        raise http.SourceError('HTTP 503')
+    monkeypatch.setattr(data_fetcher._vci, 'ohlcv', boom)
+    assert data_fetcher.fetch_vnindex(30) is None
+
+
 def test_fetch_ohlcv_bad_source_fails_fast():
     with pytest.raises(RuntimeError):
         data_fetcher.fetch_ohlcv('FPT', '2026-09-20', '2026-09-24', source='tcbs')
@@ -361,6 +417,38 @@ def test_fetch_financial_statements_tables_and_no_ratio(monkeypatch):
     asked.clear()
     ff.fetch_financial_statements('FPT', period='quarter', tables=('income', 'ratio'))
     assert asked == [('income', 'quarter')]
+
+
+def test_fundamentals_not_cached_when_overview_missing(monkeypatch, tmp_path):
+    """Tổng quan hỏng không được nằm 7 ngày trong cache (mất ngành ICB cả tuần)."""
+    monkeypatch.setattr(ff, 'CACHE_DIR', tmp_path)
+    monkeypatch.setattr(ff, 'fetch_current_price', lambda t: 66_400.0)
+    monkeypatch.setattr(ff, 'fetch_financial_statements', lambda t, period: {
+        'income': pd.DataFrame({'item': ['x'], 'item_en': ['Net sales'], 'item_id': ['net_sales'],
+                                '2025': [1e12]})})
+    monkeypatch.setattr(ff, 'fetch_company_overview', lambda t: None)
+    assert ff.fetch_fundamentals('FPT')['income'][0]['net_sales'] == 1000.0
+    assert not (tmp_path / 'FPT_year.json').exists()
+    monkeypatch.setattr(ff, 'fetch_company_overview', lambda t: {'industry': 'Technology'})
+    ff.fetch_fundamentals('FPT')
+    assert (tmp_path / 'FPT_year.json').exists()
+
+
+def test_with_retry(monkeypatch):
+    sleeps = []
+    monkeypatch.setattr(http.time, 'sleep', sleeps.append)
+    seq = [http.SourceError('a'), http.RateLimitError('b'), 'ok']
+
+    def fn():
+        x = seq.pop(0)
+        if isinstance(x, Exception):
+            raise x
+        return x
+    assert http.with_retry(fn) == 'ok' and sleeps == [2, 65]
+    with pytest.raises(http.SourceError):
+        http.with_retry(lambda: (_ for _ in ()).throw(http.SourceError('x')), tries=2)
+    with pytest.raises(ValueError):     # lỗi không phải của nguồn: không thử lại
+        http.with_retry(lambda: (_ for _ in ()).throw(ValueError('x')))
 
 
 def test_financial_fetcher_does_not_import_vnstock():

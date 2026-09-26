@@ -137,8 +137,9 @@ def fetch_events(ticker: str, lookback_days: int = 365,
     events: list[CorporateAction] = []
     try:
         from .sources import vci
+        from .sources.http import with_retry
         frames = []
-        df = vci.events(ticker)
+        df = with_retry(vci.events, ticker)
         if df is not None and not df.empty:
             frames.append(df)
 

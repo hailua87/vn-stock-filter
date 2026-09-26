@@ -111,11 +111,17 @@ def _fetch_full_universe(exchanges: tuple) -> pd.DataFrame:
     """
     try:
         from .sources import kbs
-        all_df = kbs.listing()
+        from .sources.http import with_retry
+        all_df = with_retry(kbs.listing)
         if all_df.empty:
             raise ValueError('KBS listing rỗng')
         all_df = all_df[all_df['type'] == 'stock'].rename(columns={'symbol': 'ticker'})
         result = all_df[all_df['exchange'].isin(exchanges)][['ticker', 'exchange']].copy()
+        if result.empty:
+            # Nguồn đổi mã sàn/loại (vd. 'HSX', 'STOCK_CP') thì lọc ra rỗng mà
+            # không có lỗi nào — phải rơi về danh sách curated, không chạy 0 mã.
+            raise ValueError(f"KBS listing không còn cổ phiếu nào ở {exchanges} sau khi lọc "
+                             f"(loại: {sorted(set(all_df['type']))[:5]})")
 
         # Override exchange using top_liquid.py (source of truth for curated list).
         # Nguồn danh sách đôi khi có mã trùng với sàn khác nhau (vd. DVN có cả
@@ -725,7 +731,8 @@ def fetch_vnindex(lookback_days: int = 180) -> Optional[pd.DataFrame]:
     end = datetime.now().date()
     start = end - timedelta(days=lookback_days)
     try:
-        idx = _vci.ohlcv('VNINDEX', str(start), str(end))
+        from .sources.http import with_retry
+        idx = with_retry(_vci.ohlcv, 'VNINDEX', str(start), str(end))
         if idx.empty:
             log.error("VN-Index fetch failed: nguồn trả rỗng")
             return None
