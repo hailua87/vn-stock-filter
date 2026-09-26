@@ -14,22 +14,27 @@ MINE = {'Accept': 'application/json, text/plain, */*', 'Accept-Language': 'vi-VN
 FULL = dict(MINE, **{'Connection': 'keep-alive', 'Cache-Control': 'no-cache', 'Pragma': 'no-cache', 'DNT': '1',
                      'Sec-Fetch-Dest': 'empty', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Site': 'same-site',
                      'Accept-Language': 'en-US,en;q=0.9,vi-VN;q=0.8,vi;q=0.7'})
+VN = {"Accept": "application/json, text/plain, */*", "Accept-Language": "en-US,en;q=0.9,vi-VN;q=0.8,vi;q=0.7",
+      "Connection": "keep-alive", "Content-Type": "application/json", "Cache-Control": "no-cache",
+      "Sec-Fetch-Dest": "empty", "Sec-Fetch-Mode": "cors", "Sec-Fetch-Site": "same-site", "DNT": "1", "Pragma": "no-cache",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      "Referer": "https://trading.vietcap.com.vn/", "Origin": "https://trading.vietcap.com.vn/"}
 sess = requests.Session()
 end = datetime.now() + timedelta(days=1)
 tickers = [t for t, _ in get_top_liquid_tickers()][:int(sys.argv[1]) if len(sys.argv) > 1 else 120]
-res = {'A_session_cb300': [], 'B_fresh_cb300': [], 'C_fresh_cb25': []}
+res = {'A_mine': [], 'B_vnstock_hdr': []}
 errs = []
 t0 = time.time()
 for i, tk in enumerate(tickers):
-    mode = list(res)[i % 3]
+    mode = list(res)[i % 2]
     if time.time() - t0 > 480: break
-    payload = {'timeFrame': 'ONE_DAY', 'symbols': [tk], 'to': int(end.timestamp()), 'countBack': 25 if mode.startswith('C') else 300}
+    payload = {'timeFrame': 'ONE_DAY', 'symbols': [tk], 'to': int(end.timestamp()), 'countBack': 300}
     s = time.time()
     try:
         if mode.startswith('A'):
             r = sess.post(URL, headers=MINE, json=payload, timeout=15)
         else:
-            r = requests.post(URL, headers=MINE, json=payload, timeout=15)
+            r = requests.post(URL, headers=VN, data=json.dumps(payload), timeout=15)
         ok = r.status_code == 200 and bool(r.json()) and bool(r.json()[0].get('t'))
         tag = r.status_code
     except Exception as e:
