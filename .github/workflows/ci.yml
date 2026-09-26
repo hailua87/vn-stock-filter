@@ -71,3 +71,14 @@ jobs:
         env:
           PYTHONIOENCODING: utf-8
         run: python backend/check_sources.py
+
+  diag-vci-latency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r backend/requirements.txt
+      - run: python diag/vci_latency.py 150
