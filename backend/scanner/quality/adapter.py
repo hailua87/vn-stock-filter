@@ -124,7 +124,7 @@ def annual_schema(raw: dict) -> dict:
     out['shares_outstanding'] = [
         (shares_from_paid_in_capital(tables['balance_sheet'].get(p)) or None) for p in periods
     ]
-    # Không có trong 3 bảng BCTC (§5.4 blueprint v3). `nim` được đổ vào sau
+    # Không có trong 3 bảng BCTC (§5.4 blueprint v4). `nim` được đổ vào sau
     # bằng attach_bank_ratios() cho riêng nhóm ngân hàng; `npl_ratio` và
     # `npl_coverage` đã gỡ khỏi mô hình BANK (D24) vì không nguồn nào có.
     out['nim'] = [None] * len(periods)

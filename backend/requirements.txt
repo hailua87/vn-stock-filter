@@ -5,23 +5,13 @@ openpyxl>=3.1.0
 pyarrow>=14.0.0          # parquet cache
 
 # Data source
-# GHIM CUNG, khong phai >=. Bang chung tu log CI thang 8/2026:
-#     4.0.5  — 14/08 chay tot
-#     4.0.6  — 17,18,19,20/08: FAIL ca 8 ca voi
-#              RetryError[<Future ... raised UnboundLocalError>]
-#     4.0.7  — 21,24,25,26/08 chay tot tro lai
-# `>=4.0.0` nghia la moi lan CI `pip install` deu keo ban moi nhat, nen mot ban
-# loi cua upstream tu no thanh su co cua repo nay, khong qua mot lan review nao.
-# Nang ban la viec CO Y: sua so o day, xem CI xanh, roi moi merge.
-vnstock==4.0.7          # primary VN market data (4.x API)
-# vnai la phu thuoc KHONG ghim cua vnstock. No tu ghi prompt tai tu
-# vnstocks.com vao AGENTS.md, ~/.claude/CLAUDE.md, ~/.codex/AGENTS.md,
-# ~/.gemini/GEMINI.md.
-# VNSTOCK_DISABLE_AGENT_SETUP=1 KHONG chan duoc (do that 23/09/2026; bien do
-# khong he duoc vnai doc). Cai chan that la /AGENTS.md trong .gitignore, cong
-# hook don dep o backend/conftest.py. Ghim ban de hanh vi khong doi ma khong
-# qua review.
-vnai==2.6.0
+# KHONG con vnstock/vnai (26/09/2026). PyPI cach ly ca hai tu 24-25/09/2026 nen
+# `pip install` hong va Daily Scan + CI do. Du lieu nay goi thang API Vietcap/KBS
+# qua backend/scanner/sources/ (chi can `requests`). Ly do day du o docstring
+# cua backend/scanner/sources/__init__.py.
+#
+# Neu sau nay muon dung lai vnstock: KHONG cai tu nguon ngoai PyPI de "chua
+# chay" — ban truoc 4.0.9 ghi chi dan vao tep cau hinh tro ly AI moi lan import.
 requests>=2.31.0
 
 # API server

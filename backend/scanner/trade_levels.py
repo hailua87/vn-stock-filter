@@ -1,5 +1,5 @@
 """
-Cắt lỗ / mục tiêu / R:R cho kết quả scan (blueprint v3 §7.3, §14.4 — audit F5).
+Cắt lỗ / mục tiêu / R:R cho kết quả scan (blueprint v4 §7.3, §14.4 — audit F5).
 
 Quy tắc đã chốt (22/09/2026), dùng đúng dữ liệu đã có, không thêm giả định:
 

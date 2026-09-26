@@ -194,6 +194,10 @@ Nếu sau đó giá tăng lại? OK, bạn có thể vào lại với tín hiệ
 
 ## Lỗi kỹ thuật thường gặp
 
+> **26/09/2026:** dự án không còn dùng vnstock (PyPI đã cách ly gói này) — mục
+> dưới chỉ đúng với bản cũ. Bản hiện tại chỉ cần `pip install -r backend/requirements.txt`;
+> kiểm nguồn bằng `python backend/check_sources.py`.
+
 ### Lỗi: `vnstock not installed`
 
 ```

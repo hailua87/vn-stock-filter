@@ -9,7 +9,11 @@ ghi cho mỗi (mã, loại kỳ, kỳ):
                                                      "thiếu hai quý", độ trễ backtest
     last_seen    ngày gần nhất còn thấy
     hash         sha256 nội dung kỳ (3 bảng BCTC)  → phát hiện số liệu bị sửa
-    revisions    [{date, hash, vnstock}] mỗi lần nội dung đổi
+    revisions    [{date, hash, vnstock}] mỗi lần nội dung đổi. Khóa `vnstock`
+                 giữ tên cũ; từ 26/09/2026 giá trị là phiên bản lớp nguồn
+                 (`sources.http.SOURCE_VERSION`, vd. 'direct-1') thay cho
+                 phiên bản vnstock, nên "revised" ngay sau lúc đổi nguồn là
+                 dấu hiệu lớp nguồn đọc số khác vnstock — cần kiểm.
 
 CHỈ lưu metadata, KHÔNG lưu số liệu: repo public và blueprint §4.2 không cho
 phân phối lại dữ liệu thô của bên thứ ba. Số liệu đã chuẩn hóa được lưu ở
@@ -29,14 +33,6 @@ from typing import Dict, Optional
 
 REGISTRY_SCHEMA = 1
 STATEMENT_TABLES = ('balance_sheet', 'income', 'cash_flow')
-
-
-def vnstock_version() -> Optional[str]:
-    try:
-        from importlib.metadata import version
-        return version('vnstock')
-    except Exception:
-        return None
 
 
 def period_hashes(result: Dict) -> Dict[str, str]:

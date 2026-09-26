@@ -7,14 +7,14 @@ Why this matters:
   Every indicator (ATR, BB, MA, OBV) gets polluted around the ex-date.
 
 Strategy:
-  1. Fetch adjusted prices from vnstock (preferred — they handle it correctly).
+  1. Fetch adjusted prices from VCI (preferred — they handle it correctly).
   2. Also fetch the corporate actions calendar so we can:
      - Warn users about upcoming ex-rights dates
      - Skip signals on/near ex-rights dates (volatility unrelated to TA)
      - Flag stocks with recent events in the UI
 
 Data sources:
-  - vnstock: stock.events() returns dividend/split history
+  - VCI: sources.vci.events() returns dividend/split history
   - TCBS: REST endpoint for upcoming ex-rights calendar
   - Fallback: scrape vietstock.vn or cafef.vn if API fails
 
@@ -123,8 +123,9 @@ def fetch_events(ticker: str, lookback_days: int = 365,
     4.x. Mọi lần gọi đều ném exception, bị `except` nuốt và trả về [] rồi cache
     lại danh sách rỗng 24h ⇒ toàn bộ bộ lọc sự kiện quyền chưa từng chạy.
 
-    Nay dùng `vnstock.api.company.Company(source='vci')`, thử `events()` trước
-    rồi `dividends()` (một số mã chỉ có bảng cổ tức).
+    Sau đó dùng `vnstock.api.company.Company(source='vci').events()`; từ
+    26/09/2026 gọi thẳng `sources.vci.events()` (cùng endpoint, cùng cột).
+    (`dividends()` mà code cũ thử không có ở nguồn VCI của vnstock 4.x.)
     """
     cache_file = EVENTS_CACHE / f'{ticker}.json'
     today = date.today()
@@ -135,20 +136,12 @@ def fetch_events(ticker: str, lookback_days: int = 365,
 
     events: list[CorporateAction] = []
     try:
-        from vnstock.api.company import Company
-        company = Company(symbol=ticker, source='vci')
-
+        from .sources import vci
+        from .sources.http import with_retry
         frames = []
-        for method in ('events', 'dividends'):
-            fn = getattr(company, method, None)
-            if fn is None:
-                continue
-            try:
-                df = fn()
-                if df is not None and not df.empty:
-                    frames.append(df)
-            except Exception as e:
-                log.debug(f"  {ticker}.{method}(): {type(e).__name__}: {str(e)[:100]}")
+        df = with_retry(vci.events, ticker)
+        if df is not None and not df.empty:
+            frames.append(df)
 
         for df in frames:
             for row in df.to_dict(orient='records'):
@@ -189,9 +182,6 @@ def fetch_events(ticker: str, lookback_days: int = 365,
                 deduped.append(e)
         events = deduped
 
-    except ImportError:
-        log.warning("  vnstock chưa cài hoặc quá cũ — bỏ qua corporate actions")
-        return []
     except Exception as e:
         log.warning(f"  events {ticker}: {type(e).__name__}: {str(e)[:120]}")
         # KHÔNG cache khi lỗi: cache rỗng 24h sẽ che mất sự kiện thật.
@@ -206,7 +196,7 @@ def fetch_events_batch(tickers, delay: float = 1.0,
                        lookahead_days: int = 30,
                        deadline: Optional[float] = None) -> dict:
     """
-    Lấy sự kiện cho nhiều mã, tôn trọng rate limit của vnstock.
+    Lấy sự kiện cho nhiều mã, tôn trọng rate limit của nguồn.
 
     Chỉ nên gọi cho danh sách mã ĐÃ có tín hiệu (vài chục mã) chứ không phải cả
     universe 500 mã — sự kiện quyền chỉ dùng để loại/ghi chú kết quả cuối.

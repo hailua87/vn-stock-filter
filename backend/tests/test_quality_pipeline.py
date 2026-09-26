@@ -182,7 +182,12 @@ def test_pipeline_statuses_and_reasons(universe):
     items, payload, seen = _run(universe)
     assert payload['metadata']['failures'] == [{'ticker': 'NODATA', 'reason': 'Không lấy được BCTC năm'}]
     assert items['FLC']['status'] == 'EXC' and 'Hủy niêm yết' in items['FLC']['reason']
-    assert items['REX']['status'] == 'RES' and items['REX']['reason'] == 'Mô hình ngành chưa kích hoạt'
+    # REX mang ngành Insurance — mô hình cố ý không bật (D25). Lý do phải nói
+    # RÕ vì sao: "chưa kích hoạt" nghe như sắp làm đến nơi, trong khi thật ra là
+    # không làm được với rổ này (2 mã thì percentile chỉ ra được 0 và 100).
+    assert items['REX']['status'] == 'RES'
+    assert items['REX']['reason'].startswith('Mô hình ngành chưa kích hoạt — ')
+    assert 'quá nhỏ' in items['REX']['reason']
     # Ngân hàng đứng một mình: nhóm < 8 mã và thiếu NPL/NIM → thiếu dữ liệu
     assert items['VCB']['model'] == 'BANK' and items['VCB']['status'] == 'RES'
     # Nhóm phi tài chính 11 mã (T00–T09 + FLC) có percentile và điểm

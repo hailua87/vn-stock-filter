@@ -6,5 +6,5 @@ duoc bang du lieu tong hop. Lop adapter tu du lieu vnstock sang schema chuan
 (xem metrics.py) nam o buoc sau, vi ten cot vnstock phai doi chieu tren du
 lieu that truoc khi viet.
 
-Tai lieu: docs/BLUEPRINT_v3.md muc 8-10.
+Tai lieu: docs/BLUEPRINT_v4.md muc 8-10.
 """

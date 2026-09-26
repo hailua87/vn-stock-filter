@@ -1,5 +1,5 @@
 """
-Chuỗi nến + MA cho màn Chi tiết mã (blueprint v3 §11.1).
+Chuỗi nến + MA cho màn Chi tiết mã (blueprint v4 §11.1).
 
 Điểm dễ sai nhất: cắt 60 phiên TRƯỚC rồi mới tính MA50 — khi đó 49 phiên đầu
 trong khung nhìn rỗng dù dữ liệu để tính chúng vẫn còn nguyên trong lịch sử.

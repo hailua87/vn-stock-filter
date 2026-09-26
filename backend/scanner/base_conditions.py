@@ -1,5 +1,5 @@
 """
-Điều kiện nền và dữ liệu bối cảnh cho màn Scan (blueprint v3 §7.2, §7.3).
+Điều kiện nền và dữ liệu bối cảnh cho màn Scan (blueprint v4 §7.2, §7.3).
 
 Áp TRƯỚC chiến lược, dùng chung cho cả 4:
 

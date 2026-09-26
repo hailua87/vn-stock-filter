@@ -1,5 +1,5 @@
 """
-Điều kiện nền và dữ liệu bối cảnh cho màn Scan (blueprint v3 §7.2, §7.3).
+Điều kiện nền và dữ liệu bối cảnh cho màn Scan (blueprint v4 §7.2, §7.3).
 
 Đơn vị: vnstock trả giá theo NGHÌN đồng. FPT phiên 22/09: giá 66,4 và khối
 lượng 7.355.603 cp → GTGD = 66,4 × 1.000 × 7.355.603 ≈ 488,4 tỷ đồng.

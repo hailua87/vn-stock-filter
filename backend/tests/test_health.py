@@ -1,5 +1,5 @@
 """
-health.json — tình trạng dữ liệu cho màn Hôm nay (blueprint v3 §11.2, §13).
+health.json — tình trạng dữ liệu cho màn Hôm nay (blueprint v4 §11.2, §13).
 
 Hai thứ dễ sai nhất: (1) coi ca intraday không ghi archive là LỖI, trong khi
 đó là đúng thiết kế; (2) không giữ lại số mã của lần chạy trước, nên kiểm tra

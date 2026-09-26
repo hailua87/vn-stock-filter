@@ -1,38 +1,24 @@
 """
-Data fetcher for Vietnam stock market — vnstock 4.x compatible.
+Data fetcher for Vietnam stock market — gọi thẳng API Vietcap (VCI) / KBS.
 
-Migration notes (vnstock 4.x):
-  Old API: Vnstock().stock(symbol='ACB').quote.history(...)
-  New API: from vnstock.api.quote import Quote
-           Quote(symbol='ACB', source='vci').history(...)
+Nguồn (từ 26/09/2026): `scanner/sources/` thay vnstock. PyPI cách ly
+vnstock + vnai từ 24–25/09/2026 nên không cài được nữa; lý do và bảng việc
+tương ứng nằm ở docstring `scanner/sources/__init__.py`. Đầu ra giữ đúng
+hình dạng vnstock 4.0.7 trả về nên phần phía sau không đổi.
 
-  The old `Vnstock` class was deprecated on 31/08/2025.
-  See: https://vnstocks.com/vnstock-migration
+Giá: VCI trả giá đã điều chỉnh cổ tức/chia tách (backward-adjusted), theo
+NGHÌN đồng. Giá sẽ khác cafef/app môi giới ở mã vừa chia cổ tức tiền; đó là
+chủ ý, cho phân tích kỹ thuật không có gap giả.
 
-  Valid sources (lowercase): vci, kbs, msn, dnse, binance, fmp, fmarket.
-  TCBS was REMOVED in vnstock 4.x — using it raises ValueError.
-
-API Key (vnstock 4.x):
-  Anonymous users have STRICT rate limits (few req/min). Register a free
-  API key at https://vnstocks.com/login to get 60 req/min (Community).
-  Set the env variable VNSTOCK_API_KEY before fetching.
-
-Rate limit handling:
-  vnstock calls sys.exit() when rate limit hit — we MONKEY-PATCH sys.exit
-  to raise RateLimitError instead, so we can catch and retry.
-
-Primary source: 'vci' (returns backward-adjusted prices — dividends already
-subtracted from historical bars). Prices will differ from cafef/broker apps
-for tickers with recent cash dividends; that's expected and correct for
-technical analysis (no fake gaps).
+Giới hạn tần suất: `sources.http` giữ khoảng cách tối thiểu giữa hai lượt gọi
+(mặc định 1 s, env SOURCE_MIN_INTERVAL) — đúng mức 60 lượt/phút vnstock từng
+áp. Nguồn trả HTTP 429 thì ném RateLimitError; vòng thử lại ở đây chờ 65 s.
 
 Cache: parquet files per ticker in `backend/data/cache/` with suffix
 '_adj.parquet' (adjusted prices). Daily increment: only fetch missing dates.
 """
 from __future__ import annotations
 import json
-import os
-import sys
 import threading
 import time
 from datetime import date, datetime, timedelta
@@ -45,6 +31,8 @@ import pandas as pd
 from .trading_calendar import last_expected_session, now_ict
 
 from .price_units import quote_to_vnd
+from .sources import vci as _vci
+from .sources.http import RateLimitError  # financial_fetcher import lại từ đây
 
 log = logging.getLogger(__name__)
 
@@ -68,74 +56,17 @@ _SKIPPED = _Skipped()
 
 
 # ─────────────────────────────────────────────────────────────────────────
-# Monkey-patch sys.exit so vnstock's rate-limit doesn't kill the process
+# Tương thích ngược với thời vnstock
 # ─────────────────────────────────────────────────────────────────────────
-class RateLimitError(Exception):
-    """Raised when vnstock tries to sys.exit() due to rate limit."""
-    pass
+# RateLimitError nay đến từ sources.http (HTTP 429). Thời vnstock, nó được sinh
+# ra bằng cách vá sys.exit vì vnai gọi sys.exit() khi quá hạn mức — bản vá đó
+# đã bỏ cùng vnstock.
 
-
-_original_sys_exit = sys.exit
-_patched = False
-
-
-def _patched_sys_exit(code=0):
-    """Override sys.exit — convert to RateLimitError if called from vnstock."""
-    # Check if call came from vnstock/vnai code
-    import traceback
-    stack = traceback.extract_stack()
-    in_vnstock = any('vnstock' in (frame.filename or '') or 'vnai' in (frame.filename or '')
-                     for frame in stack)
-    if in_vnstock:
-        raise RateLimitError(f"vnstock rate-limit triggered sys.exit({code})")
-    # Otherwise behave normally
-    _original_sys_exit(code)
-
-
-def patch_sys_exit():
-    """Apply the monkey patch. Idempotent."""
-    global _patched
-    if not _patched:
-        sys.exit = _patched_sys_exit
-        _patched = True
-
-
-# ─────────────────────────────────────────────────────────────────────────
-# API Key setup — call this ONCE at startup
-# ─────────────────────────────────────────────────────────────────────────
-_api_key_initialized = False
 
 def setup_api_key(api_key: Optional[str] = None) -> bool:
-    """
-    Configure vnstock API key. Reads from VNSTOCK_API_KEY env var if not given.
-    Returns True if a key was configured, False otherwise.
-    Must be called before any fetch_* function.
-    """
-    global _api_key_initialized
-    if _api_key_initialized:
-        return True
-
-    # Patch sys.exit BEFORE any vnstock import/call
-    patch_sys_exit()
-
-    if api_key is None:
-        api_key = os.environ.get('VNSTOCK_API_KEY')
-
-    if not api_key:
-        log.warning("No VNSTOCK_API_KEY set — using anonymous mode (strict rate limit)")
-        _api_key_initialized = True
-        return False
-
-    try:
-        import vnai
-        vnai.setup_api_key(api_key)
-        log.info("✓ vnstock API key configured")
-        _api_key_initialized = True
-        return True
-    except Exception as e:
-        log.error(f"Failed to setup API key: {e}")
-        _api_key_initialized = True
-        return False
+    """Không còn tác dụng: API Vietcap/KBS không cần khóa. Giữ để code gọi cũ
+    (run_valuation, run_quality, backfill_history) không phải đổi."""
+    return False
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -146,7 +77,7 @@ def get_ticker_universe(exchanges: tuple = ('HOSE', 'HNX', 'UPCOM'),
                         use_liquidity_sort: bool = True) -> pd.DataFrame:
     """
     Return a DataFrame with columns: ticker, exchange.
-    Uses vnstock 4.x Listing API.
+    Danh sách lấy từ KBS (xem _fetch_full_universe).
 
     Args:
         exchanges: which exchanges to include
@@ -155,9 +86,7 @@ def get_ticker_universe(exchanges: tuple = ('HOSE', 'HNX', 'UPCOM'),
             average turnover) before applying limit. Falls back to curated
             top-liquid list if no cache exists.
     """
-    setup_api_key()
-
-    # Always load full universe from vnstock first
+    # Always load full universe first
     full_universe = _fetch_full_universe(exchanges)
 
     if limit is None or not use_liquidity_sort:
@@ -170,39 +99,33 @@ def get_ticker_universe(exchanges: tuple = ('HOSE', 'HNX', 'UPCOM'),
 
 
 def _fetch_full_universe(exchanges: tuple) -> pd.DataFrame:
-    """Fetch full ticker list from vnstock API."""
-    try:
-        from vnstock.api.listing import Listing
-        listing = Listing()
-        all_df = listing.all_symbols()
-        cols = {c.lower(): c for c in all_df.columns}
-        ticker_col = cols.get('symbol') or cols.get('ticker') or all_df.columns[0]
-        all_df = all_df.rename(columns={ticker_col: 'ticker'})
+    """Danh sách cổ phiếu theo sàn từ KBS; lỗi thì về danh sách curated.
 
-        if 'exchange' in cols:
-            ex_col = cols['exchange']
-            all_df = all_df.rename(columns={ex_col: 'exchange'})
-            result = all_df[all_df['exchange'].isin(exchanges)][['ticker', 'exchange']]
-        else:
-            out = []
-            for ex in exchanges:
-                try:
-                    sub = listing.symbols_by_exchange(ex.lower())
-                    sub_cols = {c.lower(): c for c in sub.columns}
-                    tk_col = sub_cols.get('symbol') or sub_cols.get('ticker') or sub.columns[0]
-                    sub = sub.rename(columns={tk_col: 'ticker'})
-                    sub['exchange'] = ex
-                    out.append(sub[['ticker', 'exchange']])
-                except Exception as e:
-                    log.warning(f"  symbols_by_exchange({ex}) failed: {e}")
-            if out:
-                result = pd.concat(out, ignore_index=True)
-            else:
-                return _load_fallback_universe(exchanges)
+    Khác thời vnstock (26/09/2026). Theo mã nguồn vnstock (chưa đo trên log):
+    `Listing().all_symbols()` nguồn KBS không có cột sàn, nên code cũ rơi
+    vào nhánh `symbols_by_exchange(ex)` — hàm này không nhận tham số sàn (ex
+    rơi vào `get_all`) và trả TOÀN BỘ mã. Hệ quả: mọi mã bị gắn sàn của vòng
+    lặp đầu tiên (HOSE), chỉ mã có trong top_liquid được sửa lại sàn, và
+    chứng chỉ quỹ 3–5 ký tự cũng lọt vào. Nay đọc sàn và loại chứng khoán
+    thẳng từ KBS, chỉ giữ `type == 'stock'`.
+    """
+    try:
+        from .sources import kbs
+        from .sources.http import with_retry
+        all_df = with_retry(kbs.listing)
+        if all_df.empty:
+            raise ValueError('KBS listing rỗng')
+        all_df = all_df[all_df['type'] == 'stock'].rename(columns={'symbol': 'ticker'})
+        result = all_df[all_df['exchange'].isin(exchanges)][['ticker', 'exchange']].copy()
+        if result.empty:
+            # Nguồn đổi mã sàn/loại (vd. 'HSX', 'STOCK_CP') thì lọc ra rỗng mà
+            # không có lỗi nào — phải rơi về danh sách curated, không chạy 0 mã.
+            raise ValueError(f"KBS listing không còn cổ phiếu nào ở {exchanges} sau khi lọc "
+                             f"(loại: {sorted(set(all_df['type']))[:5]})")
 
         # Override exchange using top_liquid.py (source of truth for curated list).
-        # vnstock listing sometimes returns duplicate ticker rows with different
-        # exchanges (e.g. DVN appears on both HOSE and UPCOM historical records).
+        # Nguồn danh sách đôi khi có mã trùng với sàn khác nhau (vd. DVN có cả
+        # bản ghi HOSE và UPCOM lịch sử).
         # Our curated top_liquid lists reflect the CURRENT trading venue.
         try:
             from .top_liquid import get_top_liquid_tickers
@@ -225,7 +148,7 @@ def _fetch_full_universe(exchanges: tuple) -> pd.DataFrame:
         log.info(f"  Full universe: {len(result)} tickers from {exchanges}")
         return result.reset_index(drop=True)
     except Exception as e:
-        log.warning(f"vnstock listing failed ({e}), falling back to curated list")
+        log.warning(f"KBS listing failed ({e}), falling back to curated list")
         return _load_fallback_universe(exchanges)
 
 
@@ -350,18 +273,13 @@ def _load_fallback_universe(exchanges: tuple) -> pd.DataFrame:
 
 
 # ─────────────────────────────────────────────────────────────────────────
-# Historical OHLCV fetcher — vnstock 4.x API
+# Historical OHLCV fetcher — Vietcap (VCI)
 # ─────────────────────────────────────────────────────────────────────────
 def fetch_ohlcv(ticker: str, start: str, end: str,
                 source: str = 'vci', retries: int = 2,
                 adjusted: bool = True) -> Optional[pd.DataFrame]:
     """
-    Fetch daily OHLCV for a single ticker using vnstock 4.x.
-
-    FIX (2026-05-26): chuyển source mặc định từ 'TCBS' → 'VCI'. Lý do:
-    vnstock 4.x đã BỎ source 'TCBS' — chỉ chấp nhận: kbs, vci, msn, dnse,
-    binance, fmp, fmarket. PUSH_GUIDE.md trước đó set source='TCBS' khiến
-    MỌI fetch fail với ValueError → fallback xuống cache cũ → giá sai phiên.
+    Fetch daily OHLCV for a single ticker from Vietcap (VCI).
 
     VCI trả về backward-adjusted prices (đã trừ cổ tức/cổ phiếu thưởng quá
     khứ). Giá hiển thị sẽ KHÁC cafef cho mã có cổ tức gần đây — ví dụ VND
@@ -370,23 +288,21 @@ def fetch_ohlcv(ticker: str, start: str, end: str,
     xác hơn (RSI/Ichimoku/Fibonacci không bị gap giả), tuy giá tuyệt đối
     khác broker app. UI nên có note "✓ Giá điều chỉnh" để user hiểu.
 
-    `adjusted` parameter chỉ ảnh hưởng suffix cache file (_adj vs _raw),
-    không ảnh hưởng VCI vì VCI luôn trả adjusted.
+    `source` chỉ nhận 'vci' (giữ tham số cho code gọi cũ). `adjusted` chỉ
+    ảnh hưởng suffix cache file (_adj vs _raw), không ảnh hưởng VCI vì VCI
+    luôn trả adjusted.
 
-    Returns DataFrame: Date, Open, High, Low, Close, Volume
+    Returns DataFrame: Date, Open, High, Low, Close, Volume — hoặc None nếu
+    nguồn không có dữ liệu hay vẫn hỏng sau `retries` lần thử lại.
     """
-    setup_api_key()
-    try:
-        from vnstock.api.quote import Quote
-    except ImportError:
-        log.error("vnstock not installed or version too old. Run: pip install -U vnstock")
-        return None
+    if str(source).lower() != 'vci':
+        # Lỗi cấu hình, không phải lỗi tạm thời: dừng ngay thay vì thử lại
+        # 500 mã × 3 lần (bài học 26/05/2026 với source='TCBS').
+        raise RuntimeError(f"fetch_ohlcv chỉ hỗ trợ source='vci', nhận '{source}'")
 
     for attempt in range(retries + 1):
         try:
-            q = Quote(symbol=ticker, source=source)
-            df = q.history(start=start, end=end, interval='1D')
-
+            df = _vci.ohlcv(ticker, start, end)
             if df is None or df.empty:
                 return None
 
@@ -394,48 +310,20 @@ def fetch_ohlcv(ticker: str, start: str, end: str,
                 'time': 'Date', 'open': 'Open', 'high': 'High',
                 'low': 'Low', 'close': 'Close', 'volume': 'Volume'
             })
-
             required = ['Date', 'Open', 'High', 'Low', 'Close', 'Volume']
-            missing = [c for c in required if c not in df.columns]
-            if missing:
-                log.warning(f"  {ticker}: missing columns {missing}, got {list(df.columns)}")
-                return None
-
             df['Date'] = pd.to_datetime(df['Date'])
             df = df[required].sort_values('Date')
             return df.reset_index(drop=True)
-        except RateLimitError as e:
-            # vnstock called sys.exit() due to rate limit; wait full 60s
-            log.warning(f"  {ticker} rate-limit hit, waiting 65s for reset...")
-            time.sleep(65)
-        except SystemExit as e:
-            # Backup: if monkey-patch didn't catch it
-            log.warning(f"  {ticker} SystemExit raised, waiting 65s...")
+        except RateLimitError:
+            log.warning(f"  {ticker} rate-limited (HTTP 429), waiting 65s...")
             time.sleep(65)
         except ValueError as e:
-            # FIX: invalid source / invalid ticker là lỗi config, không phải transient.
-            # Trước đây retry 3 lần x 500 mã x 2-4s → tốn ~1h CI vô ích trước khi fail.
-            # Nay: phát hiện và RAISE để fail-fast — pipeline sẽ stop ngay.
-            err_str = str(e)
-            if 'source' in err_str.lower() or 'Lớp Quote' in err_str:
-                log.error(f"FATAL CONFIG ERROR: {err_str}")
-                raise RuntimeError(
-                    f"vnstock source='{source}' không hợp lệ. Sửa data_fetcher.py "
-                    f"đặt source thành một trong: kbs, vci, msn, dnse, fmp, fmarket. "
-                    f"Original error: {err_str}"
-                ) from e
-            # ValueError khác (parse, range...) thì retry như cũ
-            log.warning(f"  {ticker} attempt {attempt+1}: ValueError: {str(e)[:150]}")
+            # Ngày/tham số sai là lỗi của code gọi — thử lại cũng vậy.
+            log.error(f"  {ticker}: {e}")
+            return None
+        except Exception as e:
+            log.warning(f"  {ticker} attempt {attempt+1}: {type(e).__name__}: {str(e)[:150]}")
             time.sleep(2 + attempt * 2)
-        except BaseException as e:
-            err_str = str(e).lower()
-            if 'rate' in err_str or 'limit' in err_str or '429' in err_str:
-                wait = 60
-                log.warning(f"  {ticker} rate-limited (msg), waiting {wait}s...")
-                time.sleep(wait)
-            else:
-                log.warning(f"  {ticker} attempt {attempt+1}: {type(e).__name__}: {str(e)[:150]}")
-                time.sleep(2 + attempt * 2)
     return None
 
 
@@ -618,7 +506,7 @@ def fetch_with_cache(ticker: str, exchange: str, lookback_days: int = 180,
     if is_stale:
         log.warning(
             f"  {ticker}: STALE — df.last={df_last_date}, expected={last_session} "
-            f"({'refetch failed' if refetch_explicit_failed else 'vnstock chưa cập nhật'})"
+            f"({'refetch failed' if refetch_explicit_failed else 'nguồn chưa cập nhật'})"
         )
 
     df = df.copy()
@@ -637,7 +525,7 @@ def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
                    clock=None) -> pd.DataFrame:
     """
     Fetch OHLCV for entire universe. Single-threaded with delay
-    to respect vnstock 4.x free-tier rate limit (60 req/min Community).
+    to respect the source rate limit (~60 req/min).
     Each ticker fetch may use 2 internal API calls (metadata + history),
     so we use 2.0s delay = 30 req/min = 60 internal calls/min, safe under 60/min.
 
@@ -840,13 +728,14 @@ def fetch_universe(tickers_df: pd.DataFrame, lookback_days: int = 180,
 
 def fetch_vnindex(lookback_days: int = 180) -> Optional[pd.DataFrame]:
     """VN-Index for relative strength calculation."""
-    setup_api_key()
     end = datetime.now().date()
     start = end - timedelta(days=lookback_days)
     try:
-        from vnstock.api.quote import Quote
-        q = Quote(symbol='VNINDEX', source='vci')
-        idx = q.history(start=str(start), end=str(end), interval='1D')
+        from .sources.http import with_retry
+        idx = with_retry(_vci.ohlcv, 'VNINDEX', str(start), str(end))
+        if idx.empty:
+            log.error("VN-Index fetch failed: nguồn trả rỗng")
+            return None
         idx = idx.rename(columns={'time': 'Date', 'close': 'Close'})
         idx['Date'] = pd.to_datetime(idx['Date'])
         return idx[['Date', 'Close']]
