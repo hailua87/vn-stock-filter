@@ -17,20 +17,19 @@ FULL = dict(MINE, **{'Connection': 'keep-alive', 'Cache-Control': 'no-cache', 'P
 sess = requests.Session()
 end = datetime.now() + timedelta(days=1)
 tickers = [t for t, _ in get_top_liquid_tickers()][:int(sys.argv[1]) if len(sys.argv) > 1 else 120]
-res = {'A_session': [], 'B_fresh': [], 'C_fresh_fullhdr': []}
+res = {'A_session_cb300': [], 'B_fresh_cb300': [], 'C_fresh_cb25': []}
 errs = []
 t0 = time.time()
 for i, tk in enumerate(tickers):
     mode = list(res)[i % 3]
-    payload = {'timeFrame': 'ONE_DAY', 'symbols': [tk], 'to': int(end.timestamp()), 'countBack': 300}
+    if time.time() - t0 > 480: break
+    payload = {'timeFrame': 'ONE_DAY', 'symbols': [tk], 'to': int(end.timestamp()), 'countBack': 25 if mode.startswith('C') else 300}
     s = time.time()
     try:
-        if mode == 'A_session':
-            r = sess.post(URL, headers=MINE, json=payload, timeout=30)
-        elif mode == 'B_fresh':
-            r = requests.post(URL, headers=MINE, json=payload, timeout=30)
+        if mode.startswith('A'):
+            r = sess.post(URL, headers=MINE, json=payload, timeout=15)
         else:
-            r = requests.post(URL, headers=FULL, data=json.dumps(payload), timeout=30)
+            r = requests.post(URL, headers=MINE, json=payload, timeout=15)
         ok = r.status_code == 200 and bool(r.json()) and bool(r.json()[0].get('t'))
         tag = r.status_code
     except Exception as e:
@@ -41,6 +40,7 @@ for i, tk in enumerate(tickers):
         errs.append(f'{i}:{tk}:{mode}:{tag}:{dt:.1f}s@{time.time()-t0:.0f}s')
     time.sleep(max(0, 2 - dt))
 for m, v in res.items():
+    if not v: continue
     lat = [d for d, _ in v]
     print(f"::notice title={m}::n={len(v)} fail={sum(not o for _, o in v)} "
           f"median={statistics.median(lat):.2f}s p90={sorted(lat)[int(len(lat)*.9)]:.2f}s max={max(lat):.2f}s")
