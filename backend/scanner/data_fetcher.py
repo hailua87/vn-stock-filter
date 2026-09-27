@@ -43,6 +43,20 @@ CACHE_DIR.mkdir(parents=True, exist_ok=True)
 # cùng cache OHLCV mà workflow đã save/restore sẵn.
 CHECKPOINT_PATH = CACHE_DIR / 'fetch_checkpoint.json'
 
+# VN-Index 2 năm, dùng cho beta. CHUYỂN VÀO CACHE_DIR ngày 27/09/2026 — cùng
+# đúng lý do với CHECKPOINT_PATH ngay trên, mà trước đó nó bỏ sót.
+#
+# Nó từng nằm ở `backend/data/vnindex_cache.parquet`, tức NGOÀI đường dẫn mà
+# hai workflow cache (`backend/data/cache`). Đo trên runner 27/09/2026 in ra
+# đúng một dòng: `VN-Index cache: KHÔNG CÓ -> sẽ phải gọi mạng`. Nghĩa là mọi
+# lượt chạy đều tải lại 2 năm VN-Index, và nếu lượt gọi đó hỏng thì beta của
+# CẢ RỔ rơi về 1,0 (`_load_vnindex` trả None → `calculate_beta` fallback),
+# lặng lẽ làm mọi định giá dùng sai beta.
+#
+# Đây cũng là chỗ hằng số này từng được định nghĩa LẠI ở bốn tệp khác nhau.
+# Nay một nơi duy nhất, để lần sau không thể lệch.
+VNINDEX_CACHE = CACHE_DIR / 'vnindex_cache.parquet'
+
 
 class _Skipped:
     """Mã chưa được thử vì van đã đóng — khác hẳn mã đã thử và hỏng."""
