@@ -204,3 +204,74 @@ def test_valuation_as_of_falls_back_to_generated_at(tmp_path):
     p = H.build(web_dir=tmp_path, now=NOW, **args())
     assert p['sources']['valuation']['as_of'] == '2026-09-23'
     assert p['sources']['valuation']['count'] == 65
+
+
+# ─── refresh_health.py: bước riêng, chạy kể cả khi bước trước chết ──────────
+
+def _weekly_workflow() -> str:
+    return (Path(__file__).resolve().parent.parent.parent
+            / '.github' / 'workflows' / 'weekly-valuation.yml').read_text(encoding='utf-8')
+
+
+def test_refresh_runs_even_when_an_earlier_step_dies():
+    """
+    Đây là toàn bộ lý do tách bước. Ngày 27/09/2026: định giá xong (68 phút),
+    chấm chất lượng chạm trần và bị chặt — nên health.json không được cập nhật
+    và màn Hôm nay báo định giá "24/09, 61 mã" trong khi tệp thật đã là
+    "27/09, 67 mã".
+
+    Mất `if: always()` là tái lập đúng lỗi đó.
+    """
+    import re
+    wf = _weekly_workflow()
+    m = re.search(r'- name: Refresh health\.json\n(.*?)(?=\n      - name:)', wf, re.S)
+    assert m, 'khong con buoc "Refresh health.json" trong weekly-valuation.yml'
+    assert 'if: always()' in m.group(1), 'buoc Refresh health.json mat if: always()'
+
+
+def test_commit_step_also_runs_on_failure():
+    """Cập nhật health.json mà không đẩy lên thì cũng như không."""
+    import re
+    wf = _weekly_workflow()
+    m = re.search(r'- name: Commit valuation output\n(.*?)(?=\n      - name:)', wf, re.S)
+    assert m and 'if: always()' in m.group(1), 'buoc Commit mat if: always()'
+
+
+def test_run_quality_no_longer_owns_the_refresh():
+    """
+    Một chủ sở hữu duy nhất cho việc cập nhật. Để lời gọi ở cả hai nơi thì
+    `run_quality` lại giành quyền, và bài học 27/09 mất tác dụng.
+    """
+    src = (Path(__file__).resolve().parent.parent / 'run_quality.py').read_text(encoding='utf-8')
+    assert 'refresh_weekly' not in src
+
+
+def test_refresh_script_does_not_create_a_half_file(tmp_path):
+    import subprocess
+    r = subprocess.run([sys.executable, str(Path(__file__).resolve().parent.parent / 'refresh_health.py'),
+                        '--web-data-dir', str(tmp_path)], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert not (tmp_path / 'health.json').exists()
+
+
+def test_refresh_script_updates_an_existing_file(tmp_path):
+    import subprocess
+    # Tệp định giá THẬT không có `as_of` lẫn `metadata.session_date` — ngày phải
+    # lấy từ `generated_at`. Viết đúng như thế ở đây, không thì test kiểm một
+    # hình dạng dữ liệu không tồn tại.
+    d = tmp_path / 'valuation'; d.mkdir(parents=True, exist_ok=True)
+    (d / 'latest.json').write_text(json.dumps({
+        'generated_at': '2026-09-27T05:36:37.806891',
+        'metadata': {'period': 'year'}, 'signals': [{}] * 67,
+    }), encoding='utf-8')
+    write_weekly(tmp_path, 'quality', '2026-09-20T07:00:00', as_of='2026-09-20')
+    H.write(tmp_path / 'health.json', H.build(web_dir=tmp_path, now=NOW, **args()))
+    # Định giá mới hơn, chất lượng vẫn cũ — đúng tình huống 27/09.
+    r = subprocess.run([sys.executable, str(Path(__file__).resolve().parent.parent / 'refresh_health.py'),
+                        '--web-data-dir', str(tmp_path)], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    out = json.loads((tmp_path / 'health.json').read_text(encoding='utf-8'))
+    assert out['sources']['valuation']['as_of'] == '2026-09-27'
+    assert out['sources']['valuation']['count'] == 67
+    assert out['sources']['quality']['as_of'] == '2026-09-20'
+    assert out['sources']['daily_scan']['universe'] == 480      # phần lượt quét còn nguyên
