@@ -54,17 +54,24 @@ log = logging.getLogger('daily')
 # 15:15 là mốc chốt đó cộng biên an toàn.
 ARCHIVE_CUTOFF_ICT = dtime(15, 15)
 
-# Trần thời gian cho vòng fetch, giây. 45 phút — cố ý thấp hơn `timeout-minutes:
-# 60` của workflow 15 phút.
+# Trần thời gian cho vòng fetch, giây. 70 phút — cố ý thấp hơn `timeout-minutes:
+# 90` của workflow 20 phút.
 #
 # Khoảng chênh đó không phải cho đẹp: 17-20/08/2026 cả 8 ca đều bị runner giết ở
 # đúng phút 60 giữa lúc đang fetch, tức chết TRƯỚC mọi bước ghi file, nên ~140 mã
-# đã lấy về không thành cái gì cả. Tự dừng ở phút 45 thì phần chấm điểm, ghi JSON
-# và commit vẫn còn 15 phút để chạy — hỏng có kiểm soát thay vì bị chặt ngang.
-FETCH_BUDGET_S = int(os.environ.get('FETCH_BUDGET_S', 45 * 60))
+# đã lấy về không thành cái gì cả. Tự dừng sớm thì phần chấm điểm, ghi JSON và
+# commit vẫn còn thời gian — hỏng có kiểm soát thay vì bị chặt ngang.
+#
+# NÂNG 45 -> 70 phút ngày 27/09/2026. Nguồn Vietcap/KBS chậm hơn vnstock khoảng
+# ba lần, đo trên chính runner:
+#     24/09 (vnstock)      500 mã / 1002-1016s  ~2,0s mỗi mã
+#     26/09 (Vietcap/KBS)  442 mã / 2732s       ~6,2s mỗi mã
+# Với 6,2s/mã thì 500 mã cần ~3100s, vượt trần 2700s cũ — nên MỌI lượt đều dừng
+# sớm, kể cả khi cache đã ấm. 70 phút cho ~4200s, đủ dư cho nguồn chậm hơn nữa.
+FETCH_BUDGET_S = int(os.environ.get('FETCH_BUDGET_S', 70 * 60))
 
 # Hạn chót cho MỌI lệnh gọi API sau vòng fetch (hiện là sự kiện quyền), tính từ
-# lúc tiến trình bắt đầu. 55 phút < timeout 60 phút của workflow. Trước đây chỉ
+# lúc tiến trình bắt đầu. 80 phút < timeout 90 phút của workflow. Trước đây chỉ
 # vòng fetch có ngân sách: 21-22/09 nguồn chậm ~5 lần, bộ lọc sự kiện quyền gọi
 # API cho ~250 mã sau phút 45 và job bị chặt ở phút 60, mất cả kết quả đã tính.
 # Moi thu run_daily ghi ra duoi --web-data-dir. Bo day PHAI khop voi danh sach
@@ -84,7 +91,7 @@ WEB_OUTPUTS = (
     'health.json',              # tinh trang du lieu cho man Hom nay
 )
 
-RUN_BUDGET_S = int(os.environ.get('RUN_BUDGET_S', 55 * 60))
+RUN_BUDGET_S = int(os.environ.get('RUN_BUDGET_S', 80 * 60))
 _STARTED = monotonic()
 
 # Độ phủ tối thiểu để bản quét được coi là đại diện cho cả phiên. Dưới mức này,
