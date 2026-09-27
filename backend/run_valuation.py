@@ -35,6 +35,7 @@ from scanner.financial_fetcher import fetch_fundamentals
 from scanner.strategies.valuation import value_ticker
 from scanner.snapshots import record_snapshot
 from scanner.publish_gate import may_publish
+from scanner.sources import http as SOURCE
 from scanner.quality.status import valuation_band
 
 # Trần thời gian cho PASS 1 (vòng gọi mạng), giây. 120 phút — cố ý thấp hơn
@@ -134,6 +135,7 @@ def main(argv=None, clock=monotonic):
                              '(0 = luôn ghi). Mặc định %(default)s.')
     args = parser.parse_args(argv)
     started = clock()
+    SOURCE.reset_stats()
 
     setup_api_key()
     today = datetime.now().strftime('%Y-%m-%d')
@@ -306,6 +308,10 @@ def main(argv=None, clock=monotonic):
             # None khi PASS 1 chạy trọn. Khác None nghĩa là peer median của mỗi
             # ngành tính trên nhóm đã bị cắt đuôi, không phải cả rổ.
             'fetch_stop_reason': stop_reason,
+            # Nguồn tử tế hay dở chứng trong CHÍNH lượt này. Xem chú thích
+            # trong scanner/sources/http.py về việc vì sao đếm tỷ lệ treo chứ
+            # không đo thời gian chạy.
+            'source_stats': SOURCE.stats(),
             'failures': len(failures),
             'verdict_counts': verdict_counts,
             'band_counts': band_counts,

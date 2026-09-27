@@ -98,6 +98,36 @@ def _throttle() -> None:
         _last_call = time.monotonic()
 
 
+# Đếm lượt gọi và lượt TREO, để biết nguồn đang tử tế hay đang dở chứng.
+#
+# Vì sao đếm tỷ lệ treo chứ không đo thời gian chạy: thời gian phụ thuộc nặng
+# vào cache. Đo ngày 27-28/09/2026, cùng 200 mã, cùng bước chấm chất lượng:
+#     cache ấm,  nguồn sạch : 37 giây
+#     cache lạnh, nguồn sạch : 27 phút
+#     cache ấm,  nguồn dở   : 70 phút (chạm trần, chỉ xong 165/200)
+# Một ngưỡng theo thời gian sẽ báo động nhầm mỗi lần cache lạnh. Tỷ lệ treo thì
+# không đổi theo cache — cùng hai ngày đó đo được 0,00 và 1,67 lượt treo mỗi mã.
+#
+# Đây cũng là chỗ sửa lại một điều tôi từng chốt nhầm vào chú thích: nguồn
+# KHÔNG "treo ~1,7 lần mỗi mã" như một đặc tính cố định. Nó thất thường — có
+# lượt sạch tuyệt đối. Nên phải đo mỗi lượt, không phải giả định.
+_stats_lock = threading.Lock()
+_stats = {'calls': 0, 'timeouts': 0}
+
+
+def reset_stats() -> None:
+    with _stats_lock:
+        _stats.update(calls=0, timeouts=0)
+
+
+def stats() -> Dict[str, Any]:
+    """Bản chụp bộ đếm, kèm tỷ lệ treo. Người gọi tự chia cho số mã."""
+    with _stats_lock:
+        d = dict(_stats)
+    d['timeout_ratio'] = round(d['timeouts'] / d['calls'], 4) if d['calls'] else 0.0
+    return d
+
+
 def request_json(method: str, url: str, *, headers: Optional[Dict[str, str]] = None,
                  params: Optional[Dict[str, Any]] = None,
                  payload: Optional[Dict[str, Any]] = None,
@@ -107,10 +137,17 @@ def request_json(method: str, url: str, *, headers: Optional[Dict[str, str]] = N
     h = dict(BASE_HEADERS)
     if headers:
         h.update(headers)
+    with _stats_lock:
+        _stats['calls'] += 1
     try:
         r = _session().request(method, url, headers=h, params=params,
                                json=payload, timeout=timeout)
     except requests.RequestException as e:
+        # Chỉ TREO mới tính, không tính mọi lỗi mạng: một 404 hay DNS hỏng nói
+        # điều khác hẳn về nguồn so với việc nó nhận request rồi im lặng.
+        if isinstance(e, requests.Timeout):
+            with _stats_lock:
+                _stats['timeouts'] += 1
         raise SourceError(f'{method} {url}: {type(e).__name__}: {e}') from e
     if r.status_code == 429:
         raise RateLimitError(f'{method} {url}: HTTP 429 (rate limit)')

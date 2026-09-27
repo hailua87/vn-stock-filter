@@ -30,6 +30,7 @@ from typing import Callable, Dict, Optional
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from scanner.publish_gate import may_publish
+from scanner.sources import http as SOURCE
 from scanner.quality import adapter, governance, metrics, scoring
 from scanner.quality import config as C
 from scanner.quality.status import DIMS, classify, model_for, sharp_drops, valuation_band
@@ -97,7 +98,8 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
                   delisted: set, previous: Dict[str, dict],
                   on_fetched: Optional[Callable[[dict], None]] = None,
                   fetch_bank_ratio: Optional[Callable] = None,
-                  should_stop: Optional[Callable[[], bool]] = None) -> dict:
+                  should_stop: Optional[Callable[[], bool]] = None,
+                  source_stats: Optional[dict] = None) -> dict:
     """
     Chấm cả universe. Không gọi mạng trực tiếp — mọi dữ liệu qua fetch_year/fetch_quarter.
 
@@ -213,6 +215,8 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
             # None khi vòng lấy dữ liệu chạy trọn. Khác None nghĩa là percentile
             # được tính trên phần rổ đã bị cắt đuôi, không phải cả universe.
             'fetch_stop_reason': stop_reason,
+            # Nguồn tử tế hay dở chứng trong CHÍNH lượt này (scanner/sources/http.py).
+            'source_stats': source_stats if source_stats is not None else {},
             'scored': len(items),
             'failures': failures,
             'status_counts': _count('status'),
@@ -282,6 +286,7 @@ def main(argv=None) -> int:
     # dưới cũng gọi mạng. Đặt mốc sau nó nghĩa là ngân sách âm thầm dài thêm
     # đúng bằng thời gian xếp hạng thanh khoản.
     started = monotonic()
+    SOURCE.reset_stats()
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s',
                         datefmt='%H:%M:%S')
 
@@ -324,6 +329,8 @@ def main(argv=None) -> int:
         should_stop=(lambda: monotonic() - started > args.fetch_budget)
                     if args.fetch_budget else None,
     )
+    # Đọc SAU khi build_quality chạy xong — trước đó bộ đếm còn rỗng.
+    payload['metadata']['source_stats'] = SOURCE.stats()
 
     m = payload['metadata']
     latest = web / 'quality' / 'latest.json'
