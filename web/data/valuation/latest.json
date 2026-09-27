@@ -1,35 +1,35 @@
 {
-  "generated_at": "2026-09-27T11:34:30.152261",
+  "generated_at": "2026-09-27T16:24:54.256650",
   "strategy": "multi_method_valuation",
-  "total": 54,
+  "total": 66,
   "metadata": {
     "period": "year",
     "min_upside": -100,
     "min_confidence": 0.3,
-    "total_attempted": 186,
+    "total_attempted": 200,
     "universe_size": 200,
-    "fetch_coverage": 0.93,
-    "fetch_stop_reason": "hết ngân sách PASS 1 (7200s) sau 186/200 mã",
-    "failures": 7,
+    "fetch_coverage": 1.0,
+    "fetch_stop_reason": null,
+    "failures": 0,
     "verdict_counts": {
-      "STRONG BUY": 6,
+      "STRONG BUY": 9,
       "BUY": 2,
-      "HOLD": 41,
-      "SELL": 2,
+      "HOLD": 51,
+      "SELL": 1,
       "STRONG SELL": 3
     },
     "band_counts": {
-      "ATTRACTIVE": 8,
-      "NOT_AVAILABLE": 39,
-      "FAIR": 2,
+      "ATTRACTIVE": 10,
+      "NOT_AVAILABLE": 48,
+      "FAIR": 3,
       "EXPENSIVE": 5
     },
     "excluded_outliers": [
       {
         "ticker": "HSG",
-        "fair_value": 38199,
+        "fair_value": 49170,
         "current_price": 10100.0,
-        "reason": "upside +278% > +200%"
+        "reason": "upside +387% > +200%"
       },
       {
         "ticker": "PVC",
@@ -39,15 +39,15 @@
       },
       {
         "ticker": "HHS",
-        "fair_value": 154127,
+        "fair_value": 154361,
         "current_price": 9750.0,
-        "reason": "upside +1481% > +200%"
+        "reason": "upside +1483% > +200%"
       },
       {
         "ticker": "HII",
-        "fair_value": 56269,
+        "fair_value": 57288,
         "current_price": 11050.0,
-        "reason": "upside +409% > +200%"
+        "reason": "upside +418% > +200%"
       },
       {
         "ticker": "FCN",
@@ -56,10 +56,16 @@
         "reason": "upside -86% < -80%"
       },
       {
+        "ticker": "TNG",
+        "fair_value": 50254,
+        "current_price": 16700.0,
+        "reason": "upside +201% > +200%"
+      },
+      {
         "ticker": "SHI",
-        "fair_value": 44666,
+        "fair_value": 61371,
         "current_price": 14000.0,
-        "reason": "upside +219% > +200%"
+        "reason": "upside +338% > +200%"
       },
       {
         "ticker": "ASP",
@@ -69,9 +75,9 @@
       },
       {
         "ticker": "TNI",
-        "fair_value": 22410,
+        "fair_value": 29336,
         "current_price": 5130.0,
-        "reason": "upside +337% > +200%"
+        "reason": "upside +472% > +200%"
       },
       {
         "ticker": "PIT",
@@ -84,91 +90,29 @@
         "fair_value": 587,
         "current_price": 3800.0,
         "reason": "upside -85% < -80%"
+      },
+      {
+        "ticker": "SMC",
+        "fair_value": 101554,
+        "current_price": 10050.0,
+        "reason": "upside +910% > +200%"
       }
     ]
   },
   "signals": [
-    {
-      "ticker": "TNG",
-      "industry": "Consumer_Staples",
-      "industry_source": "icb_mapping",
-      "is_holding": false,
-      "current_price": 16700.0,
-      "fair_value": 40340.0,
-      "fair_value_low": 32347.0,
-      "fair_value_high": 45504.0,
-      "upside_pct": 141.6,
-      "verdict": "STRONG BUY",
-      "confidence": 57.0,
-      "method_dispersion_pct": 32.0,
-      "methods_conflict": false,
-      "methods_used": [
-        "P/E Multiple",
-        "EV/EBITDA",
-        "P/B-ROE Justified"
-      ],
-      "method_details": [
-        {
-          "method": "P/E Multiple",
-          "weight": 35.0,
-          "fair_value": 45504.0,
-          "upside_pct": 172.5,
-          "confidence": 65.0
-        },
-        {
-          "method": "EV/EBITDA",
-          "weight": 20.0,
-          "fair_value": 32347.0,
-          "upside_pct": 93.7,
-          "confidence": 75.0
-        },
-        {
-          "method": "P/B-ROE Justified",
-          "weight": 5.0,
-          "fair_value": 41225.0,
-          "upside_pct": 146.9,
-          "confidence": 55.0
-        }
-      ],
-      "warnings": [
-        "FCFF TTM <= 0 (-270 tỷ) → DCF không khả thi",
-        "Terminal value chiếm 85% của EV (>80%) → kết quả phụ thuộc nhiều vào terminal g, kém ổn định",
-        "DCF fair value bất thường (8.15× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
-        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
-        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)"
-      ],
-      "guard_reason": null,
-      "notes": [
-        "Ngành định giá: Consumer_Staples (nguồn: icb_mapping, confidence: 85%)",
-        "✓ DCF FCFF: fair=136,098, conf=0%",
-        "✓ P/E Multiple: fair=45,504, conf=65%",
-        "✓ EV/EBITDA: fair=32,347, conf=75%",
-        "✓ P/B-ROE Justified: fair=41,225, conf=55%",
-        "✓ Historical Multiple: fair=0, conf=0%",
-        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
-      ],
-      "valuation_band": {
-        "band": "ATTRACTIVE",
-        "label": "Hấp dẫn",
-        "upside_pct": 141.6,
-        "confidence": 57.0,
-        "method": "P/E Multiple",
-        "reason": null
-      }
-    },
     {
       "ticker": "APH",
       "industry": "Industrial_Manufacturing",
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 7000.0,
-      "fair_value": 15941.0,
-      "fair_value_low": 15891.0,
-      "fair_value_high": 15977.0,
-      "upside_pct": 127.7,
+      "fair_value": 18937.0,
+      "fair_value_low": 13781.0,
+      "fair_value_high": 22719.0,
+      "upside_pct": 170.5,
       "verdict": "STRONG BUY",
       "confidence": 55.0,
-      "method_dispersion_pct": 1.0,
+      "method_dispersion_pct": 39.0,
       "methods_conflict": false,
       "methods_used": [
         "P/E Multiple",
@@ -178,15 +122,15 @@
         {
           "method": "P/E Multiple",
           "weight": 30.0,
-          "fair_value": 15891.0,
-          "upside_pct": 127.0,
+          "fair_value": 13781.0,
+          "upside_pct": 96.9,
           "confidence": 55.0
         },
         {
           "method": "EV/EBITDA",
           "weight": 30.0,
-          "fair_value": 15977.0,
-          "upside_pct": 128.2,
+          "fair_value": 22719.0,
+          "upside_pct": 224.6,
           "confidence": 75.0
         }
       ],
@@ -200,8 +144,8 @@
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Industrial_Manufacturing (nguồn: icb_mapping, confidence: 85%)",
-        "✓ P/E Multiple: fair=15,891, conf=55%",
-        "✓ EV/EBITDA: fair=15,977, conf=75%",
+        "✓ P/E Multiple: fair=13,781, conf=55%",
+        "✓ EV/EBITDA: fair=22,719, conf=75%",
         "✓ DCF FCFF: fair=127,134, conf=0%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
@@ -209,77 +153,136 @@
       "valuation_band": {
         "band": "ATTRACTIVE",
         "label": "Hấp dẫn",
-        "upside_pct": 127.7,
+        "upside_pct": 170.5,
         "confidence": 55.0,
         "method": "P/E Multiple",
         "reason": null
       }
     },
     {
-      "ticker": "TCM",
-      "industry": "Consumer_Staples",
+      "ticker": "AST",
+      "industry": "Consumer_Discretionary",
       "industry_source": "icb_mapping",
       "is_holding": false,
-      "current_price": 15950.0,
-      "fair_value": 35014.0,
-      "fair_value_low": 29155.0,
-      "fair_value_high": 37618.0,
-      "upside_pct": 119.5,
+      "current_price": 63100.0,
+      "fair_value": 165764.0,
+      "fair_value_low": 155006.0,
+      "fair_value_high": 181279.0,
+      "upside_pct": 162.7,
       "verdict": "STRONG BUY",
-      "confidence": 52.0,
-      "method_dispersion_pct": 25.0,
+      "confidence": 60.0,
+      "method_dispersion_pct": 14.0,
       "methods_conflict": false,
       "methods_used": [
-        "P/E Multiple",
-        "EV/EBITDA",
-        "P/B-ROE Justified"
+        "DCF FCFF",
+        "EV/EBITDA"
       ],
       "method_details": [
         {
-          "method": "P/E Multiple",
-          "weight": 35.0,
-          "fair_value": 33822.0,
-          "upside_pct": 112.0,
-          "confidence": 55.0
+          "method": "DCF FCFF",
+          "weight": 20.0,
+          "fair_value": 181279.0,
+          "upside_pct": 187.3,
+          "confidence": 65.0
         },
         {
           "method": "EV/EBITDA",
-          "weight": 20.0,
-          "fair_value": 37618.0,
-          "upside_pct": 135.9,
+          "weight": 25.0,
+          "fair_value": 155006.0,
+          "upside_pct": 145.7,
           "confidence": 75.0
-        },
-        {
-          "method": "P/B-ROE Justified",
-          "weight": 5.0,
-          "fair_value": 29155.0,
-          "upside_pct": 82.8,
-          "confidence": 55.0
         }
       ],
       "warnings": [
-        "Terminal value chiếm 81% của EV (>80%) → kết quả phụ thuộc nhiều vào terminal g, kém ổn định",
-        "DCF fair value bất thường (0.20× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
+        "Có năm thua lỗ trong 5 năm gần đây - P/E có thể không phù hợp",
+        "EPS rất biến động (CV=1.32) - cân nhắc EV/EBITDA",
         "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical",
-        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
-        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)"
+        "CoE - g quá nhỏ, ép g về CoE - 2%",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E"
       ],
       "guard_reason": null,
       "notes": [
-        "Ngành định giá: Consumer_Staples (nguồn: icb_mapping, confidence: 85%)",
-        "✓ DCF FCFF: fair=3,160, conf=0%",
-        "✓ P/E Multiple: fair=33,822, conf=55%",
-        "✓ EV/EBITDA: fair=37,618, conf=75%",
-        "✓ P/B-ROE Justified: fair=29,155, conf=55%",
+        "Ngành định giá: Consumer_Discretionary (nguồn: icb_mapping, confidence: 85%)",
+        "✓ P/E Multiple: fair=87,385, conf=15%",
+        "✓ DCF FCFF: fair=181,279, conf=65%",
+        "✓ EV/EBITDA: fair=155,006, conf=75%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "ATTRACTIVE",
         "label": "Hấp dẫn",
-        "upside_pct": 119.5,
-        "confidence": 52.0,
-        "method": "P/E Multiple",
+        "upside_pct": 162.7,
+        "confidence": 60.0,
+        "method": "EV/EBITDA",
+        "reason": null
+      }
+    },
+    {
+      "ticker": "VHC",
+      "industry": "Agriculture_Livestock",
+      "industry_source": "sector_override",
+      "is_holding": false,
+      "current_price": 50300.0,
+      "fair_value": 112544.0,
+      "fair_value_low": 76719.0,
+      "fair_value_high": 116229.0,
+      "upside_pct": 123.7,
+      "verdict": "STRONG BUY",
+      "confidence": 65.0,
+      "method_dispersion_pct": 35.0,
+      "methods_conflict": false,
+      "methods_used": [
+        "EV/EBITDA",
+        "P/B-ROE Justified",
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 50.0,
+          "fair_value": 116229.0,
+          "upside_pct": 131.1,
+          "confidence": 80.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 25.0,
+          "fair_value": 113548.0,
+          "upside_pct": 125.7,
+          "confidence": 55.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 10.0,
+          "fair_value": 76719.0,
+          "upside_pct": 52.5,
+          "confidence": 45.0
+        }
+      ],
+      "warnings": [
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 10.7%-25.7%)",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
+        "P/B-ROE không phải phương pháp tối ưu cho ngành này",
+        "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Agriculture_Livestock (nguồn: sector_override, confidence: 95%)",
+        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
+        "✓ EV/EBITDA: fair=116,229, conf=80%",
+        "✓ P/B-ROE Justified: fair=113,548, conf=55%",
+        "✓ P/E Multiple: fair=76,719, conf=45%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "ATTRACTIVE",
+        "label": "Hấp dẫn",
+        "upside_pct": 123.7,
+        "confidence": 65.0,
+        "method": "EV/EBITDA",
         "reason": null
       }
     },
@@ -288,11 +291,11 @@
       "industry": "Real_Estate",
       "industry_source": "icb_mapping",
       "is_holding": false,
-      "current_price": 6850.0,
-      "fair_value": 13608.0,
+      "current_price": 6720.0,
+      "fair_value": 13635.0,
       "fair_value_low": 11992.0,
       "fair_value_high": 14351.0,
-      "upside_pct": 98.7,
+      "upside_pct": 102.9,
       "verdict": "STRONG BUY",
       "confidence": 55.0,
       "method_dispersion_pct": 17.0,
@@ -307,21 +310,21 @@
           "method": "RNAV",
           "weight": 50.0,
           "fair_value": 14351.0,
-          "upside_pct": 109.5,
+          "upside_pct": 113.6,
           "confidence": 60.0
         },
         {
           "method": "P/B-ROE Justified",
           "weight": 20.0,
           "fair_value": 11992.0,
-          "upside_pct": 75.1,
+          "upside_pct": 78.5,
           "confidence": 75.0
         },
         {
           "method": "P/E Multiple",
           "weight": 10.0,
-          "fair_value": 13910.0,
-          "upside_pct": 103.1,
+          "fair_value": 14120.0,
+          "upside_pct": 110.1,
           "confidence": 65.0
         }
       ],
@@ -335,15 +338,133 @@
         "Ngành định giá: Real_Estate (nguồn: icb_mapping, confidence: 85%)",
         "✓ RNAV: fair=14,351, conf=60%",
         "✓ P/B-ROE Justified: fair=11,992, conf=75%",
-        "✓ P/E Multiple: fair=13,910, conf=65%",
+        "✓ P/E Multiple: fair=14,120, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": 98.7,
+        "upside_pct": 102.9,
         "confidence": 55.0,
+        "method": "RNAV",
+        "reason": "Phương pháp chính RNAV còn giản lược"
+      }
+    },
+    {
+      "ticker": "NDN",
+      "industry": "Real_Estate",
+      "industry_source": "icb_mapping",
+      "is_holding": false,
+      "current_price": 9100.0,
+      "fair_value": 17232.0,
+      "fair_value_low": 16665.0,
+      "fair_value_high": 17658.0,
+      "upside_pct": 89.4,
+      "verdict": "STRONG BUY",
+      "confidence": 42.0,
+      "method_dispersion_pct": 6.0,
+      "methods_conflict": false,
+      "methods_used": [
+        "RNAV",
+        "P/B-ROE Justified"
+      ],
+      "method_details": [
+        {
+          "method": "RNAV",
+          "weight": 50.0,
+          "fair_value": 17658.0,
+          "upside_pct": 94.0,
+          "confidence": 40.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 20.0,
+          "fair_value": 16665.0,
+          "upside_pct": 83.1,
+          "confidence": 75.0
+        }
+      ],
+      "warnings": [
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
+        "Có năm thua lỗ trong 5 năm gần đây - P/E có thể không phù hợp",
+        "EPS rất biến động (CV=1.36) - cân nhắc EV/EBITDA",
+        "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Real_Estate (nguồn: icb_mapping, confidence: 85%)",
+        "✓ RNAV: fair=17,658, conf=40%",
+        "✓ P/B-ROE Justified: fair=16,665, conf=75%",
+        "✓ P/E Multiple: fair=38,375, conf=15%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": 89.4,
+        "confidence": 42.0,
+        "method": "RNAV",
+        "reason": "Phương pháp chính RNAV còn giản lược"
+      }
+    },
+    {
+      "ticker": "QCG",
+      "industry": "Real_Estate",
+      "industry_source": "icb_mapping",
+      "is_holding": false,
+      "current_price": 9740.0,
+      "fair_value": 16030.0,
+      "fair_value_low": 10952.0,
+      "fair_value_high": 17045.0,
+      "upside_pct": 64.6,
+      "verdict": "STRONG BUY",
+      "confidence": 34.0,
+      "method_dispersion_pct": 36.0,
+      "methods_conflict": false,
+      "methods_used": [
+        "RNAV",
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "RNAV",
+          "weight": 50.0,
+          "fair_value": 17045.0,
+          "upside_pct": 75.0,
+          "confidence": 40.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 10.0,
+          "fair_value": 10952.0,
+          "upside_pct": 12.4,
+          "confidence": 40.0
+        }
+      ],
+      "warnings": [
+        "Inventory + investment property chỉ 15% tổng tài sản. RNAV có thể không phù hợp (không phải pure RE).",
+        "Sustainable ROE quá thấp, ép lên 3% (floor)",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
+        "EPS rất biến động (CV=0.79) - cân nhắc EV/EBITDA",
+        "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Real_Estate (nguồn: icb_mapping, confidence: 85%)",
+        "✓ RNAV: fair=17,045, conf=40%",
+        "✓ P/B-ROE Justified: fair=-1,941, conf=75%",
+        "✓ P/E Multiple: fair=10,952, conf=40%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": 64.6,
+        "confidence": 34.0,
         "method": "RNAV",
         "reason": "Phương pháp chính RNAV còn giản lược"
       }
@@ -354,13 +475,13 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 10900.0,
-      "fair_value": 18394.0,
-      "fair_value_low": 17902.0,
-      "fair_value_high": 19737.0,
-      "upside_pct": 68.8,
+      "fair_value": 17665.0,
+      "fair_value_low": 17440.0,
+      "fair_value_high": 17748.0,
+      "upside_pct": 62.1,
       "verdict": "STRONG BUY",
       "confidence": 58.0,
-      "method_dispersion_pct": 9.0,
+      "method_dispersion_pct": 2.0,
       "methods_conflict": false,
       "methods_used": [
         "EV/EBITDA",
@@ -370,15 +491,15 @@
         {
           "method": "EV/EBITDA",
           "weight": 20.0,
-          "fair_value": 17902.0,
-          "upside_pct": 64.2,
+          "fair_value": 17748.0,
+          "upside_pct": 62.8,
           "confidence": 75.0
         },
         {
           "method": "P/E Multiple",
           "weight": 10.0,
-          "fair_value": 19737.0,
-          "upside_pct": 81.1,
+          "fair_value": 17440.0,
+          "upside_pct": 60.0,
           "confidence": 55.0
         }
       ],
@@ -394,16 +515,75 @@
         "Ngành định giá: Utilities (nguồn: icb_mapping, confidence: 85%)",
         "✓ DCF FCFF: fair=79,586, conf=0%",
         "✓ DDM: fair=0, conf=0%",
-        "✓ EV/EBITDA: fair=17,902, conf=75%",
-        "✓ P/E Multiple: fair=19,737, conf=55%",
+        "✓ EV/EBITDA: fair=17,748, conf=75%",
+        "✓ P/E Multiple: fair=17,440, conf=55%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "ATTRACTIVE",
         "label": "Hấp dẫn",
-        "upside_pct": 68.8,
+        "upside_pct": 62.1,
         "confidence": 58.0,
+        "method": "EV/EBITDA",
+        "reason": null
+      }
+    },
+    {
+      "ticker": "NCT",
+      "industry": "Logistics_Transport",
+      "industry_source": "sector_override",
+      "is_holding": false,
+      "current_price": 83600.0,
+      "fair_value": 129102.0,
+      "fair_value_low": 109294.0,
+      "fair_value_high": 174812.0,
+      "upside_pct": 54.4,
+      "verdict": "STRONG BUY",
+      "confidence": 68.0,
+      "method_dispersion_pct": 37.0,
+      "methods_conflict": false,
+      "methods_used": [
+        "EV/EBITDA",
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 40.0,
+          "fair_value": 109294.0,
+          "upside_pct": 30.7,
+          "confidence": 75.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 20.0,
+          "fair_value": 174812.0,
+          "upside_pct": 109.1,
+          "confidence": 65.0
+        }
+      ],
+      "warnings": [
+        "Terminal value chiếm 87% của EV (>80%) → kết quả phụ thuộc nhiều vào terminal g, kém ổn định",
+        "DCF fair value bất thường (12.51× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
+        "CoE - g quá nhỏ, ép g về CoE - 2%",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
+        "Không có historical multiple data"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Logistics_Transport (nguồn: sector_override, confidence: 95%)",
+        "✓ EV/EBITDA: fair=109,294, conf=75%",
+        "✓ DCF FCFF: fair=1,045,843, conf=0%",
+        "✓ P/E Multiple: fair=174,812, conf=65%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "ATTRACTIVE",
+        "label": "Hấp dẫn",
+        "upside_pct": 54.4,
+        "confidence": 68.0,
         "method": "EV/EBITDA",
         "reason": null
       }
@@ -414,10 +594,10 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 53500.0,
-      "fair_value": 79412.0,
-      "fair_value_low": 64309.0,
+      "fair_value": 79450.0,
+      "fair_value_low": 64404.0,
       "fair_value_high": 91769.0,
-      "upside_pct": 48.4,
+      "upside_pct": 48.5,
       "verdict": "STRONG BUY",
       "confidence": 56.0,
       "method_dispersion_pct": 32.0,
@@ -431,8 +611,8 @@
         {
           "method": "P/E Multiple",
           "weight": 30.0,
-          "fair_value": 64309.0,
-          "upside_pct": 20.2,
+          "fair_value": 64404.0,
+          "upside_pct": 20.4,
           "confidence": 65.0
         },
         {
@@ -459,7 +639,7 @@
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Construction (nguồn: icb_mapping, confidence: 85%)",
-        "✓ P/E Multiple: fair=64,309, conf=65%",
+        "✓ P/E Multiple: fair=64,404, conf=65%",
         "✓ EV/EBITDA: fair=91,769, conf=75%",
         "✓ P/B-ROE Justified: fair=85,123, conf=55%",
         "✓ Historical Multiple: fair=0, conf=0%",
@@ -468,66 +648,9 @@
       "valuation_band": {
         "band": "ATTRACTIVE",
         "label": "Hấp dẫn",
-        "upside_pct": 48.4,
+        "upside_pct": 48.5,
         "confidence": 56.0,
         "method": "P/E Multiple",
-        "reason": null
-      }
-    },
-    {
-      "ticker": "SCS",
-      "industry": "Logistics_Transport",
-      "industry_source": "sector_override",
-      "is_holding": false,
-      "current_price": 44300.0,
-      "fair_value": 58137.0,
-      "fair_value_low": 56098.0,
-      "fair_value_high": 62842.0,
-      "upside_pct": 31.2,
-      "verdict": "BUY",
-      "confidence": 68.0,
-      "method_dispersion_pct": 11.0,
-      "methods_conflict": false,
-      "methods_used": [
-        "EV/EBITDA",
-        "P/E Multiple"
-      ],
-      "method_details": [
-        {
-          "method": "EV/EBITDA",
-          "weight": 40.0,
-          "fair_value": 56098.0,
-          "upside_pct": 26.6,
-          "confidence": 75.0
-        },
-        {
-          "method": "P/E Multiple",
-          "weight": 20.0,
-          "fair_value": 62842.0,
-          "upside_pct": 41.9,
-          "confidence": 65.0
-        }
-      ],
-      "warnings": [
-        "DCF fair value bất thường (6.19× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
-        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
-        "Không có historical multiple data"
-      ],
-      "guard_reason": null,
-      "notes": [
-        "Ngành định giá: Logistics_Transport (nguồn: sector_override, confidence: 95%)",
-        "✓ EV/EBITDA: fair=56,098, conf=75%",
-        "✓ DCF FCFF: fair=274,000, conf=0%",
-        "✓ P/E Multiple: fair=62,842, conf=65%",
-        "✓ Historical Multiple: fair=0, conf=0%",
-        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
-      ],
-      "valuation_band": {
-        "band": "ATTRACTIVE",
-        "label": "Hấp dẫn",
-        "upside_pct": 31.2,
-        "confidence": 68.0,
-        "method": "EV/EBITDA",
         "reason": null
       }
     },
@@ -537,10 +660,10 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 31650.0,
-      "fair_value": 41332.0,
+      "fair_value": 41793.0,
       "fair_value_low": 36532.0,
       "fair_value_high": 44484.0,
-      "upside_pct": 30.6,
+      "upside_pct": 32.0,
       "verdict": "BUY",
       "confidence": 59.0,
       "method_dispersion_pct": 19.0,
@@ -554,8 +677,8 @@
         {
           "method": "EV/EBITDA",
           "weight": 45.0,
-          "fair_value": 41469.0,
-          "upside_pct": 31.0,
+          "fair_value": 42177.0,
+          "upside_pct": 33.3,
           "confidence": 80.0
         },
         {
@@ -584,7 +707,7 @@
       "notes": [
         "Ngành định giá: Chemicals (nguồn: icb_mapping, confidence: 85%)",
         "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
-        "✓ EV/EBITDA: fair=41,469, conf=80%",
+        "✓ EV/EBITDA: fair=42,177, conf=80%",
         "✓ P/B-ROE Justified: fair=44,484, conf=55%",
         "✓ P/E Multiple: fair=36,532, conf=55%",
         "✓ Historical Multiple: fair=0, conf=0%",
@@ -593,10 +716,249 @@
       "valuation_band": {
         "band": "ATTRACTIVE",
         "label": "Hấp dẫn",
-        "upside_pct": 30.6,
+        "upside_pct": 32.0,
         "confidence": 59.0,
         "method": "EV/EBITDA",
         "reason": null
+      }
+    },
+    {
+      "ticker": "SCS",
+      "industry": "Logistics_Transport",
+      "industry_source": "sector_override",
+      "is_holding": false,
+      "current_price": 44300.0,
+      "fair_value": 56856.0,
+      "fair_value_low": 55789.0,
+      "fair_value_high": 59319.0,
+      "upside_pct": 28.3,
+      "verdict": "BUY",
+      "confidence": 68.0,
+      "method_dispersion_pct": 6.0,
+      "methods_conflict": false,
+      "methods_used": [
+        "EV/EBITDA",
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 40.0,
+          "fair_value": 55789.0,
+          "upside_pct": 25.9,
+          "confidence": 75.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 20.0,
+          "fair_value": 59319.0,
+          "upside_pct": 33.9,
+          "confidence": 65.0
+        }
+      ],
+      "warnings": [
+        "DCF fair value bất thường (6.19× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
+        "Không có historical multiple data"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Logistics_Transport (nguồn: sector_override, confidence: 95%)",
+        "✓ EV/EBITDA: fair=55,789, conf=75%",
+        "✓ DCF FCFF: fair=274,000, conf=0%",
+        "✓ P/E Multiple: fair=59,319, conf=65%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "ATTRACTIVE",
+        "label": "Hấp dẫn",
+        "upside_pct": 28.3,
+        "confidence": 68.0,
+        "method": "EV/EBITDA",
+        "reason": null
+      }
+    },
+    {
+      "ticker": "NKG",
+      "industry": "Steel_Metals",
+      "industry_source": "sector_override",
+      "is_holding": false,
+      "current_price": 9910.0,
+      "fair_value": 28571.0,
+      "fair_value_low": 1009.0,
+      "fair_value_high": 38046.0,
+      "upside_pct": 188.3,
+      "verdict": "HOLD",
+      "confidence": 34.0,
+      "method_dispersion_pct": 97.0,
+      "methods_conflict": true,
+      "methods_used": [
+        "EV/EBITDA",
+        "P/B-ROE Justified"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 50.0,
+          "fair_value": 38046.0,
+          "upside_pct": 283.9,
+          "confidence": 80.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 25.0,
+          "fair_value": 1009.0,
+          "upside_pct": -89.8,
+          "confidence": 55.0
+        }
+      ],
+      "warnings": [
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 97% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "EBITDA TTM (489) thấp <60% so với 5y avg → có thể đang ở đáy chu kỳ",
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range -2.3%-38.9%)",
+        "Sustainable ROE quá thấp, ép lên 3% (floor)",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Steel_Metals (nguồn: sector_override, confidence: 95%)",
+        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
+        "✓ EV/EBITDA: fair=38,046, conf=80%",
+        "✓ P/B-ROE Justified: fair=1,009, conf=55%",
+        "✓ P/E Multiple: fair=2,639, conf=5%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Độ phân tán giữa các phương pháp: 97% (ngưỡng 40%)",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": 188.3,
+        "confidence": 34.0,
+        "method": "EV/EBITDA",
+        "reason": "Các phương pháp định giá mâu thuẫn"
+      }
+    },
+    {
+      "ticker": "DBC",
+      "industry": "Agriculture_Livestock",
+      "industry_source": "ticker_override",
+      "is_holding": false,
+      "current_price": 15950.0,
+      "fair_value": 36996.0,
+      "fair_value_low": 29484.0,
+      "fair_value_high": 51643.0,
+      "upside_pct": 132.0,
+      "verdict": "HOLD",
+      "confidence": 32.0,
+      "method_dispersion_pct": 58.0,
+      "methods_conflict": true,
+      "methods_used": [
+        "EV/EBITDA",
+        "P/B-ROE Justified",
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 50.0,
+          "fair_value": 38010.0,
+          "upside_pct": 138.3,
+          "confidence": 80.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 25.0,
+          "fair_value": 29484.0,
+          "upside_pct": 84.9,
+          "confidence": 45.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 10.0,
+          "fair_value": 51643.0,
+          "upside_pct": 223.8,
+          "confidence": 30.0
+        }
+      ],
+      "warnings": [
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 58% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "EBITDA TTM (2,262) cao hơn 50% so với 5y avg → có thể đang ở đỉnh chu kỳ",
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 0.1%-18.7%)",
+        "ROE TTM (18.7%) lệch >30% so với trung bình 5y (11.4%). Có thể đang ở đỉnh/đáy chu kỳ - cần xem xét lại.",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Agriculture_Livestock (nguồn: ticker_override, confidence: 100%)",
+        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
+        "✓ EV/EBITDA: fair=38,010, conf=80%",
+        "✓ P/B-ROE Justified: fair=29,484, conf=45%",
+        "✓ P/E Multiple: fair=51,643, conf=30%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Độ phân tán giữa các phương pháp: 58% (ngưỡng 40%)",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": 132.0,
+        "confidence": 32.0,
+        "method": "EV/EBITDA",
+        "reason": "Các phương pháp định giá mâu thuẫn"
+      }
+    },
+    {
+      "ticker": "TTF",
+      "industry": "Steel_Metals",
+      "industry_source": "icb_mapping",
+      "is_holding": false,
+      "current_price": 1670.0,
+      "fair_value": 3766.0,
+      "fair_value_low": 3766.0,
+      "fair_value_high": 3766.0,
+      "upside_pct": 125.5,
+      "verdict": "HOLD",
+      "confidence": 68.0,
+      "method_dispersion_pct": 0.0,
+      "methods_conflict": false,
+      "methods_used": [
+        "EV/EBITDA"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 50.0,
+          "fair_value": 3766.0,
+          "upside_pct": 125.5,
+          "confidence": 80.0
+        }
+      ],
+      "warnings": [
+        "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho STRONG BUY, đã hạ về HOLD",
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range -50.0%-2.8%)",
+        "Sustainable ROE quá thấp, ép lên 3% (floor)",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
+        "P/B-ROE không phải phương pháp tối ưu cho ngành này"
+      ],
+      "guard_reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho STRONG BUY, đã hạ về HOLD",
+      "notes": [
+        "Ngành định giá: Steel_Metals (nguồn: icb_mapping, confidence: 85%)",
+        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
+        "✓ EV/EBITDA: fair=3,766, conf=80%",
+        "✓ P/B-ROE Justified: fair=-142, conf=55%",
+        "✓ P/E Multiple: fair=177, conf=5%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": 125.5,
+        "confidence": 68.0,
+        "method": "EV/EBITDA",
+        "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho STRONG BUY, đã hạ về HOLD"
       }
     },
     {
@@ -604,14 +966,14 @@
       "industry": "Logistics_Transport",
       "industry_source": "sector_override",
       "is_holding": false,
-      "current_price": 10700.0,
-      "fair_value": 24018.0,
-      "fair_value_low": 11351.0,
-      "fair_value_high": 29507.0,
-      "upside_pct": 124.5,
+      "current_price": 10950.0,
+      "fair_value": 23753.0,
+      "fair_value_low": 10715.0,
+      "fair_value_high": 29402.0,
+      "upside_pct": 116.9,
       "verdict": "HOLD",
       "confidence": 34.0,
-      "method_dispersion_pct": 62.0,
+      "method_dispersion_pct": 64.0,
       "methods_conflict": true,
       "methods_used": [
         "EV/EBITDA",
@@ -621,39 +983,39 @@
         {
           "method": "EV/EBITDA",
           "weight": 40.0,
-          "fair_value": 29507.0,
-          "upside_pct": 175.8,
+          "fair_value": 29402.0,
+          "upside_pct": 168.5,
           "confidence": 75.0
         },
         {
           "method": "P/E Multiple",
           "weight": 20.0,
-          "fair_value": 11351.0,
-          "upside_pct": 6.1,
+          "fair_value": 10715.0,
+          "upside_pct": -2.1,
           "confidence": 65.0
         }
       ],
       "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 62% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 64% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
         "Terminal value chiếm 83% của EV (>80%) → kết quả phụ thuộc nhiều vào terminal g, kém ổn định",
-        "DCF fair value bất thường (10.60× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
+        "DCF fair value bất thường (10.32× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
         "CoE - g quá nhỏ, ép g về CoE - 2%",
         "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E"
       ],
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Logistics_Transport (nguồn: sector_override, confidence: 95%)",
-        "✓ EV/EBITDA: fair=29,507, conf=75%",
-        "✓ DCF FCFF: fair=113,448, conf=0%",
-        "✓ P/E Multiple: fair=11,351, conf=65%",
+        "✓ EV/EBITDA: fair=29,402, conf=75%",
+        "✓ DCF FCFF: fair=113,055, conf=0%",
+        "✓ P/E Multiple: fair=10,715, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 62% (ngưỡng 40%)",
+        "Độ phân tán giữa các phương pháp: 64% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": 124.5,
+        "upside_pct": 116.9,
         "confidence": 34.0,
         "method": "EV/EBITDA",
         "reason": "Các phương pháp định giá mâu thuẫn"
@@ -703,7 +1065,7 @@
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Consumer_Discretionary (nguồn: icb_mapping, confidence: 85%)",
-        "✓ P/E Multiple: fair=111,218, conf=15%",
+        "✓ P/E Multiple: fair=111,652, conf=15%",
         "✓ DCF FCFF: fair=463,121, conf=75%",
         "✓ EV/EBITDA: fair=131,038, conf=75%",
         "✓ Historical Multiple: fair=0, conf=0%",
@@ -720,76 +1082,15 @@
       }
     },
     {
-      "ticker": "NKG",
-      "industry": "Steel_Metals",
-      "industry_source": "sector_override",
-      "is_holding": false,
-      "current_price": 9910.0,
-      "fair_value": 20894.0,
-      "fair_value_low": 1009.0,
-      "fair_value_high": 27729.0,
-      "upside_pct": 110.8,
-      "verdict": "HOLD",
-      "confidence": 34.0,
-      "method_dispersion_pct": 96.0,
-      "methods_conflict": true,
-      "methods_used": [
-        "EV/EBITDA",
-        "P/B-ROE Justified"
-      ],
-      "method_details": [
-        {
-          "method": "EV/EBITDA",
-          "weight": 50.0,
-          "fair_value": 27729.0,
-          "upside_pct": 179.8,
-          "confidence": 80.0
-        },
-        {
-          "method": "P/B-ROE Justified",
-          "weight": 25.0,
-          "fair_value": 1009.0,
-          "upside_pct": -89.8,
-          "confidence": 55.0
-        }
-      ],
-      "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 96% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
-        "EBITDA TTM (489) thấp <60% so với 5y avg → có thể đang ở đáy chu kỳ",
-        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range -2.3%-38.9%)",
-        "Sustainable ROE quá thấp, ép lên 3% (floor)",
-        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)"
-      ],
-      "guard_reason": null,
-      "notes": [
-        "Ngành định giá: Steel_Metals (nguồn: sector_override, confidence: 95%)",
-        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
-        "✓ EV/EBITDA: fair=27,729, conf=80%",
-        "✓ P/B-ROE Justified: fair=1,009, conf=55%",
-        "✓ P/E Multiple: fair=2,639, conf=5%",
-        "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 96% (ngưỡng 40%)",
-        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
-      ],
-      "valuation_band": {
-        "band": "NOT_AVAILABLE",
-        "label": "Chưa có",
-        "upside_pct": 110.8,
-        "confidence": 34.0,
-        "method": "EV/EBITDA",
-        "reason": "Các phương pháp định giá mâu thuẫn"
-      }
-    },
-    {
       "ticker": "HHV",
       "industry": "Construction",
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 9330.0,
-      "fair_value": 19072.0,
-      "fair_value_low": 19072.0,
-      "fair_value_high": 19072.0,
-      "upside_pct": 104.4,
+      "fair_value": 19088.0,
+      "fair_value_low": 19088.0,
+      "fair_value_high": 19088.0,
+      "upside_pct": 104.6,
       "verdict": "HOLD",
       "confidence": 55.0,
       "method_dispersion_pct": 0.0,
@@ -801,8 +1102,8 @@
         {
           "method": "P/E Multiple",
           "weight": 30.0,
-          "fair_value": 19072.0,
-          "upside_pct": 104.4,
+          "fair_value": 19088.0,
+          "upside_pct": 104.6,
           "confidence": 65.0
         }
       ],
@@ -816,7 +1117,7 @@
       "guard_reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho STRONG BUY, đã hạ về HOLD",
       "notes": [
         "Ngành định giá: Construction (nguồn: icb_mapping, confidence: 85%)",
-        "✓ P/E Multiple: fair=19,072, conf=65%",
+        "✓ P/E Multiple: fair=19,088, conf=65%",
         "✓ EV/EBITDA: fair=-14,144, conf=75%",
         "✓ P/B-ROE Justified: fair=-1,357, conf=55%",
         "✓ Historical Multiple: fair=0, conf=0%",
@@ -825,10 +1126,79 @@
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": 104.4,
+        "upside_pct": 104.6,
         "confidence": 55.0,
         "method": "P/E Multiple",
         "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho STRONG BUY, đã hạ về HOLD"
+      }
+    },
+    {
+      "ticker": "IDI",
+      "industry": "Agriculture_Livestock",
+      "industry_source": "sector_override",
+      "is_holding": false,
+      "current_price": 4620.0,
+      "fair_value": 9403.0,
+      "fair_value_low": 1586.0,
+      "fair_value_high": 12582.0,
+      "upside_pct": 103.5,
+      "verdict": "HOLD",
+      "confidence": 32.0,
+      "method_dispersion_pct": 387.0,
+      "methods_conflict": true,
+      "methods_used": [
+        "EV/EBITDA",
+        "P/B-ROE Justified",
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 50.0,
+          "fair_value": 12582.0,
+          "upside_pct": 172.3,
+          "confidence": 80.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 25.0,
+          "fair_value": 1586.0,
+          "upside_pct": -65.7,
+          "confidence": 55.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 10.0,
+          "fair_value": 2841.0,
+          "upside_pct": -38.5,
+          "confidence": 30.0
+        }
+      ],
+      "warnings": [
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 387% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 1.7%-16.3%)",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
+        "P/B-ROE không phải phương pháp tối ưu cho ngành này",
+        "EPS rất biến động (CV=0.93) - cân nhắc EV/EBITDA"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Agriculture_Livestock (nguồn: sector_override, confidence: 95%)",
+        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
+        "✓ EV/EBITDA: fair=12,582, conf=80%",
+        "✓ P/B-ROE Justified: fair=1,586, conf=55%",
+        "✓ P/E Multiple: fair=2,841, conf=30%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Độ phân tán giữa các phương pháp: 387% (ngưỡng 40%)",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": 103.5,
+        "confidence": 32.0,
+        "method": "EV/EBITDA",
+        "reason": "Các phương pháp định giá mâu thuẫn"
       }
     },
     {
@@ -837,13 +1207,13 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 16050.0,
-      "fair_value": 31966.0,
-      "fair_value_low": 20597.0,
+      "fair_value": 31577.0,
+      "fair_value_low": 17327.0,
       "fair_value_high": 54552.0,
-      "upside_pct": 99.2,
+      "upside_pct": 96.7,
       "verdict": "HOLD",
       "confidence": 30.0,
-      "method_dispersion_pct": 186.0,
+      "method_dispersion_pct": 188.0,
       "methods_conflict": true,
       "methods_used": [
         "DCF FCFF",
@@ -869,20 +1239,20 @@
         {
           "method": "EV/EBITDA",
           "weight": 20.0,
-          "fair_value": 26647.0,
-          "upside_pct": 66.0,
+          "fair_value": 26407.0,
+          "upside_pct": 64.5,
           "confidence": 75.0
         },
         {
           "method": "P/E Multiple",
           "weight": 10.0,
-          "fair_value": 20597.0,
-          "upside_pct": 28.3,
+          "fair_value": 17327.0,
+          "upside_pct": 8.0,
           "confidence": 65.0
         }
       ],
       "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 186% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 188% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
         "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
         "Không có historical multiple data"
       ],
@@ -891,16 +1261,16 @@
         "Ngành định giá: Utilities (nguồn: icb_mapping, confidence: 85%)",
         "✓ DCF FCFF: fair=54,552, conf=75%",
         "✓ DDM: fair=4,936, conf=65%",
-        "✓ EV/EBITDA: fair=26,647, conf=75%",
-        "✓ P/E Multiple: fair=20,597, conf=65%",
+        "✓ EV/EBITDA: fair=26,407, conf=75%",
+        "✓ P/E Multiple: fair=17,327, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 186% (ngưỡng 40%)",
+        "Độ phân tán giữa các phương pháp: 188% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": 99.2,
+        "upside_pct": 96.7,
         "confidence": 30.0,
         "method": "DCF FCFF",
         "reason": "Các phương pháp định giá mâu thuẫn"
@@ -973,55 +1343,72 @@
       }
     },
     {
-      "ticker": "TTF",
-      "industry": "Steel_Metals",
-      "industry_source": "icb_mapping",
+      "ticker": "ANV",
+      "industry": "Agriculture_Livestock",
+      "industry_source": "sector_override",
       "is_holding": false,
-      "current_price": 1670.0,
-      "fair_value": 2683.0,
-      "fair_value_low": 2683.0,
-      "fair_value_high": 2683.0,
-      "upside_pct": 60.7,
+      "current_price": 15950.0,
+      "fair_value": 29930.0,
+      "fair_value_low": 1927.0,
+      "fair_value_high": 60635.0,
+      "upside_pct": 87.6,
       "verdict": "HOLD",
-      "confidence": 68.0,
-      "method_dispersion_pct": 0.0,
-      "methods_conflict": false,
+      "confidence": 30.0,
+      "method_dispersion_pct": 165.0,
+      "methods_conflict": true,
       "methods_used": [
-        "EV/EBITDA"
+        "EV/EBITDA",
+        "P/B-ROE Justified",
+        "P/E Multiple"
       ],
       "method_details": [
         {
           "method": "EV/EBITDA",
           "weight": 50.0,
-          "fair_value": 2683.0,
-          "upside_pct": 60.7,
+          "fair_value": 35503.0,
+          "upside_pct": 122.6,
           "confidence": 80.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 25.0,
+          "fair_value": 1927.0,
+          "upside_pct": -87.9,
+          "confidence": 45.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 10.0,
+          "fair_value": 60635.0,
+          "upside_pct": 280.2,
+          "confidence": 30.0
         }
       ],
       "warnings": [
-        "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho STRONG BUY, đã hạ về HOLD",
-        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range -50.0%-2.8%)",
-        "Sustainable ROE quá thấp, ép lên 3% (floor)",
-        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
-        "P/B-ROE không phải phương pháp tối ưu cho ngành này"
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 165% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "EBITDA TTM (1,285) cao hơn 50% so với 5y avg → có thể đang ở đỉnh chu kỳ",
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 1.4%-28.3%)",
+        "ROE TTM (28.3%) lệch >30% so với trung bình 5y (5.5%). Có thể đang ở đỉnh/đáy chu kỳ - cần xem xét lại.",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)"
       ],
-      "guard_reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho STRONG BUY, đã hạ về HOLD",
+      "guard_reason": null,
       "notes": [
-        "Ngành định giá: Steel_Metals (nguồn: icb_mapping, confidence: 85%)",
+        "Ngành định giá: Agriculture_Livestock (nguồn: sector_override, confidence: 95%)",
         "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
-        "✓ EV/EBITDA: fair=2,683, conf=80%",
-        "✓ P/B-ROE Justified: fair=-142, conf=55%",
-        "✓ P/E Multiple: fair=177, conf=5%",
+        "✓ EV/EBITDA: fair=35,503, conf=80%",
+        "✓ P/B-ROE Justified: fair=1,927, conf=45%",
+        "✓ P/E Multiple: fair=60,635, conf=30%",
         "✓ Historical Multiple: fair=0, conf=0%",
+        "Độ phân tán giữa các phương pháp: 165% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": 60.7,
-        "confidence": 68.0,
+        "upside_pct": 87.6,
+        "confidence": 30.0,
         "method": "EV/EBITDA",
-        "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho STRONG BUY, đã hạ về HOLD"
+        "reason": "Các phương pháp định giá mâu thuẫn"
       }
     },
     {
@@ -1029,11 +1416,11 @@
       "industry": "Banking",
       "industry_source": "icb_mapping",
       "is_holding": false,
-      "current_price": 14050.0,
+      "current_price": 13500.0,
       "fair_value": 22491.0,
       "fair_value_low": 14796.0,
       "fair_value_high": 26196.0,
-      "upside_pct": 60.1,
+      "upside_pct": 66.6,
       "verdict": "HOLD",
       "confidence": 30.0,
       "method_dispersion_pct": 44.0,
@@ -1047,14 +1434,14 @@
           "method": "P/B-ROE Justified",
           "weight": 45.0,
           "fair_value": 26196.0,
-          "upside_pct": 86.5,
+          "upside_pct": 94.0,
           "confidence": 75.0
         },
         {
           "method": "P/E Multiple",
           "weight": 25.0,
           "fair_value": 14796.0,
-          "upside_pct": 5.3,
+          "upside_pct": 9.6,
           "confidence": 65.0
         }
       ],
@@ -1078,9 +1465,78 @@
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": 60.1,
+        "upside_pct": 66.6,
         "confidence": 30.0,
         "method": "P/B-ROE Justified",
+        "reason": "Các phương pháp định giá mâu thuẫn"
+      }
+    },
+    {
+      "ticker": "HAG",
+      "industry": "Agriculture_Livestock",
+      "industry_source": "ticker_override",
+      "is_holding": false,
+      "current_price": 14000.0,
+      "fair_value": 21339.0,
+      "fair_value_low": 19045.0,
+      "fair_value_high": 29907.0,
+      "upside_pct": 52.4,
+      "verdict": "HOLD",
+      "confidence": 35.0,
+      "method_dispersion_pct": 44.0,
+      "methods_conflict": true,
+      "methods_used": [
+        "EV/EBITDA",
+        "P/B-ROE Justified",
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 50.0,
+          "fair_value": 19045.0,
+          "upside_pct": 36.0,
+          "confidence": 80.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 25.0,
+          "fair_value": 24583.0,
+          "upside_pct": 75.6,
+          "confidence": 55.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 10.0,
+          "fair_value": 29907.0,
+          "upside_pct": 113.6,
+          "confidence": 55.0
+        }
+      ],
+      "warnings": [
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 44% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "EBITDA TTM (3,348) cao hơn 50% so với 5y avg → có thể đang ở đỉnh chu kỳ",
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 4.3%-24.9%)",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
+        "P/B-ROE không phải phương pháp tối ưu cho ngành này"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Agriculture_Livestock (nguồn: ticker_override, confidence: 100%)",
+        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
+        "✓ EV/EBITDA: fair=19,045, conf=80%",
+        "✓ P/B-ROE Justified: fair=24,583, conf=55%",
+        "✓ P/E Multiple: fair=29,907, conf=55%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Độ phân tán giữa các phương pháp: 44% (ngưỡng 40%)",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": 52.4,
+        "confidence": 35.0,
+        "method": "EV/EBITDA",
         "reason": "Các phương pháp định giá mâu thuẫn"
       }
     },
@@ -1145,18 +1601,18 @@
       }
     },
     {
-      "ticker": "VHC",
-      "industry": "Agriculture_Livestock",
-      "industry_source": "sector_override",
+      "ticker": "HPG",
+      "industry": "Steel_Metals",
+      "industry_source": "ticker_override",
       "is_holding": false,
-      "current_price": 50300.0,
-      "fair_value": 74769.0,
-      "fair_value_low": 61220.0,
-      "fair_value_high": 113548.0,
-      "upside_pct": 48.6,
+      "current_price": 20650.0,
+      "fair_value": 30923.0,
+      "fair_value_low": 8611.0,
+      "fair_value_high": 39661.0,
+      "upside_pct": 49.7,
       "verdict": "HOLD",
       "confidence": 33.0,
-      "method_dispersion_pct": 68.0,
+      "method_dispersion_pct": 186.0,
       "methods_conflict": true,
       "methods_used": [
         "EV/EBITDA",
@@ -1167,47 +1623,47 @@
         {
           "method": "EV/EBITDA",
           "weight": 50.0,
-          "fair_value": 61220.0,
-          "upside_pct": 21.7,
+          "fair_value": 39661.0,
+          "upside_pct": 92.1,
           "confidence": 80.0
         },
         {
           "method": "P/B-ROE Justified",
           "weight": 25.0,
-          "fair_value": 113548.0,
-          "upside_pct": 125.7,
+          "fair_value": 8611.0,
+          "upside_pct": -58.3,
           "confidence": 55.0
         },
         {
           "method": "P/E Multiple",
           "weight": 10.0,
-          "fair_value": 76719.0,
-          "upside_pct": 52.5,
-          "confidence": 45.0
+          "fair_value": 16669.0,
+          "upside_pct": -19.3,
+          "confidence": 30.0
         }
       ],
       "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 68% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
-        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 10.7%-25.7%)",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 186% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 6.6%-38.0%)",
         "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
         "P/B-ROE không phải phương pháp tối ưu cho ngành này",
-        "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical"
+        "EPS rất biến động (CV=0.65) - cân nhắc EV/EBITDA"
       ],
       "guard_reason": null,
       "notes": [
-        "Ngành định giá: Agriculture_Livestock (nguồn: sector_override, confidence: 95%)",
+        "Ngành định giá: Steel_Metals (nguồn: ticker_override, confidence: 100%)",
         "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
-        "✓ EV/EBITDA: fair=61,220, conf=80%",
-        "✓ P/B-ROE Justified: fair=113,548, conf=55%",
-        "✓ P/E Multiple: fair=76,719, conf=45%",
+        "✓ EV/EBITDA: fair=39,661, conf=80%",
+        "✓ P/B-ROE Justified: fair=8,611, conf=55%",
+        "✓ P/E Multiple: fair=16,669, conf=30%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 68% (ngưỡng 40%)",
+        "Độ phân tán giữa các phương pháp: 186% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": 48.6,
+        "upside_pct": 49.7,
         "confidence": 33.0,
         "method": "EV/EBITDA",
         "reason": "Các phương pháp định giá mâu thuẫn"
@@ -1219,13 +1675,13 @@
       "industry_source": "ticker_override",
       "is_holding": false,
       "current_price": 48300.0,
-      "fair_value": 67616.0,
-      "fair_value_low": 52954.0,
-      "fair_value_high": 117741.0,
-      "upside_pct": 40.0,
+      "fair_value": 66691.0,
+      "fair_value_low": 52588.0,
+      "fair_value_high": 114362.0,
+      "upside_pct": 38.1,
       "verdict": "HOLD",
       "confidence": 32.0,
-      "method_dispersion_pct": 113.0,
+      "method_dispersion_pct": 107.0,
       "methods_conflict": true,
       "methods_used": [
         "EV/EBITDA",
@@ -1236,8 +1692,8 @@
         {
           "method": "EV/EBITDA",
           "weight": 40.0,
-          "fair_value": 52954.0,
-          "upside_pct": 9.6,
+          "fair_value": 52588.0,
+          "upside_pct": 8.9,
           "confidence": 75.0
         },
         {
@@ -1250,13 +1706,13 @@
         {
           "method": "P/E Multiple",
           "weight": 20.0,
-          "fair_value": 117741.0,
-          "upside_pct": 143.8,
+          "fair_value": 114362.0,
+          "upside_pct": 136.8,
           "confidence": 55.0
         }
       ],
       "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 113% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 107% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
         "Terminal value chiếm 86% của EV (>80%) → kết quả phụ thuộc nhiều vào terminal g, kém ổn định",
         "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical",
         "CoE - g quá nhỏ, ép g về CoE - 2%",
@@ -1265,18 +1721,129 @@
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Logistics_Transport (nguồn: ticker_override, confidence: 100%)",
-        "✓ EV/EBITDA: fair=52,954, conf=75%",
+        "✓ EV/EBITDA: fair=52,588, conf=75%",
         "✓ DCF FCFF: fair=57,482, conf=55%",
-        "✓ P/E Multiple: fair=117,741, conf=55%",
+        "✓ P/E Multiple: fair=114,362, conf=55%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 113% (ngưỡng 40%)",
+        "Độ phân tán giữa các phương pháp: 107% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": 40.0,
+        "upside_pct": 38.1,
         "confidence": 32.0,
+        "method": "EV/EBITDA",
+        "reason": "Các phương pháp định giá mâu thuẫn"
+      }
+    },
+    {
+      "ticker": "NAG",
+      "industry": "Industrial_Manufacturing",
+      "industry_source": "icb_mapping",
+      "is_holding": false,
+      "current_price": 6100.0,
+      "fair_value": 8413.0,
+      "fair_value_low": 8413.0,
+      "fair_value_high": 8413.0,
+      "upside_pct": 37.9,
+      "verdict": "HOLD",
+      "confidence": 55.0,
+      "method_dispersion_pct": 0.0,
+      "methods_conflict": false,
+      "methods_used": [
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "P/E Multiple",
+          "weight": 30.0,
+          "fair_value": 8413.0,
+          "upside_pct": 37.9,
+          "confidence": 65.0
+        }
+      ],
+      "warnings": [
+        "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho BUY, đã hạ về HOLD",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
+        "FCFF TTM <= 0 (-321 tỷ) → DCF không khả thi",
+        "Terminal value chiếm 83% của EV (>80%) → kết quả phụ thuộc nhiều vào terminal g, kém ổn định",
+        "DCF fair value bất thường (0.04× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá."
+      ],
+      "guard_reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho BUY, đã hạ về HOLD",
+      "notes": [
+        "Ngành định giá: Industrial_Manufacturing (nguồn: icb_mapping, confidence: 85%)",
+        "✓ P/E Multiple: fair=8,413, conf=65%",
+        "✓ EV/EBITDA: fair=-12,629, conf=75%",
+        "✓ DCF FCFF: fair=248, conf=0%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": 37.9,
+        "confidence": 55.0,
+        "method": "P/E Multiple",
+        "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho BUY, đã hạ về HOLD"
+      }
+    },
+    {
+      "ticker": "DXP",
+      "industry": "Logistics_Transport",
+      "industry_source": "sector_override",
+      "is_holding": false,
+      "current_price": 13200.0,
+      "fair_value": 17149.0,
+      "fair_value_low": 9157.0,
+      "fair_value_high": 35590.0,
+      "upside_pct": 29.9,
+      "verdict": "HOLD",
+      "confidence": 34.0,
+      "method_dispersion_pct": 74.0,
+      "methods_conflict": true,
+      "methods_used": [
+        "EV/EBITDA",
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 40.0,
+          "fair_value": 9157.0,
+          "upside_pct": -30.6,
+          "confidence": 75.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 20.0,
+          "fair_value": 35590.0,
+          "upside_pct": 169.6,
+          "confidence": 65.0
+        }
+      ],
+      "warnings": [
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 74% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "FCFF TTM <= 0 (-169 tỷ) → DCF không khả thi",
+        "Terminal value chiếm 86% của EV (>80%) → kết quả phụ thuộc nhiều vào terminal g, kém ổn định",
+        "DCF fair value bất thường (4.68× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
+        "CoE - g quá nhỏ, ép g về CoE - 2%"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Logistics_Transport (nguồn: sector_override, confidence: 95%)",
+        "✓ EV/EBITDA: fair=9,157, conf=75%",
+        "✓ DCF FCFF: fair=61,807, conf=0%",
+        "✓ P/E Multiple: fair=35,590, conf=65%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Độ phân tán giữa các phương pháp: 74% (ngưỡng 40%)",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": 29.9,
+        "confidence": 34.0,
         "method": "EV/EBITDA",
         "reason": "Các phương pháp định giá mâu thuẫn"
       }
@@ -1286,14 +1853,14 @@
       "industry": "Utilities",
       "industry_source": "icb_mapping",
       "is_holding": false,
-      "current_price": 12450.0,
-      "fair_value": 16590.0,
-      "fair_value_low": 6826.0,
-      "fair_value_high": 21448.0,
-      "upside_pct": 33.3,
+      "current_price": 12800.0,
+      "fair_value": 16252.0,
+      "fair_value_low": 5858.0,
+      "fair_value_high": 21142.0,
+      "upside_pct": 27.0,
       "verdict": "HOLD",
       "confidence": 31.0,
-      "method_dispersion_pct": 119.0,
+      "method_dispersion_pct": 125.0,
       "methods_conflict": true,
       "methods_used": [
         "DCF FCFF",
@@ -1304,110 +1871,118 @@
         {
           "method": "DCF FCFF",
           "weight": 35.0,
-          "fair_value": 21448.0,
-          "upside_pct": 72.3,
+          "fair_value": 21142.0,
+          "upside_pct": 65.2,
           "confidence": 75.0
         },
         {
           "method": "EV/EBITDA",
           "weight": 20.0,
-          "fair_value": 12318.0,
-          "upside_pct": -1.1,
+          "fair_value": 12199.0,
+          "upside_pct": -4.7,
           "confidence": 75.0
         },
         {
           "method": "P/E Multiple",
           "weight": 10.0,
-          "fair_value": 6826.0,
-          "upside_pct": -45.2,
+          "fair_value": 5858.0,
+          "upside_pct": -54.2,
           "confidence": 65.0
         }
       ],
       "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 119% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 125% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
         "FCFF TTM <= 0 (-3086 tỷ) → DCF không khả thi",
-        "DDM fair value bất thường (0.12× giá) — loại khỏi tổng hợp.",
+        "DDM fair value bất thường (0.11× giá) — loại khỏi tổng hợp.",
         "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
         "Không có historical multiple data"
       ],
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Utilities (nguồn: icb_mapping, confidence: 85%)",
-        "✓ DCF FCFF: fair=21,448, conf=75%",
+        "✓ DCF FCFF: fair=21,142, conf=75%",
         "✓ DDM: fair=1,440, conf=0%",
-        "✓ EV/EBITDA: fair=12,318, conf=75%",
-        "✓ P/E Multiple: fair=6,826, conf=65%",
+        "✓ EV/EBITDA: fair=12,199, conf=75%",
+        "✓ P/E Multiple: fair=5,858, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 119% (ngưỡng 40%)",
+        "Độ phân tán giữa các phương pháp: 125% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": 33.3,
+        "upside_pct": 27.0,
         "confidence": 31.0,
         "method": "DCF FCFF",
         "reason": "Các phương pháp định giá mâu thuẫn"
       }
     },
     {
-      "ticker": "DXP",
-      "industry": "Logistics_Transport",
-      "industry_source": "sector_override",
+      "ticker": "BWE",
+      "industry": "Utilities",
+      "industry_source": "icb_mapping",
       "is_holding": false,
-      "current_price": 13200.0,
-      "fair_value": 17524.0,
-      "fair_value_low": 9239.0,
-      "fair_value_high": 36642.0,
-      "upside_pct": 32.8,
+      "current_price": 40250.0,
+      "fair_value": 50274.0,
+      "fair_value_low": 42833.0,
+      "fair_value_high": 54683.0,
+      "upside_pct": 24.9,
       "verdict": "HOLD",
-      "confidence": 34.0,
-      "method_dispersion_pct": 75.0,
-      "methods_conflict": true,
+      "confidence": 58.0,
+      "method_dispersion_pct": 24.0,
+      "methods_conflict": false,
       "methods_used": [
+        "DDM",
         "EV/EBITDA",
         "P/E Multiple"
       ],
       "method_details": [
         {
+          "method": "DDM",
+          "weight": 25.0,
+          "fair_value": 54683.0,
+          "upside_pct": 35.9,
+          "confidence": 65.0
+        },
+        {
           "method": "EV/EBITDA",
-          "weight": 40.0,
-          "fair_value": 9239.0,
-          "upside_pct": -30.0,
+          "weight": 20.0,
+          "fair_value": 48721.0,
+          "upside_pct": 21.0,
           "confidence": 75.0
         },
         {
           "method": "P/E Multiple",
-          "weight": 20.0,
-          "fair_value": 36642.0,
-          "upside_pct": 177.6,
+          "weight": 10.0,
+          "fair_value": 42833.0,
+          "upside_pct": 6.4,
           "confidence": 65.0
         }
       ],
       "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 75% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
-        "FCFF TTM <= 0 (-169 tỷ) → DCF không khả thi",
-        "Terminal value chiếm 86% của EV (>80%) → kết quả phụ thuộc nhiều vào terminal g, kém ổn định",
-        "DCF fair value bất thường (4.68× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
-        "CoE - g quá nhỏ, ép g về CoE - 2%"
+        "FCFF TTM <= 0 (-341 tỷ) → DCF không khả thi",
+        "Terminal value chiếm 89% của EV (>80%) → kết quả phụ thuộc nhiều vào terminal g, kém ổn định",
+        "DCF fair value bất thường (5.36× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
+        "CoE - g quá nhỏ, ép g về CoE - 2%",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E"
       ],
       "guard_reason": null,
       "notes": [
-        "Ngành định giá: Logistics_Transport (nguồn: sector_override, confidence: 95%)",
-        "✓ EV/EBITDA: fair=9,239, conf=75%",
-        "✓ DCF FCFF: fair=61,807, conf=0%",
-        "✓ P/E Multiple: fair=36,642, conf=65%",
+        "Ngành định giá: Utilities (nguồn: icb_mapping, confidence: 85%)",
+        "✓ DCF FCFF: fair=215,552, conf=0%",
+        "✓ DDM: fair=54,683, conf=65%",
+        "✓ EV/EBITDA: fair=48,721, conf=75%",
+        "✓ P/E Multiple: fair=42,833, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 75% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
-        "band": "NOT_AVAILABLE",
-        "label": "Chưa có",
-        "upside_pct": 32.8,
-        "confidence": 34.0,
-        "method": "EV/EBITDA",
-        "reason": "Các phương pháp định giá mâu thuẫn"
+        "band": "ATTRACTIVE",
+        "label": "Hấp dẫn",
+        "upside_pct": 24.9,
+        "confidence": 58.0,
+        "method": "DDM",
+        "reason": null
       }
     },
     {
@@ -1416,13 +1991,13 @@
       "industry_source": "sector_override",
       "is_holding": false,
       "current_price": 12350.0,
-      "fair_value": 15338.0,
-      "fair_value_low": 15001.0,
-      "fair_value_high": 16257.0,
-      "upside_pct": 24.2,
+      "fair_value": 15033.0,
+      "fair_value_low": 14918.0,
+      "fair_value_high": 15346.0,
+      "upside_pct": 21.7,
       "verdict": "HOLD",
       "confidence": 65.0,
-      "method_dispersion_pct": 8.0,
+      "method_dispersion_pct": 3.0,
       "methods_conflict": false,
       "methods_used": [
         "EV/EBITDA",
@@ -1432,15 +2007,15 @@
         {
           "method": "EV/EBITDA",
           "weight": 40.0,
-          "fair_value": 15001.0,
-          "upside_pct": 21.5,
+          "fair_value": 14918.0,
+          "upside_pct": 20.8,
           "confidence": 75.0
         },
         {
           "method": "P/E Multiple",
           "weight": 20.0,
-          "fair_value": 16257.0,
-          "upside_pct": 31.6,
+          "fair_value": 15346.0,
+          "upside_pct": 24.3,
           "confidence": 55.0
         }
       ],
@@ -1454,88 +2029,19 @@
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Logistics_Transport (nguồn: sector_override, confidence: 95%)",
-        "✓ EV/EBITDA: fair=15,001, conf=75%",
+        "✓ EV/EBITDA: fair=14,918, conf=75%",
         "✓ DCF FCFF: fair=78,214, conf=0%",
-        "✓ P/E Multiple: fair=16,257, conf=55%",
+        "✓ P/E Multiple: fair=15,346, conf=55%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "ATTRACTIVE",
         "label": "Hấp dẫn",
-        "upside_pct": 24.2,
+        "upside_pct": 21.7,
         "confidence": 65.0,
         "method": "EV/EBITDA",
         "reason": null
-      }
-    },
-    {
-      "ticker": "DBC",
-      "industry": "Agriculture_Livestock",
-      "industry_source": "ticker_override",
-      "is_holding": false,
-      "current_price": 15950.0,
-      "fair_value": 19654.0,
-      "fair_value_low": 14491.0,
-      "fair_value_high": 51643.0,
-      "upside_pct": 23.2,
-      "verdict": "HOLD",
-      "confidence": 32.0,
-      "method_dispersion_pct": 126.0,
-      "methods_conflict": true,
-      "methods_used": [
-        "EV/EBITDA",
-        "P/B-ROE Justified",
-        "P/E Multiple"
-      ],
-      "method_details": [
-        {
-          "method": "EV/EBITDA",
-          "weight": 50.0,
-          "fair_value": 14491.0,
-          "upside_pct": -9.1,
-          "confidence": 80.0
-        },
-        {
-          "method": "P/B-ROE Justified",
-          "weight": 25.0,
-          "fair_value": 29484.0,
-          "upside_pct": 84.9,
-          "confidence": 45.0
-        },
-        {
-          "method": "P/E Multiple",
-          "weight": 10.0,
-          "fair_value": 51643.0,
-          "upside_pct": 223.8,
-          "confidence": 30.0
-        }
-      ],
-      "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 126% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
-        "EBITDA TTM (2,262) cao hơn 50% so với 5y avg → có thể đang ở đỉnh chu kỳ",
-        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 0.1%-18.7%)",
-        "ROE TTM (18.7%) lệch >30% so với trung bình 5y (11.4%). Có thể đang ở đỉnh/đáy chu kỳ - cần xem xét lại.",
-        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)"
-      ],
-      "guard_reason": null,
-      "notes": [
-        "Ngành định giá: Agriculture_Livestock (nguồn: ticker_override, confidence: 100%)",
-        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
-        "✓ EV/EBITDA: fair=14,491, conf=80%",
-        "✓ P/B-ROE Justified: fair=29,484, conf=45%",
-        "✓ P/E Multiple: fair=51,643, conf=30%",
-        "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 126% (ngưỡng 40%)",
-        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
-      ],
-      "valuation_band": {
-        "band": "NOT_AVAILABLE",
-        "label": "Chưa có",
-        "upside_pct": 23.2,
-        "confidence": 32.0,
-        "method": "EV/EBITDA",
-        "reason": "Các phương pháp định giá mâu thuẫn"
       }
     },
     {
@@ -1544,13 +2050,13 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 33950.0,
-      "fair_value": 39253.0,
-      "fair_value_low": 36966.0,
+      "fair_value": 39665.0,
+      "fair_value_low": 37581.0,
       "fair_value_high": 44241.0,
-      "upside_pct": 15.6,
+      "upside_pct": 16.8,
       "verdict": "HOLD",
       "confidence": 57.0,
-      "method_dispersion_pct": 17.0,
+      "method_dispersion_pct": 15.0,
       "methods_conflict": false,
       "methods_used": [
         "EV/EBITDA",
@@ -1561,8 +2067,8 @@
         {
           "method": "EV/EBITDA",
           "weight": 45.0,
-          "fair_value": 36966.0,
-          "upside_pct": 8.9,
+          "fair_value": 37581.0,
+          "upside_pct": 10.7,
           "confidence": 80.0
         },
         {
@@ -1591,7 +2097,7 @@
       "notes": [
         "Ngành định giá: Chemicals (nguồn: icb_mapping, confidence: 85%)",
         "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
-        "✓ EV/EBITDA: fair=36,966, conf=80%",
+        "✓ EV/EBITDA: fair=37,581, conf=80%",
         "✓ P/B-ROE Justified: fair=44,241, conf=55%",
         "✓ P/E Multiple: fair=43,322, conf=45%",
         "✓ Historical Multiple: fair=0, conf=0%",
@@ -1600,79 +2106,69 @@
       "valuation_band": {
         "band": "FAIR",
         "label": "Hợp lý",
-        "upside_pct": 15.6,
+        "upside_pct": 16.8,
         "confidence": 57.0,
         "method": "EV/EBITDA",
         "reason": null
       }
     },
     {
-      "ticker": "HPG",
-      "industry": "Steel_Metals",
-      "industry_source": "ticker_override",
+      "ticker": "MIG",
+      "industry": "Insurance",
+      "industry_source": "icb_mapping",
       "is_holding": false,
-      "current_price": 20650.0,
-      "fair_value": 23721.0,
-      "fair_value_low": 8611.0,
-      "fair_value_high": 29444.0,
-      "upside_pct": 14.9,
+      "current_price": 15700.0,
+      "fair_value": 18055.0,
+      "fair_value_low": 17923.0,
+      "fair_value_high": 18274.0,
+      "upside_pct": 15.0,
       "verdict": "HOLD",
-      "confidence": 33.0,
-      "method_dispersion_pct": 125.0,
-      "methods_conflict": true,
+      "confidence": 55.0,
+      "method_dispersion_pct": 2.0,
+      "methods_conflict": false,
       "methods_used": [
-        "EV/EBITDA",
-        "P/B-ROE Justified",
-        "P/E Multiple"
+        "P/E Multiple",
+        "DDM"
       ],
       "method_details": [
         {
-          "method": "EV/EBITDA",
-          "weight": 50.0,
-          "fair_value": 29444.0,
-          "upside_pct": 42.6,
-          "confidence": 80.0
-        },
-        {
-          "method": "P/B-ROE Justified",
-          "weight": 25.0,
-          "fair_value": 8611.0,
-          "upside_pct": -58.3,
-          "confidence": 55.0
-        },
-        {
           "method": "P/E Multiple",
-          "weight": 10.0,
-          "fair_value": 16669.0,
-          "upside_pct": -19.3,
-          "confidence": 30.0
+          "weight": 25.0,
+          "fair_value": 17923.0,
+          "upside_pct": 14.2,
+          "confidence": 65.0
+        },
+        {
+          "method": "DDM",
+          "weight": 15.0,
+          "fair_value": 18274.0,
+          "upside_pct": 16.4,
+          "confidence": 65.0
         }
       ],
       "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 125% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
-        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 6.6%-38.0%)",
+        "Nhóm tài chính (Insurance): chưa có NPL/CAR nên chưa đưa ra kết luận định giá",
+        "Sustainable ROE quá thấp, ép lên 3% (floor)",
+        "ROE TTM (0.0%) lệch >30% so với trung bình 5y (3.0%). Có thể đang ở đỉnh/đáy chu kỳ - cần xem xét lại.",
         "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
-        "P/B-ROE không phải phương pháp tối ưu cho ngành này",
-        "EPS rất biến động (CV=0.65) - cân nhắc EV/EBITDA"
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E"
       ],
-      "guard_reason": null,
+      "guard_reason": "Nhóm tài chính (Insurance): chưa có NPL/CAR nên chưa đưa ra kết luận định giá",
       "notes": [
-        "Ngành định giá: Steel_Metals (nguồn: ticker_override, confidence: 100%)",
-        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
-        "✓ EV/EBITDA: fair=29,444, conf=80%",
-        "✓ P/B-ROE Justified: fair=8,611, conf=55%",
-        "✓ P/E Multiple: fair=16,669, conf=30%",
+        "Ngành định giá: Insurance (nguồn: icb_mapping, confidence: 85%)",
+        "✓ P/B-ROE Justified: fair=-3,283, conf=65%",
+        "✓ P/E Multiple: fair=17,923, conf=65%",
+        "✓ DDM: fair=18,274, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 125% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": 14.9,
-        "confidence": 33.0,
-        "method": "EV/EBITDA",
-        "reason": "Các phương pháp định giá mâu thuẫn"
+        "upside_pct": 15.0,
+        "confidence": 55.0,
+        "method": "P/E Multiple",
+        "reason": "Nhóm tài chính (Insurance): chưa có NPL/CAR nên chưa đưa ra kết luận định giá"
       }
     },
     {
@@ -1758,13 +2254,13 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 80500.0,
-      "fair_value": 88649.0,
-      "fair_value_low": 64380.0,
+      "fair_value": 87472.0,
+      "fair_value_low": 54412.0,
       "fair_value_high": 123950.0,
-      "upside_pct": 10.1,
+      "upside_pct": 8.7,
       "verdict": "HOLD",
       "confidence": 30.0,
-      "method_dispersion_pct": 93.0,
+      "method_dispersion_pct": 95.0,
       "methods_conflict": true,
       "methods_used": [
         "DCF FCFF",
@@ -1790,20 +2286,20 @@
         {
           "method": "EV/EBITDA",
           "weight": 20.0,
-          "fair_value": 74481.0,
-          "upside_pct": -7.5,
+          "fair_value": 74055.0,
+          "upside_pct": -8.0,
           "confidence": 75.0
         },
         {
           "method": "P/E Multiple",
           "weight": 10.0,
-          "fair_value": 64380.0,
-          "upside_pct": -20.0,
+          "fair_value": 53776.0,
+          "upside_pct": -33.2,
           "confidence": 65.0
         }
       ],
       "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 93% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 95% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
         "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
         "Không có historical multiple data"
       ],
@@ -1812,19 +2308,87 @@
         "Ngành định giá: Utilities (nguồn: icb_mapping, confidence: 85%)",
         "✓ DCF FCFF: fair=123,950, conf=75%",
         "✓ DDM: fair=54,412, conf=65%",
-        "✓ EV/EBITDA: fair=74,481, conf=75%",
-        "✓ P/E Multiple: fair=64,380, conf=65%",
+        "✓ EV/EBITDA: fair=74,055, conf=75%",
+        "✓ P/E Multiple: fair=53,776, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 93% (ngưỡng 40%)",
+        "Độ phân tán giữa các phương pháp: 95% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": 10.1,
+        "upside_pct": 8.7,
         "confidence": 30.0,
         "method": "DCF FCFF",
         "reason": "Các phương pháp định giá mâu thuẫn"
+      }
+    },
+    {
+      "ticker": "CSV",
+      "industry": "Chemicals",
+      "industry_source": "icb_mapping",
+      "is_holding": false,
+      "current_price": 20250.0,
+      "fair_value": 20886.0,
+      "fair_value_low": 19107.0,
+      "fair_value_high": 27105.0,
+      "upside_pct": 3.1,
+      "verdict": "HOLD",
+      "confidence": 59.0,
+      "method_dispersion_pct": 39.0,
+      "methods_conflict": false,
+      "methods_used": [
+        "EV/EBITDA",
+        "P/B-ROE Justified",
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 45.0,
+          "fair_value": 19107.0,
+          "upside_pct": -5.6,
+          "confidence": 80.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 20.0,
+          "fair_value": 27105.0,
+          "upside_pct": 33.9,
+          "confidence": 55.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 15.0,
+          "fair_value": 20360.0,
+          "upside_pct": 0.5,
+          "confidence": 55.0
+        }
+      ],
+      "warnings": [
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 12.9%-24.8%)",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
+        "P/B-ROE không phải phương pháp tối ưu cho ngành này",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
+        "Không có historical multiple data"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Chemicals (nguồn: icb_mapping, confidence: 85%)",
+        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
+        "✓ EV/EBITDA: fair=19,107, conf=80%",
+        "✓ P/B-ROE Justified: fair=27,105, conf=55%",
+        "✓ P/E Multiple: fair=20,360, conf=55%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "FAIR",
+        "label": "Hợp lý",
+        "upside_pct": 3.1,
+        "confidence": 59.0,
+        "method": "EV/EBITDA",
+        "reason": null
       }
     },
     {
@@ -1833,10 +2397,10 @@
       "industry_source": "sector_override",
       "is_holding": false,
       "current_price": 20900.0,
-      "fair_value": 21021.0,
-      "fair_value_low": 21021.0,
-      "fair_value_high": 21021.0,
-      "upside_pct": 0.6,
+      "fair_value": 20898.0,
+      "fair_value_low": 20898.0,
+      "fair_value_high": 20898.0,
+      "upside_pct": -0.0,
       "verdict": "HOLD",
       "confidence": 71.0,
       "method_dispersion_pct": 0.0,
@@ -1848,8 +2412,8 @@
         {
           "method": "EV/EBITDA",
           "weight": 40.0,
-          "fair_value": 21021.0,
-          "upside_pct": 0.6,
+          "fair_value": 20898.0,
+          "upside_pct": -0.0,
           "confidence": 75.0
         }
       ],
@@ -1863,146 +2427,70 @@
       "guard_reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được",
       "notes": [
         "Ngành định giá: Logistics_Transport (nguồn: sector_override, confidence: 95%)",
-        "✓ EV/EBITDA: fair=21,021, conf=75%",
+        "✓ EV/EBITDA: fair=20,898, conf=75%",
         "✓ DCF FCFF: fair=85,239, conf=0%",
-        "✓ P/E Multiple: fair=18,158, conf=15%",
+        "✓ P/E Multiple: fair=17,140, conf=15%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": 0.6,
+        "upside_pct": -0.0,
         "confidence": 71.0,
         "method": "EV/EBITDA",
         "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được"
       }
     },
     {
-      "ticker": "PVT",
-      "industry": "Logistics_Transport",
-      "industry_source": "sector_override",
+      "ticker": "FIT",
+      "industry": "Healthcare",
+      "industry_source": "icb_mapping",
       "is_holding": false,
-      "current_price": 23100.0,
-      "fair_value": 22600.0,
-      "fair_value_low": 21843.0,
-      "fair_value_high": 22929.0,
-      "upside_pct": -2.2,
+      "current_price": 2880.0,
+      "fair_value": 2879.0,
+      "fair_value_low": 2879.0,
+      "fair_value_high": 2879.0,
+      "upside_pct": -0.0,
       "verdict": "HOLD",
-      "confidence": 68.0,
-      "method_dispersion_pct": 5.0,
+      "confidence": 64.0,
+      "method_dispersion_pct": 0.0,
       "methods_conflict": false,
       "methods_used": [
-        "EV/EBITDA",
-        "P/E Multiple"
+        "EV/EBITDA"
       ],
       "method_details": [
         {
           "method": "EV/EBITDA",
-          "weight": 40.0,
-          "fair_value": 22929.0,
-          "upside_pct": -0.7,
-          "confidence": 75.0
-        },
-        {
-          "method": "P/E Multiple",
           "weight": 20.0,
-          "fair_value": 21843.0,
-          "upside_pct": -5.4,
-          "confidence": 65.0
+          "fair_value": 2879.0,
+          "upside_pct": -0.0,
+          "confidence": 75.0
         }
       ],
       "warnings": [
-        "FCFF TTM <= 0 (-579 tỷ) → DCF không khả thi",
-        "DCF fair value bất thường (5.45× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
-        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
-        "Không có historical multiple data"
+        "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được",
+        "Có năm thua lỗ trong 5 năm gần đây - P/E có thể không phù hợp",
+        "EPS rất biến động (CV=1.16) - cân nhắc EV/EBITDA",
+        "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E"
       ],
-      "guard_reason": null,
+      "guard_reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được",
       "notes": [
-        "Ngành định giá: Logistics_Transport (nguồn: sector_override, confidence: 95%)",
-        "✓ EV/EBITDA: fair=22,929, conf=75%",
-        "✓ DCF FCFF: fair=125,957, conf=0%",
-        "✓ P/E Multiple: fair=21,843, conf=65%",
+        "Ngành định giá: Healthcare (nguồn: icb_mapping, confidence: 85%)",
+        "✓ P/E Multiple: fair=2,207, conf=15%",
+        "✓ DCF FCFF: fair=125,469, conf=0%",
+        "✓ EV/EBITDA: fair=2,879, conf=75%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
-      ],
-      "valuation_band": {
-        "band": "FAIR",
-        "label": "Hợp lý",
-        "upside_pct": -2.2,
-        "confidence": 68.0,
-        "method": "EV/EBITDA",
-        "reason": null
-      }
-    },
-    {
-      "ticker": "ANV",
-      "industry": "Agriculture_Livestock",
-      "industry_source": "sector_override",
-      "is_holding": false,
-      "current_price": 16250.0,
-      "fair_value": 15712.0,
-      "fair_value_low": 1927.0,
-      "fair_value_high": 60635.0,
-      "upside_pct": -3.3,
-      "verdict": "HOLD",
-      "confidence": 30.0,
-      "method_dispersion_pct": 362.0,
-      "methods_conflict": true,
-      "methods_used": [
-        "EV/EBITDA",
-        "P/B-ROE Justified",
-        "P/E Multiple"
-      ],
-      "method_details": [
-        {
-          "method": "EV/EBITDA",
-          "weight": 50.0,
-          "fair_value": 16220.0,
-          "upside_pct": -0.2,
-          "confidence": 80.0
-        },
-        {
-          "method": "P/B-ROE Justified",
-          "weight": 25.0,
-          "fair_value": 1927.0,
-          "upside_pct": -88.1,
-          "confidence": 45.0
-        },
-        {
-          "method": "P/E Multiple",
-          "weight": 10.0,
-          "fair_value": 60635.0,
-          "upside_pct": 273.1,
-          "confidence": 30.0
-        }
-      ],
-      "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 362% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
-        "EBITDA TTM (1,285) cao hơn 50% so với 5y avg → có thể đang ở đỉnh chu kỳ",
-        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 1.4%-28.3%)",
-        "ROE TTM (28.3%) lệch >30% so với trung bình 5y (5.5%). Có thể đang ở đỉnh/đáy chu kỳ - cần xem xét lại.",
-        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)"
-      ],
-      "guard_reason": null,
-      "notes": [
-        "Ngành định giá: Agriculture_Livestock (nguồn: sector_override, confidence: 95%)",
-        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
-        "✓ EV/EBITDA: fair=16,220, conf=80%",
-        "✓ P/B-ROE Justified: fair=1,927, conf=45%",
-        "✓ P/E Multiple: fair=60,635, conf=30%",
-        "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 362% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -3.3,
-        "confidence": 30.0,
+        "upside_pct": -0.0,
+        "confidence": 64.0,
         "method": "EV/EBITDA",
-        "reason": "Các phương pháp định giá mâu thuẫn"
+        "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được"
       }
     },
     {
@@ -2065,72 +2553,61 @@
       }
     },
     {
-      "ticker": "HAG",
-      "industry": "Agriculture_Livestock",
-      "industry_source": "ticker_override",
+      "ticker": "PVT",
+      "industry": "Logistics_Transport",
+      "industry_source": "sector_override",
       "is_holding": false,
-      "current_price": 14000.0,
-      "fair_value": 13343.0,
-      "fair_value_low": 7201.0,
-      "fair_value_high": 29907.0,
-      "upside_pct": -4.7,
+      "current_price": 23100.0,
+      "fair_value": 22164.0,
+      "fair_value_low": 20901.0,
+      "fair_value_high": 22711.0,
+      "upside_pct": -4.1,
       "verdict": "HOLD",
-      "confidence": 35.0,
-      "method_dispersion_pct": 92.0,
-      "methods_conflict": true,
+      "confidence": 68.0,
+      "method_dispersion_pct": 8.0,
+      "methods_conflict": false,
       "methods_used": [
         "EV/EBITDA",
-        "P/B-ROE Justified",
         "P/E Multiple"
       ],
       "method_details": [
         {
           "method": "EV/EBITDA",
-          "weight": 50.0,
-          "fair_value": 7201.0,
-          "upside_pct": -48.6,
-          "confidence": 80.0
-        },
-        {
-          "method": "P/B-ROE Justified",
-          "weight": 25.0,
-          "fair_value": 24583.0,
-          "upside_pct": 75.6,
-          "confidence": 55.0
+          "weight": 40.0,
+          "fair_value": 22711.0,
+          "upside_pct": -1.7,
+          "confidence": 75.0
         },
         {
           "method": "P/E Multiple",
-          "weight": 10.0,
-          "fair_value": 29907.0,
-          "upside_pct": 113.6,
-          "confidence": 55.0
+          "weight": 20.0,
+          "fair_value": 20901.0,
+          "upside_pct": -9.5,
+          "confidence": 65.0
         }
       ],
       "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 92% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
-        "EBITDA TTM (3,348) cao hơn 50% so với 5y avg → có thể đang ở đỉnh chu kỳ",
-        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 4.3%-24.9%)",
-        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
-        "P/B-ROE không phải phương pháp tối ưu cho ngành này"
+        "FCFF TTM <= 0 (-579 tỷ) → DCF không khả thi",
+        "DCF fair value bất thường (5.45× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
+        "Không có historical multiple data"
       ],
       "guard_reason": null,
       "notes": [
-        "Ngành định giá: Agriculture_Livestock (nguồn: ticker_override, confidence: 100%)",
-        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
-        "✓ EV/EBITDA: fair=7,201, conf=80%",
-        "✓ P/B-ROE Justified: fair=24,583, conf=55%",
-        "✓ P/E Multiple: fair=29,907, conf=55%",
+        "Ngành định giá: Logistics_Transport (nguồn: sector_override, confidence: 95%)",
+        "✓ EV/EBITDA: fair=22,711, conf=75%",
+        "✓ DCF FCFF: fair=125,957, conf=0%",
+        "✓ P/E Multiple: fair=20,901, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 92% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
-        "band": "NOT_AVAILABLE",
-        "label": "Chưa có",
-        "upside_pct": -4.7,
-        "confidence": 35.0,
+        "band": "FAIR",
+        "label": "Hợp lý",
+        "upside_pct": -4.1,
+        "confidence": 68.0,
         "method": "EV/EBITDA",
-        "reason": "Các phương pháp định giá mâu thuẫn"
+        "reason": null
       }
     },
     {
@@ -2139,13 +2616,13 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 28600.0,
-      "fair_value": 26415.0,
+      "fair_value": 25782.0,
       "fair_value_low": 20218.0,
-      "fair_value_high": 36630.0,
-      "upside_pct": -7.6,
+      "fair_value_high": 34953.0,
+      "upside_pct": -9.9,
       "verdict": "HOLD",
       "confidence": 30.0,
-      "method_dispersion_pct": 45.0,
+      "method_dispersion_pct": 42.0,
       "methods_conflict": true,
       "methods_used": [
         "P/B-ROE Justified",
@@ -2162,14 +2639,14 @@
         {
           "method": "P/E Multiple",
           "weight": 35.0,
-          "fair_value": 36630.0,
-          "upside_pct": 28.1,
+          "fair_value": 34953.0,
+          "upside_pct": 22.2,
           "confidence": 65.0
         }
       ],
       "warnings": [
         "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá",
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 45% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 42% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
         "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
         "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
         "Không có historical multiple data"
@@ -2178,15 +2655,15 @@
       "notes": [
         "Ngành định giá: Securities (nguồn: icb_mapping, confidence: 85%)",
         "✓ P/B-ROE Justified: fair=20,218, conf=75%",
-        "✓ P/E Multiple: fair=36,630, conf=65%",
+        "✓ P/E Multiple: fair=34,953, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 45% (ngưỡng 40%)",
+        "Độ phân tán giữa các phương pháp: 42% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -7.6,
+        "upside_pct": -9.9,
         "confidence": 30.0,
         "method": "P/B-ROE Justified",
         "reason": "Các phương pháp định giá mâu thuẫn"
@@ -2198,13 +2675,13 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 16700.0,
-      "fair_value": 14854.0,
+      "fair_value": 14592.0,
       "fair_value_low": 11016.0,
-      "fair_value_high": 21181.0,
-      "upside_pct": -11.1,
+      "fair_value_high": 20486.0,
+      "upside_pct": -12.6,
       "verdict": "HOLD",
       "confidence": 30.0,
-      "method_dispersion_pct": 48.0,
+      "method_dispersion_pct": 46.0,
       "methods_conflict": true,
       "methods_used": [
         "P/B-ROE Justified",
@@ -2221,14 +2698,14 @@
         {
           "method": "P/E Multiple",
           "weight": 35.0,
-          "fair_value": 21181.0,
-          "upside_pct": 26.8,
+          "fair_value": 20486.0,
+          "upside_pct": 22.7,
           "confidence": 65.0
         }
       ],
       "warnings": [
         "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá",
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 48% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 46% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
         "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
         "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
         "Không có historical multiple data"
@@ -2237,15 +2714,15 @@
       "notes": [
         "Ngành định giá: Securities (nguồn: icb_mapping, confidence: 85%)",
         "✓ P/B-ROE Justified: fair=11,016, conf=75%",
-        "✓ P/E Multiple: fair=21,181, conf=65%",
+        "✓ P/E Multiple: fair=20,486, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 48% (ngưỡng 40%)",
+        "Độ phân tán giữa các phương pháp: 46% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -11.1,
+        "upside_pct": -12.6,
         "confidence": 30.0,
         "method": "P/B-ROE Justified",
         "reason": "Các phương pháp định giá mâu thuẫn"
@@ -2257,10 +2734,10 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 72500.0,
-      "fair_value": 63111.0,
+      "fair_value": 63137.0,
       "fair_value_low": 53123.0,
       "fair_value_high": 75208.0,
-      "upside_pct": -13.0,
+      "upside_pct": -12.9,
       "verdict": "HOLD",
       "confidence": 56.0,
       "method_dispersion_pct": 39.0,
@@ -2274,8 +2751,8 @@
         {
           "method": "P/E Multiple",
           "weight": 30.0,
-          "fair_value": 57114.0,
-          "upside_pct": -21.2,
+          "fair_value": 57180.0,
+          "upside_pct": -21.1,
           "confidence": 65.0
         },
         {
@@ -2302,7 +2779,7 @@
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Construction (nguồn: icb_mapping, confidence: 85%)",
-        "✓ P/E Multiple: fair=57,114, conf=65%",
+        "✓ P/E Multiple: fair=57,180, conf=65%",
         "✓ EV/EBITDA: fair=75,208, conf=75%",
         "✓ P/B-ROE Justified: fair=53,123, conf=55%",
         "✓ Historical Multiple: fair=0, conf=0%",
@@ -2311,7 +2788,7 @@
       "valuation_band": {
         "band": "EXPENSIVE",
         "label": "Đắt",
-        "upside_pct": -13.0,
+        "upside_pct": -12.9,
         "confidence": 56.0,
         "method": "P/E Multiple",
         "reason": null
@@ -2383,13 +2860,13 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 14350.0,
-      "fair_value": 12204.0,
+      "fair_value": 11950.0,
       "fair_value_low": 10569.0,
-      "fair_value_high": 14900.0,
-      "upside_pct": -15.0,
+      "fair_value_high": 14226.0,
+      "upside_pct": -16.7,
       "verdict": "HOLD",
       "confidence": 60.0,
-      "method_dispersion_pct": 29.0,
+      "method_dispersion_pct": 26.0,
       "methods_conflict": false,
       "methods_used": [
         "P/B-ROE Justified",
@@ -2406,8 +2883,8 @@
         {
           "method": "P/E Multiple",
           "weight": 35.0,
-          "fair_value": 14900.0,
-          "upside_pct": 3.8,
+          "fair_value": 14226.0,
+          "upside_pct": -0.9,
           "confidence": 65.0
         }
       ],
@@ -2421,17 +2898,85 @@
       "notes": [
         "Ngành định giá: Securities (nguồn: icb_mapping, confidence: 85%)",
         "✓ P/B-ROE Justified: fair=10,569, conf=75%",
-        "✓ P/E Multiple: fair=14,900, conf=65%",
+        "✓ P/E Multiple: fair=14,226, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -15.0,
+        "upside_pct": -16.7,
         "confidence": 60.0,
         "method": "P/B-ROE Justified",
         "reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá"
+      }
+    },
+    {
+      "ticker": "NAF",
+      "industry": "Consumer_Staples",
+      "industry_source": "icb_mapping",
+      "is_holding": false,
+      "current_price": 48000.0,
+      "fair_value": 39238.0,
+      "fair_value_low": 36347.0,
+      "fair_value_high": 48971.0,
+      "upside_pct": -18.3,
+      "verdict": "HOLD",
+      "confidence": 57.0,
+      "method_dispersion_pct": 31.0,
+      "methods_conflict": false,
+      "methods_used": [
+        "P/E Multiple",
+        "EV/EBITDA",
+        "P/B-ROE Justified"
+      ],
+      "method_details": [
+        {
+          "method": "P/E Multiple",
+          "weight": 35.0,
+          "fair_value": 40181.0,
+          "upside_pct": -16.3,
+          "confidence": 65.0
+        },
+        {
+          "method": "EV/EBITDA",
+          "weight": 20.0,
+          "fair_value": 36347.0,
+          "upside_pct": -24.3,
+          "confidence": 75.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 5.0,
+          "fair_value": 48971.0,
+          "upside_pct": 2.0,
+          "confidence": 45.0
+        }
+      ],
+      "warnings": [
+        "FCFF TTM <= 0 (-116 tỷ) → DCF không khả thi",
+        "Terminal value chiếm 92% của EV (>80%) → kết quả phụ thuộc nhiều vào terminal g, kém ổn định",
+        "DCF fair value bất thường (5.31× giá hiện tại) — giả định growth/WACC hoặc FCFF đầu vào không đáng tin. Loại khỏi tổng hợp thay vì cắt về bội số của giá.",
+        "CoE - g quá nhỏ, ép g về CoE - 2%",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Consumer_Staples (nguồn: icb_mapping, confidence: 85%)",
+        "✓ DCF FCFF: fair=254,806, conf=0%",
+        "✓ P/E Multiple: fair=40,181, conf=65%",
+        "✓ EV/EBITDA: fair=36,347, conf=75%",
+        "✓ P/B-ROE Justified: fair=48,971, conf=45%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "EXPENSIVE",
+        "label": "Đắt",
+        "upside_pct": -18.3,
+        "confidence": 57.0,
+        "method": "P/E Multiple",
+        "reason": null
       }
     },
     {
@@ -2439,11 +2984,11 @@
       "industry": "Construction",
       "industry_source": "icb_mapping",
       "is_holding": false,
-      "current_price": 12950.0,
-      "fair_value": 10467.0,
+      "current_price": 12850.0,
+      "fair_value": 10473.0,
       "fair_value_low": 9101.0,
-      "fair_value_high": 11460.0,
-      "upside_pct": -19.2,
+      "fair_value_high": 11477.0,
+      "upside_pct": -18.5,
       "verdict": "HOLD",
       "confidence": 52.0,
       "method_dispersion_pct": 23.0,
@@ -2457,22 +3002,22 @@
         {
           "method": "P/E Multiple",
           "weight": 30.0,
-          "fair_value": 11460.0,
-          "upside_pct": -11.5,
+          "fair_value": 11477.0,
+          "upside_pct": -10.7,
           "confidence": 55.0
         },
         {
           "method": "EV/EBITDA",
           "weight": 25.0,
           "fair_value": 10394.0,
-          "upside_pct": -19.7,
+          "upside_pct": -19.1,
           "confidence": 75.0
         },
         {
           "method": "P/B-ROE Justified",
           "weight": 20.0,
           "fair_value": 9101.0,
-          "upside_pct": -29.7,
+          "upside_pct": -29.2,
           "confidence": 55.0
         }
       ],
@@ -2486,7 +3031,7 @@
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Construction (nguồn: icb_mapping, confidence: 85%)",
-        "✓ P/E Multiple: fair=11,460, conf=55%",
+        "✓ P/E Multiple: fair=11,477, conf=55%",
         "✓ EV/EBITDA: fair=10,394, conf=75%",
         "✓ P/B-ROE Justified: fair=9,101, conf=55%",
         "✓ Historical Multiple: fair=0, conf=0%",
@@ -2495,7 +3040,7 @@
       "valuation_band": {
         "band": "EXPENSIVE",
         "label": "Đắt",
-        "upside_pct": -19.2,
+        "upside_pct": -18.5,
         "confidence": 52.0,
         "method": "P/E Multiple",
         "reason": null
@@ -2554,18 +3099,134 @@
       }
     },
     {
+      "ticker": "SHS",
+      "industry": "Securities",
+      "industry_source": "icb_mapping",
+      "is_holding": false,
+      "current_price": 14200.0,
+      "fair_value": 11027.0,
+      "fair_value_low": 8962.0,
+      "fair_value_high": 14513.0,
+      "upside_pct": -22.3,
+      "verdict": "HOLD",
+      "confidence": 52.0,
+      "method_dispersion_pct": 38.0,
+      "methods_conflict": false,
+      "methods_used": [
+        "P/B-ROE Justified",
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 50.0,
+          "fair_value": 8962.0,
+          "upside_pct": -36.9,
+          "confidence": 65.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 35.0,
+          "fair_value": 14513.0,
+          "upside_pct": 2.2,
+          "confidence": 55.0
+        }
+      ],
+      "warnings": [
+        "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD",
+        "ROE TTM (14.3%) lệch >30% so với trung bình 5y (10.7%). Có thể đang ở đỉnh/đáy chu kỳ - cần xem xét lại.",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
+        "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E"
+      ],
+      "guard_reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD",
+      "notes": [
+        "Ngành định giá: Securities (nguồn: icb_mapping, confidence: 85%)",
+        "✓ P/B-ROE Justified: fair=8,962, conf=65%",
+        "✓ P/E Multiple: fair=14,513, conf=55%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": -22.3,
+        "confidence": 52.0,
+        "method": "P/B-ROE Justified",
+        "reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD"
+      }
+    },
+    {
+      "ticker": "TVS",
+      "industry": "Securities",
+      "industry_source": "icb_mapping",
+      "is_holding": false,
+      "current_price": 15050.0,
+      "fair_value": 11249.0,
+      "fair_value_low": 10222.0,
+      "fair_value_high": 13250.0,
+      "upside_pct": -25.3,
+      "verdict": "HOLD",
+      "confidence": 57.0,
+      "method_dispersion_pct": 23.0,
+      "methods_conflict": false,
+      "methods_used": [
+        "P/B-ROE Justified",
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 50.0,
+          "fair_value": 10222.0,
+          "upside_pct": -32.1,
+          "confidence": 75.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 35.0,
+          "fair_value": 13250.0,
+          "upside_pct": -12.0,
+          "confidence": 55.0
+        }
+      ],
+      "warnings": [
+        "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
+        "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
+        "Không có historical multiple data"
+      ],
+      "guard_reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD",
+      "notes": [
+        "Ngành định giá: Securities (nguồn: icb_mapping, confidence: 85%)",
+        "✓ P/B-ROE Justified: fair=10,222, conf=75%",
+        "✓ P/E Multiple: fair=13,250, conf=55%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": -25.3,
+        "confidence": 57.0,
+        "method": "P/B-ROE Justified",
+        "reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD"
+      }
+    },
+    {
       "ticker": "VCI",
       "industry": "Securities",
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 19800.0,
-      "fair_value": 14722.0,
-      "fair_value_low": 13023.0,
+      "fair_value": 14500.0,
+      "fair_value_low": 12435.0,
       "fair_value_high": 15753.0,
-      "upside_pct": -25.6,
+      "upside_pct": -26.8,
       "verdict": "HOLD",
       "confidence": 60.0,
-      "method_dispersion_pct": 17.0,
+      "method_dispersion_pct": 21.0,
       "methods_conflict": false,
       "methods_used": [
         "P/B-ROE Justified",
@@ -2582,8 +3243,8 @@
         {
           "method": "P/E Multiple",
           "weight": 35.0,
-          "fair_value": 13023.0,
-          "upside_pct": -34.2,
+          "fair_value": 12435.0,
+          "upside_pct": -37.2,
           "confidence": 65.0
         }
       ],
@@ -2597,73 +3258,15 @@
       "notes": [
         "Ngành định giá: Securities (nguồn: icb_mapping, confidence: 85%)",
         "✓ P/B-ROE Justified: fair=15,753, conf=75%",
-        "✓ P/E Multiple: fair=13,023, conf=65%",
+        "✓ P/E Multiple: fair=12,435, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -25.6,
+        "upside_pct": -26.8,
         "confidence": 60.0,
-        "method": "P/B-ROE Justified",
-        "reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD"
-      }
-    },
-    {
-      "ticker": "TVS",
-      "industry": "Securities",
-      "industry_source": "icb_mapping",
-      "is_holding": false,
-      "current_price": 15600.0,
-      "fair_value": 11465.0,
-      "fair_value_low": 10222.0,
-      "fair_value_high": 13886.0,
-      "upside_pct": -26.5,
-      "verdict": "HOLD",
-      "confidence": 57.0,
-      "method_dispersion_pct": 26.0,
-      "methods_conflict": false,
-      "methods_used": [
-        "P/B-ROE Justified",
-        "P/E Multiple"
-      ],
-      "method_details": [
-        {
-          "method": "P/B-ROE Justified",
-          "weight": 50.0,
-          "fair_value": 10222.0,
-          "upside_pct": -34.5,
-          "confidence": 75.0
-        },
-        {
-          "method": "P/E Multiple",
-          "weight": 35.0,
-          "fair_value": 13886.0,
-          "upside_pct": -11.0,
-          "confidence": 55.0
-        }
-      ],
-      "warnings": [
-        "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD",
-        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
-        "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical",
-        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
-        "Không có historical multiple data"
-      ],
-      "guard_reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD",
-      "notes": [
-        "Ngành định giá: Securities (nguồn: icb_mapping, confidence: 85%)",
-        "✓ P/B-ROE Justified: fair=10,222, conf=75%",
-        "✓ P/E Multiple: fair=13,886, conf=55%",
-        "✓ Historical Multiple: fair=0, conf=0%",
-        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
-      ],
-      "valuation_band": {
-        "band": "NOT_AVAILABLE",
-        "label": "Chưa có",
-        "upside_pct": -26.5,
-        "confidence": 57.0,
         "method": "P/B-ROE Justified",
         "reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD"
       }
@@ -2674,10 +3277,10 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 1910.0,
-      "fair_value": 1321.0,
-      "fair_value_low": 1321.0,
-      "fair_value_high": 1321.0,
-      "upside_pct": -30.8,
+      "fair_value": 1326.0,
+      "fair_value_low": 1326.0,
+      "fair_value_high": 1326.0,
+      "upside_pct": -30.6,
       "verdict": "HOLD",
       "confidence": 34.0,
       "method_dispersion_pct": 0.0,
@@ -2689,8 +3292,8 @@
         {
           "method": "P/E Multiple",
           "weight": 10.0,
-          "fair_value": 1321.0,
-          "upside_pct": -30.8,
+          "fair_value": 1326.0,
+          "upside_pct": -30.6,
           "confidence": 40.0
         }
       ],
@@ -2706,14 +3309,14 @@
         "Ngành định giá: Real_Estate (nguồn: icb_mapping, confidence: 85%)",
         "✓ RNAV: fair=9,275, conf=0%",
         "✓ P/B-ROE Justified: fair=-1,623, conf=65%",
-        "✓ P/E Multiple: fair=1,321, conf=40%",
+        "✓ P/E Multiple: fair=1,326, conf=40%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -30.8,
+        "upside_pct": -30.6,
         "confidence": 34.0,
         "method": "P/E Multiple",
         "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho SELL, đã hạ về HOLD"
@@ -2725,13 +3328,13 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 20700.0,
-      "fair_value": 13892.0,
+      "fair_value": 13596.0,
       "fair_value_low": 10078.0,
-      "fair_value_high": 20178.0,
-      "upside_pct": -32.9,
+      "fair_value_high": 19394.0,
+      "upside_pct": -34.3,
       "verdict": "HOLD",
       "confidence": 30.0,
-      "method_dispersion_pct": 50.0,
+      "method_dispersion_pct": 48.0,
       "methods_conflict": true,
       "methods_used": [
         "P/B-ROE Justified",
@@ -2748,14 +3351,14 @@
         {
           "method": "P/E Multiple",
           "weight": 35.0,
-          "fair_value": 20178.0,
-          "upside_pct": -2.5,
+          "fair_value": 19394.0,
+          "upside_pct": -6.3,
           "confidence": 65.0
         }
       ],
       "warnings": [
         "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá",
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 50% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 48% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
         "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
         "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
         "Không có historical multiple data"
@@ -2764,18 +3367,77 @@
       "notes": [
         "Ngành định giá: Securities (nguồn: icb_mapping, confidence: 85%)",
         "✓ P/B-ROE Justified: fair=10,078, conf=75%",
-        "✓ P/E Multiple: fair=20,178, conf=65%",
+        "✓ P/E Multiple: fair=19,394, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 50% (ngưỡng 40%)",
+        "Độ phân tán giữa các phương pháp: 48% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -32.9,
+        "upside_pct": -34.3,
         "confidence": 30.0,
         "method": "P/B-ROE Justified",
         "reason": "Các phương pháp định giá mâu thuẫn"
+      }
+    },
+    {
+      "ticker": "BVH",
+      "industry": "Insurance",
+      "industry_source": "icb_mapping",
+      "is_holding": false,
+      "current_price": 69700.0,
+      "fair_value": 45609.0,
+      "fair_value_low": 45087.0,
+      "fair_value_high": 45922.0,
+      "upside_pct": -34.6,
+      "verdict": "HOLD",
+      "confidence": 55.0,
+      "method_dispersion_pct": 2.0,
+      "methods_conflict": false,
+      "methods_used": [
+        "P/E Multiple",
+        "DDM"
+      ],
+      "method_details": [
+        {
+          "method": "P/E Multiple",
+          "weight": 25.0,
+          "fair_value": 45922.0,
+          "upside_pct": -34.1,
+          "confidence": 65.0
+        },
+        {
+          "method": "DDM",
+          "weight": 15.0,
+          "fair_value": 45087.0,
+          "upside_pct": -35.3,
+          "confidence": 65.0
+        }
+      ],
+      "warnings": [
+        "Nhóm tài chính (Insurance): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD",
+        "Sustainable ROE quá thấp, ép lên 3% (floor)",
+        "ROE TTM (0.0%) lệch >30% so với trung bình 5y (3.0%). Có thể đang ở đỉnh/đáy chu kỳ - cần xem xét lại.",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
+        "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E"
+      ],
+      "guard_reason": "Nhóm tài chính (Insurance): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD",
+      "notes": [
+        "Ngành định giá: Insurance (nguồn: icb_mapping, confidence: 85%)",
+        "✓ P/B-ROE Justified: fair=-9,844, conf=65%",
+        "✓ P/E Multiple: fair=45,922, conf=65%",
+        "✓ DDM: fair=45,087, conf=65%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": -34.6,
+        "confidence": 55.0,
+        "method": "P/E Multiple",
+        "reason": "Nhóm tài chính (Insurance): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD"
       }
     },
     {
@@ -2784,13 +3446,13 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 26500.0,
-      "fair_value": 16637.0,
+      "fair_value": 16343.0,
       "fair_value_low": 14728.0,
-      "fair_value_high": 20355.0,
-      "upside_pct": -37.2,
+      "fair_value_high": 19488.0,
+      "upside_pct": -38.3,
       "verdict": "HOLD",
       "confidence": 57.0,
-      "method_dispersion_pct": 28.0,
+      "method_dispersion_pct": 24.0,
       "methods_conflict": false,
       "methods_used": [
         "P/B-ROE Justified",
@@ -2807,8 +3469,8 @@
         {
           "method": "P/E Multiple",
           "weight": 35.0,
-          "fair_value": 20355.0,
-          "upside_pct": -23.2,
+          "fair_value": 19488.0,
+          "upside_pct": -26.5,
           "confidence": 55.0
         }
       ],
@@ -2823,14 +3485,14 @@
       "notes": [
         "Ngành định giá: Securities (nguồn: icb_mapping, confidence: 85%)",
         "✓ P/B-ROE Justified: fair=14,728, conf=75%",
-        "✓ P/E Multiple: fair=20,355, conf=55%",
+        "✓ P/E Multiple: fair=19,488, conf=55%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -37.2,
+        "upside_pct": -38.3,
         "confidence": 57.0,
         "method": "P/B-ROE Justified",
         "reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho STRONG SELL, đã hạ về HOLD"
@@ -2842,13 +3504,13 @@
       "industry_source": "ticker_override",
       "is_holding": false,
       "current_price": 77400.0,
-      "fair_value": 47075.0,
-      "fair_value_low": 35962.0,
-      "fair_value_high": 77021.0,
-      "upside_pct": -39.2,
+      "fair_value": 46439.0,
+      "fair_value_low": 35732.0,
+      "fair_value_high": 74811.0,
+      "upside_pct": -40.0,
       "verdict": "HOLD",
       "confidence": 35.0,
-      "method_dispersion_pct": 96.0,
+      "method_dispersion_pct": 91.0,
       "methods_conflict": true,
       "methods_used": [
         "EV/EBITDA",
@@ -2859,8 +3521,8 @@
         {
           "method": "EV/EBITDA",
           "weight": 40.0,
-          "fair_value": 35962.0,
-          "upside_pct": -53.5,
+          "fair_value": 35732.0,
+          "upside_pct": -53.8,
           "confidence": 75.0
         },
         {
@@ -2873,30 +3535,30 @@
         {
           "method": "P/E Multiple",
           "weight": 20.0,
-          "fair_value": 77021.0,
-          "upside_pct": -0.5,
+          "fair_value": 74811.0,
+          "upside_pct": -3.3,
           "confidence": 65.0
         }
       ],
       "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 96% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 91% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
         "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
         "Không có historical multiple data"
       ],
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Logistics_Transport (nguồn: ticker_override, confidence: 100%)",
-        "✓ EV/EBITDA: fair=35,962, conf=75%",
+        "✓ EV/EBITDA: fair=35,732, conf=75%",
         "✓ DCF FCFF: fair=42,775, conf=65%",
-        "✓ P/E Multiple: fair=77,021, conf=65%",
+        "✓ P/E Multiple: fair=74,811, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 96% (ngưỡng 40%)",
+        "Độ phân tán giữa các phương pháp: 91% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -39.2,
+        "upside_pct": -40.0,
         "confidence": 35.0,
         "method": "EV/EBITDA",
         "reason": "Các phương pháp định giá mâu thuẫn"
@@ -2907,14 +3569,14 @@
       "industry": "Securities",
       "industry_source": "icb_mapping",
       "is_holding": false,
-      "current_price": 24900.0,
-      "fair_value": 14036.0,
-      "fair_value_low": 12212.0,
+      "current_price": 25000.0,
+      "fair_value": 13828.0,
+      "fair_value_low": 11661.0,
       "fair_value_high": 15143.0,
-      "upside_pct": -43.6,
+      "upside_pct": -44.7,
       "verdict": "HOLD",
       "confidence": 60.0,
-      "method_dispersion_pct": 19.0,
+      "method_dispersion_pct": 23.0,
       "methods_conflict": false,
       "methods_used": [
         "P/B-ROE Justified",
@@ -2925,14 +3587,14 @@
           "method": "P/B-ROE Justified",
           "weight": 50.0,
           "fair_value": 15143.0,
-          "upside_pct": -39.2,
+          "upside_pct": -39.4,
           "confidence": 75.0
         },
         {
           "method": "P/E Multiple",
           "weight": 35.0,
-          "fair_value": 12212.0,
-          "upside_pct": -51.0,
+          "fair_value": 11661.0,
+          "upside_pct": -53.4,
           "confidence": 65.0
         }
       ],
@@ -2946,17 +3608,86 @@
       "notes": [
         "Ngành định giá: Securities (nguồn: icb_mapping, confidence: 85%)",
         "✓ P/B-ROE Justified: fair=15,143, conf=75%",
-        "✓ P/E Multiple: fair=12,212, conf=65%",
+        "✓ P/E Multiple: fair=11,661, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -43.6,
+        "upside_pct": -44.7,
         "confidence": 60.0,
         "method": "P/B-ROE Justified",
         "reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho STRONG SELL, đã hạ về HOLD"
+      }
+    },
+    {
+      "ticker": "TCO",
+      "industry": "Agriculture_Livestock",
+      "industry_source": "sector_override",
+      "is_holding": false,
+      "current_price": 10650.0,
+      "fair_value": 5700.0,
+      "fair_value_low": 4774.0,
+      "fair_value_high": 8319.0,
+      "upside_pct": -46.5,
+      "verdict": "HOLD",
+      "confidence": 33.0,
+      "method_dispersion_pct": 60.0,
+      "methods_conflict": true,
+      "methods_used": [
+        "EV/EBITDA",
+        "P/B-ROE Justified",
+        "P/E Multiple"
+      ],
+      "method_details": [
+        {
+          "method": "EV/EBITDA",
+          "weight": 50.0,
+          "fair_value": 4774.0,
+          "upside_pct": -55.2,
+          "confidence": 80.0
+        },
+        {
+          "method": "P/B-ROE Justified",
+          "weight": 25.0,
+          "fair_value": 8319.0,
+          "upside_pct": -21.9,
+          "confidence": 55.0
+        },
+        {
+          "method": "P/E Multiple",
+          "weight": 10.0,
+          "fair_value": 5937.0,
+          "upside_pct": -44.3,
+          "confidence": 45.0
+        }
+      ],
+      "warnings": [
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 60% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 2.8%-15.3%)",
+        "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
+        "P/B-ROE không phải phương pháp tối ưu cho ngành này",
+        "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical"
+      ],
+      "guard_reason": null,
+      "notes": [
+        "Ngành định giá: Agriculture_Livestock (nguồn: sector_override, confidence: 95%)",
+        "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
+        "✓ EV/EBITDA: fair=4,774, conf=80%",
+        "✓ P/B-ROE Justified: fair=8,319, conf=55%",
+        "✓ P/E Multiple: fair=5,937, conf=45%",
+        "✓ Historical Multiple: fair=0, conf=0%",
+        "Độ phân tán giữa các phương pháp: 60% (ngưỡng 40%)",
+        "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
+      ],
+      "valuation_band": {
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": -46.5,
+        "confidence": 33.0,
+        "method": "EV/EBITDA",
+        "reason": "Các phương pháp định giá mâu thuẫn"
       }
     },
     {
@@ -2965,13 +3696,13 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 20700.0,
-      "fair_value": 10174.0,
+      "fair_value": 9946.0,
       "fair_value_low": 8389.0,
-      "fair_value_high": 13188.0,
-      "upside_pct": -50.8,
+      "fair_value_high": 12574.0,
+      "upside_pct": -52.0,
       "verdict": "HOLD",
       "confidence": 52.0,
-      "method_dispersion_pct": 36.0,
+      "method_dispersion_pct": 33.0,
       "methods_conflict": false,
       "methods_used": [
         "P/B-ROE Justified",
@@ -2988,8 +3719,8 @@
         {
           "method": "P/E Multiple",
           "weight": 35.0,
-          "fair_value": 13188.0,
-          "upside_pct": -36.3,
+          "fair_value": 12574.0,
+          "upside_pct": -39.3,
           "confidence": 55.0
         }
       ],
@@ -3004,14 +3735,14 @@
       "notes": [
         "Ngành định giá: Securities (nguồn: icb_mapping, confidence: 85%)",
         "✓ P/B-ROE Justified: fair=8,389, conf=65%",
-        "✓ P/E Multiple: fair=13,188, conf=55%",
+        "✓ P/E Multiple: fair=12,574, conf=55%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -50.8,
+        "upside_pct": -52.0,
         "confidence": 52.0,
         "method": "P/B-ROE Justified",
         "reason": "Nhóm tài chính (Securities): chưa có NPL/CAR nên chưa đưa ra kết luận định giá — mô hình cho STRONG SELL, đã hạ về HOLD"
@@ -3022,14 +3753,14 @@
       "industry": "Logistics_Transport",
       "industry_source": "ticker_override",
       "is_holding": false,
-      "current_price": 13250.0,
-      "fair_value": 5712.0,
-      "fair_value_low": 453.0,
-      "fair_value_high": 15284.0,
-      "upside_pct": -56.9,
+      "current_price": 13400.0,
+      "fair_value": 5556.0,
+      "fair_value_low": 370.0,
+      "fair_value_high": 15179.0,
+      "upside_pct": -58.5,
       "verdict": "HOLD",
       "confidence": 36.0,
-      "method_dispersion_pct": 218.0,
+      "method_dispersion_pct": 231.0,
       "methods_conflict": true,
       "methods_used": [
         "EV/EBITDA",
@@ -3040,27 +3771,27 @@
         {
           "method": "EV/EBITDA",
           "weight": 40.0,
-          "fair_value": 453.0,
-          "upside_pct": -96.6,
+          "fair_value": 370.0,
+          "upside_pct": -97.2,
           "confidence": 75.0
         },
         {
           "method": "DCF FCFF",
           "weight": 20.0,
-          "fair_value": 15284.0,
-          "upside_pct": 15.3,
+          "fair_value": 15179.0,
+          "upside_pct": 13.3,
           "confidence": 75.0
         },
         {
           "method": "P/E Multiple",
           "weight": 20.0,
-          "fair_value": 6803.0,
-          "upside_pct": -48.7,
+          "fair_value": 6421.0,
+          "upside_pct": -52.1,
           "confidence": 65.0
         }
       ],
       "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 218% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 231% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
         "FCFF TTM <= 0 (-444 tỷ) → DCF không khả thi",
         "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
         "Không có historical multiple data"
@@ -3068,17 +3799,17 @@
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Logistics_Transport (nguồn: ticker_override, confidence: 100%)",
-        "✓ EV/EBITDA: fair=453, conf=75%",
-        "✓ DCF FCFF: fair=15,284, conf=75%",
-        "✓ P/E Multiple: fair=6,803, conf=65%",
+        "✓ EV/EBITDA: fair=370, conf=75%",
+        "✓ DCF FCFF: fair=15,179, conf=75%",
+        "✓ P/E Multiple: fair=6,421, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 218% (ngưỡng 40%)",
+        "Độ phân tán giữa các phương pháp: 231% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -56.9,
+        "upside_pct": -58.5,
         "confidence": 36.0,
         "method": "EV/EBITDA",
         "reason": "Các phương pháp định giá mâu thuẫn"
@@ -3090,13 +3821,13 @@
       "industry_source": "sector_override",
       "is_holding": false,
       "current_price": 48950.0,
-      "fair_value": 16372.0,
-      "fair_value_low": 11710.0,
+      "fair_value": 16113.0,
+      "fair_value_low": 11604.0,
       "fair_value_high": 25471.0,
-      "upside_pct": -66.6,
+      "upside_pct": -67.1,
       "verdict": "HOLD",
       "confidence": 34.0,
-      "method_dispersion_pct": 83.0,
+      "method_dispersion_pct": 88.0,
       "methods_conflict": true,
       "methods_used": [
         "EV/EBITDA",
@@ -3107,8 +3838,8 @@
         {
           "method": "EV/EBITDA",
           "weight": 40.0,
-          "fair_value": 11710.0,
-          "upside_pct": -76.1,
+          "fair_value": 11604.0,
+          "upside_pct": -76.3,
           "confidence": 75.0
         },
         {
@@ -3121,93 +3852,102 @@
         {
           "method": "P/E Multiple",
           "weight": 20.0,
-          "fair_value": 16631.0,
-          "upside_pct": -66.0,
+          "fair_value": 15723.0,
+          "upside_pct": -67.9,
           "confidence": 65.0
         }
       ],
       "warnings": [
-        "Các phương pháp mâu thuẫn mạnh (chênh lệch 83% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 88% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
         "Thiếu historical P/E (cần OHLCV cache >= 3 năm) — định giá dựa nhiều hơn vào peer và justified P/E",
         "Không có historical multiple data"
       ],
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Logistics_Transport (nguồn: sector_override, confidence: 95%)",
-        "✓ EV/EBITDA: fair=11,710, conf=75%",
+        "✓ EV/EBITDA: fair=11,604, conf=75%",
         "✓ DCF FCFF: fair=25,471, conf=75%",
-        "✓ P/E Multiple: fair=16,631, conf=65%",
+        "✓ P/E Multiple: fair=15,723, conf=65%",
         "✓ Historical Multiple: fair=0, conf=0%",
-        "Độ phân tán giữa các phương pháp: 83% (ngưỡng 40%)",
+        "Độ phân tán giữa các phương pháp: 88% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -66.6,
+        "upside_pct": -67.1,
         "confidence": 34.0,
         "method": "EV/EBITDA",
         "reason": "Các phương pháp định giá mâu thuẫn"
       }
     },
     {
-      "ticker": "TCO",
+      "ticker": "BAF",
       "industry": "Agriculture_Livestock",
-      "industry_source": "sector_override",
+      "industry_source": "ticker_override",
       "is_holding": false,
-      "current_price": 10700.0,
-      "fair_value": 7731.0,
-      "fair_value_low": 5937.0,
-      "fair_value_high": 8319.0,
-      "upside_pct": -27.7,
-      "verdict": "SELL",
-      "confidence": 50.0,
-      "method_dispersion_pct": 29.0,
-      "methods_conflict": false,
+      "current_price": 31600.0,
+      "fair_value": 6847.0,
+      "fair_value_low": 3133.0,
+      "fair_value_high": 7439.0,
+      "upside_pct": -78.3,
+      "verdict": "HOLD",
+      "confidence": 33.0,
+      "method_dispersion_pct": 61.0,
+      "methods_conflict": true,
       "methods_used": [
+        "EV/EBITDA",
         "P/B-ROE Justified",
         "P/E Multiple"
       ],
       "method_details": [
         {
+          "method": "EV/EBITDA",
+          "weight": 50.0,
+          "fair_value": 7099.0,
+          "upside_pct": -77.5,
+          "confidence": 80.0
+        },
+        {
           "method": "P/B-ROE Justified",
           "weight": 25.0,
-          "fair_value": 8319.0,
-          "upside_pct": -22.3,
-          "confidence": 55.0
+          "fair_value": 7439.0,
+          "upside_pct": -76.5,
+          "confidence": 45.0
         },
         {
           "method": "P/E Multiple",
           "weight": 10.0,
-          "fair_value": 5937.0,
-          "upside_pct": -44.5,
+          "fair_value": 3133.0,
+          "upside_pct": -90.1,
           "confidence": 45.0
         }
       ],
       "warnings": [
-        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 2.8%-15.3%)",
+        "Các phương pháp mâu thuẫn mạnh (chênh lệch 61% quanh trung vị) — fair value tổng hợp không đáng tin, đã hạ verdict về HOLD",
+        "Ngành cyclical: dùng median ROE để định giá P/B (raw 5y range 1.4%-22.1%)",
+        "ROE TTM (3.1%) lệch >30% so với trung bình 5y (10.8%). Có thể đang ở đỉnh/đáy chu kỳ - cần xem xét lại.",
         "Thiếu historical P/B (cần OHLCV cache >= 3 năm)",
-        "P/B-ROE không phải phương pháp tối ưu cho ngành này",
-        "EPS có cú nhảy >100% giữa các năm - dấu hiệu cyclical",
-        "CoE - g quá nhỏ, ép g về CoE - 2%"
+        "P/B-ROE không phải phương pháp tối ưu cho ngành này"
       ],
       "guard_reason": null,
       "notes": [
-        "Ngành định giá: Agriculture_Livestock (nguồn: sector_override, confidence: 95%)",
+        "Ngành định giá: Agriculture_Livestock (nguồn: ticker_override, confidence: 100%)",
         "Phát hiện CYCLICAL business → áp dụng mid-cycle adjustment",
-        "✓ EV/EBITDA: fair=-3,969, conf=80%",
-        "✓ P/B-ROE Justified: fair=8,319, conf=55%",
-        "✓ P/E Multiple: fair=5,937, conf=45%",
+        "✓ EV/EBITDA: fair=7,099, conf=80%",
+        "✓ P/B-ROE Justified: fair=7,439, conf=45%",
+        "✓ P/E Multiple: fair=3,133, conf=45%",
         "✓ Historical Multiple: fair=0, conf=0%",
+        "Độ phân tán giữa các phương pháp: 61% (ngưỡng 40%)",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
       "valuation_band": {
-        "band": "EXPENSIVE",
-        "label": "Đắt",
-        "upside_pct": -27.7,
-        "confidence": 50.0,
-        "method": "P/B-ROE Justified",
-        "reason": null
+        "band": "NOT_AVAILABLE",
+        "label": "Chưa có",
+        "upside_pct": -78.3,
+        "confidence": 33.0,
+        "method": "EV/EBITDA",
+        "reason": "Các phương pháp định giá mâu thuẫn"
       }
     },
     {
@@ -3216,9 +3956,9 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 10700.0,
-      "fair_value": 7496.0,
+      "fair_value": 7500.0,
       "fair_value_low": 6097.0,
-      "fair_value_high": 9087.0,
+      "fair_value_high": 9094.0,
       "upside_pct": -29.9,
       "verdict": "SELL",
       "confidence": 54.0,
@@ -3232,8 +3972,8 @@
         {
           "method": "P/E Multiple",
           "weight": 30.0,
-          "fair_value": 9087.0,
-          "upside_pct": -15.1,
+          "fair_value": 9094.0,
+          "upside_pct": -15.0,
           "confidence": 55.0
         },
         {
@@ -3254,7 +3994,7 @@
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Construction (nguồn: icb_mapping, confidence: 85%)",
-        "✓ P/E Multiple: fair=9,087, conf=55%",
+        "✓ P/E Multiple: fair=9,094, conf=55%",
         "✓ EV/EBITDA: fair=6,097, conf=75%",
         "✓ P/B-ROE Justified: fair=-144, conf=45%",
         "✓ Historical Multiple: fair=0, conf=0%",
@@ -3275,7 +4015,7 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 23900.0,
-      "fair_value": 12995.0,
+      "fair_value": 13011.0,
       "fair_value_low": 11605.0,
       "fair_value_high": 13835.0,
       "upside_pct": -45.6,
@@ -3306,8 +4046,8 @@
         {
           "method": "P/E Multiple",
           "weight": 10.0,
-          "fair_value": 12200.0,
-          "upside_pct": -49.0,
+          "fair_value": 12348.0,
+          "upside_pct": -48.3,
           "confidence": 55.0
         }
       ],
@@ -3323,7 +4063,7 @@
         "Ngành định giá: Real_Estate (nguồn: icb_mapping, confidence: 85%)",
         "✓ RNAV: fair=13,835, conf=60%",
         "✓ P/B-ROE Justified: fair=11,605, conf=75%",
-        "✓ P/E Multiple: fair=12,200, conf=55%",
+        "✓ P/E Multiple: fair=12,348, conf=55%",
         "✓ Historical Multiple: fair=0, conf=0%",
         "Không có historical P/E - P/B thực (thiếu OHLCV cache dài hạn) — các cấu phần lịch sử đã bị loại khỏi blend thay vì thay bằng bội số hiện tại"
       ],
@@ -3342,10 +4082,10 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 44400.0,
-      "fair_value": 23289.0,
-      "fair_value_low": 20965.0,
+      "fair_value": 23343.0,
+      "fair_value_low": 21057.0,
       "fair_value_high": 26512.0,
-      "upside_pct": -47.5,
+      "upside_pct": -47.4,
       "verdict": "STRONG SELL",
       "confidence": 59.0,
       "method_dispersion_pct": 21.0,
@@ -3358,8 +4098,8 @@
         {
           "method": "P/E Multiple",
           "weight": 40.0,
-          "fair_value": 20965.0,
-          "upside_pct": -52.8,
+          "fair_value": 21057.0,
+          "upside_pct": -52.6,
           "confidence": 65.0
         },
         {
@@ -3378,7 +4118,7 @@
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Consumer_Discretionary (nguồn: icb_mapping, confidence: 85%)",
-        "✓ P/E Multiple: fair=20,965, conf=65%",
+        "✓ P/E Multiple: fair=21,057, conf=65%",
         "✓ DCF FCFF: fair=-10,321, conf=75%",
         "✓ EV/EBITDA: fair=26,512, conf=75%",
         "✓ Historical Multiple: fair=0, conf=0%",
@@ -3387,7 +4127,7 @@
       "valuation_band": {
         "band": "EXPENSIVE",
         "label": "Đắt",
-        "upside_pct": -47.5,
+        "upside_pct": -47.4,
         "confidence": 59.0,
         "method": "P/E Multiple",
         "reason": null
@@ -3399,13 +4139,13 @@
       "industry_source": "icb_mapping",
       "is_holding": false,
       "current_price": 12800.0,
-      "fair_value": 6632.0,
+      "fair_value": 6638.0,
       "fair_value_low": 6496.0,
-      "fair_value_high": 6792.0,
-      "upside_pct": -48.2,
+      "fair_value_high": 6805.0,
+      "upside_pct": -48.1,
       "verdict": "STRONG SELL",
       "confidence": 45.0,
-      "method_dispersion_pct": 4.0,
+      "method_dispersion_pct": 5.0,
       "methods_conflict": false,
       "methods_used": [
         "P/E Multiple",
@@ -3415,8 +4155,8 @@
         {
           "method": "P/E Multiple",
           "weight": 40.0,
-          "fair_value": 6792.0,
-          "upside_pct": -46.9,
+          "fair_value": 6805.0,
+          "upside_pct": -46.8,
           "confidence": 40.0
         },
         {
@@ -3437,7 +4177,7 @@
       "guard_reason": null,
       "notes": [
         "Ngành định giá: Consumer_Discretionary (nguồn: icb_mapping, confidence: 85%)",
-        "✓ P/E Multiple: fair=6,792, conf=40%",
+        "✓ P/E Multiple: fair=6,805, conf=40%",
         "✓ DCF FCFF: fair=51,702, conf=0%",
         "✓ EV/EBITDA: fair=6,496, conf=75%",
         "✓ Historical Multiple: fair=0, conf=0%",
@@ -3446,7 +4186,7 @@
       "valuation_band": {
         "band": "NOT_AVAILABLE",
         "label": "Chưa có",
-        "upside_pct": -48.2,
+        "upside_pct": -48.1,
         "confidence": 45.0,
         "method": "P/E Multiple",
         "reason": "Độ tin cậy 45% dưới 50%"
