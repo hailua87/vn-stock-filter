@@ -86,6 +86,32 @@ def _add_guide_sheet(writer):
     guide.to_excel(writer, sheet_name='Hướng dẫn', index=False)
 
 
+def clean_non_finite(obj):
+    """
+    NaN / Infinity → None, đệ quy.
+
+    Vì sao cần: `json.dump` mặc định GHI RA chữ `NaN`, và Python đọc lại được
+    nên phía backend không bao giờ biết. Nhưng `JSON.parse` của trình duyệt
+    TỪ CHỐI — chuẩn JSON không có hằng số đó.
+
+    Hậu quả đã xảy ra: 5 bản lưu phiên (2026-06-08, 06-09, 06-26, 09-23,
+    09-25) mang `m_stop: NaN`, `m_rr: NaN`… nên chọn đúng những phiên đó
+    trong bộ chọn ngày là HỎNG IM LẶNG — bảng không đổi, chỉ có một dòng
+    trong console. Phát hiện 28/09/2026.
+
+    `None` chứ không phải 0: giao diện đã kiểm `=== null` để hiện "—" kèm lý
+    do (xem renderRR trong web/app.js). Thay bằng 0 sẽ biến "không có dữ liệu"
+    thành một con số trông như thật.
+    """
+    if isinstance(obj, float):
+        return None if (obj != obj or obj in (float('inf'), float('-inf'))) else obj
+    if isinstance(obj, dict):
+        return {k: clean_non_finite(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [clean_non_finite(v) for v in obj]
+    return obj
+
+
 def write_json(payload: dict, output_path: str | Path, compact: bool = False):
     """
     Ghi JSON, có tuỳ chọn nén không gian.
@@ -99,7 +125,11 @@ def write_json(payload: dict, output_path: str | Path, compact: bool = False):
     output_path.parent.mkdir(parents=True, exist_ok=True)
     dump_kwargs = ({'separators': (',', ':')} if compact else {'indent': 2})
     with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(payload, f, ensure_ascii=False, default=str, **dump_kwargs)
+        # `allow_nan=False` là lưới thứ hai: nếu có kiểu dữ liệu nào lọt qua
+        # `clean_non_finite` thì nổ ngay lúc ghi, chứ không ra một tệp mà
+        # trình duyệt không đọc được.
+        json.dump(clean_non_finite(payload), f, ensure_ascii=False,
+                  default=str, allow_nan=False, **dump_kwargs)
 
 
 def to_json(df: pd.DataFrame, output_path: str | Path, metadata: dict | None = None,
