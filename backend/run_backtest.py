@@ -35,8 +35,10 @@ logging.basicConfig(level=logging.INFO,
                     datefmt='%H:%M:%S')
 log = logging.getLogger('backtest')
 
-CACHE_DIR = Path(__file__).resolve().parent / 'data' / 'cache'
-VNINDEX_CACHE = Path(__file__).resolve().parent / 'data' / 'vnindex_cache.parquet'
+# Đường dẫn lấy từ scanner.data_fetcher, không viết lại: trước 27/09/2026
+# hằng số này được định nghĩa lại ở bốn tệp, và cái ở market_metrics trỏ ra
+# NGOÀI thư mục mà workflow cache.
+from scanner.data_fetcher import CACHE_DIR, VNINDEX_CACHE  # noqa: E402
 
 
 def load_universe_from_cache(cache_dir: Path, limit: int | None = None) -> dict:

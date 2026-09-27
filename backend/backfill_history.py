@@ -43,15 +43,14 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from scanner.data_fetcher import (
-    CACHE_DIR, setup_api_key, fetch_ohlcv, fetch_vnindex, get_ticker_universe,
+    CACHE_DIR, VNINDEX_CACHE, setup_api_key, fetch_ohlcv, fetch_vnindex,
+    get_ticker_universe,
 )
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s [%(levelname)s] %(message)s',
                     datefmt='%H:%M:%S')
 log = logging.getLogger('backfill')
-
-VNINDEX_CACHE = Path(__file__).resolve().parent / 'data' / 'vnindex_cache.parquet'
 
 # Chia mỗi request theo năm cho an toàn (thời vnstock nguồn giới hạn khoảng thời gian)
 CHUNK_DAYS = 365

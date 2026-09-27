@@ -23,9 +23,9 @@ from .price_units import quote_to_vnd
 
 log = logging.getLogger(__name__)
 
-# Cache OHLCV ở cùng nơi với data_fetcher
-OHLCV_CACHE_DIR = Path(__file__).resolve().parent.parent / 'data' / 'cache'
-VNINDEX_CACHE = Path(__file__).resolve().parent.parent / 'data' / 'vnindex_cache.parquet'
+# Cache OHLCV ở cùng nơi với data_fetcher — và lấy luôn đường dẫn từ đó thay
+# vì viết lại, để hai bên không thể lệch nhau.
+from .data_fetcher import CACHE_DIR as OHLCV_CACHE_DIR, VNINDEX_CACHE  # noqa: E402
 
 
 # ============================================================================
