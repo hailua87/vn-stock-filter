@@ -26,6 +26,7 @@ from scanner.trade_levels import attach as attach_trade_levels
 from scanner import base_conditions as BC
 from scanner import ohlc_export as OHLC
 from scanner import health as HEALTH
+from scanner import streaks as STREAKS
 from scanner.exporter import to_excel, to_json, to_html, write_json
 from scanner.data_fetcher import (
     CHECKPOINT_PATH, get_ticker_universe, fetch_universe, fetch_vnindex,
@@ -88,6 +89,7 @@ WEB_OUTPUTS = (
     'golden_cross_short/',
     'ichimoku/',
     'ohlc/',                    # nen 60 phien cho man Chi tiet ma
+    'streaks/',                 # nhat ky tin hieu: ma giu tin hieu may phien
     'health.json',              # tinh trang du lieu cho man Hom nay
 )
 
@@ -777,6 +779,19 @@ def main():
         log.info(f"  {len(missing)} mã không có nến vì không lấy được OHLCV: "
                  f"{', '.join(sorted(missing)[:10])}"
                  + (f" (+{len(missing) - 10})" if len(missing) > 10 else ""))
+
+    # ── Nhật ký tín hiệu ──────────────────────────────────────────────────
+    # Dựng SAU khi bản lưu phiên này đã ghi, và đọc từ chính các bản lưu đó —
+    # không tính lại gì. Nhờ vậy nhật ký luôn khớp với thứ người đọc đã nhìn
+    # thấy, và dựng lại từ đầu lúc nào cũng ra cùng kết quả.
+    #
+    # Lượt intraday KHÔNG ghi bản lưu, nên phiên hôm nay chưa vào nhật ký cho
+    # tới lượt EOD. Đó là đúng: chuỗi phiên phải đếm trên số liệu đã chốt.
+    streaks = STREAKS.build(web_dir)
+    sp = STREAKS.write(web_dir / 'streaks' / 'latest.json', streaks)
+    log.info(f"  Nhật ký tín hiệu → {sp} ({sp.stat().st_size // 1024} KB)")
+    for line in STREAKS.summary(streaks):
+        log.info(line)
 
     # ── Tình trạng dữ liệu cho màn Hôm nay (§11.2, §13) ───────────────────
     # Ghi SAU CÙNG, và đọc lại chính tệp cũ trước khi ghi đè: kiểm tra "rổ co
