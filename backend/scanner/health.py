@@ -29,6 +29,16 @@ UNIVERSE_DROP = 0.05
 # Hai nguồn hằng tuần quá số ngày này mà chưa chạy lại thì coi là cũ.
 WEEKLY_MAX_AGE_DAYS = 10
 
+# Tỷ lệ lượt gọi bị TREO mà trên mức đó thì nói cho người đọc biết nguồn đang
+# dở chứng. Đo ngày 27-28/09/2026, cùng 200 mã, cùng bước chấm chất lượng:
+#     lượt nguồn sạch : 0,00  (0 treo trên ~1.600 lượt gọi)
+#     lượt nguồn dở   : ~0,56 (275 treo trên ~495 lượt gọi)
+# 0,10 nằm hẳn về phía "sạch" nên nó kêu sớm, và cách xa nhiễu của lượt lành.
+#
+# Chưa đo được một lượt "hơi dở", nên con số này là điểm giữa hai đầu ĐÃ ĐO
+# chứ không phải ngưỡng đã hiệu chỉnh. Nếu nó kêu oan thì nâng lên.
+SOURCE_TIMEOUT_NOTICE = 0.10
+
 
 def _read_json(path: Path) -> Optional[dict]:
     try:
@@ -79,6 +89,10 @@ def _weekly_source(path: Path, now: datetime, label: str) -> dict:
         # bình thường, không có gì tự lộ ra.
         'fetch_coverage': meta.get('fetch_coverage'),
         'partial_reason': meta.get('fetch_stop_reason'),
+        # Nguồn tử tế hay dở chứng trong chính lượt chạy đó. Đây là thứ DUY
+        # NHẤT nói được điều đó: thời gian chạy phụ thuộc nặng vào cache nên
+        # không dùng làm thước đo (xem scanner/sources/http.py).
+        'source_stats': meta.get('source_stats') or {},
     }
 
 
@@ -172,6 +186,14 @@ def _issues(daily: dict, sources: dict, previous: dict, now: datetime) -> list:
                 f"{s['label']}: lượt chạy dừng sớm ({s['partial_reason']})"
                 + (f", chỉ phủ {cov:.0%} rổ" if isinstance(cov, (int, float)) else '')
                 + ". Thứ hạng giữa các mã tính trên phần rổ đó, không phải cả rổ.")
+        ss = s.get('source_stats') or {}
+        ratio = ss.get('timeout_ratio')
+        if isinstance(ratio, (int, float)) and ratio >= SOURCE_TIMEOUT_NOTICE:
+            add(f'{key}_source_flaky', 'warn',
+                f"{s['label']}: nguồn dữ liệu chập chờn trong lượt chạy này — "
+                f"{ratio:.0%} số lượt gọi bị treo ({ss.get('timeouts')}/{ss.get('calls')}). "
+                f"Mã lấy được vẫn đúng, nhưng lượt chạy có thể đã phải bỏ dở "
+                f"giữa chừng; đối chiếu với độ phủ ở trên.")
         # KHÔNG `continue` ở đây: một lượt vừa bị cắt vừa cũ thì phải nói cả hai.
         age = s.get('age_days')
         if age is not None and age > WEEKLY_MAX_AGE_DAYS:
