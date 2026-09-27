@@ -92,7 +92,16 @@ jobs:
           python backend/run_valuation.py \
             --limit ${{ github.event.inputs.limit || '200' }} \
             --period ${{ github.event.inputs.period || 'year' }}
-        timeout-minutes: 90
+        # NANG 90 -> 150 phut ngay 27/09/2026. Nguon Vietcap/KBS cham hon
+        # vnstock ~3 lan (do o daily-scan: 2,0s -> 6,2s moi ma). Buoc nay truoc
+        # mat 9-26 phut, nhan len la 28-81 phut — sat tran 90. Luot 27/09 chay
+        # tay da qua 58 phut khi con dang o buoc nay.
+        #
+        # LUU Y: khac `run_daily`, script nay KHONG co ngan sach thoi gian noi
+        # bo. Cham tran nghia la bi chat giua chung va MAT SACH moi thu da tinh
+        # — dung kieu hong cua 17-20/08/2026 ma FETCH_BUDGET_S sinh ra de chan.
+        # Nang tran chi mua them cho, khong sua duoc kieu hong do.
+        timeout-minutes: 150
 
       # Chặn dữ liệu hỏng lọt lên production. Kiểm tra cụ thể lỗi đơn vị giá
       # 1000× từng làm mọi upside thành +98.000%.
@@ -157,7 +166,9 @@ jobs:
         run: |
           python backend/run_quality.py \
             --limit ${{ github.event.inputs.limit || '200' }}
-        timeout-minutes: 45
+        # NANG 45 -> 90 phut, cung ly do voi buoc dinh gia. Buoc nay truoc mat
+        # 8-22 phut; nhan 3 lan la 25-68 phut, tuc tran 45 cu KHONG DU.
+        timeout-minutes: 90
 
       - name: Commit valuation output
         run: |
