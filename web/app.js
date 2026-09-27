@@ -227,6 +227,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   // 'analyzer' chi con co the den tu localStorage luu truoc do (hoac sua tay).
   // Mo len thay man phan tich rong la trang trang ve mat cam nhan — khong bang,
   // khong tin hieu, chi mot o tim kiem. 'combined' thi giu: van la bang day du.
+  // Nhat ky tin hieu: nap MOT LAN, dung chung cho ca bon chien luoc. Khong
+  // `await` chan duong nap bang — bang phai hien ngay, cot GIU dien sau.
+  loadStreaks().then(() => { if (state.raw?.length) render(); });
+
   const savedStrategy = prefGet('strategy');
   if (savedStrategy && savedStrategy !== 'analyzer'
       && savedStrategy !== activeStrategy && STRATEGIES[savedStrategy]) {
@@ -620,13 +624,66 @@ async function loadLatestFirst() {
   } catch (e) {
     console.error('Load latest failed:', e);
     document.getElementById('signal-rows').innerHTML =
-      `<tr><td colspan="17" class="empty error-state">
+      `<tr><td colspan="18" class="empty error-state">
          <div class="error-title">Không tải được dữ liệu</div>
          <div class="error-detail">${escapeAttr(e.message)}</div>
          <div class="error-detail">${navigator.onLine ? 'Máy chủ dữ liệu có thể đang bận.' : 'Thiết bị đang offline.'}</div>
          <button class="btn-ghost" onclick="location.reload()">↻ Thử lại</button>
        </td></tr>`;
   }
+}
+
+/**
+ * Nhat ky tin hieu (web/data/streaks/latest.json).
+ *
+ * Nap MOT LAN va dung cho ca bon chien luoc. Hong thi de rong — cot GIU hien
+ * "—" con bang van chay binh thuong.
+ */
+async function loadStreaks() {
+  try {
+    const r = await fetch(`./data/streaks/latest.json?_=${Date.now()}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    state.streaks = await r.json();
+  } catch (e) {
+    console.warn('Khong nap duoc nhat ky tin hieu:', e.message);
+    state.streaks = null;
+  }
+}
+
+/**
+ * Chuoi phien cua mot ma, HOAC null khi khong noi duoc.
+ *
+ * Tra null (khong phai 0) khi dang xem phien CU: nhat ky dung cho phien moi
+ * nhat, nen gan so cua hom nay cho mot phien thang truoc la noi sai.
+ */
+function streakOf(s) {
+  const st = state.streaks?.strategies;
+  if (!st) return null;
+  if (state.currentDate && state.latestDate && state.currentDate !== state.latestDate) return null;
+  const keys = activeStrategy === 'combined'
+    ? (s._strategies || Object.keys(st)) : [activeStrategy];
+  let best = null;
+  const parts = [];
+  for (const k of keys) {
+    const row = st[k]?.[s.ticker];
+    if (!row) continue;
+    parts.push(`${STRATEGIES[k]?.name || k}: ${row.streak} phiên`);
+    if (!best || row.streak > best.streak) best = row;
+  }
+  return best ? { ...best, why: parts.join(' · ') } : null;
+}
+
+function renderStreak(s) {
+  const r = streakOf(s);
+  if (!r) {
+    const why = (state.currentDate && state.currentDate !== state.latestDate)
+      ? 'Nhật ký chỉ tính cho phiên mới nhất'
+      : 'Chưa có trong nhật ký';
+    return `<span class="dim" title="${escapeAttr(why)}">—</span>`;
+  }
+  const cls = r.streak >= 5 ? 'streak-long' : r.streak >= 2 ? 'streak-mid' : 'streak-new';
+  const why = `${r.why} · có mặt ${r.appearances}/${state.streaks.window} phiên (${r.first} → ${r.last})`;
+  return `<span class="streak ${cls}" title="${escapeAttr(why)}">${r.streak}</span>`;
 }
 
 async function loadDateIndex() {
@@ -1191,6 +1248,9 @@ function applyFilters() {
     }
   }
 
+  // Gan chuoi phien len tung dong de cot GIU sap xep duoc nhu moi cot khac.
+  arr.forEach(r => { r._streak = streakOf(r)?.streak ?? -1; });
+
   // Sort: default by total_score desc; for combined default by _passCount desc, then total_score
   if (state.sort.column) {
     arr.sort((a, b) => {
@@ -1223,7 +1283,7 @@ function applyFilters() {
 function renderRows() {
   const tbody = document.getElementById('signal-rows');
   if (!state.filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="17" class="empty">Không có tín hiệu khớp bộ lọc</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="18" class="empty">Không có tín hiệu khớp bộ lọc</td></tr>`;
     return;
   }
   tbody.innerHTML = state.filtered.map((s, i) => renderRow(s, i + 1)).join('');
@@ -1399,6 +1459,7 @@ function renderRow(s, idx) {
       <td class="num prio-3">${fmtValue(s.close, s.volume)}</td>
       <td class="num prio-3">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
       <td class="prio-4">${sparkCell}</td>
+      <td class="num prio-2">${renderStreak(s)}</td>
       <td class="num prio-3">${(s.m_rsi14 || 0).toFixed(0)}</td>
       <td class="num prio-4">${supCell}</td>
       <td class="num prio-4">${resCell}</td>
@@ -1439,6 +1500,7 @@ function renderRow(s, idx) {
     <td class="num prio-3">${fmtValue(s.close, s.volume)}</td>
     <td class="num prio-3">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
     <td class="prio-4">${sparkCell}</td>
+    <td class="num prio-2">${renderStreak(s)}</td>
     <td class="num prio-3">${(s.m_rsi14 || 0).toFixed(0)}</td>
     <td class="num prio-4">${supCell}</td>
     <td class="num prio-4">${resCell}</td>

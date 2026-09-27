@@ -2998,3 +2998,20 @@ kbd {
 @media (max-width: 420px) {
   .time { display: none; }
 }
+
+/* ── Cot GIU: so phien lien tiep ma giu tin hieu ────────────────────────────
+   Ba muc chu KHONG phai thang mau do-xanh: day khong phai gia, va mot chuoi
+   dai khong co nghia la "tot" — no chi co nghia la "da keo dai". Gan mau tot
+   /xau vao day la noi ho nguoi doc mot dieu ma du lieu chua he chung minh. */
+.streak {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.streak-new  { color: var(--text-dim); }
+.streak-mid  { color: var(--text); background: var(--surface-2, rgba(127,127,127,.12)); }
+.streak-long { color: var(--text); background: var(--surface-2, rgba(127,127,127,.12));
+               box-shadow: inset 0 0 0 1px var(--border, rgba(127,127,127,.35)); }
