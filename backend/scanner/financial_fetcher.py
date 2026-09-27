@@ -39,6 +39,12 @@ CACHE_DIR.mkdir(parents=True, exist_ok=True)
 # BCTC quý ra ~30 ngày sau cuối quý, không cần fetch hàng ngày
 DEFAULT_CACHE_TTL_DAYS = 7
 
+# Hai bảng mà thiếu là mã không định giá được: `normalize_fundamentals` trả
+# None nếu vắng một trong hai (strategies/valuation/normalizer.py). Lưu chuyển
+# tiền tệ KHÔNG nằm đây — thiếu nó vẫn định giá được, chỉ kém tin cậy hơn.
+# Danh sách này là điều kiện dừng sớm trong `fetch_financial_statements`.
+REQUIRED_STATEMENTS = ('balance_sheet', 'income')
+
 # Tăng khi đổi định dạng record trong cache; cache khác schema bị bỏ qua.
 # 2: mỗi record là một kỳ, khóa theo item_id, BCTC theo tỷ đồng.
 # 3: overview có industry (ICB cấp 2) và icb_code_lv2/lv4 cho vnstock 4.0.7.
@@ -193,7 +199,8 @@ def fetch_company_overview(ticker: str, source: str = 'vci') -> Optional[Dict[st
 
 def fetch_financial_statements(ticker: str, source: str = 'vci',
                                 period: str = 'year',
-                                tables: Optional[tuple] = None) -> Optional[Dict[str, pd.DataFrame]]:
+                                tables: Optional[tuple] = None,
+                                required: tuple = REQUIRED_STATEMENTS) -> Optional[Dict[str, pd.DataFrame]]:
     """
     Fetch balance sheet + income statement + cash flow.
 
@@ -217,21 +224,39 @@ def fetch_financial_statements(ticker: str, source: str = 'vci',
 
     results = {}
     for name in wanted:
+        got = False
         for attempt in range(3):
             try:
                 df = vci.financial_statement(ticker, name, period=period)
                 if df is not None and not df.empty:
                     results[name] = df
+                got = True
                 break
             except RateLimitError:
                 log.warning(f"  {ticker} {name} rate-limited, waiting 65s")
                 time.sleep(65)
             except ValueError as e:
                 log.error(f"  {ticker} {name}: {e}")
+                got = True          # lỗi tham số, không phải nguồn — đừng bỏ mã
                 break
             except Exception as e:
                 log.warning(f"  {ticker} {name} attempt {attempt+1}: {type(e).__name__}: {str(e)[:120]}")
                 time.sleep(2 + attempt * 2)
+
+        # Bỏ mã ngay khi nó KHÔNG CÒN DÙNG ĐƯỢC NỮA, chứ không phải "hỏng một
+        # cái là bỏ". `normalize_fundamentals` trả None nếu thiếu bảng cân đối
+        # HOẶC kết quả kinh doanh; lưu chuyển tiền tệ thì không bắt buộc. Nên
+        # mất một trong hai bảng đầu là mã đã chết — mọi lượt gọi sau chỉ tốn
+        # thời gian để rồi vẫn bị loại.
+        #
+        # Đo trên lượt 27/09/2026: bảy mã treo chạy đủ 13 lượt gọi, ~6 phút mỗi
+        # mã, tổng 41 phút đổi lấy 0 dữ liệu. Dừng ở đây còn 4 lượt gọi. NDN là
+        # ca duy nhất lấy được lưu chuyển tiền tệ sau khi mất hai bảng kia —
+        # và nó vẫn bị `normalize_fundamentals` loại, nên không mất gì.
+        if not got and name in required:
+            log.warning(f"  {ticker}: bỏ sớm — thiếu {name}, mã không định giá "
+                        f"được dù có lấy nốt các bảng còn lại")
+            return None
 
     return results if results else None
 
@@ -318,11 +343,15 @@ def fetch_fundamentals(ticker: str, period: str = 'year',
 
     overview = fetch_company_overview(ticker)
     statements = fetch_financial_statements(ticker, period=period)
-    price = fetch_current_price(ticker)
 
+    # Kiểm TRƯỚC khi lấy giá: không có BCTC thì mã bị loại ngay sau đây, nên
+    # lượt gọi giá là ba lần thử vứt đi. Trước 27/09/2026 nó nằm sau lời gọi
+    # giá — mỗi mã treo tốn thêm ~30 s để lấy một con số không ai dùng.
     if not statements:
         log.warning(f"  {ticker}: no financial statements available")
         return None
+
+    price = fetch_current_price(ticker)
 
     result = {
         'schema': CACHE_SCHEMA,
@@ -380,7 +409,16 @@ def fetch_quarterly_statements(ticker: str, use_cache: bool = True,
         except Exception as e:
             log.warning(f"  {ticker} quarter cache read failed: {e}")
 
-    statements = fetch_financial_statements(ticker, period='quarter', tables=QUARTER_TABLES)
+    # `required=()` — KHÔNG dừng sớm ở đường quý, khác hẳn đường năm.
+    #
+    # Dừng sớm của đường năm dựa trên `normalize_fundamentals`: thiếu bảng cân
+    # đối hoặc kết quả kinh doanh là mã không định giá được. Module B thì khác:
+    # `quality/adapter.governance_inputs` lấy kỳ quý gần nhất từ HỢP của kết
+    # quả kinh doanh và lưu chuyển tiền tệ, và không đụng tới bảng cân đối quý.
+    # Nên ở đây một bảng lấy được vẫn dùng được, và áp luật của định giá sang
+    # sẽ vứt mất dữ liệu thật.
+    statements = fetch_financial_statements(ticker, period='quarter',
+                                            tables=QUARTER_TABLES, required=())
     if not statements:
         log.warning(f"  {ticker}: no quarterly statements available")
         return None
