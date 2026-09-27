@@ -20,13 +20,16 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 from datetime import date, datetime
 from pathlib import Path
+from time import monotonic
 from typing import Callable, Dict, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from scanner.publish_gate import may_publish
 from scanner.quality import adapter, governance, metrics, scoring
 from scanner.quality import config as C
 from scanner.quality.status import DIMS, classify, model_for, sharp_drops, valuation_band
@@ -35,6 +38,23 @@ from scanner.strategies.valuation.industry_classifier import IndustryClassifier
 log = logging.getLogger('run_quality')
 
 QUALITY_SCHEMA = 1
+
+# Trần thời gian cho vòng lấy dữ liệu, giây. 70 phút — cố ý thấp hơn
+# `timeout-minutes: 90` của workflow 20 phút, cùng tỷ lệ với `run_daily`.
+#
+# Vì sao cần (thêm 27/09/2026): trước đây script này KHÔNG có ngân sách nội bộ,
+# nên chạm trần là bị runner giết giữa vòng lấy dữ liệu — tức chết TRƯỚC bước
+# ghi file, mất sạch mọi thứ đã chấm. Đúng chuyện đã xảy ra ngày 27/09: bước
+# chấm chất lượng chạm trần 45 phút và không để lại gì.
+#
+# Tự dừng sớm thì phần percentile, quản trị, veto và ghi JSON vẫn còn thời gian.
+FETCH_BUDGET_S = int(os.environ.get('QUALITY_FETCH_BUDGET_S', 70 * 60))
+
+# Dưới độ phủ này thì KHÔNG ghi đè `latest.json` đang có. Xem chú thích cùng tên
+# trong run_valuation.py; ở đây còn một lý do riêng: điểm là PERCENTILE TRONG
+# UNIVERSE. Cắt đuôi rổ (rổ xếp theo thanh khoản giảm dần) nghĩa là mọi mã bị
+# xếp hạng so với riêng nhóm vốn hoá lớn — điểm đổi mà không ai đổi gì cả.
+MIN_COVERAGE_TO_PUBLISH = float(os.environ.get('QUALITY_MIN_COVERAGE', 0.8))
 
 
 def _round(v, nd=4):
@@ -71,14 +91,29 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
                   valuation_signals: Dict[str, dict], as_of: date,
                   delisted: set, previous: Dict[str, dict],
                   on_fetched: Optional[Callable[[dict], None]] = None,
-                  fetch_bank_ratio: Optional[Callable] = None) -> dict:
-    """Chấm cả universe. Không gọi mạng trực tiếp — mọi dữ liệu qua fetch_year/fetch_quarter."""
+                  fetch_bank_ratio: Optional[Callable] = None,
+                  should_stop: Optional[Callable[[], bool]] = None) -> dict:
+    """
+    Chấm cả universe. Không gọi mạng trực tiếp — mọi dữ liệu qua fetch_year/fetch_quarter.
+
+    `should_stop` được hỏi TRƯỚC mỗi mã: trả True thì bỏ phần rổ còn lại và đi
+    thẳng sang chấm điểm. Hàm này không biết gì về đồng hồ — `main` truyền vào
+    một closure đọc ngân sách thời gian, còn test truyền một bộ đếm.
+    """
     classifier = IndustryClassifier()
     rows: Dict[str, dict] = {}
     failures = []
+    stop_reason = None
+    attempted = 0
 
     # ── 1. Dữ liệu + chỉ tiêu từng mã ────────────────────────────────────
     for t in tickers:
+        # Hỏi TRƯỚC khi gọi mạng: một lượt fetch có thể mất tới ~20s khi nguồn
+        # timeout và retry, nên hỏi sau nghĩa là vẫn vượt trần.
+        if should_stop and should_stop():
+            stop_reason = f'hết ngân sách lấy dữ liệu sau {attempted}/{len(tickers)} mã'
+            break
+        attempted += 1
         raw_y = fetch_year(t)
         if not raw_y:
             failures.append({'ticker': t, 'reason': 'Không lấy được BCTC năm'})
@@ -168,6 +203,11 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
         'as_of': as_of.isoformat(),
         'metadata': {
             'universe_size': len(tickers),
+            'attempted': attempted,
+            'fetch_coverage': round(attempted / len(tickers), 3) if tickers else 0.0,
+            # None khi vòng lấy dữ liệu chạy trọn. Khác None nghĩa là percentile
+            # được tính trên phần rổ đã bị cắt đuôi, không phải cả universe.
+            'fetch_stop_reason': stop_reason,
             'scored': len(items),
             'failures': failures,
             'status_counts': _count('status'),
@@ -224,7 +264,19 @@ def main(argv=None) -> int:
                     default=str(Path(__file__).resolve().parent / 'data' / 'snapshots'
                                 / 'fundamentals_registry.json'),
                     help='Sổ point-in-time BCTC; "" để tắt')
+    ap.add_argument('--fetch-budget', type=int, default=FETCH_BUDGET_S,
+                    help='Trần thời gian cho vòng lấy dữ liệu, giây (0 = bỏ trần). '
+                         'Mặc định %(default)s, cố ý thấp hơn timeout-minutes của '
+                         'workflow để bước chấm điểm và ghi file còn kịp chạy.')
+    ap.add_argument('--min-coverage', type=float, default=MIN_COVERAGE_TO_PUBLISH,
+                    help='Độ phủ tối thiểu để ghi đè latest.json đang có (0 = luôn '
+                         'ghi). Mặc định %(default)s.')
     args = ap.parse_args(argv)
+    # Mốc tính ngân sách là lúc TIẾN TRÌNH bắt đầu, không phải lúc vào vòng lặp:
+    # `timeout-minutes` của workflow đếm từ đây, và `get_ticker_universe` phía
+    # dưới cũng gọi mạng. Đặt mốc sau nó nghĩa là ngân sách âm thầm dài thêm
+    # đúng bằng thời gian xếp hạng thanh khoản.
+    started = monotonic()
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s',
                         datefmt='%H:%M:%S')
 
@@ -254,7 +306,21 @@ def main(argv=None) -> int:
         delisted=load_delisted(Path(__file__).resolve().parent / 'data' / 'delisted_tickers.txt'),
         previous=load_previous_dims(web / 'quality' / 'latest.json'),
         on_fetched=on_fetched,
+        should_stop=(lambda: monotonic() - started > args.fetch_budget)
+                    if args.fetch_budget else None,
     )
+
+    m = payload['metadata']
+    latest = web / 'quality' / 'latest.json'
+    if m['fetch_stop_reason']:
+        log.warning(f"DỪNG SỚM: {m['fetch_stop_reason']}")
+    # Trả mã lỗi khi không công bố, để job đỏ và ci-alert mở issue.
+    ok, why = may_publish(m['fetch_coverage'], args.min_coverage, latest)
+    if not ok:
+        log.error(f"KHÔNG công bố: {why}")
+        return 1
+    if why:
+        log.warning(why)
     write_outputs(payload, web)
 
     # health.json KHÔNG cập nhật ở đây — xem backend/refresh_health.py.
@@ -262,7 +328,6 @@ def main(argv=None) -> int:
     # nghĩa là bước này chết thì phần của bước ĐỊNH GIÁ cũng không ai cập nhật.
     # Đã xảy ra ngày 27/09/2026.
 
-    m = payload['metadata']
     log.info(f"Chấm {m['scored']}/{m['universe_size']} mã | trạng thái {m['status_counts']} "
              f"| mô hình {m['model_counts']} | lỗi {len(m['failures'])}")
     return 0 if payload['items'] else 1

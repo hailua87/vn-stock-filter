@@ -201,21 +201,50 @@ def test_weekly_timeouts_fit_the_measured_slowdown():
     assert quality >= 70, 'trần chấm chất lượng không đủ cho nguồn chậm gấp ba'
 
 
-def test_weekly_scripts_still_have_no_internal_budget():
+def test_weekly_scripts_now_have_an_internal_budget():
     """
-    Chốt một điều ĐÚNG MÀ KHÔNG TỐT, để nó không bị quên.
+    Ngược lại hẳn với test trước đây ở chỗ này.
 
-    `run_daily` tự dừng ở FETCH_BUDGET_S rồi vẫn kịp ghi file — cơ chế đó sinh
-    ra sau sự cố 17-20/08/2026. `run_valuation` và `run_quality` KHÔNG có gì
-    tương đương: chạm trần là bị chặt giữa chừng và mất sạch mọi thứ đã tính.
-
-    Nếu có ngày thêm ngân sách nội bộ cho chúng, test này sẽ đỏ — và đó là lúc
-    xoá nó đi cùng với việc cập nhật chú thích trong workflow.
+    Đến 27/09/2026 chỗ này chốt một điều ĐÚNG MÀ KHÔNG TỐT: hai script hằng tuần
+    không có gì tương đương `FETCH_BUDGET_S` của `run_daily`, nên chạm trần là
+    bị chặt giữa chừng và mất sạch mọi thứ đã tính. Test đó ghi sẵn "nếu có ngày
+    thêm ngân sách, test này sẽ đỏ — và đó là lúc xoá nó đi". Hôm đó đã đến.
     """
     import run_quality
     import run_valuation
     for mod in (run_valuation, run_quality):
-        names = [n for n in dir(mod) if 'BUDGET' in n.upper()]
-        assert not names, (
-            f'{mod.__name__} nay co {names} — hay xoa test nay va sua chu thich '
-            f'"KHONG co ngan sach thoi gian noi bo" trong weekly-valuation.yml')
+        assert mod.FETCH_BUDGET_S > 0
+        assert 0 < mod.MIN_COVERAGE_TO_PUBLISH <= 1
+
+
+def test_weekly_budgets_sit_below_the_workflow_timeouts():
+    """
+    Kỷ luật ba tầng, giống daily-scan: ngân sách nội bộ < trần của workflow.
+
+    Khoảng chênh không phải cho đẹp — nó là thời gian để chấm điểm và GHI FILE
+    sau khi vòng lấy dữ liệu dừng. Bằng nhau nghĩa là script tự dừng đúng lúc
+    runner cũng giết nó, tức mất trắng y như trước.
+    """
+    import re
+    import run_quality
+    import run_valuation
+
+    wf = (Path(__file__).resolve().parent.parent.parent
+          / '.github' / 'workflows' / 'weekly-valuation.yml').read_text(encoding='utf-8')
+    valuation_timeout, quality_timeout = _weekly_timeouts()[:2]
+
+    for mod, env_name, timeout in (
+        (run_valuation, 'VALUATION_FETCH_BUDGET_S', valuation_timeout),
+        (run_quality, 'QUALITY_FETCH_BUDGET_S', quality_timeout),
+    ):
+        # Workflow phải TRUYỀN ngân sách, không phó mặc mặc định của script:
+        # đọc file là cách duy nhất biết hai bên có khớp nhau không.
+        m = re.search(rf"{env_name}:\s*'(\d+)'", wf)
+        assert m, f'weekly-valuation.yml không đặt {env_name}'
+        budget_min = int(m.group(1)) / 60
+        assert budget_min <= timeout - 15, (
+            f'{env_name}={budget_min:.0f} phút quá sát trần {timeout} phút — '
+            f'không còn chỗ để ghi file')
+        assert mod.FETCH_BUDGET_S / 60 <= timeout - 15, (
+            f'mặc định trong {mod.__name__} cũng phải thấp hơn trần: chạy tay '
+            f'không có biến môi trường vẫn phải an toàn')

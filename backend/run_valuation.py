@@ -22,9 +22,11 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
+from time import monotonic
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -32,7 +34,34 @@ from scanner.data_fetcher import get_ticker_universe, setup_api_key
 from scanner.financial_fetcher import fetch_fundamentals
 from scanner.strategies.valuation import value_ticker
 from scanner.snapshots import record_snapshot
+from scanner.publish_gate import may_publish
 from scanner.quality.status import valuation_band
+
+# Trần thời gian cho PASS 1 (vòng gọi mạng), giây. 120 phút — cố ý thấp hơn
+# `timeout-minutes: 150` của workflow 30 phút.
+#
+# Vì sao cần (thêm 27/09/2026): trước đây script này KHÔNG có ngân sách nội bộ.
+# Chạm trần nghĩa là runner giết tiến trình giữa lúc đang fetch — tức chết
+# TRƯỚC mọi bước ghi file, nên toàn bộ BCTC đã tải về và mọi thứ đã tính không
+# thành cái gì cả. Đúng kiểu hỏng của 17-20/08/2026 mà `run_daily` đã có
+# FETCH_BUDGET_S để chặn; hai script hằng tuần thì chưa.
+#
+# Tự dừng sớm thì PASS 2 (thuần tính toán trên dữ liệu đã có), peer DB và ghi
+# JSON vẫn còn thời gian — hỏng có kiểm soát thay vì bị chặt ngang.
+#
+# Con số: nguồn Vietcap/KBS ~6,2s mỗi lượt gọi, BCTC cần ~3 lượt mỗi mã, nên
+# 200 mã với cache lạnh vào khoảng 62 phút. 120 phút cho gần gấp đôi mức đó.
+FETCH_BUDGET_S = int(os.environ.get('VALUATION_FETCH_BUDGET_S', 120 * 60))
+
+# Dưới độ phủ này thì KHÔNG ghi đè `latest.json` đang có.
+#
+# Universe xếp theo thanh khoản giảm dần, nên dừng sớm cắt mất đuôi — phần còn
+# lại thiên về mã lớn, và peer median của mỗi ngành tính trên nhóm lệch đó.
+# Một tệp mỏng còn tệ hơn tệp tuần trước: định giá dựa trên BCTC (ra theo quý),
+# một tuần cũ gần như không mất gì, còn mã biến mất khỏi web thì người đọc thấy
+# ngay. Đây đúng là điều chú thích trong weekly-valuation.yml đã hứa: "hỏng
+# theo hướng an toàn — dữ liệu tuần trước còn nguyên".
+MIN_COVERAGE_TO_PUBLISH = float(os.environ.get('VALUATION_MIN_COVERAGE', 0.8))
 
 # Fair value lệch khỏi giá quá mức này gần như luôn do phương pháp không hợp
 # với doanh nghiệp (vd. EV/EBITDA khi EBITDA năm đáy < nợ ròng → BAF −97%),
@@ -73,7 +102,8 @@ logging.basicConfig(
 log = logging.getLogger('valuation')
 
 
-def main():
+def main(argv=None, clock=monotonic):
+    """`clock` chỉ để test bơm đồng hồ giả — chạy thật luôn dùng `monotonic`."""
     parser = argparse.ArgumentParser()
     parser.add_argument('--tickers', type=str, default=None,
                         help='Comma-separated tickers (e.g., VIB,PAN,DBC). Nếu set thì bỏ qua --limit/--exchanges')
@@ -82,7 +112,10 @@ def main():
     parser.add_argument('--limit', type=int, default=100,
                         help='Số mã tối đa (sort by liquidity)')
     parser.add_argument('--min-upside', type=float, default=-100,
-                        help='Lọc theo upside % tối thiểu (default: hiển thị tất cả)')
+                        # `%%` chứ không phải `%`: argparse chạy chuỗi help qua phép định dạng `%`,
+                        # nên một dấu % trần làm `--help` NỔ. Vẫn nổ từ trước 27/09/2026;
+                        # thấy khi thêm --fetch-budget. backend/tests/test_weekly_budget.py chốt lại.
+                        help='Lọc theo upside %% tối thiểu (default: hiển thị tất cả)')
     parser.add_argument('--min-confidence', type=float, default=0.30,
                         help='Lọc theo confidence tối thiểu (0-1)')
     parser.add_argument('--web-data-dir', type=str, default='web/data')
@@ -92,7 +125,15 @@ def main():
                         default=str(Path(__file__).resolve().parent / 'data' / 'snapshots'
                                     / 'fundamentals_registry.json'),
                         help='Sổ point-in-time của BCTC (audit F3); "" để tắt')
-    args = parser.parse_args()
+    parser.add_argument('--fetch-budget', type=int, default=FETCH_BUDGET_S,
+                        help='Trần thời gian cho PASS 1, giây (0 = bỏ trần). Mặc '
+                             'định %(default)s, cố ý thấp hơn timeout-minutes của '
+                             'workflow để PASS 2 và bước ghi file còn kịp chạy.')
+    parser.add_argument('--min-coverage', type=float, default=MIN_COVERAGE_TO_PUBLISH,
+                        help='Độ phủ PASS 1 tối thiểu để ghi đè latest.json đang có '
+                             '(0 = luôn ghi). Mặc định %(default)s.')
+    args = parser.parse_args(argv)
+    started = clock()
 
     setup_api_key()
     today = datetime.now().strftime('%Y-%m-%d')
@@ -129,8 +170,19 @@ def main():
     classifier = IndustryClassifier()
     failures = []
     snapshot_stats = {'new': 0, 'revised': 0}
+    stop_reason = None
+    attempted = 0
 
     for i, ticker in enumerate(tickers, 1):
+        # Kiểm TRƯỚC khi gọi mạng, không phải sau: một lượt fetch có thể mất tới
+        # ~20s khi nguồn timeout và retry, nên kiểm sau nghĩa là vẫn vượt trần.
+        if args.fetch_budget and clock() - started > args.fetch_budget:
+            stop_reason = (f'hết ngân sách PASS 1 ({args.fetch_budget}s) '
+                           f'sau {attempted}/{len(tickers)} mã')
+            log.warning(f"  DỪNG SỚM: {stop_reason}")
+            break
+        attempted = i
+
         if i % 20 == 0:
             log.info(f"  Pass 1 progress: {i}/{len(tickers)}")
 
@@ -171,7 +223,9 @@ def main():
             log.warning(f"  {ticker} pass-1 failed: {type(e).__name__}: {str(e)[:100]}")
             failures.append({'ticker': ticker, 'reason': str(e)[:100]})
 
+    coverage = round(attempted / len(tickers), 3) if tickers else 0.0
     log.info(f"  Pass 1 complete: {len(cached_raw)} fetched, {len(peer_inputs)} contributed to peer DB")
+    log.info(f"  Độ phủ PASS 1: {attempted}/{len(tickers)} = {coverage:.0%}")
     log.info(f"  Snapshot registry: {snapshot_stats['new']} kỳ mới, "
              f"{snapshot_stats['revised']} kỳ bị sửa số liệu")
 
@@ -246,7 +300,12 @@ def main():
             'period': args.period,
             'min_upside': args.min_upside,
             'min_confidence': args.min_confidence,
-            'total_attempted': len(tickers),
+            'total_attempted': attempted,
+            'universe_size': len(tickers),
+            'fetch_coverage': coverage,
+            # None khi PASS 1 chạy trọn. Khác None nghĩa là peer median của mỗi
+            # ngành tính trên nhóm đã bị cắt đuôi, không phải cả rổ.
+            'fetch_stop_reason': stop_reason,
             'failures': len(failures),
             'verdict_counts': verdict_counts,
             'band_counts': band_counts,
@@ -255,8 +314,17 @@ def main():
         'signals': signals_out,
     }
 
-    # Write latest.json
+    # Trả mã lỗi khi không công bố, để job đỏ và ci-alert mở issue: một lượt
+    # phải bỏ công bố là chuyện cần người biết, không phải chuyện im cho qua.
     latest = web_dir / 'latest.json'
+    ok, why = may_publish(coverage, args.min_coverage, latest)
+    if not ok:
+        log.error(f"KHÔNG công bố: {why} ({stop_reason or 'nhiều mã hỏng'})")
+        return 1
+    if why:
+        log.warning(why)
+
+    # Write latest.json
     with open(latest, 'w', encoding='utf-8') as f:
         json.dump(payload, f, ensure_ascii=False, indent=2, default=str)
     log.info(f"  Latest: {latest}")
@@ -276,7 +344,8 @@ def main():
 
     log.info(f"Valuation run complete: {len(reports)} signals saved")
     log.info(f"  Verdict breakdown: {verdict_counts}")
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

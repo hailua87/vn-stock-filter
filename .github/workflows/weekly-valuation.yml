@@ -88,6 +88,9 @@ jobs:
       - name: Run valuation
         env:
           PYTHONIOENCODING: utf-8
+          # Ba tang: FETCH_BUDGET (120) < script tu dung < timeout-minutes (150).
+          # Khoang chenh 30 phut la cho PASS 2, peer DB va ghi JSON.
+          VALUATION_FETCH_BUDGET_S: '7200'
         run: |
           python backend/run_valuation.py \
             --limit ${{ github.event.inputs.limit || '200' }} \
@@ -97,10 +100,10 @@ jobs:
         # mat 9-26 phut, nhan len la 28-81 phut — sat tran 90. Luot 27/09 chay
         # tay da qua 58 phut khi con dang o buoc nay.
         #
-        # LUU Y: khac `run_daily`, script nay KHONG co ngan sach thoi gian noi
-        # bo. Cham tran nghia la bi chat giua chung va MAT SACH moi thu da tinh
-        # — dung kieu hong cua 17-20/08/2026 ma FETCH_BUDGET_S sinh ra de chan.
-        # Nang tran chi mua them cho, khong sua duoc kieu hong do.
+        # Tu 27/09/2026 script CO ngan sach noi bo (VALUATION_FETCH_BUDGET_S).
+        # Truoc do khong co: cham tran la bi chat giua chung va mat sach moi thu
+        # da tinh — dung kieu hong cua 17-20/08/2026. Nay no tu dung PASS 1 o
+        # phut 120 va van kip ghi file; tran 150 chi con la luoi do cuoi.
         timeout-minutes: 150
 
       # Chặn dữ liệu hỏng lọt lên production. Kiểm tra cụ thể lỗi đơn vị giá
@@ -163,11 +166,15 @@ jobs:
         continue-on-error: true
         env:
           PYTHONIOENCODING: utf-8
+          # Ba tang: FETCH_BUDGET (70) < script tu dung < timeout-minutes (90),
+          # cung ty le voi daily-scan.
+          QUALITY_FETCH_BUDGET_S: '4200'
         run: |
           python backend/run_quality.py \
             --limit ${{ github.event.inputs.limit || '200' }}
         # NANG 45 -> 90 phut, cung ly do voi buoc dinh gia. Buoc nay truoc mat
         # 8-22 phut; nhan 3 lan la 25-68 phut, tuc tran 45 cu KHONG DU.
+        # Tu 27/09/2026 script cung co ngan sach noi bo, nen tran 90 la luoi do.
         timeout-minutes: 90
 
       # `if: always()` la diem mau chot, khong phai thoi quen.

@@ -65,6 +65,7 @@ def _weekly_source(path: Path, now: datetime, label: str) -> dict:
     as_of = (d.get('as_of') or (d.get('metadata') or {}).get('session_date')
              or (generated[:10] if isinstance(generated, str) else None))
     n = len(d.get('items') or d.get('signals') or [])
+    meta = d.get('metadata') or {}
     return {
         'label': label,
         'available': True,
@@ -72,6 +73,12 @@ def _weekly_source(path: Path, now: datetime, label: str) -> dict:
         'generated_at': generated,
         'age_days': _age_days(generated or as_of, now),
         'count': n,
+        # Lượt bị cắt giữa chừng vẫn được công bố nếu còn đủ độ phủ (xem
+        # scanner/publish_gate.py). Khi đó peer median và percentile tính trên
+        # phần rổ đã cụt, nên người đọc phải được biết — con số trông vẫn
+        # bình thường, không có gì tự lộ ra.
+        'fetch_coverage': meta.get('fetch_coverage'),
+        'partial_reason': meta.get('fetch_stop_reason'),
     }
 
 
@@ -159,6 +166,13 @@ def _issues(daily: dict, sources: dict, previous: dict, now: datetime) -> list:
         if not s.get('available'):
             add(f'{key}_missing', 'warn', f"{s['label']}: chưa có dữ liệu.")
             continue
+        if s.get('partial_reason'):
+            cov = s.get('fetch_coverage')
+            add(f'{key}_partial', 'warn',
+                f"{s['label']}: lượt chạy dừng sớm ({s['partial_reason']})"
+                + (f", chỉ phủ {cov:.0%} rổ" if isinstance(cov, (int, float)) else '')
+                + ". Thứ hạng giữa các mã tính trên phần rổ đó, không phải cả rổ.")
+        # KHÔNG `continue` ở đây: một lượt vừa bị cắt vừa cũ thì phải nói cả hai.
         age = s.get('age_days')
         if age is not None and age > WEEKLY_MAX_AGE_DAYS:
             add(f'{key}_stale', 'warn',
