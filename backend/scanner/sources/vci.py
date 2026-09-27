@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 
-from .http import OHLCV_TIMEOUT, SourceError, request_json
+from .http import OHLCV_TIMEOUT, STATEMENT_TIMEOUT, SourceError, request_json
 from .naming import camel_to_snake, english_to_snake
 
 TRADING_URL = 'https://trading.vietcap.com.vn/api'
@@ -41,7 +41,10 @@ OHLCV_COLUMNS = ['time', 'open', 'high', 'low', 'close', 'volume']
 
 
 def _get(url: str, params: Optional[Dict[str, Any]] = None) -> Any:
-    return request_json('GET', url, headers=HEADERS, params=params)
+    # STATEMENT_TIMEOUT chứ không phải trần chung 30 s: mọi lời gọi GET ở đây
+    # đều tới iq.vietcap.com.vn (tổng quan công ty, BCTC) — đúng nhóm đã đo.
+    return request_json('GET', url, headers=HEADERS, params=params,
+                        timeout=STATEMENT_TIMEOUT)
 
 
 def _data(resp: Any, what: str) -> Any:

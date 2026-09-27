@@ -31,6 +31,23 @@ TIMEOUT = 30
 # lấy thêm ~90 mã mỗi lượt 45 phút. 10 s vẫn gấp 5 lần p90 của lượt thành công.
 OHLCV_TIMEOUT = float(os.environ.get('SOURCE_OHLCV_TIMEOUT', '10'))
 
+# BCTC và tổng quan công ty (iq.vietcap.com.vn) cũng chờ ngắn hơn, cùng lý do
+# với OHLCV ở trên. Đo trên runner GitHub 27/09/2026 (bài đo tạm, nhánh
+# diag/fetch-parallel đã xoá), 144 lượt gọi, 0 lỗi:
+#     trung vị 1,01 s   p90 2,05 s   tối đa 2,15 s
+# Trần 30 s cũ gấp 15 lần p90 của lượt thành công, tức nó không bảo vệ lượt
+# chậm — nó chỉ kéo dài lượt TREO. Đúng như OHLCV: lượt hỏng treo hết thời
+# gian chờ, chờ lâu hơn cũng không ra dữ liệu.
+#
+# Ngày 27/09/2026, 7 mã (TNH, PVI, AST, ASM, BWE, DLG, NDN) treo toàn bộ 13
+# lượt gọi, ngốn 41 phút — 34% ngân sách — mà trả về không gì cả. Gọi lại
+# chính 7 mã đó trên runner hôm sau: cả 7 đều xong trong ~2 s với dữ liệu đủ.
+# Nguồn không chậm; nó suy giảm theo đợt, và trần chờ dài biến mỗi đợt thành
+# hàng chục phút.
+#
+# 10 s vẫn gấp 5 lần p90 của lượt thành công.
+STATEMENT_TIMEOUT = float(os.environ.get('SOURCE_STATEMENT_TIMEOUT', '10'))
+
 # Khoảng cách tối thiểu giữa hai lượt gọi, cho MỌI nguồn cộng lại.
 #
 # vnstock tự giới hạn 60 lượt/phút (bản có API key) ở phía máy khách. Bỏ
