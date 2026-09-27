@@ -1,27 +1,27 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-26T15:56:22",
+  "generated_at": "2026-09-27T03:17:38",
   "sources": {
     "daily_scan": {
       "label": "Scan hằng ngày",
       "session_date": "2026-09-25",
-      "run_type": "eod",
-      "run_date_ict": "2026-09-26",
-      "run_time_ict": "22:46",
-      "universe": 442,
+      "run_type": "intraday",
+      "run_date_ict": "2026-09-27",
+      "run_time_ict": "10:05",
+      "universe": 490,
       "universe_after_base": 113,
-      "dropped_low_liquidity": 329,
+      "dropped_low_liquidity": 377,
       "fetch": {
-        "coverage": 0.884,
-        "succeeded": 442,
-        "skipped": 49,
-        "failed": 9,
-        "stop_reason": "time_budget"
+        "coverage": 0.98,
+        "succeeded": 490,
+        "skipped": 0,
+        "failed": 10,
+        "stop_reason": null
       },
-      "stale_ratio": 0.176,
+      "stale_ratio": 0.194,
       "session_completeness": 0.836,
       "archive_written": true,
-      "archive_reason": "gate_time: pass (phiên 2026-09-25 đã đóng dứt khoát (hôm nay 2026-09-26)) | gate_coverage: pass (88% >= 80%, vòng fetch dừng vì hết giờ nhưng đủ ngưỡng — archive ghi kèm độ phủ)"
+      "archive_reason": "gate_time: pass (phiên 2026-09-25 đã đóng dứt khoát (hôm nay 2026-09-27)) | gate_coverage: pass (98% >= 80%, vòng fetch chạy trọn)"
     },
     "valuation": {
       "label": "Định giá",
@@ -42,14 +42,9 @@
   },
   "issues": [
     {
-      "code": "fetch_stopped",
-      "severity": "warn",
-      "message": "Vòng lấy dữ liệu dừng sớm (time_budget) — độ phủ 0.884. Rổ quét nhỏ hơn bình thường."
-    },
-    {
       "code": "fetch_failed",
       "severity": "warn",
-      "message": "9 mã không lấy được dữ liệu, đã bỏ qua trong phiên này."
+      "message": "10 mã không lấy được dữ liệu, đã bỏ qua trong phiên này."
     }
   ]
 }
