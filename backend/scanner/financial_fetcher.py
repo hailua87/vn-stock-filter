@@ -307,9 +307,14 @@ def fetch_current_price(ticker: str, source: str = 'vci') -> Optional[float]:
 
 def fetch_fundamentals(ticker: str, period: str = 'year',
                        use_cache: bool = True,
-                       cache_ttl_days: int = DEFAULT_CACHE_TTL_DAYS) -> Optional[Dict[str, Any]]:
+                       cache_ttl_days: int = DEFAULT_CACHE_TTL_DAYS,
+                       refresh_price: bool = True) -> Optional[Dict[str, Any]]:
     """
     Lấy tổng hợp dữ liệu cơ bản cho định giá.
+
+    `refresh_price=False` để BỎ HẲN lượt gọi lấy giá. Chỉ dùng khi người gọi
+    không đọc `current_price` — `run_quality` là trường hợp đó (xem chú thích
+    tại nơi gọi). Định giá thì phải giữ True: nó tính upside từ giá.
 
     Returns:
         {
@@ -332,10 +337,17 @@ def fetch_fundamentals(ticker: str, period: str = 'year',
                 data = json.load(f)
             if data.get('schema') == CACHE_SCHEMA:
                 log.debug(f"  {ticker} fundamentals from cache")
-                # Always re-fetch current price (cheap, changes daily)
-                price = fetch_current_price(ticker)
-                if price:
-                    data['current_price'] = price
+                # Giá đổi hằng ngày trong khi BCTC thì không, nên trúng cache vẫn
+                # lấy lại giá — TRỪ KHI người gọi nói rõ là không cần.
+                #
+                # Chú thích cũ ở đây ghi lượt gọi này "cheap". Đo ngày 27/09/2026
+                # cho thấy không: trên runner GitHub nó timeout 1,67 lần mỗi mã,
+                # mỗi lần 10 s. Riêng bước chấm chất lượng tốn 46 trong 70 phút
+                # ngân sách cho một con số nó không bao giờ đọc.
+                if refresh_price:
+                    price = fetch_current_price(ticker)
+                    if price:
+                        data['current_price'] = price
                 return data
             log.debug(f"  {ticker} cache schema {data.get('schema')} != {CACHE_SCHEMA}, refetching")
         except Exception as e:
@@ -351,7 +363,7 @@ def fetch_fundamentals(ticker: str, period: str = 'year',
         log.warning(f"  {ticker}: no financial statements available")
         return None
 
-    price = fetch_current_price(ticker)
+    price = fetch_current_price(ticker) if refresh_price else None
 
     result = {
         'schema': CACHE_SCHEMA,
