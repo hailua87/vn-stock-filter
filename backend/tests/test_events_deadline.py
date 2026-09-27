@@ -173,3 +173,49 @@ def test_no_candidates_means_no_api_calls(env):
     results = [SimpleNamespace(ticker=f'T{i}', total_score=1, metrics={}) for i in range(5)]
     assert ca.apply_event_filter(results, min_score=5) == results
     assert calls == []
+
+
+# ─── Trần thời gian của weekly-valuation ─────────────────────────────────────
+
+def _weekly_timeouts() -> list:
+    """Các `timeout-minutes` trong .github/workflows/weekly-valuation.yml."""
+    import re
+    wf = (Path(__file__).resolve().parent.parent.parent
+          / '.github' / 'workflows' / 'weekly-valuation.yml').read_text(encoding='utf-8')
+    got = [int(m) for m in re.findall(r'timeout-minutes:\s*(\d+)', wf)]
+    assert len(got) >= 2, 'mong đợi ít nhất hai bước có trần thời gian'
+    return got
+
+
+def test_weekly_timeouts_fit_the_measured_slowdown():
+    """
+    Nguồn Vietcap/KBS chậm hơn vnstock ~3 lần (đo ở daily-scan: 2,0s → 6,2s mỗi
+    mã). Hai bước nặng của weekly trước đây mất 9-26 phút (định giá) và 8-22
+    phút (chấm chất lượng); nhân ba là 28-81 và 25-68 phút.
+
+    Trần cũ 90 và 45 không đủ cho đầu trên của khoảng đó — trần 45 thậm chí
+    thấp hơn cả ước lượng giữa khoảng.
+    """
+    valuation, quality = _weekly_timeouts()[:2]
+    assert valuation >= 120, 'trần định giá không đủ cho nguồn chậm gấp ba'
+    assert quality >= 70, 'trần chấm chất lượng không đủ cho nguồn chậm gấp ba'
+
+
+def test_weekly_scripts_still_have_no_internal_budget():
+    """
+    Chốt một điều ĐÚNG MÀ KHÔNG TỐT, để nó không bị quên.
+
+    `run_daily` tự dừng ở FETCH_BUDGET_S rồi vẫn kịp ghi file — cơ chế đó sinh
+    ra sau sự cố 17-20/08/2026. `run_valuation` và `run_quality` KHÔNG có gì
+    tương đương: chạm trần là bị chặt giữa chừng và mất sạch mọi thứ đã tính.
+
+    Nếu có ngày thêm ngân sách nội bộ cho chúng, test này sẽ đỏ — và đó là lúc
+    xoá nó đi cùng với việc cập nhật chú thích trong workflow.
+    """
+    import run_quality
+    import run_valuation
+    for mod in (run_valuation, run_quality):
+        names = [n for n in dir(mod) if 'BUDGET' in n.upper()]
+        assert not names, (
+            f'{mod.__name__} nay co {names} — hay xoa test nay va sua chu thich '
+            f'"KHONG co ngan sach thoi gian noi bo" trong weekly-valuation.yml')
