@@ -170,7 +170,24 @@ jobs:
         # 8-22 phut; nhan 3 lan la 25-68 phut, tuc tran 45 cu KHONG DU.
         timeout-minutes: 90
 
+      # `if: always()` la diem mau chot, khong phai thoi quen.
+      #
+      # Dinh gia va cham chat luong la HAI BUOC RIENG. Ngay 27/09/2026 buoc dinh
+      # gia xong (68 phut) con buoc cham chat luong cham tran va bi chat — nen
+      # health.json khong duoc cap nhat, va man Hom nay bao dinh gia la "24/09,
+      # 61 ma" trong khi tep that da la "27/09, 67 ma".
+      #
+      # Buoc nay chi DOC nhung tep da that su duoc ghi, nen ket qua phan anh
+      # dung thu dang co, bat ke buoc nao chet.
+      - name: Refresh health.json
+        if: always()
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python backend/refresh_health.py
+        timeout-minutes: 5
+
       - name: Commit valuation output
+        if: always()
         run: |
           git config user.name "VN Scanner Bot"
           git config user.email "bot@vn-scanner.local"

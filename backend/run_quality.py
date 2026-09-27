@@ -27,7 +27,6 @@ from typing import Callable, Dict, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from scanner import health as HEALTH
 from scanner.quality import adapter, governance, metrics, scoring
 from scanner.quality import config as C
 from scanner.quality.status import DIMS, classify, model_for, sharp_drops, valuation_band
@@ -258,13 +257,10 @@ def main(argv=None) -> int:
     )
     write_outputs(payload, web)
 
-    # Cập nhật lại phần của hai nguồn hằng tuần trong health.json. Lượt này chạy
-    # theo lịch khác lượt quét hằng ngày, nên nếu không làm thì màn Hôm nay sẽ
-    # báo ngày chấm chất lượng cũ suốt cho tới lượt quét kế tiếp.
-    if HEALTH.refresh_weekly(web / 'health.json', web) is None:
-        log.info("  Chưa có health.json — bỏ qua bước cập nhật (lượt quét hằng ngày sẽ tạo)")
-    else:
-        log.info(f"  Đã cập nhật phần hằng tuần trong {web / 'health.json'}")
+    # health.json KHÔNG cập nhật ở đây — xem backend/refresh_health.py.
+    # Tóm tắt: định giá và chấm chất lượng là hai bước riêng; đặt lời gọi ở đây
+    # nghĩa là bước này chết thì phần của bước ĐỊNH GIÁ cũng không ai cập nhật.
+    # Đã xảy ra ngày 27/09/2026.
 
     m = payload['metadata']
     log.info(f"Chấm {m['scored']}/{m['universe_size']} mã | trạng thái {m['status_counts']} "
