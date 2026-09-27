@@ -91,9 +91,58 @@ def test_scanner_passes_deadline_to_event_filter(monkeypatch):
     assert seen['min_score'] == 5
 
 
-def test_run_daily_default_budget_is_under_workflow_timeout():
+def _daily_scan_budgets() -> dict:
+    """Đọc ba mốc thời gian THẬT trong .github/workflows/daily-scan.yml."""
+    import re
+    wf = (Path(__file__).resolve().parent.parent.parent
+          / '.github' / 'workflows' / 'daily-scan.yml').read_text(encoding='utf-8')
+    got = {}
+    for key, pat in (('fetch', r"FETCH_BUDGET_S:\s*'?(\d+)"),
+                     ('run', r"RUN_BUDGET_S:\s*'?(\d+)"),
+                     ('timeout', r'timeout-minutes:\s*(\d+)')):
+        m = re.search(pat, wf)
+        assert m, f'khong tim thay {key} trong daily-scan.yml'
+        got[key] = int(m.group(1))
+    got['timeout'] *= 60
+    return got
+
+
+def test_budgets_keep_their_order_in_code_and_workflow():
+    """
+    Ba mốc phải giữ thứ tự: fetch < run < timeout.
+
+    Vì sao chốt bằng test: 17-20/08/2026 cả 8 ca bị runner giết GIỮA LÚC ĐANG
+    FETCH nên mọi thứ đã lấy về mất sạch. Khoảng chênh giữa ba mốc chính là thứ
+    ngăn điều đó. Nâng một mốc mà quên hai mốc kia là tái lập đúng sự cố ấy.
+
+    Đọc THẲNG workflow chứ không chép số vào đây: bản cũ chốt cứng `60 * 60`,
+    nên khi timeout đổi thành 90 phút thì test vẫn xanh trong khi nó đang canh
+    một con số không còn tồn tại.
+    """
     import run_daily
-    assert run_daily.FETCH_BUDGET_S < run_daily.RUN_BUDGET_S < 60 * 60
+    wf = _daily_scan_budgets()
+    assert run_daily.FETCH_BUDGET_S < run_daily.RUN_BUDGET_S
+    assert wf['fetch'] < wf['run'] < wf['timeout']
+
+
+def test_workflow_values_match_the_code_defaults():
+    """Hai nơi cùng khai một con số thì chúng phải bằng nhau — nếu không, chạy
+    tay ở máy và chạy trên runner sẽ dừng ở hai thời điểm khác nhau."""
+    import run_daily
+    wf = _daily_scan_budgets()
+    assert wf['fetch'] == run_daily.FETCH_BUDGET_S
+    assert wf['run'] == run_daily.RUN_BUDGET_S
+
+
+def test_fetch_budget_fits_the_measured_rate():
+    """
+    Đo 26/09/2026 trên runner: nguồn Vietcap/KBS mất ~6,2s mỗi mã (442 mã /
+    2732s). Rổ 500 mã cần ~3100s. Trần fetch phải chứa nổi con số đó, nếu không
+    thì MỌI lượt đều dừng sớm kể cả khi cache đã ấm — đúng chuyện đã xảy ra với
+    trần 2700s cũ.
+    """
+    import run_daily
+    assert run_daily.FETCH_BUDGET_S >= 3100
 
 
 # --- Chỉ kiểm sự kiện quyền cho mã đạt ngưỡng công bố ------------------------

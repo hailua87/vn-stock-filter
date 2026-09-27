@@ -132,19 +132,28 @@ jobs:
           restore-keys: |
             ohlcv-cache-v3-
 
-      # FETCH_BUDGET_S = 2700 (45 phút) trong khi timeout-minutes = 60.
-      # Khoảng chênh 15 phút là cố ý: 17-20/08/2026 cả 8 ca đều bị runner giết ở
-      # đúng phút 60 GIỮA LÚC ĐANG FETCH, tức chết trước mọi bước ghi file, nên
-      # ~140 mã đã lấy về không thành cái gì. Tự dừng ở phút 45 thì phần chấm
-      # điểm, ghi JSON và commit vẫn còn 15 phút — hỏng có kiểm soát thay vì bị
-      # chặt ngang. timeout-minutes giữ nguyên làm lưới cuối.
+      # BA MỐC, thứ tự bắt buộc: FETCH_BUDGET_S < RUN_BUDGET_S < timeout-minutes.
+      # backend/tests/test_events_deadline.py đọc CHÍNH tệp này và chốt thứ tự đó
+      # — nâng một mốc mà quên hai mốc kia thì test đỏ.
+      #
+      # Khoảng chênh là cố ý: 17-20/08/2026 cả 8 ca đều bị runner giết GIỮA LÚC
+      # ĐANG FETCH, tức chết trước mọi bước ghi file, nên ~140 mã đã lấy về không
+      # thành cái gì. Tự dừng sớm thì phần chấm điểm, ghi JSON và commit vẫn còn
+      # thời gian — hỏng có kiểm soát thay vì bị chặt ngang.
+      #
+      # NÂNG 45 -> 70 phút (timeout 60 -> 90) ngày 27/09/2026: nguồn Vietcap/KBS
+      # chậm hơn vnstock ~3 lần, đo trên runner — 24/09 lấy 500 mã trong 1002s
+      # (~2,0s/mã), 26/09 lấy 442 mã trong 2732s (~6,2s/mã). Với 6,2s/mã thì 500
+      # mã cần ~3100s, vượt trần 2700s cũ, nên MỌI lượt đều dừng sớm kể cả khi
+      # cache đã ấm.
       - name: Run daily scan
         env:
           SCAN_RUN_TYPE: ${{ steps.runtype.outputs.run_type }}
-          FETCH_BUDGET_S: '2700'
+          FETCH_BUDGET_S: '4200'
+          RUN_BUDGET_S: '4800'
         run: |
           python backend/run_daily.py --min-score 5 --limit 500             --max-consecutive-failures 20
-        timeout-minutes: 60
+        timeout-minutes: 90
 
       # Chạy cả khi bước trên hỏng: checkpoint chỉ có giá trị đúng lúc mọi thứ
       # hỏng. `if: always()` là điểm mấu chốt, không phải thói quen.
