@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-27T14:54:45",
+  "generated_at": "2026-09-27T12:42:27",
   "sources": {
     "daily_scan": {
       "label": "Scan hằng ngày",
@@ -27,17 +27,21 @@
       "label": "Định giá",
       "available": true,
       "as_of": "2026-09-27",
-      "generated_at": "2026-09-27T05:36:37.806891",
+      "generated_at": "2026-09-27T11:34:30.152261",
       "age_days": 0,
-      "count": 67
+      "count": 54,
+      "fetch_coverage": 0.93,
+      "partial_reason": "hết ngân sách PASS 1 (7200s) sau 186/200 mã"
     },
     "quality": {
       "label": "Chất lượng",
       "available": true,
-      "as_of": "2026-09-24",
-      "generated_at": "2026-09-24T12:05:57",
-      "age_days": 3,
-      "count": 200
+      "as_of": "2026-09-27",
+      "generated_at": "2026-09-27T12:42:27",
+      "age_days": 0,
+      "count": 200,
+      "fetch_coverage": 1.0,
+      "partial_reason": null
     }
   },
   "issues": [
@@ -45,7 +49,12 @@
       "code": "fetch_failed",
       "severity": "warn",
       "message": "10 mã không lấy được dữ liệu, đã bỏ qua trong phiên này."
+    },
+    {
+      "code": "valuation_partial",
+      "severity": "warn",
+      "message": "Định giá: lượt chạy dừng sớm (hết ngân sách PASS 1 (7200s) sau 186/200 mã), chỉ phủ 93% rổ. Thứ hạng giữa các mã tính trên phần rổ đó, không phải cả rổ."
     }
   ],
-  "weekly_refreshed_at": "2026-09-27T14:54:45"
+  "weekly_refreshed_at": "2026-09-27T12:42:27"
 }
