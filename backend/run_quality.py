@@ -39,8 +39,13 @@ log = logging.getLogger('run_quality')
 
 QUALITY_SCHEMA = 1
 
-# Trần thời gian cho vòng lấy dữ liệu, giây. 70 phút — cố ý thấp hơn
-# `timeout-minutes: 90` của workflow 20 phút, cùng tỷ lệ với `run_daily`.
+# Trần thời gian cho vòng lấy dữ liệu, giây. 100 phút — cố ý thấp hơn
+# `timeout-minutes: 120` của workflow 20 phút, cùng tỷ lệ với `run_daily`.
+#
+# NÂNG 70 -> 100 ngày 28/09/2026, từ số đo: lượt 27/09 14:59 chạm trần 70 phút
+# ở đúng 165/200 mã = 25,45s mỗi mã, nên trọn rổ cần ~85 phút. Trần cũ không đủ,
+# và hậu quả không phải job đỏ mà là TUẦN NÀO CŨNG công bố điểm tính trên 82%
+# rổ — percentile lệch mà con số trông vẫn bình thường.
 #
 # Vì sao cần (thêm 27/09/2026): trước đây script này KHÔNG có ngân sách nội bộ,
 # nên chạm trần là bị runner giết giữa vòng lấy dữ liệu — tức chết TRƯỚC bước
@@ -48,7 +53,7 @@ QUALITY_SCHEMA = 1
 # chấm chất lượng chạm trần 45 phút và không để lại gì.
 #
 # Tự dừng sớm thì phần percentile, quản trị, veto và ghi JSON vẫn còn thời gian.
-FETCH_BUDGET_S = int(os.environ.get('QUALITY_FETCH_BUDGET_S', 70 * 60))
+FETCH_BUDGET_S = int(os.environ.get('QUALITY_FETCH_BUDGET_S', 100 * 60))
 
 # Dưới độ phủ này thì KHÔNG ghi đè `latest.json` đang có. Xem chú thích cùng tên
 # trong run_valuation.py; ở đây còn một lý do riêng: điểm là PERCENTILE TRONG

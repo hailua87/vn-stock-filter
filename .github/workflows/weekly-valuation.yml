@@ -166,16 +166,28 @@ jobs:
         continue-on-error: true
         env:
           PYTHONIOENCODING: utf-8
-          # Ba tang: FETCH_BUDGET (70) < script tu dung < timeout-minutes (90),
-          # cung ty le voi daily-scan.
-          QUALITY_FETCH_BUDGET_S: '4200'
+          # NANG 70 -> 100 phut ngay 28/09/2026, tu so do chu khong tu uoc luong.
+          #
+          # Luot 27/09 14:59 (lan dau co du ca bon PR) cham tran 70 phut o dung
+          # 165/200 ma = 25,45s moi ma, tuc tron ro can ~85 phut. Tran 70 cu
+          # KHONG DU, va hau qua khong phai la job do ma la tuan nao cung cong
+          # bo diem tinh tren 82% ro — percentile lech ma trong van binh thuong.
+          #
+          # 100 phut chiu duoc toi 30s/ma. Ngay xau nhat do duoc (luot 09:32,
+          # 39,5s/ma) van se cham tran; do la co y — luc do cong cong bo se giu
+          # du lieu tuan truoc thay vi ghi de bang mot ro cut.
+          QUALITY_FETCH_BUDGET_S: '6000'
         run: |
           python backend/run_quality.py \
             --limit ${{ github.event.inputs.limit || '200' }}
-        # NANG 45 -> 90 phut, cung ly do voi buoc dinh gia. Buoc nay truoc mat
-        # 8-22 phut; nhan 3 lan la 25-68 phut, tuc tran 45 cu KHONG DU.
-        # Tu 27/09/2026 script cung co ngan sach noi bo, nen tran 90 la luoi do.
-        timeout-minutes: 90
+        # 45 -> 90 (27/09) -> 120 (28/09). Lan sau cung nang theo ngan sach noi
+        # bo o tren, giu khoang chenh 20 phut cho buoc cham diem va ghi file.
+        #
+        # LUU Y ve tong thoi gian: dinh gia 150 + chat luong 120 = 270 phut,
+        # tuc job hang tuan co the chay 4,5 tieng. Gioi han cua GitHub la 6
+        # tieng moi job nen van trong nguong, nhung day la cai gia phai tra cho
+        # viec nguon timeout ~1,7 lan moi ma.
+        timeout-minutes: 120
 
       # `if: always()` la diem mau chot, khong phai thoi quen.
       #

@@ -301,3 +301,56 @@ def test_help_does_not_crash(capsys):
             mod.main(['--help'])
         assert e.value.code == 0
         assert '--fetch-budget' in capsys.readouterr().out
+
+
+# ─── 6. Ngân sách phải đỡ được trọn rổ, không chỉ "lớn hơn con số cũ" ────────
+
+def _budget_minutes(env_name: str) -> float:
+    import re
+    wf = (Path(__file__).resolve().parent.parent.parent
+          / '.github' / 'workflows' / 'weekly-valuation.yml').read_text(encoding='utf-8')
+    m = re.search(rf"{env_name}:\s*'(\d+)'", wf)
+    assert m, f'weekly-valuation.yml không đặt {env_name}'
+    return int(m.group(1)) / 60
+
+
+# Đo được ngày 27/09/2026, lượt 14:59 (lần đầu có đủ bốn PR): bước chấm chất
+# lượng chạm trần 70 phút ở ĐÚNG 165/200 mã. Đây là số thật, không phải ước
+# lượng — giữ lại để lần sau đổi trần còn biết nó dựa trên gì.
+MEASURED_TICKERS, MEASURED_MINUTES = 165, 70
+SECONDS_PER_TICKER = MEASURED_MINUTES * 60 / MEASURED_TICKERS      # 25,45s
+
+
+def test_quality_budget_covers_the_whole_universe():
+    """
+    Ngân sách phải đủ cho TRỌN 200 mã ở nhịp đã đo.
+
+    Vì sao quan trọng hơn vẻ ngoài: thiếu ngân sách ở đây KHÔNG làm job đỏ.
+    Độ phủ 82,5% vẫn trên ngưỡng công bố 80%, nên tuần nào cũng xuất bản điểm
+    tính trên phần rổ bị cắt đuôi — percentile lệch mà con số trông bình thường.
+    Một lỗi im lặng thì tệ hơn một lỗi ồn ào.
+    """
+    need = SECONDS_PER_TICKER * 200 / 60                            # ~85 phút
+    assert _budget_minutes('QUALITY_FETCH_BUDGET_S') >= need, (
+        f'cần ít nhất {need:.0f} phút cho 200 mã ở nhịp {SECONDS_PER_TICKER:.1f}s/mã')
+
+
+def test_quality_budget_is_not_open_ended():
+    """
+    Biên trên cũng phải có. Ngân sách càng rộng thì một ngày nguồn thật sự
+    hỏng càng đốt nhiều giờ trước khi chịu dừng — và cổng công bố mới là thứ
+    bảo vệ chất lượng dữ liệu, không phải ngân sách.
+    """
+    assert _budget_minutes('QUALITY_FETCH_BUDGET_S') <= 120
+
+
+def test_the_whole_weekly_job_still_fits_in_a_github_runner():
+    """Giới hạn của GitHub là 6 tiếng mỗi job. Hai bước nặng cộng lại phải lọt."""
+    import re
+    wf = (Path(__file__).resolve().parent.parent.parent
+          / '.github' / 'workflows' / 'weekly-valuation.yml').read_text(encoding='utf-8')
+    valuation, quality = [int(m) for m in
+                          re.findall(r'timeout-minutes:\s*(\d+)', wf)][:2]
+    assert valuation + quality <= 330, (
+        f'{valuation} + {quality} = {valuation + quality} phút, quá sát trần '
+        f'6 tiếng của runner khi cộng cả các bước cài đặt')
