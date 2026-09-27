@@ -303,7 +303,17 @@ def main(argv=None) -> int:
 
     payload = build_quality(
         tickers,
-        fetch_year=lambda t: fetch_fundamentals(t, period='year'),
+        # refresh_price=False — Module B KHÔNG đọc `current_price` ở bất kỳ đâu:
+        # `build_quality` chỉ dùng `raw_y['overview']` và `annual_schema(raw_y)`,
+        # còn mức định giá thì lấy từ TỆP định giá đã xuất bản. Sổ snapshot cũng
+        # chỉ băm ba bảng BCTC, không băm giá.
+        #
+        # Đo lượt 27/09/2026: 275/276 cảnh báo của bước này là `gap-chart` —
+        # đúng lượt gọi lấy giá — không một lỗi nào từ BCTC. 1,67 lần timeout
+        # mỗi mã × 10 s ≈ 46 trong 70 phút ngân sách, đổi lấy một con số không
+        # ai đọc. Chính vì hết giờ mà bước này dừng ở 165/200 mã và percentile
+        # bị tính trên rổ cụt.
+        fetch_year=lambda t: fetch_fundamentals(t, period='year', refresh_price=False),
         fetch_quarter=fetch_quarterly_statements,
         fetch_bank_ratio=fetch_bank_ratios,
         valuation_signals=load_valuation_signals(web / 'valuation' / 'latest.json'),
