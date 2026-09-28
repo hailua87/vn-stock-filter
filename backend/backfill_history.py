@@ -102,7 +102,12 @@ def backfill_ticker(ticker: str, start: datetime, end: datetime,
     while cursor < fetch_until:
         chunk_end = min(cursor + pd.Timedelta(days=CHUNK_DAYS), fetch_until)
         try:
-            part = fetch_ohlcv(ticker, str(cursor.date()), str(chunk_end.date()))
+            # retries=2 chu khong phai mac dinh 1: day la lan dung lich su MOT
+            # LAN, khong co ngan sach thoi gian nhu luot quet hang ngay. O day
+            # mot ma thieu du lieu la thieu vinh vien, nen tra them thoi gian
+            # de doi lay day du la dung.
+            part = fetch_ohlcv(ticker, str(cursor.date()), str(chunk_end.date()),
+                               retries=2)
             if part is not None and not part.empty:
                 frames.append(part)
         except Exception as e:

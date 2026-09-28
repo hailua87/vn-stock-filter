@@ -19,6 +19,7 @@ Cache: parquet files per ticker in `backend/data/cache/` with suffix
 """
 from __future__ import annotations
 import json
+import os
 import threading
 import time
 from datetime import date, datetime, timedelta
@@ -56,6 +57,25 @@ CHECKPOINT_PATH = CACHE_DIR / 'fetch_checkpoint.json'
 # Đây cũng là chỗ hằng số này từng được định nghĩa LẠI ở bốn tệp khác nhau.
 # Nay một nơi duy nhất, để lần sau không thể lệch.
 VNINDEX_CACHE = CACHE_DIR / 'vnindex_cache.parquet'
+
+# Số lần THỬ LẠI khi lấy giá ngày, ngoài lần đầu. 1 nghĩa là tối đa 2 lần gọi.
+#
+# HẠ 2 -> 1 ngày 28/09/2026, từ số đo trên lượt quét theo lịch 36416599174:
+#
+#     90 mã có ít nhất một lần treo
+#     88 mã treo CẢ BA lần  -> không lấy được gì
+#      2 mã treo rồi lấy được, và cả hai đều ở LẦN THỨ HAI
+#
+# Tức lần thử thứ ba cứu được 0/88 mã, trong khi 88 mã vô vọng đó ngốn 53
+# phút — 76% ngân sách 70 phút — và lượt quét dừng ở 208/500 mã.
+#
+# Điều này xác nhận chính chú thích đã có ở sources/http.py (26/09): "lượt
+# hỏng là TREO hẳn tới hết thời gian chờ, chờ lâu hơn cũng không ra". Hôm đó
+# mới hạ THỜI GIAN CHỜ mà chưa xem lại SỐ LẦN THỬ.
+#
+# Không bỏ hẳn thử lại: 2/90 mã có phục hồi ở lần hai. Ít, nhưng không phải
+# không — và một lượt gọi thêm cho ~90 mã chỉ tốn ~15 phút.
+OHLCV_RETRIES = int(os.environ.get('SOURCE_OHLCV_RETRIES', '1'))
 
 
 class _Skipped:
@@ -290,7 +310,7 @@ def _load_fallback_universe(exchanges: tuple) -> pd.DataFrame:
 # Historical OHLCV fetcher — Vietcap (VCI)
 # ─────────────────────────────────────────────────────────────────────────
 def fetch_ohlcv(ticker: str, start: str, end: str,
-                source: str = 'vci', retries: int = 2,
+                source: str = 'vci', retries: int = None,
                 adjusted: bool = True) -> Optional[pd.DataFrame]:
     """
     Fetch daily OHLCV for a single ticker from Vietcap (VCI).
@@ -314,6 +334,8 @@ def fetch_ohlcv(ticker: str, start: str, end: str,
         # 500 mã × 3 lần (bài học 26/05/2026 với source='TCBS').
         raise RuntimeError(f"fetch_ohlcv chỉ hỗ trợ source='vci', nhận '{source}'")
 
+    if retries is None:
+        retries = OHLCV_RETRIES
     for attempt in range(retries + 1):
         try:
             df = _vci.ohlcv(ticker, start, end)
