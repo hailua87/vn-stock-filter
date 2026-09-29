@@ -27,9 +27,23 @@ TIMEOUT = 30
 # Giá ngày (OHLCV) chờ ngắn hơn. Đo trên runner GitHub 26/09/2026 (bài đo
 # tạm, PR #46): lượt gọi thành công xong trong 0,3–2 s (trung vị 0,33 s, p90
 # 1,8 s); lượt hỏng là TREO hẳn tới hết thời gian chờ, chờ lâu hơn cũng không
-# ra. Với 30 s × 3 lần thử, một mã treo tốn ~1,5 phút — Daily Scan 26/09 chỉ
-# lấy thêm ~90 mã mỗi lượt 45 phút. 10 s vẫn gấp 5 lần p90 của lượt thành công.
-OHLCV_TIMEOUT = float(os.environ.get('SOURCE_OHLCV_TIMEOUT', '10'))
+# ra.
+#
+# HẠ 10 -> 5 ngày 29/09/2026. Hai lượt quét theo lịch 28/09 đều dừng sớm vì
+# hết ngân sách, và cả hai lần phần lớn thời gian là ngồi chờ lượt treo:
+#
+#     18:35 (3 lần thử): 208/500 = 41,6% — 88 mã treo cả ba lần
+#     21:51 (2 lần thử): 368/500 = 73,6% — 144 mã treo cả hai lần
+#
+# Lượt sau đã tốt hơn hẳn nhờ bớt một lần thử (PR #61), nhưng vẫn dưới ngưỡng
+# 80% nên KHÔNG ghi được bản lưu phiên — ba lượt liên tiếp như vậy, và nhật ký
+# tín hiệu đứng yên ở 25/09.
+#
+# 144 mã × 2 lần × 10 s = 48 phút trong ngân sách 70 phút. Hạ còn 5 s cắt một
+# nửa số đó (~24 phút), đủ để quét thêm ~125 mã ở nhịp 11,4 s/mã đã đo.
+#
+# 5 s vẫn gấp 2,8 lần p90 của lượt thành công, và gấp 15 lần trung vị.
+OHLCV_TIMEOUT = float(os.environ.get('SOURCE_OHLCV_TIMEOUT', '5'))
 
 # BCTC và tổng quan công ty (iq.vietcap.com.vn) cũng chờ ngắn hơn, cùng lý do
 # với OHLCV ở trên. Đo trên runner GitHub 27/09/2026 (bài đo tạm, nhánh
