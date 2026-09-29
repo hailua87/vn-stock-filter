@@ -119,3 +119,50 @@ def test_a_bad_argument_still_fails_fast(monkeypatch):
 
     monkeypatch.setattr(DF._vci, 'ohlcv', raiser)
     assert DF.fetch_ohlcv('AAA', 'x', 'y') is None
+
+
+# ─── Thời gian chờ ───────────────────────────────────────────────────────────
+
+def test_ohlcv_timeout_stays_well_above_the_measured_p90():
+    """
+    Đo trên runner 26/09: lượt gọi THÀNH CÔNG có trung vị 0,33s, p90 1,8s.
+    Thời gian chờ chỉ để cắt lượt TREO, không để đợi lượt chậm — nên nó phải
+    rộng hơn p90 vài lần, chứ không cần rộng hơn nữa.
+
+    Hạ 10 → 5 ngày 29/09 sau khi hai lượt quét theo lịch 28/09 đều dừng sớm:
+    144 mã × 2 lần × 10s = 48 phút trong ngân sách 70 phút.
+    """
+    from scanner.sources import http as H
+    P90 = 1.8
+    assert H.OHLCV_TIMEOUT >= P90 * 2, 'quá sát p90 — sẽ cắt nhầm lượt gọi tốt'
+    assert H.OHLCV_TIMEOUT <= P90 * 6, 'quá rộng — chỉ kéo dài lượt treo'
+
+
+def test_ohlcv_waits_less_than_the_statement_calls():
+    """
+    Hai nhóm lời gọi, hai mức chờ, và thứ tự phải đúng: BCTC nặng hơn giá ngày
+    (p90 2,05s so với 1,8s) nên được chờ lâu hơn. Đảo lại là sai.
+    """
+    from scanner.sources import http as H
+    assert H.OHLCV_TIMEOUT < H.STATEMENT_TIMEOUT < H.TIMEOUT
+
+
+def test_the_worst_case_per_ticker_fits_the_budget():
+    """
+    Chốt phép tính đã dùng để quyết. Mã treo tệ nhất = số lần thử × thời gian
+    chờ. Với 500 mã, nếu MỌI mã đều treo thì vẫn phải nằm trong ngân sách —
+    nếu không thì một ngày nguồn thật xấu sẽ không quét nổi mã nào.
+    """
+    import re
+    from scanner.sources import http as H
+    from scanner.data_fetcher import OHLCV_RETRIES
+
+    wf = (Path(__file__).resolve().parent.parent.parent
+          / '.github' / 'workflows' / 'daily-scan.yml').read_text(encoding='utf-8')
+    budget = int(re.search(r"FETCH_BUDGET_S:\s*'(\d+)'", wf).group(1))
+    worst = (OHLCV_RETRIES + 1) * H.OHLCV_TIMEOUT
+    assert worst * 500 > budget, (
+        'nếu 500 mã treo hết mà vẫn lọt ngân sách thì phép tính này vô nghĩa — '
+        'xem lại giả định')
+    assert worst <= 12, (
+        f'mỗi mã treo tốn {worst}s; với vài trăm mã treo là hết sạch ngân sách')
