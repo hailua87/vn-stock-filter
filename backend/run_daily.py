@@ -27,6 +27,7 @@ from scanner import base_conditions as BC
 from scanner import ohlc_export as OHLC
 from scanner import health as HEALTH
 from scanner import streaks as STREAKS
+from scanner import outcomes as OUTCOMES
 from scanner.exporter import to_excel, to_json, to_html, write_json
 from scanner.data_fetcher import (
     CHECKPOINT_PATH, get_ticker_universe, fetch_universe, fetch_vnindex,
@@ -90,6 +91,7 @@ WEB_OUTPUTS = (
     'ichimoku/',
     'ohlc/',                    # nen 60 phien cho man Chi tiet ma
     'streaks/',                 # nhat ky tin hieu: ma giu tin hieu may phien
+    'outcomes/',                # so theo doi ket qua: sau N phien lai/lo bao nhieu
     'health.json',              # tinh trang du lieu cho man Hom nay
 )
 
@@ -791,6 +793,19 @@ def main():
     sp = STREAKS.write(web_dir / 'streaks' / 'latest.json', streaks)
     log.info(f"  Nhật ký tín hiệu → {sp} ({sp.stat().st_size // 1024} KB)")
     for line in STREAKS.summary(streaks):
+        log.info(line)
+
+    # ── Sổ theo dõi kết quả ───────────────────────────────────────────────
+    # Dùng `by_ticker_all` và `index_df` ĐANG CÓ SẴN trong bộ nhớ — không một
+    # lượt gọi mạng nào thêm. `by_ticker_all` là bản CHƯA lọc điều kiện nền:
+    # một mã từng có tín hiệu rồi tụt thanh khoản vẫn phải tính được kết quả,
+    # nếu không thì sổ chỉ còn lại những mã sống sót và mọi con số đẹp lên.
+    #
+    # Hợp đồng dữ liệu: docs/outcomes-contract.md. KHÔNG phải backtest.
+    outcomes = OUTCOMES.build(web_dir, by_ticker_all.get, index_df)
+    op = OUTCOMES.write(web_dir / 'outcomes' / 'latest.json', outcomes)
+    log.info(f"  Sổ theo dõi kết quả → {op} ({op.stat().st_size // 1024} KB)")
+    for line in OUTCOMES.summary(outcomes):
         log.info(line)
 
     # ── Tình trạng dữ liệu cho màn Hôm nay (§11.2, §13) ───────────────────
