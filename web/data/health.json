@@ -1,27 +1,27 @@
 {
   "schema": 1,
-  "generated_at": "2026-09-28T23:11:43",
+  "generated_at": "2026-09-29T11:34:24",
   "sources": {
     "daily_scan": {
       "label": "Scan hằng ngày",
-      "session_date": "2026-09-28",
+      "session_date": "2026-09-29",
       "run_type": "eod",
       "run_date_ict": "2026-09-29",
-      "run_time_ict": "06:02",
-      "universe": 368,
-      "universe_after_base": 114,
-      "dropped_low_liquidity": 254,
+      "run_time_ict": "18:31",
+      "universe": 500,
+      "universe_after_base": 113,
+      "dropped_low_liquidity": 387,
       "fetch": {
-        "coverage": 0.736,
-        "succeeded": 368,
-        "skipped": 132,
+        "coverage": 1.0,
+        "succeeded": 500,
+        "skipped": 0,
         "failed": 0,
-        "stop_reason": "time_budget"
+        "stop_reason": null
       },
-      "stale_ratio": 0.41,
-      "session_completeness": 1.221,
-      "archive_written": false,
-      "archive_reason": "gate_time: pass (phiên 2026-09-28 đã đóng dứt khoát (hôm nay 2026-09-29)) | gate_coverage: fail (74% < 80%, vòng fetch dừng sớm (time_budget))"
+      "stale_ratio": 0.156,
+      "session_completeness": 0.958,
+      "archive_written": true,
+      "archive_reason": "gate_time: pass (phiên hôm nay, 18:31 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)"
     },
     "valuation": {
       "label": "Định giá",
@@ -46,21 +46,5 @@
       "source_stats": {}
     }
   },
-  "issues": [
-    {
-      "code": "fetch_stopped",
-      "severity": "warn",
-      "message": "Vòng lấy dữ liệu dừng sớm (time_budget) — độ phủ 0.736. Rổ quét nhỏ hơn bình thường."
-    },
-    {
-      "code": "stale_high",
-      "severity": "warn",
-      "message": "41% số mã có dữ liệu chưa cập nhật tới phiên mới nhất (nguồn chậm). Tín hiệu của những mã đó tính trên giá cũ."
-    },
-    {
-      "code": "archive_skipped",
-      "severity": "info",
-      "message": "Chưa ghi bản lưu phiên: gate_time: pass (phiên 2026-09-28 đã đóng dứt khoát (hôm nay 2026-09-29)) | gate_coverage: fail (74% < 80%, vòng fetch dừng sớm (time_budget))."
-    }
-  ]
+  "issues": []
 }
