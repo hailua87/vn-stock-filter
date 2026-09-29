@@ -619,6 +619,10 @@ async function loadLatestFirst() {
     renderBaseConditions(data.metadata);
 
     render();
+    // O chon ngay phai chi dung phien vua nap. Chi goi khi danh sach ngay DA co:
+    // luc khoi dong ham nay chay TRUOC loadDateIndex, goi som se ve mot danh
+    // sach mot muc roi bi ve lai ngay sau do.
+    if (state.availableDates?.length) renderDateOptions();
     // Ban do chien luoc nap ngam roi ve lai bang: cot MA hien du nhan khop (§7.3)
     ensureStrategyMap().then(render);
   } catch (e) {
@@ -659,7 +663,17 @@ async function loadStreaks() {
 function streakOf(s) {
   const st = state.streaks?.strategies;
   if (!st) return null;
-  if (state.currentDate && state.latestDate && state.currentDate !== state.latestDate) return null;
+
+  // So voi phien MA NHAT KY THAT SU PHU, chu khong phai `state.latestDate`.
+  //
+  // Ban truoc so voi latestDate va THUA CUOC DUA NAP: `loadDateIndex` chay sau
+  // va ghi de latestDate, nen bang da ve xong tu truoc do voi guard chua kip
+  // dung. Ket qua: chuoi phien cua 25/09 hien len tren phien 28/09 — dung dieu
+  // guard nay sinh ra de chan. Nhat ky biet ro no phu toi phien nao; hoi no.
+  const covers = state.streaks?.sessions || {};
+  const keys0 = activeStrategy === 'combined' ? Object.keys(st) : [activeStrategy];
+  const newest = keys0.map(k => (covers[k] || []).at(-1)).filter(Boolean).sort().at(-1);
+  if (!newest || (state.currentDate && state.currentDate !== newest)) return null;
   const keys = activeStrategy === 'combined'
     ? (s._strategies || Object.keys(st)) : [activeStrategy];
   let best = null;
@@ -676,8 +690,11 @@ function streakOf(s) {
 function renderStreak(s) {
   const r = streakOf(s);
   if (!r) {
-    const why = (state.currentDate && state.currentDate !== state.latestDate)
-      ? 'Nhật ký chỉ tính cho phiên mới nhất'
+    const covers = state.streaks?.sessions || {};
+    const newest = Object.values(covers).map(v => (v || []).at(-1))
+      .filter(Boolean).sort().at(-1);
+    const why = (newest && state.currentDate && state.currentDate !== newest)
+      ? `Nhật ký tính tới phiên ${newest}, không phải phiên đang xem`
       : 'Chưa có trong nhật ký';
     return `<span class="dim" title="${escapeAttr(why)}">—</span>`;
   }
@@ -693,7 +710,15 @@ async function loadDateIndex() {
     if (!r.ok) { state.availableDates = []; return; }
     const idx = await r.json();
     state.availableDates = idx.dates || [];
-    state.latestDate = idx.latest || state.currentDate;
+    // `latestDate` la phien DANG CONG BO (tu latest.json), KHONG phai phien
+    // moi nhat co ban luu.
+    //
+    // Truoc 29/09/2026 dong nay ghi de no bang `idx.latest`, va khi luot quet
+    // khong ghi duoc ban luu (cong do phu < 80%) thi hai so lech nhau: bang
+    // hien phien 28/09 trong khi bo chon ngay bao 25/09 la moi nhat. Nguoi
+    // doc nhin vao bo chon roi ket luan "khong co du lieu 28/09" — da xay ra.
+    state.archiveLatest = idx.latest || null;
+    if (!state.currentDate) state.currentDate = state.latestDate = state.archiveLatest;
   } catch (e) {
     state.availableDates = [];
   }
@@ -714,6 +739,7 @@ async function loadDateData(date) {
     document.getElementById('stat-scanned').textContent =
       statNumber(data.metadata?.total_scanned);
     render();
+    renderDateOptions();   // o chon phai chi dung phien vua nap
   } catch (e) {
     console.error('Load date failed:', e);
   }
@@ -725,21 +751,38 @@ function renderDateOptions() {
     sel.innerHTML = `<option value="${state.currentDate}">${formatDateLong(state.currentDate)}</option>`;
     return;
   }
-  sel.innerHTML = state.availableDates.map(d => {
+  // Phien dang cong bo co the CHUA co ban lu — luot quet khong dat nguong do
+  // phu thi khong ghi archive, nen no khong nam trong index. Van phai co trong
+  // danh sach, neu khong bo chon ngay se mau thuan voi chinh cai bang ben canh.
+  const live = state.latestDate && !state.availableDates.includes(state.latestDate)
+    ? [state.latestDate] : [];
+  const days = [...live, ...state.availableDates];
+
+  sel.innerHTML = days.map(d => {
     const isLatest = d === state.latestDate;
+    const noArchive = live.includes(d);
     return `<option value="${d}" ${d === state.currentDate ? 'selected' : ''}>
-      ${isLatest ? '• ' : ''}${formatDateLong(d)}
+      ${isLatest ? '• ' : ''}${formatDateLong(d)}${noArchive ? ' · chưa có bản lưu' : ''}
     </option>`;
   }).join('');
 
+  // Dong bo o chon voi phien DANG hien. Hai nut truoc/sau goi thang
+  // loadDateData nen the <select> khong tu doi — truoc 29/09/2026 bam nut xong
+  // thi bang mot dang, o chon mot neo.
+  if ([...sel.options].some(o => o.value === state.currentDate)) {
+    sel.value = state.currentDate;
+  }
+
   sel.onchange = () => loadDateData(sel.value);
+  // Dieu huong theo CUNG danh sach dang hien, khong phai availableDates: neu
+  // khong thi bam "phien truoc" tu phien chua co ban luu se nhay lung tung.
   document.getElementById('date-prev').onclick = () => {
-    const i = state.availableDates.indexOf(state.currentDate);
-    if (i < state.availableDates.length - 1) loadDateData(state.availableDates[i+1]);
+    const i = days.indexOf(state.currentDate);
+    if (i >= 0 && i < days.length - 1) loadDateData(days[i + 1]);
   };
   document.getElementById('date-next').onclick = () => {
-    const i = state.availableDates.indexOf(state.currentDate);
-    if (i > 0) loadDateData(state.availableDates[i-1]);
+    const i = days.indexOf(state.currentDate);
+    if (i > 0) loadDateData(days[i - 1]);
   };
   document.getElementById('date-latest').onclick = () => loadDateData(state.latestDate);
 }
