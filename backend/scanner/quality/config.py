@@ -99,10 +99,16 @@ MODELS = {
     # VON va THANH KHOAN, khong do chat luong tai san. Xem BANK_NOT_EVALUATED.
     'BANK': {
         'quality': [
-            ('roa_avg3', 30, True),
-            ('roe_avg3', 20, True),
-            ('nim_std', 25, False),
-            ('cost_income', 25, False),
+            ('roa_avg3', 20, True),
+            ('roe_avg3', 15, True),
+            ('nim_std', 15, False),
+            ('cost_income', 15, False),
+            # Chất lượng tài sản, khôi phục 30/09/2026. Trọng số 35/100 cho hai
+            # chỉ tiêu này: với ngân hàng, nợ xấu quyết định nhiều hơn lợi
+            # nhuận — một ngân hàng ROE cao mà nợ xấu 6% không phải ngân hàng
+            # tốt. Bốn chỉ tiêu cũ nhường đều phần còn lại.
+            ('npl_ratio', 20, False),
+            ('npl_coverage', 15, True),
         ],
         'growth': [
             ('toi_cagr5', 30, True),
@@ -188,10 +194,14 @@ GOVERNANCE_FLAGS = {
 # Chuoi hien THANG len man hinh nen co dau — cung quy uoc voi ly do veto.
 # Chi tieu cua rieng mo hinh BANK da can nhac va khong do duoc (D24).
 # Giao dien hien "Chua xet" cho nhom ngan hang, giong cach lam voi §14.2.
-BANK_NOT_EVALUATED = {
-    'npl_ratio': 'tỷ lệ nợ xấu',
-    'npl_coverage': 'bao phủ nợ xấu',
-}
+# Rỗng từ 30/09/2026: nợ xấu và bao phủ nợ xấu đã chấm được, sau khi tìm ra
+# section NOTE của VCI có phân loại nợ 5 nhóm tới 2025 (xem sources/vci.py).
+# Quyết định D24 kết luận "không nguồn nào có" là SAI — khảo sát hôm ấy chỉ thử
+# bảng `ratio` của VCI và 32 chỉ tiêu KBS, không thử NOTE.
+#
+# Giữ lại khoá rỗng chứ không xoá: giao diện đọc nó để nói ra những yếu tố đã
+# cân nhắc mà không đánh giá được. Có lại thì để rỗng, đừng bỏ cơ chế.
+BANK_NOT_EVALUATED = {}
 
 GOVERNANCE_NOT_EVALUATED = {
     'warning_status': 'diện cảnh báo / kiểm soát của sở giao dịch',

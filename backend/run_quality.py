@@ -98,6 +98,7 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
                   delisted: set, previous: Dict[str, dict],
                   on_fetched: Optional[Callable[[dict], None]] = None,
                   fetch_bank_ratio: Optional[Callable] = None,
+                  fetch_bank_quality: Optional[Callable] = None,
                   should_stop: Optional[Callable[[], bool]] = None,
                   source_stats: Optional[dict] = None) -> dict:
     """
@@ -137,6 +138,9 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
         # lượt API cho ~18 mã, không phải cả rổ 200.
         if model == 'BANK' and fetch_bank_ratio:
             adapter.attach_bank_ratios(annual, fetch_bank_ratio(t))
+        # Nợ xấu và CAR: thêm MỘT lượt gọi cho ~17 ngân hàng, không phải cả rổ.
+        if model == 'BANK' and fetch_bank_quality:
+            adapter.attach_bank_asset_quality(annual, fetch_bank_quality(t))
         rows[t] = {
             'industry': industry,
             'model': model,
@@ -291,7 +295,8 @@ def main(argv=None) -> int:
                         datefmt='%H:%M:%S')
 
     from scanner.data_fetcher import get_ticker_universe, setup_api_key
-    from scanner.financial_fetcher import fetch_bank_ratios, fetch_fundamentals, fetch_quarterly_statements
+    from scanner.financial_fetcher import (fetch_bank_asset_quality, fetch_bank_ratios,
+                                           fetch_fundamentals, fetch_quarterly_statements)
     from scanner.snapshots import record_snapshot
     setup_api_key()
 
@@ -321,6 +326,7 @@ def main(argv=None) -> int:
         fetch_year=lambda t: fetch_fundamentals(t, period='year', refresh_price=False),
         fetch_quarter=fetch_quarterly_statements,
         fetch_bank_ratio=fetch_bank_ratios,
+        fetch_bank_quality=fetch_bank_asset_quality,
         valuation_signals=load_valuation_signals(web / 'valuation' / 'latest.json'),
         as_of=as_of,
         delisted=load_delisted(Path(__file__).resolve().parent / 'data' / 'delisted_tickers.txt'),

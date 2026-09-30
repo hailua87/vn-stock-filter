@@ -200,6 +200,10 @@ def bank(a: dict) -> dict:
         # chi phi du phong co the ghi am; do lech chuan khong phu thuoc dau
         'credit_cost_std': _std_last([abs(v) if v is not None else None for v in credit_cost], 5, 4),
         'ldr': _div(_last(a, 'loans'), _last(a, 'deposits')),
+        # Chất lượng tài sản — khôi phục 30/09/2026 sau khi tìm ra section NOTE
+        # của VCI có phân loại nợ 5 nhóm tới 2025 (xem sources/vci.py).
+        'npl_ratio': _last(a, 'npl_ratio'),
+        'npl_coverage': _last(a, 'npl_coverage'),
     }
 
 
