@@ -92,3 +92,49 @@ tốt, trong khi trung vị cho biết mã điển hình ra sao.
   điều chỉnh; quyền mua thì không.
 
 Mọi con số sổ này xuất ra đều phải đọc kèm ba giới hạn trên.
+
+---
+
+# Bổ sung 29/09/2026 — Phép thử giả dược
+
+Lượt đo đầu tiên cho cả bốn chiến lược đều **âm** so với VN-Index ở mọi chân
+trời (pre_breakout −2,65% sau 20 phiên, thắng 34%). Nhìn thì như chiến lược
+không hiệu quả. Nhưng có một cách giải thích khác:
+
+> VN-Index là chỉ số bình quân gia quyền theo **vốn hoá**. Nếu nhóm vốn hoá lớn
+> dẫn dắt, thì **mã trung vị bất kỳ** cũng thua chỉ số — không cần chiến lược
+> nào sai.
+
+Không loại trừ được điều đó thì mọi con số `median_excess` **không phân xử
+được** giữa "chiến lược kém" và "rổ thua chỉ số vốn hoá".
+
+## Đối chứng
+
+| Khớp gì | Vì sao |
+|---|---|
+| **Cùng ngày** | Lấy ngày ngẫu nhiên nữa thì pha thị trường thành biến thứ hai |
+| **Cùng rổ** (GTGD TB20 ≥ 10 tỷ tại ngày đó) | Tín hiệu chỉ phát từ rổ sau điều kiện nền; lấy cả 500 mã sẽ gồm mã kém thanh khoản, hành vi giá khác hẳn |
+| **Loại mã có tín hiệu phiên đó** | Đối chứng phải là "mã không có tín hiệu" |
+| **Cùng hàm đo** (`_measure`) | Hai bên dùng code khác nhau thì chênh lệch có thể đến từ code |
+
+3 đối chứng mỗi lần vào, hạt giống suy từ `(ngày, mã)` nên dựng lại luôn ra
+cùng kết quả.
+
+## Khoảng tin cậy — bắt buộc
+
+Chênh lệch đo được chỉ khoảng **−0,66% tới +0,17%**. Báo một con số như thế mà
+không kèm khoảng tin cậy là mời người đọc hiểu nó thành "chiến lược kém 0,66%",
+trong khi với độ phân tán của lợi suất cổ phiếu nó có thể không khác 0.
+
+Bootstrap 2000 lượt, khoảng 5–95%. **Khoảng chứa 0 → không phân biệt được với
+"không có lợi thế"**. Đó là kết luận trung thực, không phải "chiến lược vô dụng"
+cũng không phải "chiến lược có tác dụng".
+
+Mẫu dưới 30 quan sát thì **không** trả khoảng — bootstrap cũng không cứu được.
+
+## Điều phép thử này vẫn KHÔNG nói
+
+**Vấn đề so sánh nhiều lần.** 3 chiến lược × 3 chân trời = 9 phép so. Ở mức tin
+cậy 90%, riêng ngẫu nhiên đã cho ~0,9 kết quả "khác 0" giả. Nên một ô đơn lẻ
+loại được 0 **chưa phải bằng chứng**; chỉ một hình mẫu nhất quán qua nhiều chân
+trời mới là.

@@ -251,3 +251,103 @@ def test_counts_come_from_the_rows_not_from_a_stored_number(tmp_path):
     assert out3['strategies']['x']['by_horizon']['5']['n'] == 3
     assert out1['strategies']['x']['by_horizon']['5']['n'] == 1
     assert out3['strategies']['x']['entries'] == 3
+
+
+# ─── Giả dược: phân xử "chiến lược kém" vs "rổ thua chỉ số vốn hoá" ─────────
+
+def _uni_series(n=40):
+    """Rổ giả: mọi mã đủ thanh khoản, giá phẳng trừ mã được chỉ định."""
+    return _series([100.0] * n)
+
+
+def test_placebo_draws_from_the_same_dates_not_random_dates(tmp_path):
+    """
+    Khớp NGÀY là điểm mấu chốt. Lấy ngày ngẫu nhiên nữa thì pha thị trường
+    thành biến thứ hai và phép thử mất nghĩa.
+    """
+    days = _days(40)
+    # days[25] va days[30]: _eligible can >=20 phien lich su de tinh GTGD TB20,
+    # nen tin hieu o phien dau chuoi gia se khong co doi chung — dung thiet ke.
+    #
+    # Va days[27] phai la phien RONG: khong co no thi hai phien kia lien ke
+    # trong dong thoi gian cua ban luu, tuc MOT lan vao chu khong phai hai.
+    _archive(tmp_path, 'archive', {days[25]: ['A'], days[27]: [], days[30]: ['A']})
+    uni = ['A'] + [f'T{i}' for i in range(10)]
+    big = pd.DataFrame({'Date': days, 'Close': [100.0] * 40, 'Volume': [10_000_000] * 40})
+    out = O.build(tmp_path, lambda t: big, None, horizons=(5,), now=NOW,
+                  strategies={'x': 'archive'}, universe=uni)
+    pl = out['strategies']['x']['placebo']
+    assert {r['date'] for r in pl['rows']} == {days[25], days[30]}
+
+
+def test_placebo_excludes_tickers_that_had_the_signal(tmp_path):
+    """Đối chứng phải là mã KHÔNG có tín hiệu — đó là thứ cần so."""
+    days = _days(40)
+    _archive(tmp_path, 'archive', {days[25]: ['A', 'B']})
+    uni = ['A', 'B'] + [f'T{i}' for i in range(10)]
+    big = pd.DataFrame({'Date': days, 'Close': [100.0] * 40, 'Volume': [10_000_000] * 40})
+    out = O.build(tmp_path, lambda t: big, None, horizons=(5,), now=NOW,
+                  strategies={'x': 'archive'}, universe=uni)
+    picked = {r['ticker'] for r in out['strategies']['x']['placebo']['rows']}
+    assert not (picked & {'A', 'B'}), f'đã lấy chính mã có tín hiệu: {picked}'
+
+
+def test_placebo_only_draws_liquid_enough_tickers(tmp_path):
+    """
+    Tín hiệu chỉ phát ra từ rổ sau điều kiện nền. Đối chứng lấy cả mã kém thanh
+    khoản thì so hai thứ khác nhau — mã kém thanh khoản có hành vi giá khác hẳn.
+    """
+    days = _days(40)
+    _archive(tmp_path, 'archive', {days[25]: ['A']})
+    thin = pd.DataFrame({'Date': days, 'Close': [100.0] * 40, 'Volume': [1] * 40})
+    fat = pd.DataFrame({'Date': days, 'Close': [100.0] * 40, 'Volume': [10_000_000] * 40})
+    out = O.build(tmp_path, lambda t: fat if t in ('A', 'RICH') else thin, None,
+                  horizons=(5,), now=NOW, strategies={'x': 'archive'},
+                  universe=['A', 'RICH', 'POOR1', 'POOR2'])
+    picked = {r['ticker'] for r in out['strategies']['x']['placebo']['rows']}
+    assert picked == {'RICH'}, f'đã lấy mã kém thanh khoản: {picked}'
+
+
+def test_placebo_is_reproducible(tmp_path):
+    """Hạt giống suy từ (ngày, mã) nên dựng lại lúc nào cũng ra cùng kết quả."""
+    days = _days(40)
+    _archive(tmp_path, 'archive', {days[25]: ['A']})
+    big = pd.DataFrame({'Date': days, 'Close': [100.0] * 40, 'Volume': [10_000_000] * 40})
+    uni = ['A'] + [f'T{i}' for i in range(20)]
+    f = lambda: O.build(tmp_path, lambda t: big, None, horizons=(5,), now=NOW,
+                        strategies={'x': 'archive'}, universe=uni
+                        )['strategies']['x']['placebo']['rows']
+    assert [(r['ticker'], r['date']) for r in f()] == [(r['ticker'], r['date']) for r in f()]
+
+
+def test_no_universe_means_no_placebo(tmp_path):
+    days = _days(10)
+    _archive(tmp_path, 'archive', {days[0]: ['A']})
+    out = O.build(tmp_path, lambda t: _series([100.0] * 10), None, horizons=(5,),
+                  now=NOW, strategies={'x': 'archive'})
+    assert 'placebo' not in out['strategies']['x']
+
+
+# ─── Khoảng tin cậy cho chênh lệch ──────────────────────────────────────────
+
+def test_identical_groups_give_an_interval_containing_zero():
+    """Hai nhóm y hệt nhau thì chênh lệch phải KHÔNG khác 0."""
+    a = [0.01 * (i % 7) - 0.03 for i in range(200)]
+    ci = O.median_gap_ci(a, list(a))
+    assert ci is not None and ci['includes_zero']
+
+
+def test_a_clearly_better_group_gives_an_interval_above_zero():
+    """
+    Nếu khoảng tin cậy chứa 0 với MỌI dữ liệu thì nó vô dụng. Phải có trường
+    hợp nó loại được 0.
+    """
+    a = [0.10 + 0.001 * (i % 5) for i in range(200)]
+    b = [0.00 + 0.001 * (i % 5) for i in range(200)]
+    ci = O.median_gap_ci(a, b)
+    assert ci is not None and not ci['includes_zero'] and ci['gap_lo'] > 0
+
+
+def test_a_tiny_sample_gets_no_interval_rather_than_a_fake_one():
+    """Mẫu 10 quan sát thì bootstrap cũng không cứu — nói KHÔNG BIẾT."""
+    assert O.median_gap_ci([0.01] * 10, [0.02] * 10) is None
