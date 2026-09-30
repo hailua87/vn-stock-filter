@@ -802,7 +802,11 @@ def main():
     # nếu không thì sổ chỉ còn lại những mã sống sót và mọi con số đẹp lên.
     #
     # Hợp đồng dữ liệu: docs/outcomes-contract.md. KHÔNG phải backtest.
-    outcomes = OUTCOMES.build(web_dir, by_ticker_all.get, index_df)
+    # `universe=` bat phep thu gia duoc — khong co no thi moi con so
+    # median_excess deu KHONG PHAN XU DUOC giua "chien luoc kem" va "ma trung
+    # vi thua chi so von hoa". Xem chu thich o outcomes.MIN_AVG_VALUE_20D.
+    outcomes = OUTCOMES.build(web_dir, by_ticker_all.get, index_df,
+                              universe=sorted(by_ticker_all))
     op = OUTCOMES.write(web_dir / 'outcomes' / 'latest.json', outcomes)
     log.info(f"  Sổ theo dõi kết quả → {op} ({op.stat().st_size // 1024} KB)")
     for line in OUTCOMES.summary(outcomes):
