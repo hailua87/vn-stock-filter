@@ -51,6 +51,10 @@ ITEMS: Dict[str, tuple] = {
     'opex':                ('income', ['general_and_admin_expenses']),
     'provision':           ('income', ['provision_for_credit_losses']),
     'loans':               ('balance_sheet', ['loans_and_advances_to_customers']),
+    # Dự phòng rủi ro cho vay khách hàng. Nguồn ghi ÂM (là khoản giảm trừ tài
+    # sản); `npl_coverage` lấy trị tuyệt đối.
+    'loan_allowance':      ('balance_sheet',
+                            ['less_provision_for_losses_on_loans_and_advances_to_customers']),
     'deposits':            ('balance_sheet', ['deposits_from_customers']),
     # bất động sản
     # `inventories_net` là hàng tồn kho SAU trích lập; với chủ đầu tư BĐS đây
@@ -129,6 +133,49 @@ def annual_schema(raw: dict) -> dict:
     # `npl_coverage` đã gỡ khỏi mô hình BANK (D24) vì không nguồn nào có.
     out['nim'] = [None] * len(periods)
     return out
+
+
+def attach_bank_asset_quality(annual: dict, quality: Optional[dict]) -> dict:
+    """
+    Đổ nợ xấu và CAR (thuyết minh BCTC, `vci.bank_asset_quality`) vào `annual`.
+
+    ĐƠN VỊ — chỗ duy nhất hai gốc gặp nhau, nên đổi ở đây và chỉ ở đây:
+      · thuyết minh trả số tiền theo ĐỒNG
+      · `annual` (từ cache BCTC) theo TỶ ĐỒNG
+    Quên chia 1e9 thì `npl_coverage` lệch đúng một tỷ lần và trông như 0%.
+
+    `npl_ratio` và `car` đã là TỶ LỆ ở nguồn, giữ nguyên.
+
+    `npl_coverage` = dự phòng / nợ xấu, tính từ HAI nguồn độc lập: dự phòng ở
+    bảng cân đối, nợ xấu ở thuyết minh. Kiểm chéo trên VCB 2025 cho 258%, khớp
+    mức ngân hàng này công bố (~250%).
+    """
+    q = quality or {}
+    if not q:
+        return annual
+    years = []
+    for pe in annual.get('period_end') or []:
+        try:
+            years.append(int(str(pe)[:4]) if pe else None)
+        except ValueError:
+            years.append(None)
+
+    allow = annual.get('loan_allowance') or [None] * len(years)
+    npl_ratio, car, coverage = [], [], []
+    for i, year in enumerate(years):
+        row = q.get(year) or {}
+        npl_ratio.append(row.get('npl_ratio'))
+        car.append(row.get('car'))
+        npl_ty = row.get('npl_amount')
+        a = allow[i] if i < len(allow) else None
+        if npl_ty and a:
+            coverage.append(abs(a) / (npl_ty / 1e9))     # tỷ / (đồng → tỷ)
+        else:
+            coverage.append(None)
+    annual['npl_ratio'] = npl_ratio
+    annual['car'] = car
+    annual['npl_coverage'] = coverage
+    return annual
 
 
 def attach_bank_ratios(annual: dict, ratios: Optional[dict]) -> dict:

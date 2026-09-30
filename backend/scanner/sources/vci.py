@@ -186,6 +186,66 @@ def _period_label(rec: Dict[str, Any], quarterly: bool) -> str:
     return f'{y}-Q{qn}' if (quarterly and qn < 5) else f'{y}'
 
 
+# Thuyết minh BCTC ngân hàng — nơi DUY NHẤT có nợ xấu và CAR.
+#
+# Quyết định D24 (24/09/2026) kết luận "không nguồn nào có NPL" và đã gỡ
+# `npl_ratio`, `npl_coverage` khỏi mô hình BANK. Kết luận đó SAI: khảo sát hôm
+# ấy chỉ thử bảng `ratio` của VCI (dừng ở 2018) và 32 chỉ tiêu của KBS, mà
+# không thử section `NOTE` của chính endpoint BCTC đang dùng.
+#
+# `NOTE` trả 226 trường mỗi kỳ, có đủ phân loại nợ 5 nhóm tới 2025:
+#
+#     nob40 Nợ đủ tiêu chuẩn      nob43 Nợ nghi ngờ          (nhóm 4)
+#     nob41 Nợ cần chú ý          nob44 Nợ có khả năng mất vốn (nhóm 5)
+#     nob42 Nợ dưới tiêu chuẩn (nhóm 3)      nob151 CAR
+#
+# Nợ xấu = nhóm 3+4+5 (Thông tư 02/2013 và 11/2021).
+#
+# Kiểm chéo trên VCB 2025, hai nguồn độc lập:
+#     tổng 5 nhóm nợ                       1.673.530 tỷ
+#     loans_and_advances_to_customers      1.673.526 tỷ   (bảng cân đối)
+#     bao phủ = dự phòng 24.976 / nợ xấu 9.670 = 258%     (VCB công bố ~250%)
+NOTE_SECTION = 'NOTE'
+LOAN_GROUPS = ('nob40', 'nob41', 'nob42', 'nob43', 'nob44')   # nhóm 1..5
+NPL_GROUPS = ('nob42', 'nob43', 'nob44')                      # nhóm 3..5 = nợ xấu
+CAR_FIELD = 'nob151'
+
+
+def bank_asset_quality(symbol: str) -> Dict[int, Dict[str, Optional[float]]]:
+    """
+    {năm: {'npl_ratio', 'car', 'npl_amount', 'gross_loans'}} cho một ngân hàng.
+
+    `npl_ratio` và `car` là TỶ LỆ (0,0058 = 0,58%), thống nhất với mọi chỉ tiêu
+    khác trong hệ thống — nguồn trả CAR sẵn ở dạng tỷ lệ, còn nợ xấu thì tự
+    chia. Số tiền để nguyên ĐỒNG như nguồn; người gọi tự đổi đơn vị.
+
+    Năm nào thiếu dữ liệu phân loại nợ thì để None chứ không đoán.
+    """
+    sym = symbol.upper()
+    data = _data(_get(f'{IQ_URL}/v1/company/{sym}/financial-statement',
+                      {'section': NOTE_SECTION}), f'note {sym}')
+    rows = (data.get('years') or []) if isinstance(data, dict) else []
+    out: Dict[int, Dict[str, Optional[float]]] = {}
+    for r in rows:
+        try:
+            year = int(r.get('yearReport'))
+        except (TypeError, ValueError):
+            continue
+        groups = [r.get(f) for f in LOAN_GROUPS]
+        total = sum(v for v in groups if isinstance(v, (int, float)))
+        npl = sum(r.get(f) or 0 for f in NPL_GROUPS)
+        car = r.get(CAR_FIELD)
+        out[year] = {
+            # total <= 0 nghĩa là kỳ đó không có thuyết minh phân loại nợ —
+            # trả None chứ không trả 0, vì 0% nợ xấu là một khẳng định mạnh.
+            'npl_ratio': (npl / total) if total > 0 else None,
+            'car': float(car) if isinstance(car, (int, float)) and car > 0 else None,
+            'npl_amount': npl if total > 0 else None,
+            'gross_loans': total if total > 0 else None,
+        }
+    return out
+
+
 def financial_statement(symbol: str, table: str, period: str = 'year') -> pd.DataFrame:
     """
     Một bảng BCTC dạng dài như vnstock 4.0.7: dòng = khoản mục

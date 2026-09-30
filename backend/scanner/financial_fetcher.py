@@ -287,6 +287,23 @@ def fetch_bank_ratios(ticker: str) -> Optional[Dict[str, Dict[int, float]]]:
     return {'nim': nim} if nim else None
 
 
+def fetch_bank_asset_quality(ticker: str) -> Optional[Dict[str, Any]]:
+    """
+    Nợ xấu và CAR từ thuyết minh BCTC (`vci.bank_asset_quality`).
+
+    Một lượt gọi mạng cho mỗi ngân hàng — ~17 mã trong rổ 200, không phải cả
+    rổ. Cùng khuôn với `fetch_bank_ratios` ngay trên.
+
+    Trả `{năm: {'npl_ratio', 'car', 'npl_amount', 'gross_loans'}}` đúng như
+    nguồn; đổi đơn vị là việc của adapter, để chỗ đổi chỉ có một.
+    """
+    try:
+        return with_retry(vci.bank_asset_quality, ticker) or None
+    except Exception as e:
+        log.warning(f"  {ticker} VCI note: {type(e).__name__}: {str(e)[:110]}")
+        return None
+
+
 def fetch_current_price(ticker: str, source: str = 'vci') -> Optional[float]:
     """
     Giá đóng cửa gần nhất, trả về theo **VND/cp** (đã nhân 1.000).

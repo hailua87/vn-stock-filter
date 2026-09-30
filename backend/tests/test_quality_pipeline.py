@@ -64,18 +64,36 @@ def test_bank_fields_and_missing_nim_are_none_not_zero():
     assert m['equity_assets'] is not None
 
 
-def test_npl_fields_are_gone_from_the_bank_model():
+def test_npl_fields_are_back_in_the_bank_model():
     """
-    Tỷ lệ nợ xấu và bao phủ nợ xấu đã gỡ 24/09/2026 (D24): không nguồn nào có.
-    Để chúng lại với giá trị None vĩnh viễn là kéo độ phủ xuống dưới ngưỡng và
-    khóa cả 18 ngân hàng ở "Thiếu dữ liệu" — mà không nói vì sao.
+    Ngược hẳn với test cũ ở chỗ này.
+
+    Đến 24/09/2026, D24 kết luận "không nguồn nào có nợ xấu" và gỡ hai chỉ tiêu
+    khỏi mô hình BANK. Kết luận đó SAI: khảo sát hôm ấy thử bảng `ratio` của
+    VCI (dừng ở 2018) và 32 chỉ tiêu KBS, nhưng KHÔNG thử section NOTE của
+    chính endpoint BCTC đang dùng — nơi có phân loại nợ 5 nhóm tới 2025, đủ
+    cho 17/17 ngân hàng trong rổ.
+
+    Bài học không phải "D24 cẩu thả" mà là: một kết luận dạng "không nguồn nào
+    có" phải ghi rõ ĐÃ THỬ NHỮNG GÌ, nếu không lần sau không ai biết chỗ nào
+    còn chưa thử.
     """
     keys = {k for specs in C.MODELS['BANK'].values() for k, _, _ in specs}
-    assert 'npl_ratio' not in keys and 'npl_coverage' not in keys
+    assert 'npl_ratio' in keys and 'npl_coverage' in keys
+    # Nợ xấu THẤP hơn là tốt hơn; bao phủ CAO hơn là tốt hơn. Đảo chiều là
+    # xếp hạng ngược, và không có gì báo lỗi.
+    spec = {k: hb for specs in C.MODELS['BANK'].values() for k, _, hb in specs}
+    assert spec['npl_ratio'] is False and spec['npl_coverage'] is True
+    assert C.BANK_NOT_EVALUATED == {}, 'không còn yếu tố nào chưa đánh giá được'
+
+
+def test_asset_quality_needs_the_note_data_to_be_attached():
+    """
+    Không nối thuyết minh thì hai chỉ tiêu vẫn có mặt nhưng RỖNG — đúng như
+    trước, và độ phủ chiều Chất lượng tụt. Đây là trạng thái khi nguồn hỏng.
+    """
     m = metrics.compute('BANK', adapter.annual_schema(raw('VCB', 'year')))
-    assert 'npl_ratio' not in m and 'npl_coverage' not in m
-    # Gỡ mà không ghi lại thì lần sau có người tưởng là quên làm.
-    assert set(C.BANK_NOT_EVALUATED) == {'npl_ratio', 'npl_coverage'}
+    assert m['npl_ratio'] is None and m['npl_coverage'] is None
 
 
 def test_attaching_kbs_nim_makes_the_quality_dimension_scoreable():
