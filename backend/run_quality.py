@@ -31,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from scanner.publish_gate import may_publish
 from scanner.sources import http as SOURCE
-from scanner.quality import adapter, governance, metrics, scoring
+from scanner.quality import adapter, diagnostics, governance, metrics, scoring
 from scanner.quality import config as C
 from scanner.quality.status import DIMS, classify, model_for, sharp_drops, valuation_band
 from scanner.strategies.valuation.industry_classifier import IndustryClassifier
@@ -245,6 +245,10 @@ def build_quality(tickers, fetch_year: Callable[[str], Optional[dict]],
             'inactive_model_reason': C.INACTIVE_MODEL_REASON,
             'governance_not_evaluated': C.GOVERNANCE_NOT_EVALUATED,
             'veto_not_evaluated': C.VETO_NOT_EVALUATED,
+            # Phễu ngưỡng: vì sao có (hoặc không có) mã nào đạt chuẩn. Tính
+            # mỗi lượt chứ không phải một phép đo rời — con số rời sẽ cũ đi mà
+            # không ai biết. Xem scanner/quality/diagnostics.py.
+            'threshold_funnel': diagnostics.funnel(items),
             'note': ('Percentile là thứ hạng trong universe Module B (top thanh khoản), '
                      'không phải toàn thị trường. Ngưỡng là mặc định cấu hình, chưa backtest. '
                      'Không phải khuyến nghị đầu tư.'),
@@ -356,6 +360,8 @@ def main(argv=None) -> int:
     # nghĩa là bước này chết thì phần của bước ĐỊNH GIÁ cũng không ai cập nhật.
     # Đã xảy ra ngày 27/09/2026.
 
+    for line in diagnostics.summary(m['threshold_funnel']):
+        log.info(line)
     log.info(f"Chấm {m['scored']}/{m['universe_size']} mã | trạng thái {m['status_counts']} "
              f"| mô hình {m['model_counts']} | lỗi {len(m['failures'])}")
     return 0 if payload['items'] else 1
