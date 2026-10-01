@@ -177,6 +177,34 @@ window.QV = (function () {
     return `<span class="band-badge band-${band}" title="${esc(v?.reason || '')}">${esc(v?.label || 'Chưa có')}</span>`;
   }
 
+  const nghin = v => (v >= 1000 ? Math.round(v / 1000) : Math.round(v / 100) / 10)
+    .toLocaleString('vi-VN', { maximumFractionDigits: 1 });
+
+  // Khoang giua phuong phap thap nhat va cao nhat. Chi co gia tri khi cac
+  // phuong phap mau thuan: luc do khong mot muc nao dung duoc, nhung khoang
+  // thi co — in "Chua co" roi im lang la che mat thu da tinh ra duoc.
+  //
+  // `compact` cho bang: cot dinh gia hep, va bang chi can noi "phia sau chu
+  // Chua co la mot khoang rong tung nay", con hai dau chinh xac thi o o chi
+  // tiet. Dang nghin dong (11-36k) hep hon chinh nhan muc dinh gia, nen them
+  // dong nay KHONG lam bang rong ra.
+  function bandRange(v, opts) {
+    if (v?.range_low == null || v?.range_high == null) return '';
+    const lo = Math.round(v.range_low).toLocaleString('vi-VN');
+    const hi = Math.round(v.range_high).toLocaleString('vi-VN');
+    const lech = v.dispersion_pct == null ? '' : ` · lệch ${Math.round(v.dispersion_pct)}%`;
+    const full = `Các phương pháp cho ${lo}–${hi} đ/cp${lech}`;
+    const body = opts?.compact
+      ? `${nghin(v.range_low)}–${nghin(v.range_high)}k`
+      : `${lo}–${hi} đ${lech}`;
+    return `<span class="band-range" title="${esc(full)}">${body}</span>`;
+  }
+
+  function bandCell(v) {
+    const r = bandRange(v, { compact: true });
+    return bandBadge(v) + (r ? `<div class="band-range-row">${r}</div>` : '');
+  }
+
   function statusBadge(st) {
     return `<span class="wl-status st-${st}">${esc(STATUS_LABEL[st] || st)}</span>`;
   }
@@ -185,7 +213,7 @@ window.QV = (function () {
     DIMS, DIM_LABEL, STATUS_ORDER, STATUS_LABEL, MODEL_LABEL, BAND_ORDER,
     FLAG_LABEL, MISSING_GOV_LABEL, METRIC,
     esc, fmtMetric, metricLabel, dimBar, metricsTable, flagList, notEvaluated,
-    bandBadge, statusBadge,
+    bandBadge, bandRange, bandCell, statusBadge,
     nf1, nf2,
   };
 })();

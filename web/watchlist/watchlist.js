@@ -152,7 +152,7 @@ function render() {
           <div class="wl-reason" title="${esc(it.reason)}">${esc(it.reason)}</div>${it.sharp_drops?.length
         ? `<span class="wl-drop" title="Giảm ≥ 15 điểm so với lần chấm trước">↓ ${it.sharp_drops.map(d => DIM_LABEL[d]).join(', ')}</span>` : ''}</td>
       ${DIMS.map(d => `<td>${dimBar(it, d)}</td>`).join('')}
-      <td class="td-center">${bandBadge(it.valuation)}</td>
+      <td class="td-center">${bandCell(it.valuation)}</td>
     </tr>`).join('');
   tbody.querySelectorAll('tr[data-ticker]').forEach(tr => {
     const open = () => select(tr.dataset.ticker);
@@ -164,6 +164,8 @@ function render() {
 const statusBadge = window.QV.statusBadge;
 
 const bandBadge = window.QV.bandBadge;
+
+const bandCell = window.QV.bandCell;
 
 // Nguong lay tu metadata cua chinh tep JSON dang hien thi.
 const dimBar = (it, d) => window.QV.dimBar(it, d, state.meta.thresholds);
