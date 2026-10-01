@@ -284,10 +284,21 @@ MAX_METHOD_DISPERSION = 0.40
 #
 # CHỨNG KHOÁN và BẢO HIỂM GIỮ LẠI, nhưng lý do KHÁC hẳn ngân hàng — và trước
 # 01/10 thông báo nói sai: nợ xấu/CAR không phải chỉ tiêu của hai nhóm này.
-#   · Chứng khoán: cần chất lượng dư nợ margin và mức độ tự doanh. Nguồn chưa
-#     tách được margin quá hạn khỏi tổng dư nợ margin.
-#   · Bảo hiểm: cần biên khả năng thanh toán và dự phòng nghiệp vụ. Thuyết minh
-#     có nhưng chưa khảo sát; và chỉ 3 mã trong rổ nên chưa đáng làm trước.
+#
+# ĐÃ KHẢO NGUỒN 01/10/2026 — cả VCI lẫn KBS, mọi bảng, quét toàn bộ nhãn.
+# Kết quả đầy đủ kèm độ phủ từng trường: docs/securities-insurance-source-survey.md
+#   · Chứng khoán: dư nợ margin CÓ (`nos446`, phủ 15/15), nhưng phân loại tuổi
+#     nợ thì KHÔNG nguồn nào tách, và tỷ lệ an toàn tài chính (TT 91/2020) cũng
+#     không có. Thay bằng tỷ lệ dự phòng thì chỉ phủ 6/15 = 40%, dưới chính
+#     ngưỡng COVERAGE_MIN = 0,70 của dự án.
+#   · Bảo hiểm: biên khả năng thanh toán KHÔNG có ở nguồn nào. Nhưng cổng này
+#     không phải chỗ đang chặn — cả 3 mã dừng ở `RES` từ tầng chấm chất lượng
+#     (INSURANCE ngoài ACTIVE_MODELS vì 3 mã < MIN_PEER_GROUP = 8) và không mã
+#     nào có trong đầu ra định giá. Gỡ cổng ở đây sẽ không đổi gì trên màn hình.
+#
+# Mở được hay không là việc có thêm NGUỒN, không phải việc viết thêm mã. Trước
+# khi kết luận lại "không có nguồn", đọc mục "Đã hỏi những đâu" trong tài liệu
+# trên rồi hỏi chỗ CHƯA có trong đó.
 HOLD_ONLY_INDUSTRIES = frozenset({
     ValuationIndustry.SECURITIES,
     ValuationIndustry.INSURANCE,
