@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "generated_at": "2026-10-01T12:30:53",
+ "generated_at": "2026-10-01T14:06:33",
  "as_of": "2026-10-01",
  "metadata": {
   "universe_size": 200,
@@ -8,14 +8,15 @@
   "fetch_coverage": 1.0,
   "fetch_stop_reason": null,
   "source_stats": {
-   "calls": 759,
+   "calls": 35,
    "timeouts": 0,
    "timeout_ratio": 0.0
   },
   "scored": 200,
   "failures": [],
   "status_counts": {
-   "MON": 143,
+   "QUAL": 1,
+   "MON": 142,
    "REV": 36,
    "RES": 16,
    "EXC": 5
@@ -340,7 +341,7 @@
    "universe": 200,
    "scored_all_dims": 184,
    "passed_all_thresholds": 2,
-   "qualified": 0,
+   "qualified": 1,
    "fail_by_dim": {
     "quality": 171,
     "growth": 142,
@@ -348,20 +349,8 @@
     "resilience": 131
    },
    "binding_dim": "quality",
-   "blocked_by_valuation": 2,
+   "blocked_by_valuation": 1,
    "near_miss": [
-    {
-     "ticker": "CTR",
-     "model": "NON_FINANCIAL",
-     "band": "EXPENSIVE",
-     "status": "MON",
-     "scores": {
-      "quality": 91.5,
-      "growth": 77.2,
-      "governance": 100,
-      "resilience": 66.2
-     }
-    },
     {
      "ticker": "FPT",
      "model": "NON_FINANCIAL",
@@ -387,9 +376,9 @@
    "ticker": "CTR",
    "industry": "Construction",
    "model": "NON_FINANCIAL",
-   "status": "MON",
-   "status_label": "Theo dõi",
-   "reason": "Đạt 4 ngưỡng nhưng định giá Đắt",
+   "status": "QUAL",
+   "status_label": "Đủ chuẩn",
+   "reason": "Đạt cả 4 ngưỡng, định giá Hợp lý",
    "dims": {
     "quality": {
      "score": 91.5,
@@ -415,10 +404,10 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "EXPENSIVE",
-    "label": "Đắt",
-    "upside_pct": -14.4,
-    "confidence": 56.0,
+    "band": "FAIR",
+    "label": "Hợp lý",
+    "upside_pct": -4.6,
+    "confidence": 59.0,
     "method": "P/E Multiple",
     "reason": null
    },
@@ -633,8 +622,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -7.7,
-    "confidence": 30.0,
+    "upside_pct": -20.2,
+    "confidence": 33.0,
     "method": "P/B-ROE Justified",
     "reason": "Các phương pháp định giá mâu thuẫn"
    },
@@ -775,10 +764,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 106.1,
+    "confidence": 31.0,
+    "method": "P/E Multiple",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.1022,
@@ -1069,10 +1058,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 1.4,
+    "confidence": 31.0,
+    "method": "P/E Multiple",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.2218,
@@ -1223,7 +1212,7 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -69.6,
+    "upside_pct": -59.8,
     "confidence": 34.0,
     "method": "EV/EBITDA",
     "reason": "Các phương pháp định giá mâu thuẫn"
@@ -1444,10 +1433,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 64.2,
+    "confidence": 30.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.1563,
@@ -1521,8 +1510,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 32.0,
-    "confidence": 55.0,
+    "upside_pct": 44.8,
+    "confidence": 57.0,
     "method": "RNAV",
     "reason": "Phương pháp chính RNAV còn giản lược"
    },
@@ -1592,10 +1581,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -48.2,
-    "confidence": 52.0,
-    "method": "P/B-ROE Justified",
-    "reason": "Nhóm tài chính (Securities): chưa tách được dư nợ margin quá hạn nên chưa đưa ra kết luận định giá — mô hình cho STRONG SELL, đã hạ về HOLD"
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roe_avg3": 0.1221,
@@ -1730,12 +1719,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "ATTRACTIVE",
-    "label": "Hấp dẫn",
-    "upside_pct": 56.1,
-    "confidence": 68.0,
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 42.8,
+    "confidence": 34.0,
     "method": "EV/EBITDA",
-    "reason": null
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.5993,
@@ -1807,10 +1796,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 21.1,
+    "confidence": 31.0,
+    "method": "P/E Multiple",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.2307,
@@ -1884,10 +1873,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -3.7,
-    "confidence": 30.0,
+    "upside_pct": -0.8,
+    "confidence": 66.0,
     "method": "P/B-ROE Justified",
-    "reason": "Các phương pháp định giá mâu thuẫn"
+    "reason": "Nhóm tài chính (Securities): chưa tách được dư nợ margin quá hạn nên chưa đưa ra kết luận định giá"
    },
    "metrics": {
     "roe_avg3": 0.086,
@@ -2022,10 +2011,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 39.5,
+    "confidence": 32.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roa_avg3": 0.0206,
@@ -2241,10 +2230,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 168.1,
+    "confidence": 30.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.12,
@@ -2316,8 +2305,8 @@
    "valuation": {
     "band": "FAIR",
     "label": "Hợp lý",
-    "upside_pct": 10.9,
-    "confidence": 61.0,
+    "upside_pct": 0.5,
+    "confidence": 66.0,
     "method": "P/B-ROE Justified",
     "reason": null
    },
@@ -2460,8 +2449,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 51.3,
-    "confidence": 30.0,
+    "upside_pct": 7.4,
+    "confidence": 33.0,
     "method": "P/B-ROE Justified",
     "reason": "Các phương pháp định giá mâu thuẫn"
    },
@@ -2497,9 +2486,7 @@
    },
    "latest_annual": "2025-12-31",
    "latest_quarter": "2026-06-30",
-   "sharp_drops": [
-    "quality"
-   ]
+   "sharp_drops": []
   },
   {
    "ticker": "PGC",
@@ -2679,10 +2666,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 11.1,
+    "confidence": 31.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roa_avg3": 0.0118,
@@ -2752,10 +2739,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 36.3,
+    "confidence": 30.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.1559,
@@ -2827,10 +2814,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": -5.8,
+    "confidence": 32.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roa_avg3": 0.0224,
@@ -2902,10 +2889,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 4.4,
+    "confidence": 31.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roa_avg3": 0.0193,
@@ -2977,10 +2964,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 104.1,
+    "confidence": 47.0,
+    "method": "RNAV",
+    "reason": "Phương pháp chính RNAV còn giản lược"
    },
    "metrics": {
     "roe_avg5": 0.1139,
@@ -3121,10 +3108,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 1.3,
+    "confidence": 32.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roa_avg3": 0.0237,
@@ -3348,12 +3335,12 @@
    ],
    "veto": null,
    "valuation": {
-    "band": "EXPENSIVE",
-    "label": "Đắt",
-    "upside_pct": -51.1,
-    "confidence": 59.0,
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -52.4,
+    "confidence": 31.0,
     "method": "P/E Multiple",
-    "reason": null
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.0814,
@@ -3427,10 +3414,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 192.2,
+    "confidence": 31.0,
+    "method": "P/E Multiple",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.1675,
@@ -3502,10 +3489,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 8.5,
+    "confidence": 31.0,
+    "method": "P/E Multiple",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.2031,
@@ -3729,10 +3716,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 57.0,
+    "confidence": 30.0,
+    "method": "SOTP Simplified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.0873,
@@ -3806,10 +3793,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 94.8,
-    "confidence": 32.0,
-    "method": "EV/EBITDA",
-    "reason": "Các phương pháp định giá mâu thuẫn"
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roic_avg5": 0.0687,
@@ -3879,12 +3866,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "ATTRACTIVE",
-    "label": "Hấp dẫn",
-    "upside_pct": 172.7,
-    "confidence": 55.0,
-    "method": "P/E Multiple",
-    "reason": null
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roic_avg5": 0.06,
@@ -3954,12 +3941,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "band": "ATTRACTIVE",
+    "label": "Hấp dẫn",
+    "upside_pct": 22.1,
+    "confidence": 52.0,
+    "method": "P/E Multiple",
+    "reason": null
    },
    "metrics": {
     "roic_avg5": 0.117,
@@ -4031,12 +4018,12 @@
    ],
    "veto": null,
    "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "band": "EXPENSIVE",
+    "label": "Đắt",
+    "upside_pct": -42.7,
+    "confidence": 61.0,
+    "method": "P/E Multiple",
+    "reason": null
    },
    "metrics": {
     "roic_avg5": 0.3317,
@@ -4106,12 +4093,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "FAIR",
-    "label": "Hợp lý",
-    "upside_pct": -6.6,
-    "confidence": 68.0,
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -18.1,
+    "confidence": 34.0,
     "method": "EV/EBITDA",
-    "reason": null
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.1121,
@@ -4183,7 +4170,7 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 8.7,
+    "upside_pct": 7.1,
     "confidence": 30.0,
     "method": "DCF FCFF",
     "reason": "Các phương pháp định giá mâu thuẫn"
@@ -4412,10 +4399,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 50.3,
+    "confidence": 31.0,
+    "method": "P/E Multiple",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.2233,
@@ -4639,7 +4626,7 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 114.4,
+    "upside_pct": 86.9,
     "confidence": 34.0,
     "method": "EV/EBITDA",
     "reason": "Các phương pháp định giá mâu thuẫn"
@@ -4792,10 +4779,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -26.3,
-    "confidence": 60.0,
+    "upside_pct": -17.5,
+    "confidence": 66.0,
     "method": "P/B-ROE Justified",
-    "reason": "Nhóm tài chính (Securities): chưa tách được dư nợ margin quá hạn nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD"
+    "reason": "Nhóm tài chính (Securities): chưa tách được dư nợ margin quá hạn nên chưa đưa ra kết luận định giá"
    },
    "metrics": {
     "roe_avg3": 0.0824,
@@ -5072,8 +5059,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 69.4,
-    "confidence": 33.0,
+    "upside_pct": 54.4,
+    "confidence": 34.0,
     "method": "EV/EBITDA",
     "reason": "Các phương pháp định giá mâu thuẫn"
    },
@@ -5371,8 +5358,8 @@
    "valuation": {
     "band": "FAIR",
     "label": "Hợp lý",
-    "upside_pct": 11.2,
-    "confidence": 59.0,
+    "upside_pct": 7.9,
+    "confidence": 60.0,
     "method": "EV/EBITDA",
     "reason": null
    },
@@ -5446,7 +5433,7 @@
    "valuation": {
     "band": "ATTRACTIVE",
     "label": "Hấp dẫn",
-    "upside_pct": 31.0,
+    "upside_pct": 38.5,
     "confidence": 68.0,
     "method": "EV/EBITDA",
     "reason": null
@@ -5670,10 +5657,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 104.2,
-    "confidence": 55.0,
-    "method": "RNAV",
-    "reason": "Phương pháp chính RNAV còn giản lược"
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roe_avg5": 0.129,
@@ -5741,12 +5728,12 @@
    ],
    "veto": null,
    "valuation": {
-    "band": "ATTRACTIVE",
-    "label": "Hấp dẫn",
-    "upside_pct": 101.2,
-    "confidence": 59.0,
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 76.9,
+    "confidence": 30.0,
     "method": "EV/EBITDA",
-    "reason": null
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.073,
@@ -5818,10 +5805,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 29.4,
+    "confidence": 32.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roa_avg3": 0.0135,
@@ -5889,10 +5876,10 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "ATTRACTIVE",
-    "label": "Hấp dẫn",
-    "upside_pct": 26.6,
-    "confidence": 58.0,
+    "band": "FAIR",
+    "label": "Hợp lý",
+    "upside_pct": 18.8,
+    "confidence": 59.0,
     "method": "DDM",
     "reason": null
    },
@@ -6032,12 +6019,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "band": "FAIR",
+    "label": "Hợp lý",
+    "upside_pct": 10.7,
+    "confidence": 59.0,
+    "method": "P/E Multiple",
+    "reason": null
    },
    "metrics": {
     "roic_avg5": 0.3702,
@@ -6107,12 +6094,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "ATTRACTIVE",
-    "label": "Hấp dẫn",
-    "upside_pct": 103.6,
-    "confidence": 60.0,
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": 59.2,
+    "confidence": 32.0,
     "method": "P/B-ROE Justified",
-    "reason": null
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roa_avg3": 0.0149,
@@ -6261,10 +6248,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": -36.5,
+    "confidence": 31.0,
+    "method": "SOTP Simplified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.1101,
@@ -6403,12 +6390,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "ATTRACTIVE",
-    "label": "Hấp dẫn",
-    "upside_pct": 27.5,
-    "confidence": 50.0,
-    "method": "P/E Multiple",
-    "reason": null
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roic_avg5": 0.0743,
@@ -6634,8 +6621,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -54.5,
-    "confidence": 60.0,
+    "upside_pct": -50.9,
+    "confidence": 66.0,
     "method": "P/B-ROE Justified",
     "reason": "Nhóm tài chính (Securities): chưa tách được dư nợ margin quá hạn nên chưa đưa ra kết luận định giá — mô hình cho STRONG SELL, đã hạ về HOLD"
    },
@@ -6780,10 +6767,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": -35.0,
+    "confidence": 31.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roe_avg3": 0.045,
@@ -6845,10 +6832,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": -23.2,
+    "confidence": 31.0,
+    "method": "SOTP Simplified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.0806,
@@ -6922,12 +6909,12 @@
    ],
    "veto": null,
    "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": 34.9,
-    "confidence": 55.0,
+    "band": "FAIR",
+    "label": "Hợp lý",
+    "upside_pct": 8.2,
+    "confidence": 58.0,
     "method": "P/E Multiple",
-    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho BUY, đã hạ về HOLD"
+    "reason": null
    },
    "metrics": {
     "roic_avg5": 0.0546,
@@ -7145,8 +7132,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -24.4,
-    "confidence": 57.0,
+    "upside_pct": -23.1,
+    "confidence": 63.0,
     "method": "P/B-ROE Justified",
     "reason": "Nhóm tài chính (Securities): chưa tách được dư nợ margin quá hạn nên chưa đưa ra kết luận định giá — mô hình cho SELL, đã hạ về HOLD"
    },
@@ -7210,8 +7197,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 29.7,
-    "confidence": 32.0,
+    "upside_pct": 5.4,
+    "confidence": 33.0,
     "method": "EV/EBITDA",
     "reason": "Các phương pháp định giá mâu thuẫn"
    },
@@ -7283,12 +7270,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "ATTRACTIVE",
-    "label": "Hấp dẫn",
-    "upside_pct": 49.9,
-    "confidence": 56.0,
-    "method": "P/E Multiple",
-    "reason": null
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roic_avg5": 0.2208,
@@ -7362,7 +7349,7 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -57.0,
+    "upside_pct": -43.3,
     "confidence": 36.0,
     "method": "EV/EBITDA",
     "reason": "Các phương pháp định giá mâu thuẫn"
@@ -7435,12 +7422,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "band": "ATTRACTIVE",
+    "label": "Hấp dẫn",
+    "upside_pct": 115.5,
+    "confidence": 60.0,
+    "method": "EV/EBITDA",
+    "reason": null
    },
    "metrics": {
     "roic_avg5": 0.285,
@@ -7589,10 +7576,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 122.3,
-    "confidence": 42.0,
-    "method": "RNAV",
-    "reason": "Phương pháp chính RNAV còn giản lược"
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roe_avg5": 0.1007,
@@ -7809,8 +7796,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 21.4,
-    "confidence": 30.0,
+    "upside_pct": 22.3,
+    "confidence": 32.0,
     "method": "EV/EBITDA",
     "reason": "Các phương pháp định giá mâu thuẫn"
    },
@@ -7884,10 +7871,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 111.8,
-    "confidence": 30.0,
-    "method": "DCF FCFF",
-    "reason": "Các phương pháp định giá mâu thuẫn"
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roic_avg5": 0.1021,
@@ -7961,10 +7948,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -36.9,
-    "confidence": 57.0,
+    "upside_pct": -12.2,
+    "confidence": 32.0,
     "method": "P/B-ROE Justified",
-    "reason": "Nhóm tài chính (Securities): chưa tách được dư nợ margin quá hạn nên chưa đưa ra kết luận định giá — mô hình cho STRONG SELL, đã hạ về HOLD"
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roe_avg3": 0.0894,
@@ -8098,7 +8085,7 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 29.9,
+    "upside_pct": 33.0,
     "confidence": 31.0,
     "method": "DCF FCFF",
     "reason": "Các phương pháp định giá mâu thuẫn"
@@ -8396,10 +8383,10 @@
    ],
    "veto": null,
    "valuation": {
-    "band": "ATTRACTIVE",
-    "label": "Hấp dẫn",
-    "upside_pct": 24.3,
-    "confidence": 57.0,
+    "band": "FAIR",
+    "label": "Hợp lý",
+    "upside_pct": 19.1,
+    "confidence": 59.0,
     "method": "EV/EBITDA",
     "reason": null
    },
@@ -8471,12 +8458,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "EXPENSIVE",
-    "label": "Đắt",
-    "upside_pct": -27.0,
-    "confidence": 59.0,
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -33.6,
+    "confidence": 30.0,
     "method": "EV/EBITDA",
-    "reason": null
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.1625,
@@ -8546,12 +8533,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "ATTRACTIVE",
-    "label": "Hấp dẫn",
-    "upside_pct": 70.1,
-    "confidence": 58.0,
-    "method": "EV/EBITDA",
-    "reason": null
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roic_avg5": 0.0736,
@@ -8696,12 +8683,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "EXPENSIVE",
-    "label": "Đắt",
-    "upside_pct": -18.8,
-    "confidence": 57.0,
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -30.5,
+    "confidence": 30.0,
     "method": "P/E Multiple",
-    "reason": null
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.0807,
@@ -8775,10 +8762,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": -42.9,
+    "confidence": 30.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.0871,
@@ -8852,12 +8839,12 @@
    ],
    "veto": null,
    "valuation": {
-    "band": "EXPENSIVE",
-    "label": "Đắt",
-    "upside_pct": -29.7,
-    "confidence": 54.0,
-    "method": "P/E Multiple",
-    "reason": null
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roic_avg5": 0.0467,
@@ -9009,8 +8996,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 13.7,
-    "confidence": 30.0,
+    "upside_pct": 2.6,
+    "confidence": 32.0,
     "method": "SOTP Simplified",
     "reason": "Các phương pháp định giá mâu thuẫn"
    },
@@ -9084,12 +9071,12 @@
    ],
    "veto": null,
    "valuation": {
-    "band": "EXPENSIVE",
-    "label": "Đắt",
-    "upside_pct": -21.7,
-    "confidence": 52.0,
-    "method": "P/E Multiple",
-    "reason": null
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roic_avg5": 0.0804,
@@ -9164,8 +9151,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -33.4,
-    "confidence": 30.0,
+    "upside_pct": -30.6,
+    "confidence": 33.0,
     "method": "P/B-ROE Justified",
     "reason": "Các phương pháp định giá mâu thuẫn"
    },
@@ -9295,12 +9282,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "ATTRACTIVE",
-    "label": "Hấp dẫn",
-    "upside_pct": 27.4,
-    "confidence": 61.0,
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": -10.8,
+    "confidence": 33.0,
     "method": "P/B-ROE Justified",
-    "reason": null
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roa_avg3": 0.0179,
@@ -9370,8 +9357,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 42.9,
-    "confidence": 33.0,
+    "upside_pct": 35.2,
+    "confidence": 35.0,
     "method": "EV/EBITDA",
     "reason": "Các phương pháp định giá mâu thuẫn"
    },
@@ -9595,10 +9582,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -48.6,
-    "confidence": 54.0,
-    "method": "RNAV",
-    "reason": "Phương pháp chính RNAV còn giản lược"
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roe_avg5": 0.0766,
@@ -9818,10 +9805,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 0.1,
-    "confidence": 64.0,
-    "method": "EV/EBITDA",
-    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được"
+    "upside_pct": 2.1,
+    "confidence": 39.0,
+    "method": "P/E Multiple",
+    "reason": "Độ tin cậy 39% dưới 50%"
    },
    "metrics": {
     "roic_avg5": 0.0256,
@@ -10044,8 +10031,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -13.0,
-    "confidence": 60.0,
+    "upside_pct": -8.1,
+    "confidence": 66.0,
     "method": "P/B-ROE Justified",
     "reason": "Nhóm tài chính (Securities): chưa tách được dư nợ margin quá hạn nên chưa đưa ra kết luận định giá"
    },
@@ -10111,8 +10098,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 59.3,
-    "confidence": 32.0,
+    "upside_pct": 52.4,
+    "confidence": 33.0,
     "method": "EV/EBITDA",
     "reason": "Các phương pháp định giá mâu thuẫn"
    },
@@ -10260,10 +10247,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": -22.4,
+    "confidence": 32.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roa_avg3": 0.0175,
@@ -10333,8 +10320,8 @@
    "valuation": {
     "band": "FAIR",
     "label": "Hợp lý",
-    "upside_pct": 8.2,
-    "confidence": 60.0,
+    "upside_pct": -4.6,
+    "confidence": 64.0,
     "method": "P/B-ROE Justified",
     "reason": null
    },
@@ -10406,10 +10393,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 30.1,
+    "confidence": 32.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roa_avg3": 0.0175,
@@ -10633,10 +10620,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 109.8,
-    "confidence": 55.0,
-    "method": "P/E Multiple",
-    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho STRONG BUY, đã hạ về HOLD"
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roic_avg5": 0.033,
@@ -10710,7 +10697,7 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -40.4,
+    "upside_pct": -36.6,
     "confidence": 35.0,
     "method": "EV/EBITDA",
     "reason": "Các phương pháp định giá mâu thuẫn"
@@ -10785,10 +10772,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -17.8,
-    "confidence": 68.0,
-    "method": "EV/EBITDA",
-    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được"
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roic_avg5": 0.035,
@@ -10862,8 +10849,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -18.3,
-    "confidence": 52.0,
+    "upside_pct": -0.3,
+    "confidence": 59.0,
     "method": "P/B-ROE Justified",
     "reason": "Nhóm tài chính (Securities): chưa tách được dư nợ margin quá hạn nên chưa đưa ra kết luận định giá"
    },
@@ -10929,7 +10916,7 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 29.2,
+    "upside_pct": 10.4,
     "confidence": 34.0,
     "method": "EV/EBITDA",
     "reason": "Các phương pháp định giá mâu thuẫn"
@@ -11085,10 +11072,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": -14.6,
+    "confidence": 51.0,
+    "method": "Historical Multiple",
+    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được"
    },
    "metrics": {
     "roic_avg5": 0.0348,
@@ -11625,10 +11612,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 9.9,
+    "confidence": 31.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roa_avg3": 0.01,
@@ -11767,7 +11754,7 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 176.8,
+    "upside_pct": 152.4,
     "confidence": 34.0,
     "method": "EV/EBITDA",
     "reason": "Các phương pháp định giá mâu thuẫn"
@@ -12080,10 +12067,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": -77.1,
+    "confidence": 34.0,
+    "method": "EV/EBITDA",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.1044,
@@ -12235,10 +12222,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": 14.1,
+    "confidence": 46.0,
+    "method": "P/E Multiple",
+    "reason": "Độ tin cậy 46% dưới 50%"
    },
    "metrics": {
     "roic_avg5": 0.0621,
@@ -12533,8 +12520,8 @@
    "valuation": {
     "band": "EXPENSIVE",
     "label": "Đắt",
-    "upside_pct": -30.3,
-    "confidence": 61.0,
+    "upside_pct": -42.3,
+    "confidence": 66.0,
     "method": "P/B-ROE Justified",
     "reason": null
    },
@@ -12684,10 +12671,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -29.2,
-    "confidence": 34.0,
-    "method": "P/E Multiple",
-    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho SELL, đã hạ về HOLD"
+    "upside_pct": 77.7,
+    "confidence": 48.0,
+    "method": "Historical Multiple",
+    "reason": "Độ tin cậy 48% dưới 50%"
    },
    "metrics": {
     "roe_avg5": 0.0053,
@@ -13138,8 +13125,8 @@
    "valuation": {
     "band": "EXPENSIVE",
     "label": "Đắt",
-    "upside_pct": -25.1,
-    "confidence": 50.0,
+    "upside_pct": -38.7,
+    "confidence": 58.0,
     "method": "P/B-ROE Justified",
     "reason": null
    },
@@ -13288,10 +13275,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": -58.2,
+    "confidence": 32.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roa_avg3": 0.0025,
@@ -13730,12 +13717,12 @@
    ],
    "veto": null,
    "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": -0.1,
-    "confidence": 71.0,
+    "band": "FAIR",
+    "label": "Hợp lý",
+    "upside_pct": -0.7,
+    "confidence": 56.0,
     "method": "EV/EBITDA",
-    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được"
+    "reason": null
    },
    "metrics": {
     "roic_avg5": 0.1409,
@@ -13807,12 +13794,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "NOT_AVAILABLE",
-    "label": "Chưa có",
-    "upside_pct": -8.4,
-    "confidence": 55.0,
+    "band": "ATTRACTIVE",
+    "label": "Hấp dẫn",
+    "upside_pct": 54.4,
+    "confidence": 57.0,
     "method": "P/B-ROE Justified",
-    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được"
+    "reason": null
    },
    "metrics": {
     "roe_avg5": 0.0828,
@@ -13879,12 +13866,12 @@
    "governance_flags": [],
    "veto": null,
    "valuation": {
-    "band": "ATTRACTIVE",
-    "label": "Hấp dẫn",
-    "upside_pct": 183.4,
-    "confidence": 60.0,
-    "method": "EV/EBITDA",
-    "reason": null
+    "band": "NOT_AVAILABLE",
+    "label": "Chưa có",
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roic_avg5": 0.2207,
@@ -14109,7 +14096,7 @@
    "valuation": {
     "band": "ATTRACTIVE",
     "label": "Hấp dẫn",
-    "upside_pct": 30.5,
+    "upside_pct": 22.3,
     "confidence": 65.0,
     "method": "EV/EBITDA",
     "reason": null
@@ -14189,10 +14176,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -35.7,
-    "confidence": 45.0,
-    "method": "P/E Multiple",
-    "reason": "Độ tin cậy 45% dưới 50%"
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roic_avg5": 0.0379,
@@ -14269,8 +14256,8 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 5.3,
-    "confidence": 35.0,
+    "upside_pct": 0.3,
+    "confidence": 36.0,
     "method": "EV/EBITDA",
     "reason": "Các phương pháp định giá mâu thuẫn"
    },
@@ -14346,10 +14333,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": -55.1,
+    "confidence": 30.0,
+    "method": "P/B-ROE Justified",
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roe_avg3": -0.0731,
@@ -14498,10 +14485,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": null,
-    "confidence": null,
-    "method": null,
-    "reason": "Không có trong đầu ra định giá tuần này"
+    "upside_pct": -25.6,
+    "confidence": 51.0,
+    "method": "Historical Multiple",
+    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho SELL, đã hạ về HOLD"
    },
    "metrics": {
     "roic_avg5": 0.021,
@@ -14563,10 +14550,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": -42.7,
-    "confidence": 55.0,
-    "method": "P/E Multiple",
-    "reason": "Nhóm tài chính (Insurance): chưa có biên khả năng thanh toán nên chưa đưa ra kết luận định giá — mô hình cho STRONG SELL, đã hạ về HOLD"
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {},
    "percentiles": {},
@@ -14633,10 +14620,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 15.2,
-    "confidence": 55.0,
-    "method": "P/E Multiple",
-    "reason": "Nhóm tài chính (Insurance): chưa có biên khả năng thanh toán nên chưa đưa ra kết luận định giá"
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {},
    "percentiles": {},
@@ -14900,10 +14887,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 128.3,
-    "confidence": 68.0,
+    "upside_pct": 84.4,
+    "confidence": 31.0,
     "method": "EV/EBITDA",
-    "reason": "Chỉ có 1 phương pháp định giá khả dụng, không kiểm chéo được — mô hình cho STRONG BUY, đã hạ về HOLD"
+    "reason": "Các phương pháp định giá mâu thuẫn"
    },
    "metrics": {
     "roic_avg5": 0.0855,
@@ -15054,10 +15041,10 @@
    "valuation": {
     "band": "NOT_AVAILABLE",
     "label": "Chưa có",
-    "upside_pct": 68.5,
-    "confidence": 34.0,
-    "method": "RNAV",
-    "reason": "Phương pháp chính RNAV còn giản lược"
+    "upside_pct": null,
+    "confidence": null,
+    "method": null,
+    "reason": "Không có trong đầu ra định giá tuần này"
    },
    "metrics": {
     "roe_avg5": 0.0159,
