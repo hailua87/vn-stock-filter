@@ -79,6 +79,17 @@
 .band-NOT_AVAILABLE { background: transparent; color: var(--band-not-available);
                       border: 1px dashed var(--band-not-available); }
 
+/* Khoang cac phuong phap, hien duoi nhan muc dinh gia khi mau thuan. Co lop
+   rieng chu khong dung .wl-sub: .wl-sub bi an o 1025-1440px, ma o day an di
+   thi o dinh gia chi con moi chu "Chua co" — dung cai dang muon noi ra. */
+.band-range {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mute);
+  white-space: nowrap;
+}
+.band-range-row { margin-top: 3px; }
+
 .band-reason {
   font-size: 12px;
   color: var(--text-dim);

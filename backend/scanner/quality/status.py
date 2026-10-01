@@ -39,10 +39,33 @@ def _primary_method(signal: dict) -> Optional[str]:
     return max(details, key=lambda m: m.get('weight') or 0).get('method')
 
 
+def _method_range(signal: dict) -> Optional[tuple]:
+    """Khoang day du (thap nhat - cao nhat) giua cac phuong phap, don vi dong.
+
+    KHONG dung fair_value_low/high cua engine: do la phan vi 25/75, nen voi 4
+    phuong phap no BO phuong phap thap nhat (HPG 11.300 bi cat khoi khoang
+    17.800-36.400). Muc dich o day la noi "bon phuong phap noi gi", nen phai la
+    khoang day du — dung mot khoang da cat hai dau la noi sai.
+    """
+    vals = sorted(v for m in (signal.get('method_details') or [])
+                  if isinstance((v := m.get('fair_value')), (int, float)) and v > 0)
+    if len(vals) < 2:
+        return None
+    return vals[0], vals[-1]
+
+
+def _vnd(v: float) -> str:
+    return f'{v:,.0f}'.replace(',', '.')
+
+
 def valuation_band(signal: Optional[dict]) -> dict:
     """signal: 1 phan tu cua web/data/valuation/latest.json['signals']."""
     empty = {'band': 'NOT_AVAILABLE', 'label': VALUATION_LABEL['NOT_AVAILABLE'],
-             'upside_pct': None, 'confidence': None, 'method': None, 'reason': 'Chưa định giá'}
+             'upside_pct': None, 'confidence': None, 'method': None, 'reason': 'Chưa định giá',
+             # Khoang cac phuong phap. Co gia tri CHI khi mau thuan — khi da chot
+             # duoc mot muc thi khoang la nhieu, con khi khong chot duoc thi khoang
+             # la tat ca nhung gi con dung duoc.
+             'range_low': None, 'range_high': None, 'dispersion_pct': None}
     if not signal:
         return empty
 
@@ -55,7 +78,15 @@ def valuation_band(signal: Optional[dict]) -> dict:
     # Engine da tu ha verdict ve HOLD khi cac phuong phap mau thuan. Voi muc dinh
     # gia thi mau thuan nghia la fair value khong dung duoc -> Chua co, khong phai Hop ly.
     if signal.get('methods_conflict'):
-        return {**out, 'reason': 'Các phương pháp định giá mâu thuẫn'}
+        rng = _method_range(signal)
+        if not rng:
+            return {**out, 'reason': 'Các phương pháp định giá mâu thuẫn'}
+        disp = signal.get('method_dispersion_pct')
+        n = len(signal.get('method_details') or [])
+        lech = f', lệch {disp:.0f}%' if isinstance(disp, (int, float)) else ''
+        return {**out, 'range_low': rng[0], 'range_high': rng[1], 'dispersion_pct': disp,
+                'reason': (f'{n} phương pháp cho khoảng {_vnd(rng[0])}–{_vnd(rng[1])} đ'
+                           f'{lech}; quá rộng để chốt một mức')}
 
     # Engine da ha verdict ve HOLD vi chua du can cu (nhom tai chinh chua co
     # NPL/CAR, hoac chi 1 phuong phap) -> muc dinh gia cung la Chua co. Thieu
