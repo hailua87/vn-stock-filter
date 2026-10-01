@@ -32,7 +32,14 @@
 .val-dashboard {
   display: grid;
   grid-template-columns: var(--val-filter-w) 1fr var(--val-detail-w);
-  height: calc(100vh - var(--topbar-h));
+  /* KHONG dung calc(100vh - --topbar-h): no chiem HET cho con lai, nen
+     footer.site-disclaimer bi day xuong duoi mep man hinh, ma html,body co
+     `overflow: hidden` nen khong cuon toi duoc — dong mien tru trach nhiem
+     khong bao gio hien tren trang DUA RA CON SO DINH GIA. Cung loi va cung
+     cach sua nhu .dashboard cua trang scanner, xem chu thich o styles.css.
+     min-height: 0 la bat buoc, thieu no thi bang lai tran ra ngoai. */
+  flex: 1;
+  min-height: 0;
   gap: 0;
   background: var(--bg-base);
 }
@@ -631,15 +638,6 @@ input[type=range]::-moz-range-thumb {
   }
 }
 
-/* ─── Miễn trừ trách nhiệm ─── */
-.site-disclaimer {
-  padding: 14px 20px 20px;
-  font-size: 11px;
-  line-height: 1.6;
-  color: var(--text-dim, #8b93a7);
-  background: var(--bg-base);
-  border-top: 1px solid var(--border, #2a3040);
-  text-align: center;
-}
-
-.site-disclaimer strong { color: var(--text, #e6e9ef); }
+/* Mien tru trach nhiem: dung ban chung o web/styles.css (mot dong, mo rong
+   duoc bang <details>). Ban ghi de cu o day cao 70px va khong co kieu cho
+   <summary> nen van ban van chay thanh ba dong. */
