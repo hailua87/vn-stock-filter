@@ -1597,6 +1597,16 @@ kbd {
   .chip-row-vertical { grid-template-columns: 1fr; }
 }
 @media (max-width: 1024px) {
+  /* Nang `overflow: auto` tu 768px len 1024px.
+     Vi sao: tu 1024px tro xuong, .wl-dashboard chuyen sang xep chong
+     (`height: auto`) nen trang CAO HON man hinh — do that o 1024x768 la
+     13.062px bang. Nhung `overflow: hidden` chi noi ra o <=768px, nen trong
+     dai 769-1024px khong cuon duoc: chi 5/200 ma xem duoc, 195 ma con lai
+     khong co cach nao toi. Dai nay la iPad ngang va laptop nho.
+     Trang scanner va dinh gia khong bi anh huong: dashboard cua chung la
+     `flex: 1` nen vua khit man hinh, khong co gi de cuon. */
+  html, body { overflow: auto; }
+
   /* On narrower screens, collapse filters by default */
   :root {
     --col-filter-w: 200px;
@@ -1607,8 +1617,8 @@ kbd {
 
 /* ─── Mobile: single-column with overlay drawers ─── */
 @media (max-width: 768px) {
-  html, body { overflow: auto; }
-  
+  /* `html, body { overflow: auto }` da khai o khoi 1024px, khong lap lai. */
+
   /* flex-wrap / order / flex-basis / overflow-x da khai o khoi 1280px, khong
      lap lai. O day chi con phan COMPACT rieng cho mobile. */
   .topbar {
@@ -1622,7 +1632,7 @@ kbd {
   
   /* flex: none — BAT BUOC. body la flex column nen `flex: 1` o pham vi chung
      se ep .dashboard chiem phan con lai thay vi gian theo noi dung, pha hanh vi
-     cuon doc cua mobile (html,body { overflow: auto } ngay tren). */
+     cuon doc cua mobile (html,body { overflow: auto }, khai o khoi 1024px). */
   .dashboard { display: block; height: auto; flex: none; }
   
   /* Filters as left drawer overlay */
@@ -1640,7 +1650,7 @@ kbd {
   
   /* .col-detail PHAI quay ve `fixed` o day, khong dung `absolute` nhu pham vi
      chung. Ly do: o mobile `.dashboard` co `display: block; height: auto` va
-     `html, body { overflow: auto }` — trang CUON DOC. Mot phan tu absolute neo
+     `html, body { overflow: auto }` (khoi 1024px) — trang CUON DOC. Mot phan tu
      theo .dashboard se cuon di theo trang va cao bang ca noi dung bang, thay vi
      dung yen phu man hinh. `fixed` neo theo viewport, dung hanh vi drawer von
      co. Kem theo top: 0 vi topbar o day wrap nhieu dong. */

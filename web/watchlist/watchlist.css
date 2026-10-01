@@ -61,7 +61,12 @@
 
 /* ─── Màn hẹp: xếp chồng thay vì ẩn bộ lọc và chi tiết ─── */
 @media (max-width: 1024px) {
-  .wl-dashboard { display: flex; flex-direction: column; height: auto; }
+  /* flex: none — BAT BUOC, cung ly do nhu .dashboard o styles.css. body la
+     flex column nen `flex: 1` (khai o .val-dashboard) se ep khoi nay vua khit
+     man hinh va bang cuon BEN TRONG khung, thay vi trang dai cuon theo noi
+     dung. Thieu dong nay thi o 375px bang tu 14.161px co lai con 553px —
+     doi han cach cuon tren dien thoai. */
+  .wl-dashboard { display: flex; flex-direction: column; height: auto; flex: none; }
   .wl-dashboard .val-filters, .wl-dashboard .val-detail { display: block; border: 0; }
   .wl-filters .info-card { display: none; }
   .wl-filters .col-body { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px 16px; }
