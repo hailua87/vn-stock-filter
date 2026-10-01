@@ -144,7 +144,11 @@ def test_outlier_gate(upside, excluded):
     assert (outlier_reason(upside) is not None) == excluded
 
 
-# --- 5. Nhóm tài chính luôn HOLD khi chưa có NPL/CAR ------------------------
+# --- 5. Nhóm tài chính chưa đủ căn cứ thì HOLD ------------------------------
+#
+# NGÂN HÀNG ĐÃ GỠ ngày 01/10/2026: nợ xấu, bao phủ và CAR đều có từ thuyết minh
+# BCTC, đủ 17/17 ngân hàng trong rổ. Chứng khoán và bảo hiểm giữ lại, nhưng LÝ
+# DO khác hẳn — nợ xấu/CAR không phải chỉ tiêu của hai nhóm đó.
 
 @pytest.fixture
 def no_dispersion(monkeypatch):
@@ -154,26 +158,100 @@ def no_dispersion(monkeypatch):
     monkeypatch.setattr(engine, '_method_dispersion', lambda fvs: 0.0)
 
 
-def _value(ticker, industry_lv2, price, shares):
+def _value(ticker, industry_lv2, price, shares, asset_quality=None,
+           loan_allowance=None):
     from scanner.strategies.valuation import value_ticker
     raw = _raw(ticker, overview={'industry': industry_lv2, 'outstanding_share': shares})
     raw['current_price'] = price
+    if asset_quality is not None:
+        raw['bank_asset_quality'] = asset_quality
+    if loan_allowance is not None:
+        # Fixture là bản thu gọn của BCTC thật nên không có khoản mục dự phòng.
+        # Thêm vào để test đi qua ĐÚNG đường thật: nợ xấu từ thuyết minh + dự
+        # phòng từ bảng cân đối -> bao phủ. Nguồn ghi ÂM.
+        from scanner.financial_fetcher import LOAN_ALLOWANCE_ITEM
+        raw['balance_sheet'][0][LOAN_ALLOWANCE_ITEM] = loan_allowance
     return value_ticker(ticker, raw_fundamentals=raw)
 
 
-def test_bank_verdict_forced_to_hold_but_upside_kept(no_dispersion):
-    # VCB fair value ≈ 48.000đ (lượt chạy 21/09); giá 20.000đ → mô hình cho mua mạnh
-    r = _value('VCB', 'Banks', 20_000.0, 8_355_675_094)
+# Chất lượng tài sản THẬT của VCB 2025 (thuyết minh BCTC): nợ xấu 0,58%, CAR
+# 11,56%, và số tiền nợ xấu để tính bao phủ.
+VCB_2025 = {2025: {'npl_ratio': 0.0058, 'car': 0.1156,
+                   'npl_amount': 9_670_000_000_000.0,
+                   'gross_loans': 1_673_530_000_000_000.0}}
+
+
+def test_bank_verdict_is_no_longer_forced_to_hold(no_dispersion):
+    """
+    Ngược hẳn với test cũ ở chỗ này.
+
+    Tới 30/09/2026 ngân hàng luôn bị hạ về HOLD vì "chưa có NPL/CAR". Nay có —
+    thuyết minh BCTC cho đủ nợ xấu, bao phủ và CAR cho 17/17 ngân hàng tới 2025.
+    """
+    # Dự phòng VCB 2025: 24.975,679 tỷ -> bao phủ 258%
+    r = _value('VCB', 'Banks', 20_000.0, 8_355_675_094, asset_quality=VCB_2025,
+               loan_allowance=-24_975.679)
     assert r.upside_pct > 0.5
+    assert r.verdict in ('BUY', 'STRONG BUY'), f'vẫn bị hạ: {r.verdict}'
+    assert not any('NPL/CAR' in w for w in r.warnings)
+
+
+def test_a_bank_without_asset_quality_data_is_still_held(no_dispersion):
+    """
+    Nửa còn lại của hợp đồng, và là nửa dễ làm sai.
+
+    Gỡ ngân hàng khỏi cổng VÔ ĐIỀU KIỆN thì một lượt gọi thuyết minh hỏng sẽ
+    âm thầm thành nhãn "Hấp dẫn", và CAR lại rơi về mặc định 0,115. Nên cổng
+    gác theo DỮ LIỆU CÓ THẬT, không theo tên ngành.
+
+    Hai test trong test_valuation_bands.py bảo vệ đúng điều này và chúng đã đỏ
+    khi tôi gỡ vô điều kiện.
+    """
+    r = _value('VCB', 'Banks', 20_000.0, 8_355_675_094)   # không truyền dữ liệu
+    assert r.upside_pct > 0.5, 'mô hình vẫn thấy upside'
+    assert r.verdict == 'HOLD', 'thiếu dữ liệu thì không được kết luận'
+    assert 'thiếu' in r.warnings[0] and 'car' in r.warnings[0]
+
+
+def test_a_bank_missing_only_car_is_still_held(no_dispersion):
+    """Có nợ xấu và bao phủ nhưng không có CAR vẫn là thiếu."""
+    part = {2025: {'npl_ratio': 0.0058, 'car': None,
+                   'npl_amount': 9_670_000_000_000.0}}
+    r = _value('VCB', 'Banks', 20_000.0, 8_355_675_094, asset_quality=part,
+               loan_allowance=-24_975.679)
+    assert r.verdict == 'HOLD' and 'car' in r.warnings[0]
+
+
+def test_a_bank_missing_only_coverage_is_still_held(no_dispersion):
+    """
+    Có nợ xấu VÀ CAR thật, nhưng không tính được bao phủ (thiếu khoản mục dự
+    phòng trong bảng cân đối) — vẫn phải chặn.
+
+    Test này sinh ra vì một lỗ hổng: phép phá hoại "bỏ npl_coverage_ratio khỏi
+    điều kiện" KHÔNG làm test nào đỏ. Hai test kia đều bị CAR chặn trước nên
+    không bao giờ chạm tới bao phủ.
+    """
+    r = _value('VCB', 'Banks', 20_000.0, 8_355_675_094, asset_quality=VCB_2025)
     assert r.verdict == 'HOLD'
-    assert 'chưa có NPL/CAR' in r.warnings[0]
-    assert 'STRONG BUY' in r.warnings[0]
+    assert 'npl_coverage_ratio' in r.warnings[0], r.warnings[0]
+    assert 'car' not in r.warnings[0], 'CAR có thật, không được kể là thiếu'
 
 
-@pytest.mark.parametrize('lv2', ['Financial Services', 'Insurance'])
-def test_securities_and_insurance_also_forced(no_dispersion, lv2):
+@pytest.mark.parametrize('lv2,phrase', [('Financial Services', 'margin quá hạn'),
+                                        ('Insurance', 'biên khả năng thanh toán')])
+def test_securities_and_insurance_still_forced_but_for_the_right_reason(
+        no_dispersion, lv2, phrase):
+    """
+    Hai nhóm này vẫn chưa đủ căn cứ — nhưng lý do phải nói ĐÚNG thứ còn thiếu.
+
+    Trước 01/10 cả ba nhóm dùng chung câu "chưa có NPL/CAR". Với một công ty
+    chứng khoán vốn không có sổ cho vay khách hàng, câu đó khiến người đọc đi
+    tìm một nguồn không tồn tại.
+    """
     r = _value('VCB', lv2, 20_000.0, 8_355_675_094)
-    assert r.verdict == 'HOLD' and 'NPL/CAR' in r.warnings[0]
+    assert r.verdict == 'HOLD'
+    assert phrase in r.warnings[0], r.warnings[0]
+    assert 'NPL/CAR' not in r.warnings[0]
 
 
 def test_non_financial_verdict_not_forced(no_dispersion):

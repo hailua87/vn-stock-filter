@@ -95,7 +95,7 @@ def test_bank_with_guard_is_not_attractive(no_dispersion):
     (sig,), counts = signals_with_bands([r])
     assert sig['verdict'] == 'HOLD' and sig['upside_pct'] > 50
     assert sig['valuation_band']['band'] == 'NOT_AVAILABLE'
-    assert 'NPL/CAR' in sig['valuation_band']['reason']
+    assert 'thiếu' in sig['valuation_band']['reason']
 
 
 def test_single_method_is_not_available(no_dispersion, monkeypatch):
@@ -121,4 +121,4 @@ def test_bank_with_model_hold_is_still_not_available():
     (sig,), _ = signals_with_bands([r])
     assert sig['verdict'] == 'HOLD'
     assert sig['valuation_band']['band'] == 'NOT_AVAILABLE'
-    assert 'NPL/CAR' in sig['valuation_band']['reason']
+    assert 'thiếu' in sig['valuation_band']['reason']
