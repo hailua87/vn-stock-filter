@@ -1,0 +1,92 @@
+# Backfill lich su OHLCV — CHAY TAY, khong co lich.
+#
+# Vi sao can (do 01/10/2026):
+#   21/69 ma dinh gia bi bao "cac phuong phap mau thuan" va KHONG co muc dinh
+#   gia. Ca 21 ma deu co ghi chu thieu historical multiples, va do tin cay cua
+#   chung la trung vi 32% — duoi nguong 50%, nen khong mot ma nao ra duoc nhan.
+#   Nhom 48 ma con lai co trung vi 57%, va 44/48 dat nguong.
+#
+#   Historical P/E - P/B can >= 3 nam cache OHLCV. Cache tren CI co trung vi
+#   548 ngay = 1,5 nam. Nguyen nhan: `fetch_with_cache` lan dau chi lay
+#   `--lookback 400` ngay roi CHI noi ve phia truoc, nen sau 5 thang van hanh
+#   no dat dung ~548 ngay.
+#
+#   `backend/backfill_history.py` da ton tai cho dung viec nay tu truoc, nhung
+#   khong co workflow nao chay no.
+#
+# NANG: no goi nguon ~1.000 luot (250 ma x 4 doan nam), delay 2s moi luot nen
+# ~35-40 phut goi lien tuc. Day la viec MOT LAN, khong dat lich.
+#
+# KHONG backfill ma da roi san o day: script canh bao ve survivorship bias va
+# ho tro `--extra-tickers`, nhung dieu do can cho BACKTEST, khong can cho viec
+# khoi phuc historical multiples cua ro hien tai. Tron hai muc tieu vao mot
+# luot chay se lam ca hai kho kiem chung hon.
+name: Backfill OHLCV
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: 'So nam lich su (>= 3 moi du cho historical multiples)'
+        required: false
+        default: '4'
+      limit:
+        description: 'So ma thanh khoan nhat (200 la ro dinh gia)'
+        required: false
+        default: '250'
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      # Khoi phuc cache HIEN CO roi noi them phia truoc: script co `--resume`
+      # va chi keo phan con thieu, nen khong tai lai du lieu da co.
+      - name: Restore OHLCV cache
+        id: restore
+        uses: actions/cache/restore@v4
+        with:
+          path: backend/data/cache
+          key: ohlcv-cache-v3-backfill-${{ github.run_id }}
+          restore-keys: |
+            ohlcv-cache-v3-
+
+      - name: Do do sau TRUOC khi backfill
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python backend/measure_cache_depth.py
+
+      - name: Backfill
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          python backend/backfill_history.py \
+            --years ${{ github.event.inputs.years || '4' }} \
+            --limit ${{ github.event.inputs.limit || '250' }}
+
+      - name: Do do sau SAU khi backfill
+        if: always()
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python backend/measure_cache_depth.py
+
+      # Luu voi tien to `ohlcv-cache-v3-` de daily-scan va weekly-valuation
+      # (dung restore-keys cung tien to) nhan duoc cache sau nay.
+      - name: Save OHLCV cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: backend/data/cache
+          key: ohlcv-cache-v3-backfill-${{ github.run_id }}
