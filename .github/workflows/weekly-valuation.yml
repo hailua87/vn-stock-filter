@@ -66,7 +66,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: backend/data/cache
-          key: ohlcv-cache-v3-valuation
+          key: ohlcv-cache-v3-weekly-${{ github.run_id }}
           restore-keys: |
             ohlcv-cache-v3-
 
@@ -188,6 +188,30 @@ jobs:
         # tieng moi job nen van trong nguong, nhung day la cai gia phai tra cho
         # viec nguon timeout ~1,7 lan moi ma.
         timeout-minutes: 120
+
+      # Luu cache. THIEU buoc nay thi moi thu luot tuan ghi vao backend/data/cache
+      # deu bi bo khi job ket thuc — luot nay chi RESTORE, khong SAVE, tu luc
+      # workflow ra doi (cd012b9, 13/08/2026).
+      #
+      # Cai bi bo khong phai thu vat:
+      #   - vnindex_cache.parquet: beta 2 nam tinh tu day. Khong co no thi beta
+      #     roi ve gia tri du phong 1.0 cho MOI ma, va do la dau vao cua WACC
+      #     trong DCF. Tren CI no CHUA BAO GIO duoc giu lai.
+      #   - OHLCV cua ro 200 ma: historical P/E - P/B can >= 3 nam. Luot tuan
+      #     keo ve roi vut di, luot sau keo lai tu dau.
+      #
+      # An toan khi ghi de: buoc restore o tren da nap cache moi nhat truoc, nen
+      # dia luc nay la "cache cu + phan tuan nay them" — tap LON HON, khong bao
+      # gio nho hon. daily-scan nhan duoc qua restore-keys cung tien to.
+      #
+      # `if: always()`: luot cham tran bi chat van da keo ve duoc mot phan. Bo di
+      # la bat luot sau lam lai tu dau, dung cai da lam hong luot nay.
+      - name: Save OHLCV cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: backend/data/cache
+          key: ohlcv-cache-v3-weekly-${{ github.run_id }}
 
       # `if: always()` la diem mau chot, khong phai thoi quen.
       #
