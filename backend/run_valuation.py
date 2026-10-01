@@ -31,7 +31,7 @@ from time import monotonic
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from scanner.data_fetcher import get_ticker_universe, setup_api_key
-from scanner.financial_fetcher import fetch_fundamentals
+from scanner.financial_fetcher import fetch_bank_asset_quality, fetch_fundamentals
 from scanner.strategies.valuation import value_ticker
 from scanner.snapshots import record_snapshot
 from scanner.publish_gate import may_publish
@@ -201,6 +201,14 @@ def main(argv=None, clock=monotonic):
                                        today=str(raw.get('fetched_at', ''))[:10] or None)
                 snapshot_stats['new'] += snap['new']
                 snapshot_stats['revised'] += snap['revised']
+
+            # Ngân hàng: lấy nợ xấu + CAR từ thuyết minh BCTC TRƯỚC khi
+            # normalize, vì normalizer đọc chúng để điều chỉnh P/B mục tiêu.
+            # Phân ngành suy từ `overview` nên không cần normalize trước.
+            #
+            # Một lượt gọi thêm cho ~17 ngân hàng, không phải cả rổ 200.
+            if classifier.classify(ticker, raw.get('overview') or {})                     .valuation_industry.value == 'Banking':
+                raw['bank_asset_quality'] = fetch_bank_asset_quality(ticker)
 
             # Enrich với beta + historical multiples thực
             raw = enrich_with_market_metrics(ticker, raw)

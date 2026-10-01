@@ -166,12 +166,11 @@ def attach_bank_asset_quality(annual: dict, quality: Optional[dict]) -> dict:
         row = q.get(year) or {}
         npl_ratio.append(row.get('npl_ratio'))
         car.append(row.get('car'))
-        npl_ty = row.get('npl_amount')
-        a = allow[i] if i < len(allow) else None
-        if npl_ty and a:
-            coverage.append(abs(a) / (npl_ty / 1e9))     # tỷ / (đồng → tỷ)
-        else:
-            coverage.append(None)
+        # Phép đổi đơn vị nằm ở `financial_fetcher.bank_npl_coverage` — một
+        # chỗ duy nhất, dùng chung với đường định giá.
+        from ..financial_fetcher import bank_npl_coverage
+        coverage.append(bank_npl_coverage(row.get('npl_amount'),
+                                          allow[i] if i < len(allow) else None))
     annual['npl_ratio'] = npl_ratio
     annual['car'] = car
     annual['npl_coverage'] = coverage

@@ -274,15 +274,41 @@ STRONG_SELL_THRESHOLD = -0.35
 # nghĩa — báo mâu thuẫn thay vì đưa ra một con số duy nhất.
 MAX_METHOD_DISPERSION = 0.40
 
-# Nhóm tài chính luôn công bố HOLD cho tới khi có nguồn NPL, bao phủ nợ xấu,
-# CAR: vnstock bản cộng đồng chỉ trả bảng ratio 2018 và 3 bảng BCTC không đủ
-# để tính các chỉ số này (CAR đang dùng mặc định 0,115). Fair value và upside
-# vẫn hiển thị; chỉ verdict bị hạ. Đổi thành frozenset() khi đã có nguồn.
+# Nhóm tài chính chưa đủ căn cứ để kết luận định giá. Fair value và upside vẫn
+# hiển thị; chỉ verdict bị hạ về HOLD.
+#
+# NGÂN HÀNG ĐÃ GỠ ngày 01/10/2026: nợ xấu, bao phủ nợ xấu và CAR đều có từ
+# thuyết minh BCTC (`vci.bank_asset_quality`), đủ 17/17 ngân hàng trong rổ, tới
+# 2025. Trước đó CAR dùng mặc định 0,115 cho mọi ngân hàng và bao phủ bị gán
+# cứng 1,0 — tức điều chỉnh P/B theo chất lượng tài sản không bao giờ chạy.
+#
+# CHỨNG KHOÁN và BẢO HIỂM GIỮ LẠI, nhưng lý do KHÁC hẳn ngân hàng — và trước
+# 01/10 thông báo nói sai: nợ xấu/CAR không phải chỉ tiêu của hai nhóm này.
+#   · Chứng khoán: cần chất lượng dư nợ margin và mức độ tự doanh. Nguồn chưa
+#     tách được margin quá hạn khỏi tổng dư nợ margin.
+#   · Bảo hiểm: cần biên khả năng thanh toán và dự phòng nghiệp vụ. Thuyết minh
+#     có nhưng chưa khảo sát; và chỉ 3 mã trong rổ nên chưa đáng làm trước.
 HOLD_ONLY_INDUSTRIES = frozenset({
-    ValuationIndustry.BANKING,
     ValuationIndustry.SECURITIES,
     ValuationIndustry.INSURANCE,
 })
+
+# Ngân hàng chỉ được kết luận KHI CÓ chất lượng tài sản thật. Gỡ ngân hàng khỏi
+# danh sách trên là chưa đủ: nếu gỡ vô điều kiện thì một lượt gọi thuyết minh
+# hỏng sẽ âm thầm biến thành nhãn "Hấp dẫn", và CAR lại rơi về mặc định 0,115.
+#
+# Đây đúng điều hai test `test_bank_with_guard_is_not_attractive` và
+# `test_bank_with_model_hold_is_still_not_available` bảo vệ — chúng đỏ khi tôi
+# gỡ cổng vô điều kiện, và chúng đúng.
+BANK_REQUIRES = ('npl_ratio', 'npl_coverage_ratio')
+
+# Lý do riêng cho từng nhóm. Dùng chung một câu "chưa có NPL/CAR" cho cả ba là
+# nói sai với chứng khoán và bảo hiểm — người đọc sẽ đi tìm nguồn NPL cho một
+# công ty chứng khoán vốn không có sổ cho vay.
+HOLD_ONLY_REASON = {
+    ValuationIndustry.SECURITIES: 'chưa tách được dư nợ margin quá hạn',
+    ValuationIndustry.INSURANCE: 'chưa có biên khả năng thanh toán',
+}
 
 # Cần ít nhất chừng này phương pháp khả dụng mới đưa ra kết luận có hướng.
 # Một phương pháp thì độ phân tán = 0 nên không có gì để phát hiện mâu thuẫn
@@ -290,8 +316,19 @@ HOLD_ONLY_INDUSTRIES = frozenset({
 MIN_METHODS_FOR_DIRECTIONAL = 2
 
 
+def _bank_quality_missing(data: dict) -> list:
+    """Chỉ tiêu chất lượng tài sản còn thiếu cho một ngân hàng."""
+    aq = data.get('asset_quality') or {}
+    missing = [k for k in BANK_REQUIRES if not aq.get(k)]
+    # CAR mặc định 0,115 KHÔNG tính là có: điều chỉnh P/B theo CAR khi ấy chỉ
+    # phản ánh một con số bịa, không phản ánh ngân hàng nào cả.
+    if not (data.get('balance_sheet') or {}).get('car_is_real'):
+        missing.append('car')
+    return missing
+
+
 def _publish_guard(verdict: str, industry: ValuationIndustry,
-                   n_methods: int) -> Tuple[str, Optional[str]]:
+                   n_methods: int, data: Optional[dict] = None) -> Tuple[str, Optional[str]]:
     """
     Chưa đủ căn cứ để kết luận → verdict HOLD và trả lý do. Trả (verdict, lý do).
 
@@ -302,8 +339,14 @@ def _publish_guard(verdict: str, industry: ValuationIndustry,
     """
     model = f" — mô hình cho {verdict}, đã hạ về HOLD" if verdict != "HOLD" else ""
     if industry in HOLD_ONLY_INDUSTRIES:
-        return "HOLD", (f"Nhóm tài chính ({industry.value}): chưa có NPL/CAR nên chưa "
+        why = HOLD_ONLY_REASON.get(industry, 'chưa đủ chỉ tiêu đặc thù ngành')
+        return "HOLD", (f"Nhóm tài chính ({industry.value}): {why} nên chưa "
                         f"đưa ra kết luận định giá{model}")
+    if industry is ValuationIndustry.BANKING:
+        thieu = _bank_quality_missing(data or {})
+        if thieu:
+            return "HOLD", (f"Ngân hàng: thiếu {', '.join(thieu)} nên chưa đưa ra "
+                            f"kết luận định giá{model}")
     if n_methods < MIN_METHODS_FOR_DIRECTIONAL:
         return "HOLD", (f"Chỉ có {n_methods} phương pháp định giá khả dụng, không kiểm "
                         f"chéo được{model}")
@@ -519,7 +562,7 @@ def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
         overall_confidence *= 0.5
 
     verdict, guard_warning = _publish_guard(verdict, classification.valuation_industry,
-                                            len(used_methods))
+                                            len(used_methods), data)
     if guard_warning:
         all_warnings.insert(0, guard_warning)
 

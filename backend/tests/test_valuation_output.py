@@ -38,13 +38,16 @@ def test_methods_conflict_is_json_bool(price):
     ('SELL', ValuationIndustry.OIL_GAS, 1, 'HOLD', '1 phương pháp'),                        # PVD
     ('STRONG BUY', ValuationIndustry.CHEMICALS, 3, 'STRONG BUY', None),                     # DCM
     ('SELL', ValuationIndustry.CONSUMER_DISCRETIONARY, 2, 'SELL', None),                    # BCV
-    ('STRONG SELL', ValuationIndustry.BANKING, 3, 'HOLD', 'NPL/CAR'),
+    # Ngan hang THIEU chat luong tai san -> van HOLD (01/10/2026)
+    ('STRONG SELL', ValuationIndustry.BANKING, 3, 'HOLD', 'thiếu'),
     # Mô hình tự ra HOLD vẫn phải có lý do, để mức định giá là "Chưa có"
     ('HOLD', ValuationIndustry.OIL_GAS, 1, 'HOLD', '1 phương pháp'),
-    ('HOLD', ValuationIndustry.BANKING, 3, 'HOLD', 'NPL/CAR'),
+    ('HOLD', ValuationIndustry.BANKING, 3, 'HOLD', 'thiếu'),
     ('HOLD', ValuationIndustry.CHEMICALS, 3, 'HOLD', None),
 ])
 def test_publish_guard(verdict, industry, n, expected, warn):
+    # Khong truyen `data` => ngan hang bi coi la thieu chat luong tai san, dung
+    # nhu khi luot goi thuyet minh hong.
     v, w = engine._publish_guard(verdict, industry, n)
     assert v == expected
     if warn is None:

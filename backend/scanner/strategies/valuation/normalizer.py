@@ -212,11 +212,19 @@ def normalize_fundamentals(raw: Dict[str, Any]) -> Dict[str, Any]:
         bvps = (balance_sheet['shareholders_equity'] * 1_000_000_000) / shares
     balance_sheet['book_value_per_share'] = bvps
 
-    # CAR cho banking (đôi khi nằm ở ratio table, đôi khi BS)
-    car = _safe_float(_get_field(r0, RATIO_ALIASES['car']))
+    # CAR cho banking. Thứ tự nguồn có chủ ý:
+    #   1. `bank_asset_quality` — thuyết minh BCTC, số THẬT tới 2025
+    #   2. bảng ratio — dừng ở 2018 và đã gỡ khỏi hệ thống 26/09/2026
+    #   3. mặc định 0,115
+    # Trước 01/10/2026 chỉ có (2) và (3), nên MỌI ngân hàng dùng 0,115 — tức
+    # điều chỉnh P/B theo CAR không bao giờ hoạt động.
+    aq_src = raw.get('bank_asset_quality') or {}
+    aq_latest = aq_src.get(max(aq_src)) if aq_src else {}
+    car = _safe_float(aq_latest.get('car')) or _safe_float(_get_field(r0, RATIO_ALIASES['car']))
     if car == 0:
         car = 0.115  # default conservative cho VN banks
     balance_sheet['car'] = car
+    balance_sheet['car_is_real'] = bool(_safe_float(aq_latest.get('car')))
 
     # === Income statement ===
     revenue = _safe_float(_get_field(is0, IS_ALIASES['revenue']))
@@ -410,12 +418,24 @@ def normalize_fundamentals(raw: Dict[str, Any]) -> Dict[str, Any]:
     }
 
     # === Asset quality (cho banking) ===
+    #
+    # Nguồn THẬT là thuyết minh BCTC (`bank_asset_quality`, tới 2025). Bảng
+    # ratio dừng ở 2018 và đã gỡ 26/09/2026, nên nhánh cũ gần như luôn rỗng —
+    # và khi rỗng thì `calculate_asset_quality_adjustment` trả hệ số 1,0, tức
+    # điều chỉnh P/B theo chất lượng tài sản KHÔNG BAO GIỜ chạy.
+    #
+    # Bao phủ nợ xấu từng bị gán cứng 1,0 ("tạm default reasonable cho VN") —
+    # một con số bịa, và nó rơi đúng vào khoảng "trung tính" nên không ai thấy.
     asset_quality = {}
-    if ratios.get('npl_ratio'):
+    if aq_latest.get('npl_ratio'):
+        from ...financial_fetcher import LOAN_ALLOWANCE_ITEM, bank_npl_coverage
+        asset_quality['npl_ratio'] = aq_latest['npl_ratio']
+        allowance = _safe_float((bs0 or {}).get(LOAN_ALLOWANCE_ITEM))
+        cov = bank_npl_coverage(aq_latest.get('npl_amount'), allowance)
+        if cov is not None:
+            asset_quality['npl_coverage_ratio'] = cov
+    elif ratios.get('npl_ratio'):
         asset_quality['npl_ratio'] = ratios['npl_ratio']
-        # Coverage ratio: cần loan_loss_reserves / NPL
-        # Tạm default reasonable cho VN
-        asset_quality['npl_coverage_ratio'] = 1.0
 
     return {
         'ticker': ticker,

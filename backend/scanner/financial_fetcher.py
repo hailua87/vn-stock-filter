@@ -287,6 +287,31 @@ def fetch_bank_ratios(ticker: str) -> Optional[Dict[str, Dict[int, float]]]:
     return {'nim': nim} if nim else None
 
 
+# Khoản mục dự phòng cho vay trong bảng cân đối ngân hàng. Nguồn ghi ÂM.
+LOAN_ALLOWANCE_ITEM = 'less_provision_for_losses_on_loans_and_advances_to_customers'
+
+
+def bank_npl_coverage(npl_amount_dong: Optional[float],
+                      allowance_ty: Optional[float]) -> Optional[float]:
+    """
+    Bao phủ nợ xấu = dự phòng / nợ xấu. MỘT chỗ duy nhất đổi đơn vị.
+
+    Hai nguồn, hai đơn vị khác nhau:
+      · nợ xấu   — thuyết minh BCTC, theo ĐỒNG
+      · dự phòng — bảng cân đối trong cache, theo TỶ ĐỒNG (và ghi ÂM)
+
+    Quên chia 1e9 thì kết quả lệch đúng một tỷ lần và trông như 0% — không có
+    gì báo lỗi. Hai nơi dùng hàm này (chấm chất lượng và định giá); viết lại ở
+    mỗi nơi thì đến lúc sửa sẽ chỉ sửa một.
+
+    Kiểm chéo VCB 2025: 24.975,679 tỷ / 9.670 tỷ = 258%, khớp mức công bố.
+    """
+    if not npl_amount_dong or not allowance_ty:
+        return None
+    npl_ty = npl_amount_dong / 1e9
+    return abs(allowance_ty) / npl_ty if npl_ty else None
+
+
 def fetch_bank_asset_quality(ticker: str) -> Optional[Dict[str, Any]]:
     """
     Nợ xấu và CAR từ thuyết minh BCTC (`vci.bank_asset_quality`).
