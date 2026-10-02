@@ -682,9 +682,16 @@ input { font-family: inherit; }
   flex-wrap: wrap;
   gap: 4px;
 }
+/* Chip trang thai DU LIEU ("Gia dieu chinh", "Loc corporate actions"), khong
+   phai trang thai GIA. Ban cu dung --up/--up-soft, vi pham quy tac mau cua
+   tokens.css ("5 mau trang thai gia CHI dung cho gia/bien dong gia, khong dung
+   trang tri") VA chi dat 4,33:1 khi do that — duoi 4,5:1.
+   Nay dung thang phi sac, dung nhu quy tac do chi dinh: 6,58:1. Dau ✓ da mang
+   nghia "da xac nhan", mau xanh khong them thong tin gi — no chi muon nguoi doc
+   nham sang chieu TANG GIA. */
 .flag {
-  background: var(--up-soft);
-  color: var(--up);
+  background: var(--bg-elev-2);
+  color: var(--text-dim);
   border-radius: 2px;
   padding: 3px 6px;
   font-size: 10px;
