@@ -4,12 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VN Valuation — Định giá đa phương pháp</title>
+<!-- tokens.css nap TRUOC styles.css la co y: chi lay token phi mau
+     (--fs-*, --sp-*, --r-*, --fw-*); mau de styles.css ghi de. Thieu no thi
+     .ticker-cell o bang nay ra 12px thay vi 13px (do that 02/10/2026), vi
+     --fs-sm va --fw-semibold khong ton tai. Hai trang kia da nap san. -->
+<link rel="stylesheet" href="../tokens.css">
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="../shared/quality-view.css">
 <link rel="stylesheet" href="valuation.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Font tai BAT DONG BO, giong ../index.html: <link rel=stylesheet> toi origin
+     ngoai chan render, them 200-400ms LCP va lam trang hong khi bi chan mang.
+     media="print" cho tai voi do uu tien thap, onload doi lai thanh "all". -->
+<link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<noscript><link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
 </head>
 <body>
 

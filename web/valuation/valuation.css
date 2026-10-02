@@ -95,10 +95,14 @@
   padding: 7px 10px;
   font-family: var(--font-sans);
   font-size: 13px;
-  outline: none;
   transition: border 120ms ease;
 }
 
+/* KHONG dat `outline: none` o day. Tep nay nap SAU styles.css nen no de bep
+   quy tac chung `:where(a,button,input,...):focus-visible` (do uu tien 0,1,0,
+   bang nhau thi ban sau thang) — do bang cach bam Tab that: 3/8 dieu khien
+   cua trang nay khong co vong focus nao, trong khi scanner va watchlist deu
+   co du. Doi mau vien khi focus la dau hieu CHI BANG MAU, khong du mot minh. */
 .filter-input:focus, .filter-select:focus {
   border-color: var(--focus);
 }
@@ -116,7 +120,8 @@ input[type=range] {
   height: 4px;
   background: var(--bg-elev-3);
   border-radius: 2px;
-  outline: none;
+  /* `input[type=range]` co do uu tien 0,1,1 — cao hon quy tac focus chung
+     (0,1,0), nen `outline: none` o day chan han vong focus. */
 }
 
 input[type=range]::-webkit-slider-thumb {
