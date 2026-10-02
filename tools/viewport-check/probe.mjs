@@ -126,7 +126,23 @@ export const PROBE = () => {
   // Nguy hiem hon ca cai sai: bien do PHU THUOC SO HANG du lieu, nen hom khac
   // du lieu khac thi so cap gia doi tu 2 thanh 0 hay 3 — va se hien o cot MOI
   // PHAT SINH ma khong ai biet vi sao.
-  // Giao rect voi moi to tien cat; rong bang 0 nghia la khuat han -> bo qua.
+  // Giao rect voi moi to tien cat; nho hon TOI_THIEU nghia la khuat han -> bo qua.
+  //
+  // TOI_THIEU = 4px, khong phai 1px.
+  //
+  // Nguong 1px chua du. Do that 03/10/2026 tren trang dinh gia: chip "Holding"
+  // vat qua day vung cuon, dai nhin thay con 1,61px — lot qua nguong 1px, roi
+  // `elementFromPoint` o TAM cua dai do (766,8) tra ve footer chu khong phai
+  // chip, vi o deviceScaleFactor 3 thi tam cua mot dai 1,6px roi dung pixel ma
+  // footer ve. Ket qua: mot bao "bi che" hoan toan gia.
+  //
+  // 4px chu khong phai mot so to hon: no du de tam diem cach moi mep >= 2px
+  // (ngoai tam lam tron duoi pixel), va van du nho de khong bo sot mot phan tu
+  // that su bi che chi con ho ra mot vien mong.
+  //
+  // Mot dai mong hon the khong the "bi che" theo nghia nguoi dung thay duoc —
+  // no la mep cua mot hang dang cuon do, khong phai mot phan tu bi vat khac de len.
+  const TOI_THIEU = 4;
   const visibleBox = (el) => {
     let r = el.getBoundingClientRect();
     let box = { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
@@ -136,7 +152,7 @@ export const PROBE = () => {
       const b = p.getBoundingClientRect();
       box.left = Math.max(box.left, b.left);   box.right = Math.min(box.right, b.right);
       box.top = Math.max(box.top, b.top);      box.bottom = Math.min(box.bottom, b.bottom);
-      if (box.right - box.left < 1 || box.bottom - box.top < 1) return null;
+      if (box.right - box.left < TOI_THIEU || box.bottom - box.top < TOI_THIEU) return null;
     }
     return box;
   };

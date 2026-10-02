@@ -66,10 +66,27 @@ async function choOnDinh(page) {
     // May la pulse chi doi opacity nen khong doi hinh hoc — nhung neu lay
     // mau mot phan tu co animation lap vo han thi settle() se KHONG BAO GIO
     // on dinh.
+    // Ba lop cuoi la cua TRANG SCANNER. Tren trang dinh gia va watchlist chung
+    // khong ton tai, nen mau chi con topbar + fonts.status — tuc vung THAT SU
+    // xo lech (bang loc chua chip, bang du lieu, o chi tiet) khong duoc lay mau
+    // lan nao. Do la bai hoc so 1 trong README nay, mac lai o trang khac:
+    // thieu mot phan tu trong mau la du.
+    //
+    // Hau qua do duoc 03/10/2026: hai luot lien tiep bao cung mot chip "bi che"
+    // o HAI be ngang khac nhau (1281 va 1279), vi vi tri vo dong cua hang chip
+    // chua on khi do.
     return [q('.topbar'), q('.topbar-left'), q('.topbar-right'),
             q('.strategy-tabs'), q('.table-wrap'),
-            q('.col-detail'), q('.col-filters'), document.fonts.status].join('|');
+            q('.col-detail'), q('.col-filters'),
+            q('.val-filters'), q('.val-table-container'), q('.val-detail'),
+            q('.wl-dashboard'),
+            document.fonts.status].join('|');
   });
+  // `document.fonts.status` co the dang la 'loaded' NGAY TRUOC khi mot font den
+  // muon bat dau tai — voi cach nap bat dong bo (media=print + onload) thi bang
+  // kieu chuyen sang `all` roi moi keo font. Doi promise `ready` thay vi doc
+  // trang thai tuc thoi.
+  await page.evaluate(() => document.fonts.ready);
   let truoc = await chup();
   for (let i = 0; i < 32; i++) {          // tran 32 x 250ms = 8s
     await page.waitForTimeout(250);
@@ -100,15 +117,52 @@ async function choOnDinh(page) {
 //   #clock        do dai co dinh, font mono nen moi gio deu bang nhau
 // Dong bang vao chuoi ngan la tu cho minh diem: bo cuc se xanh o day va vo
 // dong that trong gio giao dich.
+const CHU_GHIM = {
+  '#clock': '00:00:00 ICT',
+  '#live-text': 'GIỮA PHIÊN 01/01 00:00',
+  '#market-text': 'ĐANG GIAO DỊCH',
+};
+
 async function dongBangChuDong(page) {
-  await page.evaluate(() => {
+  await page.evaluate((GHIM) => {
     // Go moi bo dem dang chay. Phep do chi doc BO CUC, khong can trang song.
     const cao = setInterval(() => {}, 99999);
     for (let i = 1; i <= cao; i++) clearInterval(i);
-    const dat = (sel, t) => { const e = document.querySelector(sel); if (e) e.textContent = t; };
-    dat('#clock', '00:00:00 ICT');
-    dat('#live-text', 'GIỮA PHIÊN 01/01 00:00');
-    dat('#market-text', 'ĐANG GIAO DỊCH');
+    const dat = () => {
+      for (const [sel, t] of Object.entries(GHIM)) {
+        const e = document.querySelector(sel);
+        if (e && e.textContent !== t) e.textContent = t;
+      }
+    };
+    dat();
+
+    // GHIM BEN BI, khong phai mot lan.
+    //
+    // `clearInterval` o tren chi don cac bo dem DA ton tai. Bo dem tao SAU do —
+    // hoac mot lan render lai cua chinh ung dung — van ghi de chu. Ma giua hai
+    // lan do (`top` va `scrolled`) co `waitForTimeout(300)`: thua cho mot nhip
+    // dong ho chay vao.
+    //
+    // Do that 02/10/2026: hai lan chay LIEN TIEP, cung ma nguon, cung may,
+    // cung moc chuan, ra hai ket qua khac nhau — lan dau "DA SUA 8, MOI 2",
+    // lan sau "DA SUA 0, MOI 0". Dung loai sai ma ban ghi 24/09 da mo ta va
+    // tuong la da sua xong.
+    window.__ghimChu = GHIM;
+    new MutationObserver(dat).observe(document.body,
+      { childList: true, subtree: true, characterData: true });
+  }, CHU_GHIM);
+}
+
+/** Chu da ghim con nguyen luc DO khong? Tra ve danh sach o da troi. */
+async function chuDaTroi(page) {
+  return page.evaluate(() => {
+    const GHIM = window.__ghimChu || {};
+    const troi = [];
+    for (const [sel, t] of Object.entries(GHIM)) {
+      const e = document.querySelector(sel);
+      if (e && e.textContent !== t) troi.push(`${sel}="${e.textContent}"`);
+    }
+    return troi;
   });
 }
 
@@ -117,8 +171,22 @@ async function moTrang(page, trang) {
   // Cho DUNG thu can chu khong cho mang im: hang dau tien cua bang da render.
   // Moi trang mot dau hieu khac nhau — xem pages.mjs.
   await page.waitForSelector(trang.sanSang, { timeout: HAN_MS });
-  const onDinh = await choOnDinh(page);
+
+  // GHIM TRUOC ROI MOI CHO ON DINH — thu tu nay quan trong.
+  //
+  // Ban cu lam nguoc: cho on dinh voi chu THAT, roi moi ghi de bang chu da ghim
+  // (rong hon, vi ghim vao truong hop rong nhat), roi do NGAY. Tuc moi phep do
+  // deu lay sau mot lan doi noi dung ma chua cho bo cuc chay lai.
+  //
+  // O be rong sat ranh gioi vo dong — 1441px — dieu do du de cung mot trang
+  // luc vo dong luc khong. Do that 03/10/2026: hai luot lien tiep cho 4 nhan
+  // topbar ra "1x" va "2x". `diff.mjs` co dem so lan, nen chenh do du lam
+  // cong do.
+  //
+  // Ghim truoc thi an toan, vi `dongBangChuDong` cai MutationObserver giu chu
+  // suot doi trang: moi lan ung dung ghi de deu bi ghim lai ngay.
   await dongBangChuDong(page);
+  const onDinh = await choOnDinh(page);
   return onDinh;
 }
 
@@ -171,12 +239,17 @@ MAY CHU CHET giua chung tai ${khoa}. Dung ngay.`);
 
       // Lan 1: dau trang
       entry.runs.top = await page.evaluate(PROBE);
+      for (const o of await chuDaTroi(page)) entry.errors.push(`CHU DONG TROI (top): ${o}`);
       if (SHOTS) await page.screenshot({ path: `shot-${khoa.replace(':', '-')}-top.png`, fullPage: true });
 
       // Lan 2: sau khi cuon — loi sticky chi lo khi da cuon
       await page.evaluate(() => window.scrollBy(0, 300));
       await page.waitForTimeout(300);
       entry.runs.scrolled = await page.evaluate(PROBE);
+      // Kiem NGAY SAU khi do, khong phai truoc: ghim co the troi trong 300ms
+      // vua roi, va mot phep do da troi phai keu len chu khong duoc im lang di
+      // vao bao cao — do dung la cach 8 muc cua 24/09 lot qua.
+      for (const o of await chuDaTroi(page)) entry.errors.push(`CHU DONG TROI (scrolled): ${o}`);
       if (SHOTS) await page.screenshot({ path: `shot-${khoa.replace(':', '-')}-scrolled.png` });
 
       // Kiem chuc nang chi viet cho index.html (drawer, dai tab, o nhap).
