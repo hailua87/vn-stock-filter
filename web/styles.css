@@ -28,7 +28,11 @@
   /* ─── Text (higher contrast) ─── */
   --text:       #f5f7fa;       /* primary — bright white */
   --text-dim:   #b0b8c4;       /* secondary — clearer */
-  --text-mute:  #78818f;       /* tertiary — still readable */
+  /* Do that tren nen bang: #78818f chi duoc 3,95:1 tren --bg-elev-1 va
+     3,34:1 tren --bg-elev-2 — duoi 4,5:1. Chu thich cu ghi "still readable"
+     la noi theo cam giac, khong theo so do. #919aa8 dat 4,63:1 o nen te nhat
+     va van toi hon --text-dim nen thu bac ba cap chu khong doi. */
+  --text-mute:  #919aa8;
 
   /* ─── Trading colors (ONLY for price/trend) ─── */
   --up:         #26a69a;
@@ -541,6 +545,7 @@ input { font-family: inherit; }
   border: 1px solid var(--border);
   color: var(--text-dim);
   width: 24px;
+  min-height: 24px;      /* do o 375px: cao that 17px, duoi muc cham 24px */
   border-radius: 2px;
   font-size: 12px;
   transition: all 0.12s;
@@ -567,6 +572,11 @@ input { font-family: inherit; }
   font-size: 10px;
   padding: 2px 0;
   text-align: left;
+  /* Do o 375px: cao that 17px. Dung min-height + inline-flex thay vi tang
+     padding, de khong day cac khoi quanh no ra. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   transition: color 0.12s;
 }
 .link-btn:hover { color: var(--focus); }
@@ -640,7 +650,7 @@ input { font-family: inherit; }
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text-mute);
-  width: 22px;
+  width: 24px;           /* do o 375px: 22px, thieu 2px so voi muc cham */
   height: 24px;
   border-radius: 2px;
   font-size: 12px;
@@ -2764,7 +2774,8 @@ kbd {
 /* Đơn vị giá ở tiêu đề cột — cùng gốc với bug sai 1000× ở module định giá:
    đơn vị ngầm định mà không ai viết ra. */
 .th-unit {
-  font-size: 9px; font-weight: 400;
+  /* 9px duoi muc doc duoc cho chu phu, va o co do thi 3,34:1 cang khong du. */
+  font-size: 11px; font-weight: 400;
   color: var(--text-mute); text-transform: none;
 }
 
