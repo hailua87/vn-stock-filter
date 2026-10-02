@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-02T11:16:16.089177",
+  "generated_at": "2026-10-02T20:41:58.564455",
   "strategy": "ichimoku",
   "total": 35,
   "metadata": {
@@ -11,15 +11,15 @@
     ],
     "base_conditions": {
       "min_avg_value_20d": 10000000000.0,
-      "dropped_low_liquidity": 388,
-      "universe_after": 112,
+      "dropped_low_liquidity": 374,
+      "universe_after": 111,
       "exchanges": [
         "HOSE",
         "HNX",
         "UPCOM"
       ]
     },
-    "total_scanned": 500,
+    "total_scanned": 485,
     "market_context": {
       "available": true,
       "close": 1737.71,
@@ -34,37 +34,37 @@
       "label": "Thị trường bất lợi — phần lớn tín hiệu breakout thất bại trong giai đoạn này",
       "position_size_multiplier": 0.3,
       "breadth": {
-        "pct_above_ma50": 23.4,
-        "sample_size": 500
+        "pct_above_ma50": 23.7,
+        "sample_size": 485
       }
     },
     "session_date": "2026-10-02",
-    "written_at_ict": "2026-10-02 18:16:04+0700",
+    "written_at_ict": "2026-10-03 03:41:44+0700",
     "run_type": "eod",
-    "session_complete": 1.125,
+    "session_complete": 1.129,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 18:16 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên 2026-10-02 đã đóng dứt khoát (hôm nay 2026-10-03)) | gate_coverage: pass (97% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 18:16 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-10-02 đã đóng dứt khoát (hôm nay 2026-10-03)"
       },
       {
         "name": "gate_coverage",
         "passed": true,
-        "detail": "100% >= 80%, vòng fetch chạy trọn"
+        "detail": "97% >= 80%, vòng fetch chạy trọn"
       }
     ],
     "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 1.0,
-    "fetch_elapsed_s": 998.7,
+    "fetch_coverage": 0.97,
+    "fetch_elapsed_s": 137.7,
     "intraday": false,
-    "run_time_ict": "18:23",
-    "run_date_ict": "2026-10-02"
+    "run_time_ict": "03:47",
+    "run_date_ict": "2026-10-03"
   },
   "signals": [
     {
@@ -272,7 +272,7 @@
         "range": 4.2
       },
       "m_rs_score": 10.93,
-      "m_rs_rank": 91,
+      "m_rs_rank": 92,
       "m_rs_63d": 13.85,
       "m_stop": 27.66,
       "m_target": 28.65,
@@ -500,7 +500,7 @@
         "range": 31.4
       },
       "m_rs_score": 39.3,
-      "m_rs_rank": 98,
+      "m_rs_rank": 99,
       "m_rs_63d": 59.17,
       "m_stop": 55.79,
       "m_target": 63.2,
@@ -850,7 +850,7 @@
         "range": 15.0
       },
       "m_rs_score": 5.73,
-      "m_rs_rank": 85,
+      "m_rs_rank": 86,
       "m_rs_63d": 9.95,
       "m_stop": 76.27,
       "m_target": 78.46,
@@ -972,7 +972,7 @@
         "range": 24.4
       },
       "m_rs_score": 26.23,
-      "m_rs_rank": 97,
+      "m_rs_rank": 98,
       "m_rs_63d": 36.99,
       "m_stop": 48.08,
       "m_target": 51.64,
@@ -1102,7 +1102,7 @@
         "range": 2.64
       },
       "m_rs_score": 13.45,
-      "m_rs_rank": 93,
+      "m_rs_rank": 94,
       "m_rs_63d": 16.35,
       "m_stop": 17.58,
       "m_target": 17.89,
@@ -1330,7 +1330,7 @@
         "range": 4.4
       },
       "m_rs_score": 10.93,
-      "m_rs_rank": 91,
+      "m_rs_rank": 92,
       "m_rs_63d": 13.43,
       "m_stop": 36.96,
       "m_target": 38.0,
@@ -1810,7 +1810,7 @@
         "range": 16.45
       },
       "m_rs_score": -1.27,
-      "m_rs_rank": 64,
+      "m_rs_rank": 63,
       "m_rs_63d": 0.16,
       "m_stop": 71.71,
       "m_target": 74.47,
@@ -1940,7 +1940,7 @@
         "range": 6.9
       },
       "m_rs_score": -3.62,
-      "m_rs_rank": 55,
+      "m_rs_rank": 54,
       "m_rs_63d": 4.74,
       "m_stop": 31.95,
       "m_target": 32.76,
@@ -2054,7 +2054,7 @@
         "range": 9.35
       },
       "m_rs_score": 5.12,
-      "m_rs_rank": 84,
+      "m_rs_rank": 85,
       "m_rs_63d": 6.14,
       "m_stop": 32.69,
       "m_target": 34.9,
@@ -2514,7 +2514,7 @@
         "range": 1.7
       },
       "m_rs_score": 2.87,
-      "m_rs_rank": 78,
+      "m_rs_rank": 79,
       "m_rs_63d": 5.56,
       "m_stop": 14.59,
       "m_target": 14.95,
@@ -2628,7 +2628,7 @@
         "range": 11.5
       },
       "m_rs_score": 8.81,
-      "m_rs_rank": 90,
+      "m_rs_rank": 91,
       "m_rs_63d": 14.05,
       "m_stop": 42.79,
       "m_target": 45.5,
@@ -2657,6 +2657,120 @@
         45.0,
         44.5,
         43.85
+      ]
+    },
+    {
+      "ticker": "DRI",
+      "exchange": "UPCOM",
+      "date": "2026-10-02T00:00:00",
+      "close": 16.2,
+      "volume": 1973700,
+      "total_score": 4.0,
+      "max_score": 5.0,
+      "rating": "A+",
+      "ich_tk_bullish": 1,
+      "ich_recent_tk_cross": 0,
+      "ich_price_above_cloud": 1,
+      "ich_cloud_bullish": 0,
+      "ich_chikou_free": 1,
+      "ich_future_cloud_bullish": 1,
+      "m_change_1d_pct": 4.52,
+      "m_limit_status": "normal",
+      "m_limit_locked": false,
+      "m_tradable_warning": null,
+      "m_tenkan": 15.25,
+      "m_kijun": 14.78,
+      "m_senkou_a": 13.12,
+      "m_senkou_b": 13.65,
+      "m_cloud_top": 13.65,
+      "m_cloud_bottom": 13.12,
+      "m_cloud_distance_pct": 18.68,
+      "m_future_cloud_gap_pct": 3.55,
+      "m_tk_cross_days_ago": null,
+      "m_tk_cross_reverted": false,
+      "m_is_turnaround": false,
+      "m_turnaround_reasons": [],
+      "m_change_5d_pct": 7.28,
+      "m_vol_ratio": 1.5,
+      "m_rsi14": 73.7,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 15.66,
+          "label": "23.6%",
+          "ratio": 0.236,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 3.33
+        },
+        {
+          "price": 15.02,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 7.28
+        },
+        {
+          "price": 14.5,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 10.49
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 16.7,
+          "label": "0%",
+          "ratio": 0.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 3.09
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 16.7,
+        "high_date": "2026-10-02",
+        "high_idx": 59,
+        "low": 12.3,
+        "low_date": "2026-07-22",
+        "low_idx": 10,
+        "direction": "up",
+        "range": 4.4
+      },
+      "m_rs_score": 26.44,
+      "m_rs_rank": 98,
+      "m_rs_63d": 27.79,
+      "m_stop": 15.66,
+      "m_target": 16.7,
+      "m_rr": 0.93,
+      "m_levels_note": null,
+      "m_suppress_signal": false,
+      "m_avg_value20": 19350644853.0,
+      "m_spark20": [
+        13.24,
+        13.7,
+        13.89,
+        13.7,
+        13.52,
+        13.24,
+        13.42,
+        13.89,
+        13.8,
+        13.8,
+        13.89,
+        14.0,
+        14.5,
+        14.8,
+        15.1,
+        15.0,
+        16.0,
+        15.7,
+        15.5,
+        16.2
       ]
     },
     {
@@ -2774,120 +2888,6 @@
       ]
     },
     {
-      "ticker": "DRI",
-      "exchange": "UPCOM",
-      "date": "2026-10-02T00:00:00",
-      "close": 16.2,
-      "volume": 1973700,
-      "total_score": 4.0,
-      "max_score": 5.0,
-      "rating": "A+",
-      "ich_tk_bullish": 1,
-      "ich_recent_tk_cross": 0,
-      "ich_price_above_cloud": 1,
-      "ich_cloud_bullish": 0,
-      "ich_chikou_free": 1,
-      "ich_future_cloud_bullish": 1,
-      "m_change_1d_pct": 4.52,
-      "m_limit_status": "normal",
-      "m_limit_locked": false,
-      "m_tradable_warning": null,
-      "m_tenkan": 15.25,
-      "m_kijun": 14.78,
-      "m_senkou_a": 13.12,
-      "m_senkou_b": 13.65,
-      "m_cloud_top": 13.65,
-      "m_cloud_bottom": 13.12,
-      "m_cloud_distance_pct": 18.68,
-      "m_future_cloud_gap_pct": 3.55,
-      "m_tk_cross_days_ago": null,
-      "m_tk_cross_reverted": false,
-      "m_is_turnaround": false,
-      "m_turnaround_reasons": [],
-      "m_change_5d_pct": 7.28,
-      "m_vol_ratio": 1.5,
-      "m_rsi14": 73.7,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 15.66,
-          "label": "23.6%",
-          "ratio": 0.236,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 3.33
-        },
-        {
-          "price": 15.02,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 7.28
-        },
-        {
-          "price": 14.5,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 10.49
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 16.7,
-          "label": "0%",
-          "ratio": 0.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 3.09
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 16.7,
-        "high_date": "2026-10-02",
-        "high_idx": 59,
-        "low": 12.3,
-        "low_date": "2026-07-22",
-        "low_idx": 10,
-        "direction": "up",
-        "range": 4.4
-      },
-      "m_rs_score": 26.44,
-      "m_rs_rank": 97,
-      "m_rs_63d": 27.79,
-      "m_stop": 15.66,
-      "m_target": 16.7,
-      "m_rr": 0.93,
-      "m_levels_note": null,
-      "m_suppress_signal": false,
-      "m_avg_value20": 19350644853.0,
-      "m_spark20": [
-        13.24,
-        13.7,
-        13.89,
-        13.7,
-        13.52,
-        13.24,
-        13.42,
-        13.89,
-        13.8,
-        13.8,
-        13.89,
-        14.0,
-        14.5,
-        14.8,
-        15.1,
-        15.0,
-        16.0,
-        15.7,
-        15.5,
-        16.2
-      ]
-    },
-    {
       "ticker": "AAS",
       "exchange": "UPCOM",
       "date": "2026-10-02T00:00:00",
@@ -2970,7 +2970,7 @@
         "range": 3.5
       },
       "m_rs_score": 18.99,
-      "m_rs_rank": 96,
+      "m_rs_rank": 97,
       "m_rs_63d": 18.39,
       "m_stop": 9.47,
       "m_target": 10.3,
@@ -3075,7 +3075,7 @@
         "range": 7.8
       },
       "m_rs_score": 14.55,
-      "m_rs_rank": 94,
+      "m_rs_rank": 95,
       "m_rs_63d": 15.04,
       "m_stop": 51.26,
       "m_target": null,
@@ -3335,7 +3335,7 @@
         "range": 7.4
       },
       "m_rs_score": 4.13,
-      "m_rs_rank": 82,
+      "m_rs_rank": 83,
       "m_rs_63d": 2.17,
       "m_stop": 31.5,
       "m_target": 32.37,
@@ -3595,7 +3595,7 @@
         "range": 12.62
       },
       "m_rs_score": -3.61,
-      "m_rs_rank": 55,
+      "m_rs_rank": 54,
       "m_rs_63d": -6.09,
       "m_stop": 32.89,
       "m_target": 34.38,
@@ -4216,7 +4216,7 @@
         "range": 6.85
       },
       "m_rs_score": 2.71,
-      "m_rs_rank": 77,
+      "m_rs_rank": 78,
       "m_rs_63d": 6.79,
       "m_stop": 47.68,
       "m_target": 49.15,

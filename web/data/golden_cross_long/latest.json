@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-02T11:16:10.659095",
+  "generated_at": "2026-10-02T20:41:53.171538",
   "strategy": "golden_cross_long",
   "total": 2,
   "metadata": {
@@ -11,15 +11,15 @@
     ],
     "base_conditions": {
       "min_avg_value_20d": 10000000000.0,
-      "dropped_low_liquidity": 388,
-      "universe_after": 112,
+      "dropped_low_liquidity": 374,
+      "universe_after": 111,
       "exchanges": [
         "HOSE",
         "HNX",
         "UPCOM"
       ]
     },
-    "total_scanned": 500,
+    "total_scanned": 485,
     "market_context": {
       "available": true,
       "close": 1737.71,
@@ -34,37 +34,37 @@
       "label": "Thị trường bất lợi — phần lớn tín hiệu breakout thất bại trong giai đoạn này",
       "position_size_multiplier": 0.3,
       "breadth": {
-        "pct_above_ma50": 23.4,
-        "sample_size": 500
+        "pct_above_ma50": 23.7,
+        "sample_size": 485
       }
     },
     "session_date": "2026-10-02",
-    "written_at_ict": "2026-10-02 18:16:04+0700",
+    "written_at_ict": "2026-10-03 03:41:44+0700",
     "run_type": "eod",
-    "session_complete": 1.125,
+    "session_complete": 1.129,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 18:16 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên 2026-10-02 đã đóng dứt khoát (hôm nay 2026-10-03)) | gate_coverage: pass (97% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 18:16 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-10-02 đã đóng dứt khoát (hôm nay 2026-10-03)"
       },
       {
         "name": "gate_coverage",
         "passed": true,
-        "detail": "100% >= 80%, vòng fetch chạy trọn"
+        "detail": "97% >= 80%, vòng fetch chạy trọn"
       }
     ],
     "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 1.0,
-    "fetch_elapsed_s": 998.7,
+    "fetch_coverage": 0.97,
+    "fetch_elapsed_s": 137.7,
     "intraday": false,
-    "run_time_ict": "18:23",
-    "run_date_ict": "2026-10-02"
+    "run_time_ict": "03:47",
+    "run_date_ict": "2026-10-03"
   },
   "signals": [
     {
@@ -150,7 +150,7 @@
         "range": 24.4
       },
       "m_rs_score": 26.23,
-      "m_rs_rank": 97,
+      "m_rs_rank": 98,
       "m_rs_63d": 36.99,
       "m_stop": 48.08,
       "m_target": 51.64,
@@ -256,7 +256,7 @@
         "range": 4.4
       },
       "m_rs_score": 26.44,
-      "m_rs_rank": 97,
+      "m_rs_rank": 98,
       "m_rs_63d": 27.79,
       "m_stop": 15.66,
       "m_target": 16.7,

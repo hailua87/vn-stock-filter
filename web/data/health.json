@@ -1,34 +1,34 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-02T11:23:04",
+  "generated_at": "2026-10-02T20:47:32",
   "sources": {
     "daily_scan": {
       "label": "Scan hằng ngày",
       "session_date": "2026-10-02",
       "run_type": "eod",
-      "run_date_ict": "2026-10-02",
-      "run_time_ict": "18:16",
-      "universe": 500,
-      "universe_after_base": 112,
-      "dropped_low_liquidity": 388,
+      "run_date_ict": "2026-10-03",
+      "run_time_ict": "03:41",
+      "universe": 485,
+      "universe_after_base": 111,
+      "dropped_low_liquidity": 374,
       "fetch": {
-        "coverage": 1.0,
-        "succeeded": 500,
+        "coverage": 0.97,
+        "succeeded": 485,
         "skipped": 0,
-        "failed": 0,
+        "failed": 15,
         "stop_reason": null
       },
-      "stale_ratio": 0.138,
-      "session_completeness": 1.125,
+      "stale_ratio": 0.142,
+      "session_completeness": 1.129,
       "archive_written": true,
-      "archive_reason": "gate_time: pass (phiên hôm nay, 18:16 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)"
+      "archive_reason": "gate_time: pass (phiên 2026-10-02 đã đóng dứt khoát (hôm nay 2026-10-03)) | gate_coverage: pass (97% >= 80%, vòng fetch chạy trọn)"
     },
     "valuation": {
       "label": "Định giá",
       "available": true,
       "as_of": "2026-10-01",
       "generated_at": "2026-10-01T14:05:34.257725",
-      "age_days": 0,
+      "age_days": 1,
       "count": 84,
       "fetch_coverage": 1.0,
       "partial_reason": null,
@@ -43,7 +43,7 @@
       "available": true,
       "as_of": "2026-10-01",
       "generated_at": "2026-10-01T14:06:33",
-      "age_days": 0,
+      "age_days": 1,
       "count": 200,
       "fetch_coverage": 1.0,
       "partial_reason": null,
@@ -54,5 +54,11 @@
       }
     }
   },
-  "issues": []
+  "issues": [
+    {
+      "code": "fetch_failed",
+      "severity": "warn",
+      "message": "15 mã không lấy được dữ liệu, đã bỏ qua trong phiên này."
+    }
+  ]
 }
