@@ -1171,7 +1171,12 @@ function render() {
     // trong index.html, nen chuoi cu hien ra HAI dau cham lien nhau.
     statDate.textContent = isLatest ? `• ${day}/${m}` : `${day}/${m}`;
     // --text-dim chu khong phai --text-mute: mute chi 3.34x khi hover, duoi AA.
-    statDate.style.color = isLatest ? 'var(--up)' : 'var(--text-dim)';
+    //
+    // Phien moi nhat dung --text (sang nhat cua thang phi sac), KHONG dung
+    // --up. Day la nhan NGAY, khong phai gia: mau xanh "gia tang" o day vua
+    // vi pham quy tac mau cua tokens.css vua chi dat 4,39:1. Thang phi sac van
+    // noi duoc "cai nay moi nhat" bang do sang, va dat 14,49:1.
+    statDate.style.color = isLatest ? 'var(--text)' : 'var(--text-dim)';
   } else {
     // Không có ngày phiên thì nói KHÔNG BIẾT, đừng để nguyên giá trị lần trước:
     // một ngày cũ nằm lại trên màn hình còn tệ hơn một dấu gạch.
