@@ -2,12 +2,32 @@
    tokens.css — nguồn sự thật duy nhất cho design system
    Hướng: "Sổ tay phân tích" (nền sáng)
 
-   TRẠNG THÁI: file này CHƯA được nạp ở bất kỳ đâu. Không một
-   file HTML nào tham chiếu tới nó.
+   TRẠNG THÁI (cập nhật 03/10/2026) — tệp này nạp ở CẢ BA trang,
+   và nạp TRƯỚC styles.css. Đó là CỐ Ý, không phải nhầm:
 
-   Khi nạp ở bước dọn component, phải nạp SAU styles.css, hoặc
-   xoá hẳn khối :root cũ trong styles.css — nếu không khối alias
-   (mục 3) sẽ bị ghi đè và file này thành vô tác dụng.
+     · Phần token PHI MÀU (--fs-*, --sp-*, --r-*, --fw-*) có tác
+       dụng thật và đang được dùng. Thiếu nó thì .ticker-cell ra
+       12px thay vì 13px (đo thật trên trang định giá, 02/10).
+     · Phần MÀU (mục 1-3 bên dưới) bị styles.css nạp sau ghi đè,
+       nên KHÔNG có tác dụng. Đây là chủ ý: app chạy nền tối của
+       styles.css, còn bảng màu dưới đây là nền SÁNG.
+
+   ĐỪNG làm theo câu dặn cũ "phải nạp SAU styles.css". Đo thật
+   03/10: nạp sau thì --bg-base thành #EEF0F2 và --text thành
+   #1A1F26, tức TOÀN BỘ ứng dụng lật sang nền sáng ngay lập tức.
+
+   BẢNG MÀU SÁNG LÀ ĐỒ ĐỖ, chưa dùng được. Nó dựng xong và trông
+   chỉnh tề, nhưng đo tương phản ở chế độ sáng còn 4 chỗ hỏng:
+     ·  2,93:1  button.strat-tab   màu chữ #EEF0F2 = đúng màu nền
+     ·  2,93:1  button.chip        cùng lỗi
+     ·  1,33:1  span.mc-warn       #ffcc80 trên nền sáng
+     ·  1,67:1  span.fib-label     #b0bec5, cỡ chữ 8px
+   Ba lỗi đầu là dấu hiệu token mới di cư được một nửa: các lớp đó
+   còn lấy màu chữ từ token đã đổi nghĩa khi lật nền.
+
+   Muốn bật nền sáng thì phải: sửa 4 chỗ trên, hoàn tất di cư token
+   cho mọi lớp còn lấy màu trực tiếp từ styles.css, rồi mới thêm nút
+   chuyển. Không phải việc đổi thứ tự hai dòng <link>.
 
    Không đặt selector nào ngoài :root trong file này.
 
