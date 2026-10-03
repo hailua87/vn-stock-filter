@@ -126,15 +126,49 @@ Chênh lệch đo được chỉ khoảng **−0,66% tới +0,17%**. Báo một 
 không kèm khoảng tin cậy là mời người đọc hiểu nó thành "chiến lược kém 0,66%",
 trong khi với độ phân tán của lợi suất cổ phiếu nó có thể không khác 0.
 
-Bootstrap 2000 lượt, khoảng 5–95%. **Khoảng chứa 0 → không phân biệt được với
-"không có lợi thế"**. Đó là kết luận trung thực, không phải "chiến lược vô dụng"
-cũng không phải "chiến lược có tác dụng".
+Bootstrap **2000 lượt, khoảng 95%** (phân vị 2,5–97,5). **Khoảng chứa 0 → không
+phân biệt được với "không có lợi thế"**. Đó là kết luận trung thực, không phải
+"chiến lược vô dụng" cũng không phải "chiến lược có tác dụng".
 
 Mẫu dưới 30 quan sát thì **không** trả khoảng — bootstrap cũng không cứu được.
 
+### Lấy mẫu theo KHỐI NGÀY, không theo từng dòng (sửa 03/10/2026)
+
+Các lần vào **không độc lập**, theo hai trục:
+
+- **Thời gian** — hai lần vào cách nhau 3 phiên thì cửa sổ 20 phiên của chúng
+  dùng chung 17 ngày giá. Chúng gần như cùng một quan sát.
+- **Cắt ngang** — mọi lần vào trong cùng một phiên cùng chịu một cú chuyển động
+  của thị trường. Trừ chỉ số đã bớt phần lớn, phần dư theo ngày vẫn còn.
+
+Lấy mẫu từng dòng coi 1816 lần vào là 1816 quan sát độc lập, trong khi số quan
+sát thực tế nhỏ hơn nhiều — 81 **ngày** vào. Hệ quả là khoảng **hẹp giả**, và
+một chênh lệch không có thật trông như "khác 0".
+
+Nay lấy mẫu theo **khối ngày liên tiếp, độ dài khối = kỳ quan sát**. Cùng một bộ
+khối dùng cho **cả** tín hiệu lẫn giả dược (lấy mẫu **cặp**), vì hai bên vốn đo
+trên đúng những phiên đó. Cần ít nhất **hai khối**, nếu không mọi lần lấy mẫu
+đều ra gần như cùng một tập — trả "không đủ ngày" thay vì đoán.
+
+Khoảng được tính trên **`excess`**, cùng đại lượng với con số nó đứng cạnh. Bản
+trước tính trên `ret` trong khi báo cáo in `median_excess`.
+
+**Hiệu lực đo được ngày 03/10/2026** — chuyển từ (90%, từng dòng, `ret`) sang
+(95%, khối, `excess`), kỳ 20 phiên:
+
+| Chiến lược | Cũ | Mới |
+|---|---|---|
+| pre_breakout | −0,24% … +0,65% | −0,75% … +1,18% |
+| golden_cross_short | −1,46% … −0,05% · *khác 0* | −2,10% … +0,92% · **chứa 0** |
+| ichimoku | +0,02% … +1,38% · *khác 0* | −0,11% … +1,93% · **chứa 0** |
+| golden_cross_long | −4,35% … +1,11% | **không đủ ngày** (23 < 40) |
+
+Cả hai kết luận "khác 0" đều **không sống sót**. Đó là điều cần ghi lại: chúng
+là sản phẩm của phép đo, không phải của dữ liệu.
+
 ## Điều phép thử này vẫn KHÔNG nói
 
-**Vấn đề so sánh nhiều lần.** 3 chiến lược × 3 chân trời = 9 phép so. Ở mức tin
-cậy 90%, riêng ngẫu nhiên đã cho ~0,9 kết quả "khác 0" giả. Nên một ô đơn lẻ
+**Vấn đề so sánh nhiều lần.** 4 chiến lược × 3 chân trời = 12 phép so. Ở mức
+tin cậy 95%, riêng ngẫu nhiên đã cho ~0,6 kết quả "khác 0" giả. Nên một ô đơn lẻ
 loại được 0 **chưa phải bằng chứng**; chỉ một hình mẫu nhất quán qua nhiều chân
 trời mới là.

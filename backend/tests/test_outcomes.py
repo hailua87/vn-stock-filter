@@ -329,11 +329,21 @@ def test_no_universe_means_no_placebo(tmp_path):
 
 
 # ─── Khoảng tin cậy cho chênh lệch ──────────────────────────────────────────
+#
+# `median_gap_ci` nhận các cặp (ngày_vào, excess) chứ không phải list số trần:
+# nó lấy mẫu theo KHỐI NGÀY để xử lý việc các lần vào không độc lập.
+
+
+def _cap(gia_tri, moi_ngay=1, start='2026-01-01'):
+    """Rải `gia_tri` ra các ngày, `moi_ngay` giá trị mỗi ngày."""
+    ngay = _days(-(-len(gia_tri) // moi_ngay), start)
+    return [(ngay[i // moi_ngay], v) for i, v in enumerate(gia_tri)]
+
 
 def test_identical_groups_give_an_interval_containing_zero():
     """Hai nhóm y hệt nhau thì chênh lệch phải KHÔNG khác 0."""
-    a = [0.01 * (i % 7) - 0.03 for i in range(200)]
-    ci = O.median_gap_ci(a, list(a))
+    a = _cap([0.01 * (i % 7) - 0.03 for i in range(200)])
+    ci = O.median_gap_ci(a, list(a), block=5)
     assert ci is not None and ci['includes_zero']
 
 
@@ -342,12 +352,112 @@ def test_a_clearly_better_group_gives_an_interval_above_zero():
     Nếu khoảng tin cậy chứa 0 với MỌI dữ liệu thì nó vô dụng. Phải có trường
     hợp nó loại được 0.
     """
-    a = [0.10 + 0.001 * (i % 5) for i in range(200)]
-    b = [0.00 + 0.001 * (i % 5) for i in range(200)]
-    ci = O.median_gap_ci(a, b)
+    a = _cap([0.10 + 0.001 * (i % 5) for i in range(200)])
+    b = _cap([0.00 + 0.001 * (i % 5) for i in range(200)])
+    ci = O.median_gap_ci(a, b, block=5)
     assert ci is not None and not ci['includes_zero'] and ci['gap_lo'] > 0
 
 
 def test_a_tiny_sample_gets_no_interval_rather_than_a_fake_one():
     """Mẫu 10 quan sát thì bootstrap cũng không cứu — nói KHÔNG BIẾT."""
-    assert O.median_gap_ci([0.01] * 10, [0.02] * 10) is None
+    assert O.median_gap_ci(_cap([0.01] * 10), _cap([0.02] * 10), block=5) is None
+
+
+def test_the_level_is_95_percent():
+    """
+    90% là mức dễ dãi hơn quy ước, và người đọc mặc định hiểu là 95%. Một
+    khoảng 90% in ra không kèm nhãn sẽ bị đọc thành kết luận mạnh hơn sự thật.
+    """
+    assert (O.CI_LO, O.CI_HI) == (2.5, 97.5)
+    ci = O.median_gap_ci(_cap([0.01 * (i % 9) for i in range(300)]),
+                         _cap([0.01 * (i % 9) for i in range(300)]), block=5)
+    assert ci['level'] == 95
+
+
+def test_clustered_entries_get_a_wider_interval_than_spread_out_ones():
+    """
+    ĐÂY LÀ LÝ DO CÓ BOOTSTRAP KHỐI.
+
+    Cùng một tập 200 giá trị. Bản A rải ra 100 ngày; bản B dồn vào 10 ngày.
+    Bản B có ÍT QUAN SÁT ĐỘC LẬP HƠN HẲN dù số dòng y hệt, nên khoảng tin cậy
+    của nó phải RỘNG HƠN. Lấy mẫu từng dòng sẽ cho hai khoảng gần bằng nhau —
+    tức khai khống độ chắc chắn của bản dồn cục.
+    """
+    val = [0.01 * (i % 20) - 0.10 for i in range(200)]   # 20 muc, moi muc 10 lan
+
+    # Rai: 100 ngay x 2 gia tri, moi ngay mot hon hop -> trung vi it lay dong.
+    rai = O.median_gap_ci(_cap(val, moi_ngay=2),
+                          _cap([0.0] * 200, moi_ngay=2), block=2)
+    # Don: sap xep de MOI NGAY chi mang MOT muc, lap 10 lan -> 20 ngay. Day la
+    # tuong quan trong ngay that: rut mot ngay ra hay vao lam trung vi nhay han.
+    don = O.median_gap_ci(_cap(sorted(val), moi_ngay=10),
+                          _cap([0.0] * 200, moi_ngay=10), block=2)
+
+    rong_rai = rai['gap_hi'] - rai['gap_lo']
+    rong_don = don['gap_hi'] - don['gap_lo']
+    assert rong_don > rong_rai * 1.5, (
+        f'dồn cục {rong_don:.4f} phải rộng hơn hẳn rải đều {rong_rai:.4f}')
+
+
+def test_too_few_dates_refuses_instead_of_guessing():
+    """
+    Cần ít nhất HAI khối, nếu không mọi lần lấy mẫu đều ra gần như cùng một tập
+    và khoảng hẹp giả — đúng loại sai đang đi chữa. Nói không đủ, đừng đoán.
+    """
+    a = _cap([0.01 * (i % 7) for i in range(100)], moi_ngay=10)   # 10 ngày
+    ci = O.median_gap_ci(a, list(a), block=20)                    # cần >= 40 ngày
+    assert ci['includes_zero'] is None and ci['gap_lo'] is None
+    assert '10 ngay' in ci['ly_do'] and '40' in ci['ly_do']
+
+
+def test_the_block_length_follows_the_horizon():
+    """Khối phải dài bằng kỳ quan sát: đó mới là độ dài cửa sổ chồng lấn."""
+    sessions = {d: ['A'] for d in _days(60)}
+    rows = [{'date': d, 'exits': {'20': {'ret': 0.0, 'excess': 0.001 * i}}}
+            for i, d in enumerate(sessions)]
+    ci = O.median_gap_ci([(r['date'], r['exits']['20']['excess']) for r in rows],
+                         [(r['date'], 0.0) for r in rows], block=20)
+    assert ci['block'] == 20
+
+
+def test_the_interval_is_fed_excess_not_raw_return(tmp_path, monkeypatch):
+    """
+    Con số in ra là `median_excess`, nên khoảng đi kèm phải tính trên `excess`.
+    Bản trước tính trên `ret` — khoảng mô tả một đại lượng KHÁC với đại lượng
+    nó đứng cạnh.
+
+    Kiểm THẲNG thứ `build` truyền vào hàm, không kiểm qua chênh lệch: chỉ số
+    triệt tiêu khi trừ hai nhóm đo trên cùng ngày, nên chênh lệch gần như
+    không phân biệt được hai đại lượng. Đó chính là lý do lỗi này sống lâu.
+    """
+    ghi = {}
+
+    def bat(a, b, **kw):
+        ghi['a'], ghi['b'], ghi['kw'] = a, b, kw
+        return {'gap_lo': 0.0, 'gap_hi': 0.0, 'rounds': 1,
+                'includes_zero': True, 'block': kw.get('block'), 'level': 95}
+
+    monkeypatch.setattr(O, 'median_gap_ci', bat)
+
+    days = _days(60)
+    _archive(tmp_path, 'archive', {days[25]: ['A'], days[27]: [], days[30]: ['A']})
+    uni = ['A'] + [f'T{i}' for i in range(10)]
+    khung = pd.DataFrame({'Date': days, 'Close': [100.0 * (1.002 ** i) for i in range(60)],
+                          'Volume': [10_000_000] * 60})
+    chi_so = _series([100.0 * (1.005 ** i) for i in range(60)])
+    out = O.build(tmp_path, lambda t: khung, chi_so, horizons=(5,), now=NOW,
+                  strategies={'x': 'archive'}, universe=uni)
+
+    r = out['strategies']['x']
+    mong = [(x['date'], x['exits']['5']['excess']) for x in r['rows']
+            if '5' in x['exits'] and x['exits']['5'].get('excess') is not None]
+    assert ghi['a'] == mong, 'phai truyen (ngay, excess) cua chinh cac dong tin hieu'
+
+    # Chot chan: neu ret va excess bang nhau thi phep kiem tren khong phan biet
+    # duoc gi. Chi so tang nhanh hon gia nen hai dai luong phai tach han.
+    ret = [x['exits']['5']['ret'] for x in r['rows'] if '5' in x['exits']]
+    exc = [v for _, v in mong]
+    assert ret and exc and ret != exc, 'fixture khong tach duoc ret voi excess'
+
+    # Khoi phai dai bang ky quan sat.
+    assert ghi['kw'].get('block') == 5
