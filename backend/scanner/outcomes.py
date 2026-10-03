@@ -259,34 +259,92 @@ def placebo_strategy(sessions: List[tuple], price_of, universe: List[str],
     return out
 
 
-def median_gap_ci(a: List[float], b: List[float], rounds=2000,
-                  seed=20260929, lo=5, hi=95):
+MIN_CHO_CI = 30          # duoi muc nay thi bootstrap cung khong cuu duoc
+CI_LO, CI_HI = 2.5, 97.5  # khoang 95%, khong phai 90%
+
+
+def median_gap_ci(a, b, rounds=2000, seed=20260929, lo=CI_LO, hi=CI_HI,
+                  block=None):
     """
-    Khoảng tin cậy cho CHÊNH LỆCH trung vị giữa hai nhóm, bằng bootstrap.
+    Khoảng tin cậy 95% cho CHÊNH LỆCH trung vị giữa tín hiệu và giả dược,
+    bằng BOOTSTRAP KHỐI theo ngày.
 
-    Vì sao bắt buộc: chênh lệch đo được giữa tín hiệu và giả dược chỉ khoảng
-    −0,66% tới +0,17% sau 20 phiên. Báo một con số như thế mà không kèm khoảng
-    tin cậy là mời người đọc hiểu nó thành "chiến lược kém 0,66%", trong khi với
-    độ phân tán của lợi suất cổ phiếu, nó có thể không khác 0 chút nào.
+    `a`, `b`: list các cặp (ngày_vào, giá_trị). Giá trị phải là `excess` —
+    cùng đại lượng với con số được báo cáo.
 
-    Khoảng chứa 0 -> KHÔNG phân biệt được với "không có lợi thế". Đó là kết luận
-    trung thực, không phải kết luận "chiến lược vô dụng" cũng không phải
-    "chiến lược có tác dụng".
+    Vì sao bắt buộc có khoảng: chênh lệch đo được chỉ cỡ phần mười phần trăm.
+    Báo một con số như thế trần trụi là mời người đọc hiểu nó thành kết luận,
+    trong khi với độ phân tán của lợi suất cổ phiếu nó có thể không khác 0.
+
+    ──────────────────────────────────────────────────────────────────────
+    VÌ SAO KHỐI, KHÔNG PHẢI LẤY MẪU TỪNG DÒNG
+
+    Bản trước lấy mẫu từng lần vào một cách độc lập. Các lần vào ở đây KHÔNG
+    độc lập, theo hai trục:
+
+      · THỜI GIAN — hai lần vào cách nhau 3 phiên thì cửa sổ 20 phiên của
+        chúng dùng chung 17 ngày giá. Chúng gần như cùng một quan sát.
+      · CẮT NGANG — mọi lần vào trong CÙNG một phiên cùng chịu một cú chuyển
+        động của thị trường. Trừ chỉ số đã bớt phần lớn, nhưng phần dư theo
+        ngày vẫn còn.
+
+    Lấy mẫu từng dòng coi 1816 lần vào là 1816 quan sát độc lập, trong khi số
+    quan sát thực tế nhỏ hơn nhiều. Hệ quả: khoảng tin cậy HẸP GIẢ, và một
+    chênh lệch không có thật trông như "khác 0".
+
+    Cách chữa: lấy mẫu theo KHỐI NGÀY LIÊN TIẾP, độ dài khối = kỳ quan sát.
+    Trong một khối, mọi quan hệ phụ thuộc được giữ nguyên; giữa hai khối cách
+    xa nhau thì cửa sổ không còn chồng lấn.
+
+    LẤY MẪU CẶP: cùng một bộ khối ngày dùng cho CẢ tín hiệu lẫn giả dược.
+    Hai bên vốn đo trên cùng những phiên đó, nên bắt cặp giữ đúng cấu trúc và
+    loại phần chuyển động chung của thị trường khỏi chênh lệch.
     """
     import random
-    if len(a) < 30 or len(b) < 30:
-        return None                      # mẫu quá nhỏ, bootstrap cũng không cứu
+    if len(a) < MIN_CHO_CI or len(b) < MIN_CHO_CI:
+        return None
+
+    nhom_a, nhom_b = {}, {}
+    for ngay, v in a:
+        nhom_a.setdefault(ngay, []).append(v)
+    for ngay, v in b:
+        nhom_b.setdefault(ngay, []).append(v)
+    ngay_sx = sorted(set(nhom_a) | set(nhom_b))
+    D = len(ngay_sx)
+
+    L = max(1, int(block or 1))
+    # Can it nhat HAI khoi, neu khong thi moi lan lay mau deu ra gan nhu cung
+    # mot tap va khoang tin cay hep gia — dung loai sai dang di chua.
+    if D < 2 * L:
+        return {'gap_lo': None, 'gap_hi': None, 'rounds': 0, 'includes_zero': None,
+                'block': L, 'n_dates': D, 'level': hi - lo,
+                'ly_do': f'chi co {D} ngay vao, can >= {2 * L} de chia khoi {L} phien'}
+
     rnd = random.Random(seed)
+    so_khoi = -(-D // L)                    # tran chia
+    dau_toi_da = D - L
     gaps = []
     for _ in range(rounds):
-        ra = [a[rnd.randrange(len(a))] for _ in range(len(a))]
-        rb = [b[rnd.randrange(len(b))] for _ in range(len(b))]
+        ngay_lay = []
+        for _ in range(so_khoi):
+            d0 = rnd.randint(0, dau_toi_da)
+            ngay_lay.extend(ngay_sx[d0:d0 + L])
+        ra = [v for ng in ngay_lay for v in nhom_a.get(ng, ())]
+        rb = [v for ng in ngay_lay for v in nhom_b.get(ng, ())]
+        if not ra or not rb:
+            continue
         gaps.append(median(ra) - median(rb))
+    if len(gaps) < rounds // 2:
+        return None
     gaps.sort()
-    def q(p):
-        return gaps[min(len(gaps) - 1, int(len(gaps) * p / 100))]
-    return {'gap_lo': round(q(lo), 4), 'gap_hi': round(q(hi), 4),
-            'rounds': rounds, 'includes_zero': q(lo) <= 0 <= q(hi)}
+
+    def q(pct):
+        return gaps[min(len(gaps) - 1, int(len(gaps) * pct / 100))]
+
+    g_lo, g_hi = q(lo), q(hi)
+    return {'gap_lo': round(g_lo, 4), 'gap_hi': round(g_hi, 4),
+            'rounds': len(gaps), 'includes_zero': g_lo <= 0 <= g_hi,
+            'block': L, 'n_dates': D, 'level': hi - lo}
 
 
 def build(web_dir: Path, price_of: Callable[[str], Optional[pd.DataFrame]],
@@ -314,10 +372,15 @@ def build(web_dir: Path, price_of: Callable[[str], Optional[pd.DataFrame]],
             row['gap_ci'] = {}
             for n in horizons:
                 k = str(n)
-                ra = [r['exits'][k]['ret'] for r in row['rows'] if k in r['exits']]
-                rb = [r['exits'][k]['ret'] for r in row['placebo']['rows']
-                      if k in r['exits']]
-                row['gap_ci'][k] = median_gap_ci(ra, rb)
+                # EXCESS, khong phai `ret`. Ban truoc lay `ret` trong khi con so
+                # dat canh khoang la `median_excess` — khoang mo ta mot dai luong
+                # KHAC voi dai luong no di kem.
+                def _cap(rows):
+                    return [(r['date'], r['exits'][k]['excess']) for r in rows
+                            if k in r['exits'] and r['exits'][k].get('excess') is not None]
+                row['gap_ci'][k] = median_gap_ci(_cap(row['rows']),
+                                                 _cap(row['placebo']['rows']),
+                                                 block=n)
         out[name] = row
     return {
         'schema': SCHEMA,
@@ -359,8 +422,11 @@ def summary(payload: dict):
                 else h['median_excess'] - p['median_excess'])
         ci = (s.get('gap_ci') or {}).get(last)
         verdict = ('—' if not ci else
-                   'KHÔNG khác 0' if ci['includes_zero'] else
-                   f"khác 0 ({_pct(ci['gap_lo'])}..{_pct(ci['gap_hi'])})")
+                   f"chưa đủ ngày ({ci.get('ly_do')})" if ci.get('includes_zero') is None else
+                   f"KHÔNG khác 0 ({_pct(ci['gap_lo'])}..{_pct(ci['gap_hi'])}, "
+                   f"{ci.get('level', 95):.0f}%)" if ci['includes_zero'] else
+                   f"khác 0 ({_pct(ci['gap_lo'])}..{_pct(ci['gap_hi'])}, "
+                   f"{ci.get('level', 95):.0f}%)")
         yield (f"  {name:<20} {s['entries']:>4} lần vào | {last} phiên: "
                f"n={h.get('n', 0):>4} vượt chỉ số {_pct(h.get('median_excess'))} "
                f"| giả dược {_pct(p.get('median_excess'))} (n={p.get('n', 0)}) "
