@@ -45,6 +45,12 @@
   --system-active: #b0bec5;    /* active state (light gray) */
   --focus:         #4fc3f7;    /* focus highlight (cool blue, info) */
   --warning:       #b0bec5;    /* events — NEUTRAL gray (was amber #ffa726) */
+  /* Loi va canh bao. CUNG GIA TRI voi --down nhung la token RIENG: loi khong
+     phai mot trang thai gia, va dung chung token nghia la doi mau giam gia se
+     am tham doi ca mau loi. Giu mau do o day la CO Y — do la quy uoc chung cho
+     loi, va loi hien o panel rieng chu khong trong bang gia nen khong lan voi
+     chieu giam. */
+  --danger:        #ef5350;
 
   /* ─── Criteria pill colors (for legend) ─── */
   --cat-squeeze: #ec407a;      /* pink — Nén */
@@ -53,8 +59,11 @@
   --cat-event:   #b0bec5;      /* NEUTRAL gray (was amber) — Sự kiện */
 
   /* ─── Rating tags (neutral, no amber) ─── */
-  --rating-aplus: #26a69a;     /* teal — strongest */
-  --rating-a:     #66bb6a;     /* light green */
+  /* #26a69a la DUNG hex cua --up. Mot nhan xep hang mang y nguyen sac gia
+     tang thi tren bang gia no doc nhu mot o gia, du token co ten khac.
+     Doi sang thang xanh phi-gia (--cat-trend va mot bac sang hon). */
+  --rating-aplus: #66bb6a;     /* green — strongest (phi gia) */
+  --rating-a:     #9ccc65;     /* light green-yellow */
   --rating-b:     #b0bec5;     /* neutral gray (was amber) */
   --rating-c:     #546e7a;     /* dim */
 
@@ -146,7 +155,8 @@ input { font-family: inherit; }
   font-size: 12px;
 }
 .brand-mark {
-  color: var(--up);
+  /* Dau cham thuong hieu, khong phai trang thai gia. */
+  color: var(--text-dim);
   font-size: 10px;
   animation: pulse 2s ease-in-out infinite;
 }
@@ -167,7 +177,9 @@ input { font-family: inherit; }
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--up);
+  /* "Dang song" la trang thai KET NOI, khong phai trang thai gia. --cat-trend
+     la sac xanh da duoc dat rieng cho muc dich phi-gia (xem chu thich o :root). */
+  background: var(--cat-trend);
 }
 
 /* Center stats */
@@ -190,7 +202,7 @@ input { font-family: inherit; }
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
-.stat-aplus { color: var(--up); }
+.stat-aplus { color: var(--text); }        /* so luong, khong phai gia */
 .stat-dim   { color: var(--text-dim); font-size: 18px; font-weight: 600; }
 .stat-lbl {
   font-size: 10px;
@@ -336,7 +348,7 @@ input { font-family: inherit; }
   border-radius: 50%;
   background: var(--text-mute);
 }
-.market-state.open .market-dot { background: var(--up); }
+.market-state.open .market-dot { background: var(--cat-trend); }   /* mo cua, khong phai gia */
 .time {
   font-family: var(--font-mono);
   color: var(--text-dim);
@@ -448,7 +460,7 @@ input { font-family: inherit; }
   padding: 4px 0;
 }
 .dashboard.filters-collapsed .col-filters .col-title:hover {
-  color: var(--up);
+  color: var(--text);
 }
 .dashboard.filters-collapsed .col-filters .collapse-btn {
   /* KHONG dung transform: rotate. Huong mui ten do JS doi bang ky tu, di kem
@@ -657,8 +669,8 @@ input { font-family: inherit; }
   transition: all 0.12s;
 }
 .vol-clear:hover {
-  color: var(--down);
-  border-color: var(--down);
+  color: var(--text);
+  border-color: var(--border-strong);
 }
 
 /* Search */
@@ -953,8 +965,10 @@ input { font-family: inherit; }
   font-weight: 600;
   color: var(--text);
 }
-.score-cell.high { color: var(--up); }
-.score-cell.mid  { color: var(--text); }
+/* Thu bac bang DO SANG chu khong bang sac: cao = sang nhat + dam. Ban cu dung
+   --up cho `high`, tuc mot diem so cao trong bang gia hien y het mot o gia tang. */
+.score-cell.high { color: var(--text); font-weight: 700; }
+.score-cell.mid  { color: var(--text-dim); }
 
 /* Rating tags — these stay color-coded (system) */
 .rating-tag {
@@ -968,7 +982,7 @@ input { font-family: inherit; }
   letter-spacing: 0.02em;
   font-family: var(--font-mono);
 }
-.rating-tag.aplus { background: rgba(38, 166, 154, 0.2); color: var(--rating-aplus); }
+.rating-tag.aplus { background: rgba(102, 187, 106, 0.2); color: var(--rating-aplus); }
 .rating-tag.a     { background: rgba(102, 187, 106, 0.2); color: var(--rating-a); }
 .rating-tag.b     { background: rgba(176, 190, 197, 0.15); color: var(--rating-b); }
 .rating-tag.c     { background: rgba(84, 110, 122, 0.2); color: var(--rating-c); }
@@ -1325,7 +1339,7 @@ input { font-family: inherit; }
   font-weight: 700;
   flex-shrink: 0;
 }
-.crit-check.on  { background: var(--up-soft); color: var(--up); }
+.crit-check.on  { background: var(--bg-elev-4); color: var(--text); }
 .crit-check.off { background: var(--bg-elev-3); color: var(--text-mute); }
 .crit-list li.on  { color: var(--text); }
 .crit-list li.off { color: var(--text-mute); }
@@ -1343,7 +1357,7 @@ input { font-family: inherit; }
 
 /* TK Cross callout — special Ichimoku highlight */
 .tk-cross-callout {
-  background: linear-gradient(135deg, rgba(255, 167, 38, 0.12), rgba(38, 166, 154, 0.08));
+  background: linear-gradient(135deg, rgba(255, 167, 38, 0.12), rgba(79, 195, 247, 0.08));
   border: 1px solid rgba(255, 167, 38, 0.3);
   border-left: 3px solid var(--warning);
   border-radius: 2px;
@@ -1822,7 +1836,9 @@ kbd {
 }
 .strat-badge-pb  { background: rgba(236, 64, 122, 0.18);   color: #f48fb1; border: 1px solid rgba(236, 64, 122, 0.4); }
 .strat-badge-gcl { background: rgba(102, 187, 106, 0.18);  color: #a5d6a7; border: 1px solid rgba(102, 187, 106, 0.4); }
-.strat-badge-gcs { background: rgba(38, 166, 154, 0.18);   color: #80cbc4; border: 1px solid rgba(38, 166, 154, 0.4); }
+/* Badge nhan dang chien luoc, dat canh badge Ichimoku mau cham. Dung sac
+   phi-gia (--cat-trend #66bb6a) chu khong phai teal cua --up. */
+.strat-badge-gcs { background: rgba(102, 187, 106, 0.18); color: #a5d6a7; border: 1px solid rgba(102, 187, 106, 0.4); }
 .strat-badge-ich { background: rgba(92, 107, 192, 0.18);   color: #9fa8da; border: 1px solid rgba(92, 107, 192, 0.4); }
 
 /* Combined view: STRATEGY column */
@@ -1838,7 +1854,9 @@ kbd {
   font-weight: 700;
   font-size: 11px;
 }
-.combined-pass.full {  color: var(--up); }
+/* full -> high -> low nay la mot thang do sang lien tuc, khong con bac nao
+   mang sac gia. */
+.combined-pass.full {  color: var(--text); }
 .combined-pass.high {  color: var(--system-active); }
 .combined-pass.low  {  color: var(--text-mute); }
 
@@ -1870,7 +1888,7 @@ kbd {
   margin-left: 4px;
 }
 .strat-tab-analyzer.active {
-  background: var(--up);
+  background: var(--system-active);
   color: var(--bg-base);
 }
 
@@ -2083,22 +2101,25 @@ kbd {
   gap: 24px;
   align-items: center;
 }
-.recommendation.rec-strong-buy { border-left: 4px solid var(--up); background: rgba(38, 166, 154, 0.06); }
-.recommendation.rec-buy        { border-left: 4px solid var(--up); background: rgba(38, 166, 154, 0.04); }
+/* Thang nay von da nua phi-sac (--system, --text-mute). Nay lien tuc: sang
+   dan tu "tranh" len "mua manh", khong con bac nao muon sac gia. Rieng
+   "tranh" giu --danger vi do la canh bao rui ro — cung cach da xu ly loi. */
+.recommendation.rec-strong-buy { border-left: 4px solid var(--text);          background: rgba(255, 255, 255, 0.05); }
+.recommendation.rec-buy        { border-left: 4px solid var(--system-active); background: rgba(255, 255, 255, 0.03); }
 .recommendation.rec-watch      { border-left: 4px solid var(--system); }
 .recommendation.rec-weak       { border-left: 4px solid var(--text-mute); }
-.recommendation.rec-avoid      { border-left: 4px solid var(--down); background: rgba(239, 83, 80, 0.04); }
+.recommendation.rec-avoid      { border-left: 4px solid var(--danger); background: rgba(239, 83, 80, 0.04); }
 .recommendation.rec-no-data    { border-left: 4px solid var(--border-strong); }
 
 .rec-stars {
   font-size: 24px;
   letter-spacing: 0.1em;
-  color: var(--up);
+  color: var(--text);
   white-space: nowrap;
 }
 .rec-stars.dim { color: var(--text-mute); }
 .recommendation.rec-weak .rec-stars { color: var(--system); }
-.recommendation.rec-avoid .rec-stars { color: var(--down); }
+.recommendation.rec-avoid .rec-stars { color: var(--danger); }
 
 .rec-body {
   display: flex;
@@ -2123,12 +2144,12 @@ kbd {
   color: var(--text-dim);
 }
 .rec-pass-badge.full {
-  background: rgba(38, 166, 154, 0.2);
-  color: var(--up);
+  background: var(--bg-elev-4);
+  color: var(--text);
 }
 .rec-pass-badge.high {
-  background: rgba(38, 166, 154, 0.12);
-  color: var(--up);
+  background: var(--bg-elev-3);
+  color: var(--text-dim);
 }
 .rec-desc {
   font-size: 13px;
@@ -2227,8 +2248,8 @@ kbd {
   padding: 14px 16px;
 }
 .strategy-card.pass {
-  border-color: rgba(38, 166, 154, 0.3);
-  background: rgba(38, 166, 154, 0.03);
+  border-color: var(--border-strong);
+  background: rgba(255, 255, 255, 0.03);
 }
 .strategy-card-head {
   display: flex;
@@ -2254,7 +2275,7 @@ kbd {
   font-weight: 700;
 }
 .strategy-card.pass .strategy-card-status {
-  background: var(--up);
+  background: var(--system-active);
   color: var(--bg-base);
 }
 .strategy-card:not(.pass) .strategy-card-status {
@@ -2281,8 +2302,8 @@ kbd {
   color: var(--text-dim);
 }
 .criteria-tag.passed {
-  background: rgba(38, 166, 154, 0.15);
-  color: var(--up);
+  background: var(--bg-elev-4);
+  color: var(--text);
 }
 .strategy-card-score {
   font-family: var(--font-mono);
@@ -2298,7 +2319,7 @@ kbd {
 .warning-list {
   background: var(--bg-elev-1);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--down);
+  border-left: 3px solid var(--danger);
   border-radius: 4px;
   padding: 12px 16px;
   margin-bottom: 24px;
@@ -2319,7 +2340,7 @@ kbd {
   content: '⚠';
   position: absolute;
   left: 0;
-  color: var(--down);
+  color: var(--danger);
 }
 
 /* Fibonacci section in analyzer */
@@ -2412,10 +2433,10 @@ kbd {
 
 /* Turnaround chip - special highlight */
 .chip-turnaround.active {
-  background: linear-gradient(90deg, var(--up) 0%, var(--focus) 100%);
+  background: linear-gradient(90deg, var(--cat-trend) 0%, var(--focus) 100%);
   color: var(--bg-base);
   font-weight: 700;
-  box-shadow: 0 2px 6px rgba(38, 166, 154, 0.4);
+  box-shadow: 0 2px 6px rgba(102, 187, 106, 0.4);
 }
 .chip-turnaround:not(.active) {
   border: 1px dashed rgba(79, 195, 247, 0.4);
@@ -2431,7 +2452,7 @@ kbd {
   font-size: 9px;
   font-weight: 700;
   padding: 2px 6px;
-  background: linear-gradient(90deg, var(--up) 0%, var(--focus) 100%);
+  background: linear-gradient(90deg, var(--cat-trend) 0%, var(--focus) 100%);
   color: var(--bg-base);
   border-radius: 3px;
   margin-left: 6px;
@@ -2441,18 +2462,18 @@ kbd {
 
 /* Turnaround callout in detail panel */
 .turnaround-callout {
-  background: linear-gradient(135deg, rgba(38,166,154,0.12) 0%, rgba(79,195,247,0.10) 100%);
-  border: 1px solid var(--up);
-  border-left: 4px solid var(--up);
+  background: linear-gradient(135deg, rgba(102,187,106,0.12) 0%, rgba(79,195,247,0.10) 100%);
+  border: 1px solid var(--cat-trend);
+  border-left: 4px solid var(--cat-trend);
   border-radius: 4px;
   padding: 12px 14px;
   margin-bottom: 12px;
-  box-shadow: 0 0 16px rgba(38, 166, 154, 0.25);
+  box-shadow: 0 0 16px rgba(102, 187, 106, 0.25);
 }
 .turnaround-title {
   font-size: 13px;
   font-weight: 700;
-  color: var(--up);
+  color: var(--text);
   margin-bottom: 6px;
   letter-spacing: 0.02em;
 }
@@ -2477,7 +2498,7 @@ kbd {
   padding: 3px 8px;
   background: var(--bg-elev-2);
   border-radius: 3px;
-  border-left: 2px solid var(--up);
+  border-left: 2px solid var(--cat-trend);
 }
 
 /* ─── Miễn trừ trách nhiệm (bắt buộc: UI có đưa ra gợi ý tỷ trọng NAV) ─── */
@@ -2763,7 +2784,7 @@ kbd {
   padding: 3px 8px; border-radius: 3px;
 }
 
-.plan-breakout { background: rgba(38,166,154,.18); color: var(--up); }
+.plan-breakout { background: var(--bg-elev-4);        color: var(--text); }
 .plan-pullback { background: rgba(79,195,247,.16); color: var(--focus); }
 .plan-note     { font-size: 11px; color: var(--text-dim); }
 
@@ -2788,7 +2809,7 @@ kbd {
 
 /* Trạng thái lỗi có lối thoát, thay vì là ngõ cụt */
 .error-state { padding: 32px 16px !important; }
-.error-title  { font-size: 14px; color: var(--down); margin-bottom: 6px; font-weight: 600; }
+.error-title  { font-size: 14px; color: var(--danger); margin-bottom: 6px; font-weight: 600; }
 .error-detail { font-size: 12px; color: var(--text-dim); margin-bottom: 4px; }
 .error-state .btn-ghost { margin-top: 12px; }
 
