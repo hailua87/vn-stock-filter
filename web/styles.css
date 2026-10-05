@@ -1897,6 +1897,20 @@ kbd {
   position: relative;
   margin-left: 16px;
   width: 280px;
+  /* SAN 141px, khong phai so tron cho dep: do la be rong cua placeholder
+     "Nhap ma, vd: FPT" (16 ky tu, JetBrains Mono 12px, padding+border 26px) —
+     con so do chinh chu thich cua .analyzer-input ghi lai tu 29/08/2026.
+     Placeholder la rang buoc be rong DUY NHAT cua o nay.
+
+     Can san nay vi topbar la flex va o nhap la thu bi ep co dau tien. Them tab
+     MA7x25 lam no tut tu 135px xuong 63px o 1441px (cam ung: 117 -> 45), tuc
+     placeholder khong con lot. Cong `kiem` bat duoc nho canh gac "muc da chap
+     nhan khong duoc te them" trong accepted.json.
+
+     Phan tran ra se day sang viec dai tab vo dong — do la muc DA CHAP NHAN va
+     da co ho so (docs/mobile-layout-out-of-scope.md muc 5, 7), con o nhap
+     khong doc duoc thi khong. */
+  min-width: 141px;
   display: flex;
   align-items: center;
 }
@@ -2500,6 +2514,26 @@ kbd {
   border-radius: 3px;
   border-left: 2px solid var(--cat-trend);
 }
+
+/* ─── Nhãn tín hiệu MA7 × MA25 ─── */
+/* Thang DO SANG chu khong phai sac gia: day la ket luan cua chien luoc, khong
+   phai trang thai gia. Xem quy tac mau o tokens.css. Rieng THOAT dung --danger
+   vi do la canh bao rui ro, cung cach da xu ly loi va the khuyen nghi "tranh". */
+.ma-signal {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.ma-THOAT    { background: rgba(239, 83, 80, 0.18); color: var(--danger); }
+.ma-GIAM     { background: var(--bg-elev-4);        color: var(--text); }
+.ma-CHOT_LOI { background: var(--bg-elev-4);        color: var(--text); }
+.ma-MUA_1    { background: var(--bg-elev-3);        color: var(--text-dim); }
+.ma-MUA_2    { background: var(--bg-elev-3);        color: var(--text-dim); }
+.ma-blocked  { margin-left: 4px; color: var(--text-mute); cursor: help; }
 
 /* ─── Miễn trừ trách nhiệm (bắt buộc: UI có đưa ra gợi ý tỷ trọng NAV) ─── */
 /* Mien tru trach nhiem: MOT DONG luon hien, mo rong duoc.

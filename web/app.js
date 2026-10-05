@@ -60,6 +60,16 @@ const STRATEGIES = {
       { key: 'ich_future_cloud_bullish', name: 'Mây tương lai bullish (+26)', cat: 'trend' },
     ],
   },
+  ma7_25: {
+    name: 'MA7 × MA25',
+    dataDir: './data/ma7_25',
+    // KHÔNG chấm điểm: mỗi mã mang ĐÚNG MỘT tín hiệu trong 5 loại, chọn theo
+    // thứ tự ưu tiên ở backend. Vì vậy không có maxScore và không có criteria —
+    // bảng dùng mẫu hàng riêng, giống tab Tổng hợp.
+    signalBased: true,
+    maxScore: null,
+    criteria: [],
+  },
   combined: {
     name: 'Tổng hợp',
     dataDir: null,                 // multi-source; merged client-side
@@ -1201,12 +1211,20 @@ function render() {
   // Update table headers based on mode
   const criteriaLabel = document.getElementById('th-criteria-label');
   const scoreLabel = document.getElementById('th-score-label');
+  // Cot cuoi: "HANG" voi chien luoc cham diem, "TUOI" voi chien luoc theo tin
+  // hieu. De nguyen nhan cu thi cot ghi "HANG" ma ben duoi la "2 phien".
+  const ratingLabel = document.getElementById('th-rating-label');
+  if (ratingLabel) ratingLabel.textContent = currentConfig().signalBased ? 'TUỔI' : 'HẠNG';
   if (criteriaLabel && scoreLabel) {
     if (activeStrategy === 'combined') {
       // Hide TIÊU CHÍ column in combined (badges live in MÃ cell)
       criteriaLabel.style.display = 'none';
       scoreLabel.innerHTML = 'PASS <span class="sort-ind"></span>';
       scoreLabel.dataset.sort = '_passCount';
+    } else if (currentConfig().signalBased) {
+      criteriaLabel.style.display = 'none';
+      scoreLabel.innerHTML = 'TÍN HIỆU <span class="sort-ind"></span>';
+      scoreLabel.dataset.sort = 'signal';
     } else {
       criteriaLabel.style.display = '';
       criteriaLabel.textContent = 'TIÊU CHÍ';
@@ -1313,6 +1331,10 @@ function applyFilters() {
       const cmp = (av < bv) ? -1 : (av > bv) ? 1 : 0;
       return state.sort.direction === 'asc' ? cmp : -cmp;
     });
+  } else if (currentConfig().signalBased) {
+    const UT = { THOAT: 0, GIAM: 1, CHOT_LOI: 2, MUA_1: 3, MUA_2: 4 };
+    arr.sort((a, b) => (UT[a.signal] ?? 99) - (UT[b.signal] ?? 99)
+      || a.ticker.localeCompare(b.ticker));
   } else if (activeStrategy === 'combined') {
     arr.sort((a, b) => {
       const dp = (b._passCount || 0) - (a._passCount || 0);
@@ -1515,6 +1537,35 @@ function renderRow(s, idx) {
       <td class="combined-criteria-cell prio-4" style="display:none;"></td>
       <td class="num"><span class="combined-pass ${passCls}">${passCount}/${totalStrats}</span></td>
       <td><span class="rating-tag ${ratingClass}">${s.rating}</span></td>
+    </tr>`;
+  }
+
+  // ── Hàng cho chiến lược theo TÍN HIỆU (MA7 × MA25) ──
+  // Mẫu riêng chứ không nhét tín hiệu vào ô điểm: bảng này không có điểm, và
+  // số cột phải khớp với <thead> đã ẩn cột TIÊU CHÍ.
+  if (currentConfig().signalBased) {
+    const sg = s.signal || '';
+    const tuoi = s.signal_age == null ? '—' : `${s.signal_age} phiên`;
+    const chan = s.blocked_by
+      ? `<span class="ma-blocked" title="Bộ lọc chặn: ${escapeAttr(s.blocked_by)}">⊘</span>` : '';
+    return `<tr data-ticker="${s.ticker}" class="${selectedClass}">
+      <td class="th-idx prio-4">${idx}</td>
+      <td><span class="ticker-cell">${s.ticker}</span>${eventFlag}</td>
+      <td class="prio-3"><span class="exchange-cell">${s.exchange}</span></td>
+      <td class="num td-price">${fmtPrice(s.close)}</td>
+      <td class="num prio-1">${renderChange1D(s)}</td>
+      <td class="num prio-3 ${changeClass}">${sign}${change.toFixed(2)}%</td>
+      <td class="num prio-2">${fmtVolume(s.volume)}</td>
+      <td class="num prio-3">${fmtValue(s.close, s.volume)}</td>
+      <td class="num prio-3">${(s.m_vol_ratio || 0).toFixed(2)}×</td>
+      <td class="prio-4">${sparkCell}</td>
+      <td class="num prio-2">${renderStreak(s)}</td>
+      <td class="num prio-3">${(s.m_rsi14 || 0).toFixed(0)}</td>
+      <td class="num prio-4">${supCell}</td>
+      <td class="num prio-4">${resCell}</td>
+      <td class="num prio-4">${rrCell}</td>
+      <td class="num"><span class="ma-signal ma-${sg}">${escapeAttr(s.signal_label || sg)}</span>${chan}</td>
+      <td class="prio-3">${tuoi}</td>
     </tr>`;
   }
 

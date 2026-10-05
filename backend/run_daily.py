@@ -36,7 +36,7 @@ from scanner.corporate_actions import apply_event_filter
 from scanner.market_regime import (
     compute_regime, compute_breadth, compute_relative_strength, annotate_results,
 )
-from scanner.strategies import golden_cross, ichimoku
+from scanner.strategies import golden_cross, ichimoku, ma7_25
 from scanner.trading_calendar import ICT, now_ict
 
 logging.basicConfig(
@@ -89,6 +89,7 @@ WEB_OUTPUTS = (
     'golden_cross_long/',
     'golden_cross_short/',
     'ichimoku/',
+    'ma7_25/',
     'ohlc/',                    # nen 60 phien cho man Chi tiet ma
     'streaks/',                 # nhat ky tin hieu: ma giu tin hieu may phien
     'outcomes/',                # so theo doi ket qua: sau N phien lai/lo bao nhieu
@@ -441,22 +442,29 @@ def build_metadata(min_score, exchanges, total_scanned, market_context,
 def write_strategy_outputs(results, web_subdir, session_date, min_score,
                            exchanges, total_scanned, strategy_label,
                            market_context=None, decision=None, completeness=None,
-                           fetch_summary=None, base_conditions=None):
+                           fetch_summary=None, base_conditions=None,
+                           keep=None, sort_key=None):
     """Ghi latest.json + archive/<date>.json + archive/index.json cho một chiến lược.
 
     Trả về danh sách mã ĐÃ CÔNG BỐ (đã qua ngưỡng điểm) — màn Chi tiết mã chỉ
     cần nến của những mã người đọc mở được từ bảng tín hiệu.
+
+    `keep` / `sort_key` cho chiến lược KHÔNG chấm điểm (MA7×25 lọc theo tín hiệu
+    chứ không theo điểm). Mặc định giữ nguyên hành vi cũ.
+
+    Vì sao tham số hoá chứ không viết bộ ghi thứ hai: thư mục archive này nuôi
+    cả sổ chuỗi phiên (`streaks`) lẫn sổ theo dõi kết quả (`outcomes`). Hai bản
+    cài đặt sẽ trôi khỏi nhau, và sai lệch chỉ lộ ra nhiều tháng sau khi hai sổ
+    đó bắt đầu nói hai chuyện khác nhau.
     """
     web_subdir.mkdir(parents=True, exist_ok=True)
     archive_dir = web_subdir / 'archive'
     archive_dir.mkdir(exist_ok=True)
 
-    signals = []
-    for r in results:
-        if r is None: continue
-        if r.total_score >= min_score:
-            signals.append(r.to_dict())
-    signals.sort(key=lambda s: -s['total_score'])
+    giu = keep if keep is not None else (lambda r: r.total_score >= min_score)
+    xep = sort_key if sort_key is not None else (lambda s: -s['total_score'])
+    signals = [r.to_dict() for r in results if r is not None and giu(r)]
+    signals.sort(key=xep)
     published = [s['ticker'] for s in signals]
 
     payload = {
@@ -758,6 +766,40 @@ def main():
         args.min_score_ichimoku, exchanges, total_scanned,
         'ichimoku', market_context, decision, completeness,
         fetch_summary, base_conditions))
+
+    # -------- MA7 × MA25 --------
+    # KHONG di qua `run_strategy`: ham do cham diem, gan RS va muc gia vao lenh
+    # cho cac chien luoc co `total_score`. MA7x25 khong cham diem — moi ma mang
+    # MOT tin hieu, va tin hieu BAN khong duoc loc theo thanh khoan hay su kien
+    # quyen (dang giu ma thi van phai bao duoc khi can thoat).
+    #
+    # `market_ok`: VN-Index tren MA50. None khi khong lay duoc VN-Index, va
+    # None CHAN tin hieu mua — khong biet thi khong mua.
+    log.info("Running MA7 x MA25 strategy...")
+    market_ok = (market_context or {}).get('above_ma50') if (market_context or {}).get('available') else None
+    ma_results, ma_raised = [], 0
+    for ticker, df_t in by_ticker_all.items():
+        try:
+            r = ma7_25.evaluate(df_t, ticker, market_ok=market_ok)
+            if r is not None:
+                ma_results.append(r)
+        except Exception as e:
+            ma_raised += 1
+            log.warning(f"  MA7x25 {ticker}: {type(e).__name__}: {e}")
+    if ma_raised:
+        log.warning(f"  MA7x25: {ma_raised}/{len(by_ticker_all)} ma raise exception")
+    # `by_ticker_all` chu khong phai `by_ticker`: tin hieu BAN phai den duoc ca
+    # ma da rot dieu kien nen — dung luc can thoat thi thanh khoan thuong da can.
+    ma_act = [r for r in ma_results if r.actionable]
+    log.info(f"  MA7x25: {len(ma_act)}/{len(ma_results)} ma co tin hieu hanh dong duoc")
+    _UU_TIEN = {s: i for i, s in enumerate(ma7_25.SIGNALS)}
+    published |= set(write_strategy_outputs(
+        ma_results, web_dir / 'ma7_25', session_date,
+        0, exchanges, total_scanned,
+        'ma7_25', market_context, decision, completeness,
+        fetch_summary, base_conditions,
+        keep=lambda r: r.actionable,
+        sort_key=lambda s: (_UU_TIEN.get(s['signal'], 99), s['ticker'])))
 
     # ── Nến + MA cho màn Chi tiết mã (§11.1) ──────────────────────────────
     # Một tệp dùng chung, chỉ chứa mã có tín hiệu: cùng một mã hay nằm ở nhiều

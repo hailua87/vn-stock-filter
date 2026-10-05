@@ -64,6 +64,7 @@
     <button class="strat-tab" data-strategy="golden_cross_long">GC dài hạn</button>
     <button class="strat-tab" data-strategy="golden_cross_short">GC ngắn hạn</button>
     <button class="strat-tab" data-strategy="ichimoku">Ichimoku</button>
+    <button class="strat-tab" data-strategy="ma7_25" title="MA7 × MA25 — 5 tín hiệu mua/bán, không chấm điểm">MA7×25</button>
     <button class="strat-tab strat-tab-combined" data-strategy="combined" title="Lọc mã thỏa nhiều chiến lược cùng lúc"><span aria-hidden="true">⚡</span> Tổng hợp</button>
     <button class="strat-tab strat-tab-analyzer" data-strategy="analyzer" title="Phân tích chi tiết 1 mã qua mọi chiến lược"><span aria-hidden="true">🔍</span> Phân tích mã</button>
   </nav>
@@ -273,7 +274,7 @@
             <th scope="col" class="num sortable prio-4" data-sort="m_rr" title="Tỷ lệ lời : lỗ = (mục tiêu − giá) / (giá − cắt lỗ)">R:R <span class="sort-ind"></span></th>
             <th scope="col" class="th-criteria prio-4" id="th-criteria-label">TIÊU CHÍ</th>
             <th scope="col" class="num sortable" data-sort="total_score" id="th-score-label">ĐIỂM <span class="sort-ind"></span></th>
-            <th scope="col" class="th-rating">HẠNG</th>
+            <th scope="col" class="th-rating" id="th-rating-label">HẠNG</th>
           </tr>
         </thead>
         <tbody id="signal-rows">
