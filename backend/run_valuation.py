@@ -103,6 +103,20 @@ logging.basicConfig(
 log = logging.getLogger('valuation')
 
 
+def _tong_hop_beta(signals) -> dict:
+    """Bao nhiêu mã dùng beta thật, bao nhiêu rơi về giá trị dự phòng 1.0."""
+    co = [s.get('beta') for s in signals if s.get('beta')]
+    that = [b for b in co if not b.get('fallback')]
+    rs = [b['r_squared'] for b in that if b.get('r_squared') is not None]
+    return {
+        'n': len(co),
+        'real': len(that),
+        'fallback': len(co) - len(that),
+        'median_r_squared': (None if not rs
+                             else round(sorted(rs)[len(rs) // 2], 3)),
+    }
+
+
 def main(argv=None, clock=monotonic):
     """`clock` chỉ để test bơm đồng hồ giả — chạy thật luôn dùng `monotonic`."""
     parser = argparse.ArgumentParser()
@@ -321,6 +335,14 @@ def main(argv=None, clock=monotonic):
             # không đo thời gian chạy.
             'source_stats': SOURCE.stats(),
             'failures': len(failures),
+            # Beta that hay gia tri du phong 1.0, TONG HOP ca luot.
+            #
+            # Beta quyet dinh WACC trong DCF, va methods_pb_roe tru 5% do tin cay
+            # khi no la du phong — tuc no DOI KET QUA. Truoc 04/10/2026 no khong
+            # duoc ghi ra dau, nen khong ai noi duoc tu du lieu cong bo rang mot
+            # luot chay dung beta that hay 1.0. Mot dong o day de nhin mot cai la
+            # biet, khong phai mo tung tin hieu ra dem.
+            'beta_coverage': _tong_hop_beta(signals_out),
             'verdict_counts': verdict_counts,
             'band_counts': band_counts,
             'excluded_outliers': outliers,

@@ -176,6 +176,8 @@ class ValuationReport:
     # Lý do _publish_guard hạ verdict về HOLD (nhóm tài chính, 1 phương pháp).
     # Lớp mức định giá đọc trường này để trả "Chưa có" thay vì "Hấp dẫn"/"Đắt".
     guard_reason: Optional[str] = None
+    # Beta thực hay giá trị dự phòng 1.0. Xem chú thích ở to_dict().
+    beta: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         """Chuyển thành dict JSON-serializable, tương thích web frontend pattern."""
@@ -196,6 +198,13 @@ class ValuationReport:
             # json.dump(default=str) ghi thành chuỗi "True"/"False"
             'methods_conflict': bool(self.method_dispersion > MAX_METHOD_DISPERSION),
             'methods_used': self.methods_used,
+            # Beta quyết định WACC trong DCF, và `methods_pb_roe` còn trừ 5% độ
+            # tin cậy khi beta là giá trị dự phòng 1.0 — tức nó ĐỔI KẾT QUẢ.
+            # Trước 04/10/2026 nó không được ghi ra đâu cả: không ai, kể cả
+            # người viết, nói được từ dữ liệu công bố rằng beta một lượt chạy là
+            # thật hay là 1.0. Một đầu vào làm đổi kết quả mà không để lại dấu
+            # vết thì không kiểm chứng được, và không sửa được khi nó hỏng.
+            'beta': self.beta or None,
             'method_details': [
                 {
                     'method': m,
@@ -362,6 +371,17 @@ def _publish_guard(verdict: str, industry: ValuationIndustry,
         return "HOLD", (f"Chỉ có {n_methods} phương pháp định giá khả dụng, không kiểm "
                         f"chéo được{model}")
     return verdict, None
+
+
+def _beta_info(market: Dict[str, Any]) -> Dict[str, Any]:
+    """Beta đã dùng cho lượt này, kèm việc nó là thật hay giá trị dự phòng."""
+    rs = market.get('beta_r_squared')
+    return {
+        'value': round(float(market.get('beta_2y', 1.0)), 3),
+        'fallback': bool(market.get('beta_fallback', True)),
+        'method': market.get('beta_method'),
+        'r_squared': None if rs is None else round(float(rs), 3),
+    }
 
 
 def _method_dispersion(fair_values: List[float]) -> float:
@@ -597,6 +617,7 @@ def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
         methods_used=used_methods,
         method_results=results,
         method_weights={m: method_weights[m] for m in used_methods},
+        beta=_beta_info(data['market']),
         warnings=all_warnings,
         recommendation_notes=rec_notes,
         guard_reason=guard_warning,
