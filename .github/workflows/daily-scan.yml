@@ -197,7 +197,8 @@ jobs:
           for f in web/data/latest.json \
                    web/data/golden_cross_long/latest.json \
                    web/data/golden_cross_short/latest.json \
-                   web/data/ichimoku/latest.json; do
+                   web/data/ichimoku/latest.json \
+                   web/data/ma7_25/latest.json; do
             if [ -f "$f" ]; then
               echo ""
               echo "── $f ──"
@@ -266,7 +267,8 @@ jobs:
           for f in web/data/latest.json \
                    web/data/golden_cross_long/latest.json \
                    web/data/golden_cross_short/latest.json \
-                   web/data/ichimoku/latest.json; do
+                   web/data/ichimoku/latest.json \
+                   web/data/ma7_25/latest.json; do
             if [ -f "$f" ]; then
               jq --arg rt "$RUN_TYPE" --arg time "$RUN_TIME_ICT" --arg date "$RUN_DATE_ICT" \
                 '.metadata += {run_type: $rt, run_time_ict: $time, run_date_ict: $date}' \
@@ -343,7 +345,7 @@ jobs:
           BRANCH="${{ github.ref_name }}" bash scripts/commit-bot-data.sh "$MSG" \
             web/data/latest.json web/data/archive/ \
             web/data/golden_cross_long/ web/data/golden_cross_short/ \
-            web/data/ichimoku/ \
+            web/data/ichimoku/ web/data/ma7_25/ \
             web/data/health.json web/data/ohlc/ web/data/streaks/ web/data/outcomes/
 
       # Cảnh báo bằng issue (nhãn workflow-failure): mở/comment khi hỏng, tự đóng

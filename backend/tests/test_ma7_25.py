@@ -282,3 +282,41 @@ def test_cli_vnindex_duoi_ma50_chan_mua(tmp_path, monkeypatch, capsys):
     assert '1 tin hieu MUA bi bo loc chan: vnindex_duoi_ma50 1' in printed
     csv = pd.read_csv(tmp_path / 'out' / f'ma7_25_{last}.csv')
     assert csv.loc[0, 'actionable'] == False  # noqa: E712
+
+
+# ---------------------------------------------------------------- Ưu tiên
+
+def test_cham_cat_lo_thang_giam_ty_trong():
+    """
+    Thứ tự ưu tiên là quyết định thiết kế (mỗi mã mang ĐÚNG MỘT tín hiệu), và
+    nó chưa được canh ở đâu cả: đảo thứ tự trong `evaluate` vẫn xanh hết.
+
+    Phần lớn các cặp loại trừ nhau theo cấu trúc — THOAT cần MA7 DƯỚI MA25 còn
+    GIAM/CHOT_LOI/MUA_* đều cần MA7 TRÊN. Nhưng THOAT-vì-cắt-lỗ thì KHÔNG: nó
+    chỉ cần `stop_hit`, và mã vẫn có thể đang ở trạng thái GIAM.
+
+    Đây là cặp đáng canh nhất trong cả nhóm. Người đang cầm mã chạm cắt lỗ mà
+    màn hình bảo "Giảm tỷ trọng" thay vì "Thoát hết" là lời khuyên sai ở đúng
+    lúc nó tốn tiền nhất.
+    """
+    df = path(GIAM_SEGS)
+    khong_giu = ev(df, GIAM_LEN)
+    assert khong_giu.signal == 'GIAM', 'fixture phải đang ở trạng thái GIAM'
+
+    # Giá cuối ~29,55 → mua ở 35,0 thì đã lỗ 15,6%, quá ngưỡng cắt lỗ 7%.
+    dang_giu = ev(df, GIAM_LEN, entry_price=35.0)
+    assert dang_giu.position['cham_cat_lo'] is True, 'fixture phải chạm cắt lỗ'
+    assert dang_giu.signal == 'THOAT', (
+        f"chạm cắt lỗ phải ra THOAT, không phải {dang_giu.signal}")
+
+
+def test_chua_cham_cat_lo_thi_van_la_giam_ty_trong():
+    """
+    Chốt chặn cho phép kiểm trên: nếu THOAT nuốt mọi mã đang giữ thì phép kiểm
+    kia xanh một cách rỗng. Cùng fixture, mua ở giá thấp → chưa chạm cắt lỗ →
+    vẫn phải là GIAM.
+    """
+    df = path(GIAM_SEGS)
+    r = ev(df, GIAM_LEN, entry_price=28.0)      # lãi, không chạm cắt lỗ
+    assert r.position['cham_cat_lo'] is False
+    assert r.signal == 'GIAM', f'chưa chạm cắt lỗ thì vẫn GIAM, không phải {r.signal}'
