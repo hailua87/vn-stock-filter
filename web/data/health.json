@@ -1,34 +1,34 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-05T23:59:00",
+  "generated_at": "2026-10-06T13:19:51",
   "sources": {
     "daily_scan": {
       "label": "Scan hằng ngày",
-      "session_date": "2026-10-05",
+      "session_date": "2026-10-06",
       "run_type": "eod",
       "run_date_ict": "2026-10-06",
-      "run_time_ict": "06:43",
-      "universe": 447,
+      "run_time_ict": "20:05",
+      "universe": 301,
       "universe_after_base": 112,
-      "dropped_low_liquidity": 335,
+      "dropped_low_liquidity": 189,
       "fetch": {
-        "coverage": 0.894,
-        "succeeded": 447,
-        "skipped": 53,
+        "coverage": 0.602,
+        "succeeded": 301,
+        "skipped": 199,
         "failed": 0,
         "stop_reason": "time_budget"
       },
-      "stale_ratio": 0.555,
-      "session_completeness": 0.884,
-      "archive_written": true,
-      "archive_reason": "gate_time: pass (phiên 2026-10-05 đã đóng dứt khoát (hôm nay 2026-10-06)) | gate_coverage: pass (89% >= 80%, vòng fetch dừng vì hết giờ nhưng đủ ngưỡng — archive ghi kèm độ phủ)"
+      "stale_ratio": 0.754,
+      "session_completeness": 1.047,
+      "archive_written": false,
+      "archive_reason": "gate_time: pass (phiên hôm nay, 20:05 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: fail (60% < 80%, vòng fetch dừng sớm (time_budget))"
     },
     "valuation": {
       "label": "Định giá",
       "available": true,
       "as_of": "2026-10-04",
       "generated_at": "2026-10-04T05:44:52.758567",
-      "age_days": 1,
+      "age_days": 2,
       "count": 81,
       "fetch_coverage": 1.0,
       "partial_reason": null,
@@ -43,7 +43,7 @@
       "available": true,
       "as_of": "2026-10-04",
       "generated_at": "2026-10-04T05:45:54",
-      "age_days": 1,
+      "age_days": 2,
       "count": 200,
       "fetch_coverage": 1.0,
       "partial_reason": null,
@@ -58,12 +58,22 @@
     {
       "code": "fetch_stopped",
       "severity": "warn",
-      "message": "Vòng lấy dữ liệu dừng sớm (time_budget) — độ phủ 0.894. Rổ quét nhỏ hơn bình thường."
+      "message": "Vòng lấy dữ liệu dừng sớm (time_budget) — độ phủ 0.602. Rổ quét nhỏ hơn bình thường."
     },
     {
       "code": "stale_high",
       "severity": "warn",
-      "message": "56% số mã có dữ liệu chưa cập nhật tới phiên mới nhất (nguồn chậm). Tín hiệu của những mã đó tính trên giá cũ."
+      "message": "75% số mã có dữ liệu chưa cập nhật tới phiên mới nhất (nguồn chậm). Tín hiệu của những mã đó tính trên giá cũ."
+    },
+    {
+      "code": "archive_skipped",
+      "severity": "info",
+      "message": "Chưa ghi bản lưu phiên: gate_time: pass (phiên hôm nay, 20:05 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: fail (60% < 80%, vòng fetch dừng sớm (time_budget))."
+    },
+    {
+      "code": "universe_shrank",
+      "severity": "error",
+      "message": "Danh sách mã giảm 33% so với lần chạy trước (447 → 301). Nguồn danh sách có thể đang lỗi."
     }
   ]
 }
