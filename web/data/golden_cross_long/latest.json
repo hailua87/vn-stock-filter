@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T13:09:53.931238",
+  "generated_at": "2026-10-06T22:15:12.253756",
   "strategy": "golden_cross_long",
   "total": 0,
   "metadata": {
@@ -11,7 +11,7 @@
     ],
     "base_conditions": {
       "min_avg_value_20d": 10000000000.0,
-      "dropped_low_liquidity": 189,
+      "dropped_low_liquidity": 289,
       "universe_after": 112,
       "exchanges": [
         "HOSE",
@@ -19,7 +19,7 @@
         "UPCOM"
       ]
     },
-    "total_scanned": 301,
+    "total_scanned": 401,
     "market_context": {
       "available": false,
       "regime": "unknown",
@@ -27,38 +27,36 @@
       "position_size_multiplier": 1.0,
       "breadth": {
         "pct_above_ma50": 26.2,
-        "sample_size": 301
+        "sample_size": 401
       }
     },
     "session_date": "2026-10-06",
-    "written_at_ict": "2026-10-06 20:05:09+0700",
+    "written_at_ict": "2026-10-07 05:05:47+0700",
     "run_type": "eod",
-    "session_complete": 1.047,
-    "archive_written": false,
+    "session_complete": 1.212,
+    "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 20:05 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: fail (60% < 80%, vòng fetch dừng sớm (time_budget))",
+    "archive_gate": "gate_time: pass (phiên 2026-10-06 đã đóng dứt khoát (hôm nay 2026-10-07)) | gate_coverage: pass (80% >= 80%, vòng fetch dừng vì hết giờ nhưng đủ ngưỡng — archive ghi kèm độ phủ)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 20:05 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-10-06 đã đóng dứt khoát (hôm nay 2026-10-07)"
       },
       {
         "name": "gate_coverage",
-        "passed": false,
-        "detail": "60% < 80%, vòng fetch dừng sớm (time_budget)"
+        "passed": true,
+        "detail": "80% >= 80%, vòng fetch dừng vì hết giờ nhưng đủ ngưỡng — archive ghi kèm độ phủ"
       }
     ],
-    "archive_gates_failed": [
-      "gate_coverage"
-    ],
+    "archive_gates_failed": [],
     "fetch_truncated": true,
     "fetch_stop_reason": "time_budget",
-    "fetch_coverage": 0.602,
-    "fetch_elapsed_s": 4201.8,
+    "fetch_coverage": 0.802,
+    "fetch_elapsed_s": 4211.2,
     "intraday": false,
-    "run_time_ict": "20:19",
-    "run_date_ict": "2026-10-06"
+    "run_time_ict": "05:20",
+    "run_date_ict": "2026-10-07"
   },
   "signals": []
 }
