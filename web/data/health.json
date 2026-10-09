@@ -1,27 +1,27 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-09T12:08:50",
+  "generated_at": "2026-10-09T20:56:57",
   "sources": {
     "daily_scan": {
       "label": "Scan hằng ngày",
       "session_date": "2026-10-09",
       "run_type": "eod",
-      "run_date_ict": "2026-10-09",
-      "run_time_ict": "19:02",
-      "universe": 500,
-      "universe_after_base": 112,
-      "dropped_low_liquidity": 388,
+      "run_date_ict": "2026-10-10",
+      "run_time_ict": "03:50",
+      "universe": 487,
+      "universe_after_base": 111,
+      "dropped_low_liquidity": 376,
       "fetch": {
-        "coverage": 1.0,
-        "succeeded": 500,
+        "coverage": 0.974,
+        "succeeded": 487,
         "skipped": 0,
-        "failed": 0,
+        "failed": 13,
         "stop_reason": null
       },
-      "stale_ratio": 0.142,
-      "session_completeness": 1.269,
+      "stale_ratio": 0.146,
+      "session_completeness": 1.287,
       "archive_written": true,
-      "archive_reason": "gate_time: pass (phiên hôm nay, 19:02 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)"
+      "archive_reason": "gate_time: pass (phiên 2026-10-09 đã đóng dứt khoát (hôm nay 2026-10-10)) | gate_coverage: pass (97% >= 80%, vòng fetch chạy trọn)"
     },
     "valuation": {
       "label": "Định giá",
@@ -54,5 +54,11 @@
       }
     }
   },
-  "issues": []
+  "issues": [
+    {
+      "code": "fetch_failed",
+      "severity": "warn",
+      "message": "13 mã không lấy được dữ liệu, đã bỏ qua trong phiên này."
+    }
+  ]
 }
