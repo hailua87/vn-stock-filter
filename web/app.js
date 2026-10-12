@@ -2599,74 +2599,293 @@ function renderValuationBlock(band, val) {
 }
 
 /**
- * Bieu do nen + MA20/MA50 (§11.1). SVG noi tuyen, khong thu vien.
+ * Bieu do ky thuat cho man Chi tiet ma: ba tang chung mot truc thoi gian.
  *
- * Mau nen theo bang dien Viet Nam (§11.3): day LA gia, nen dung dung bang mau
- * do — xanh la tang, do giam, vang tham chieu. Hai duong MA thi khong: chung
- * la trung binh truot, khong phai gia mot phien.
+ *   Gia      — nen + cap MA dang chon (MA7 x MA25 mac dinh, hoac MA20 x MA50)
+ *              + diem giao cat cua cap do (tam giac len/xuong)
+ *   Khoi luong — cot KL + MA20 cua KL (tinh CA phien hien tai, nhu bang dien)
+ *   MACD     — DIF, DEA va cot MACD = DIF - DEA (12, 26, 9)
+ *
+ * SVG noi tuyen, khong thu vien. Moi chi bao tinh o backend tren TOAN BO lich
+ * su (ohlc_export.py) roi moi cat 60 phien — tinh lai o day tu 60 phien se lech,
+ * nhat la MACD.
+ *
+ * Mau: nen, cot KL va cot MACD la gia/xu huong nen dung --up/--down. Duong
+ * MA va DIF/DEA thi khong: "nhanh = net lien, cham = net dut" la ngon ngu
+ * chung cho ca ba cap, nen doc duoc ca khi khong phan biet mau.
+ *
+ * Chu (truc, nhan) nam o HTML chu khong trong SVG: SVG dung
+ * preserveAspectRatio="none" de gian theo be rong, chu trong do se bi keo meo.
+ * Nhan truc nam trong mot cot rieng ben phai (.cd-plot padding-right), KHONG
+ * de len vung ve: de len thi che mat may cay nen cuoi — dung phien can doc nhat.
  */
-function renderCandles(series, ticker) {
+const CD = { W: 720, PAD_L: 4, PAD_R: 4, H_PRICE: 240, H_VOL: 70, H_MACD: 90, PAD_Y: 8 };
+const MA_PAIRS = {
+  ma7:  { fast: 'ma7',  slow: 'ma25', label: 'MA7 × MA25' },
+  ma20: { fast: 'ma20', slow: 'ma50', label: 'MA20 × MA50' },
+};
+
+const isNum = v => typeof v === 'number' && Number.isFinite(v);
+
+function cdPairFor(series) {
+  // Du lieu schema cu (chua co MA7/MA25) -> roi ve MA20 x MA50 thay vi ve
+  // mot bieu do trong.
+  const want = prefGet('cd-pair', 'ma7');
+  const pair = MA_PAIRS[want] ? want : 'ma7';
+  return Array.isArray(series?.[MA_PAIRS[pair].fast]) ? pair : 'ma20';
+}
+
+/**
+ * Giao cat cua cap MA: [{i, dir}] voi dir +1 cat len, -1 cat xuong.
+ *
+ * Uu tien danh sach backend xuat (`x7_25`, `x20_50`): no tinh tren MA CHUA lam
+ * tron. Tu do tren mang 2 chu so o day se truot diem cat mot phien moi khi hai
+ * duong sat nhau (lech o 6/31 ma khi do ngay 05/10/2026). Tu do chi la duong
+ * lui cho tep schema cu, va dung CUNG dinh nghia voi backend: "tren" la
+ * fast > slow, cat la luc trang thai do doi.
+ */
+function cdCrosses(series, P) {
+  const key = `x${P.fast.slice(2)}_${P.slow.slice(2)}`;
+  if (Array.isArray(series?.[key])) return series[key].map(([i, dir]) => ({ i, dir }));
+  const fast = series?.[P.fast] || [], slow = series?.[P.slow] || [];
+  const out = [];
+  for (let i = 1; i < fast.length; i++) {
+    if (![fast[i - 1], slow[i - 1], fast[i], slow[i]].every(isNum)) continue;
+    const was = fast[i - 1] > slow[i - 1], now = fast[i] > slow[i];
+    if (was !== now) out.push({ i, dir: now ? 1 : -1 });
+  }
+  return out;
+}
+
+function cdScale(n, H, lo, hi) {
+  const plotW = CD.W - CD.PAD_L - CD.PAD_R, plotH = H - 2 * CD.PAD_Y;
+  const span = (hi - lo) || 1;
+  return {
+    x: i => CD.PAD_L + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW),
+    y: v => CD.PAD_Y + (1 - (v - lo) / span) * plotH,
+    step: plotW / n,
+    pct: (px, total) => (px / total * 100).toFixed(2) + '%',
+  };
+}
+
+/** Duong co the dut quang (chua du cua so) — tach doan, khong noi qua khoang trong. */
+function cdLine(arr, sc, cls) {
+  const segs = [];
+  let cur = [];
+  (arr || []).forEach((v, i) => {
+    if (isNum(v)) cur.push(`${sc.x(i).toFixed(1)},${sc.y(v).toFixed(1)}`);
+    else if (cur.length) { segs.push(cur); cur = []; }
+  });
+  if (cur.length) segs.push(cur);
+  return segs.filter(g => g.length > 1)
+    .map(g => `<polyline class="${cls}" points="${g.join(' ')}" fill="none"/>`).join('');
+}
+
+function cdBars(vals, sc, base, clsOf, wRatio = 0.62) {
+  const w = Math.max(1.2, Math.min(7, sc.step * wRatio));
+  return vals.map((v, i) => {
+    if (!isNum(v)) return '';
+    const y0 = sc.y(base), y1 = sc.y(v);
+    const top = Math.min(y0, y1), h = Math.max(0.8, Math.abs(y1 - y0));
+    return `<rect class="${clsOf(v, i)}" x="${(sc.x(i) - w / 2).toFixed(1)}" y="${top.toFixed(1)}"`
+      + ` width="${w.toFixed(1)}" height="${h.toFixed(1)}"/>`;
+  }).join('');
+}
+
+/** Nhan truc o le phai, dat bang % chieu cao de khop SVG gian. */
+function cdAxis(vals, sc, H, fmt) {
+  return vals.map(v => `<span class="cd-tick" style="top:${sc.pct(sc.y(v), H)}">${fmt(v)}</span>`).join('');
+}
+
+const candleCls = (o, c) => (c > o ? 'up' : c < o ? 'down' : 'ref');
+
+function fmtVolShort(v) {
+  if (!isNum(v)) return '—';
+  if (v >= 1e6) return (v / 1e6).toFixed(2).replace('.', ',') + ' tr';
+  if (v >= 1e3) return (v / 1e3).toFixed(0) + ' k';
+  return String(v);
+}
+// MACD cua ma gia thap nho tu 0,0x — can 3 chu so thap phan moi doc duoc.
+const fmtMacd = v => (isNum(v) ? (v >= 0 ? '+' : '') + v.toFixed(3).replace('.', ',') : '—');
+
+function renderTechChart(series, ticker) {
   if (!series || !series.c || series.c.length < 2) {
     return '<p class="muted">Chưa có dữ liệu nến cho mã này.</p>';
   }
   const n = series.c.length;
-  const W = 720, H = 240, PAD_L = 4, PAD_R = 46, PAD_T = 8, PAD_B = 18;
-  const plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
+  const pairKey = cdPairFor(series);
+  const P = MA_PAIRS[pairKey];
+  const fast = series[P.fast] || [], slow = series[P.slow] || [];
+  const hasMa7 = Array.isArray(series.ma7);
+  const hasVol = Array.isArray(series.v);
+  const hasMacd = Array.isArray(series.dif);
 
-  // Thang gia phu CA nen LAN hai duong MA: cat mat mot phan duong MA50 se
-  // khien no trong nhu vua "bien mat" khoi bieu do.
-  const pool = [...series.h, ...series.l, ...series.ma20, ...series.ma50]
-    .filter(v => typeof v === 'number');
-  const lo = Math.min(...pool), hi = Math.max(...pool), span = (hi - lo) || 1;
-  const x = i => PAD_L + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
-  const y = v => PAD_T + (1 - (v - lo) / span) * plotH;
-
-  const step = plotW / n;
-  const bodyW = Math.max(1.5, Math.min(7, step * 0.62));
-
+  // ── Gia: thang phu ca nen lan hai duong MA dang hien
+  const pool = [...series.h, ...series.l, ...fast, ...slow].filter(isNum);
+  const lo = Math.min(...pool), hi = Math.max(...pool);
+  const sp = cdScale(n, CD.H_PRICE, lo, hi);
+  const bodyW = Math.max(1.5, Math.min(7, sp.step * 0.62));
   const candles = series.c.map((c, i) => {
     const o = series.o[i], h = series.h[i], l = series.l[i];
-    if ([o, h, l, c].some(v => typeof v !== 'number')) return '';
-    const cls = c > o ? 'up' : c < o ? 'down' : 'ref';
-    const top = y(Math.max(o, c)), bot = y(Math.min(o, c));
-    const cx = x(i);
-    return `<line class="cd-wick ${cls}" x1="${cx.toFixed(1)}" y1="${y(h).toFixed(1)}" x2="${cx.toFixed(1)}" y2="${y(l).toFixed(1)}"/>`
+    if (![o, h, l, c].every(isNum)) return '';
+    const cls = candleCls(o, c);
+    const top = sp.y(Math.max(o, c)), bot = sp.y(Math.min(o, c)), cx = sp.x(i);
+    return `<line class="cd-wick ${cls}" x1="${cx.toFixed(1)}" y1="${sp.y(h).toFixed(1)}" x2="${cx.toFixed(1)}" y2="${sp.y(l).toFixed(1)}"/>`
       + `<rect class="cd-body ${cls}" x="${(cx - bodyW / 2).toFixed(1)}" y="${top.toFixed(1)}"`
       + ` width="${bodyW.toFixed(1)}" height="${Math.max(1, bot - top).toFixed(1)}"/>`;
   }).join('');
+  const crosses = cdCrosses(series, P);
+  const marks = crosses.map(({ i, dir }) => {
+    const yv = dir > 0 ? sp.y(series.l[i]) : sp.y(series.h[i]);
+    const label = `${P.fast.toUpperCase()} cắt ${dir > 0 ? 'lên' : 'xuống'} ${P.slow.toUpperCase()} ngày ${series.dates?.[i] || ''}`;
+    return `<span class="cd-mark ${dir > 0 ? 'up' : 'down'}" title="${escapeAttr(label)}"
+      style="left:${sp.pct(sp.x(i), CD.W)};top:${sp.pct(yv, CD.H_PRICE)}">${dir > 0 ? '▲' : '▼'}</span>`;
+  }).join('');
+  const gridP = [hi, (hi + lo) / 2, lo];
+  const priceSvg = `<svg class="cd-chart cd-svg-price" viewBox="0 0 ${CD.W} ${CD.H_PRICE}" preserveAspectRatio="none"
+      role="img" aria-label="Nến ${n} phiên của ${escapeAttr(ticker)} kèm ${P.label}, ${crosses.length} lần giao cắt">
+      ${gridP.map(v => `<line class="cd-grid" x1="0" x2="${CD.W}" y1="${sp.y(v).toFixed(1)}" y2="${sp.y(v).toFixed(1)}"/>`).join('')}
+      ${cdLine(slow, sp, 'cd-ma cd-ma-slow')}${cdLine(fast, sp, 'cd-ma cd-ma-fast')}${candles}
+    </svg>`;
 
-  // Duong MA co the dut quang o dau chuoi (chua du cua so) — tach thanh
-  // nhieu doan thay vi noi qua khoang trong, vi noi qua se ve ra mot doan
-  // thang khong ton tai.
-  const maPath = key => {
-    const segs = [];
-    let cur = [];
-    series[key].forEach((v, i) => {
-      if (typeof v === 'number') cur.push(`${x(i).toFixed(1)},${y(v).toFixed(1)}`);
-      else if (cur.length) { segs.push(cur); cur = []; }
+  // ── Khoi luong
+  let volPane = '';
+  if (hasVol) {
+    const vmax = Math.max(...series.v.filter(isNum), ...(series.vma20 || []).filter(isNum)) || 1;
+    const sv = cdScale(n, CD.H_VOL, 0, vmax);
+    volPane = `<div class="cd-pane">
+      <div class="cd-readout" data-pane="vol"></div>
+      <div class="cd-plot" style="--h:${CD.H_VOL}px">
+        <div class="cd-area">
+          <svg class="cd-chart" viewBox="0 0 ${CD.W} ${CD.H_VOL}" preserveAspectRatio="none" role="img"
+               aria-label="Khối lượng ${n} phiên và đường trung bình 20 phiên">
+            ${cdBars(series.v, sv, 0, (v, i) => `cd-vol ${candleCls(series.o[i], series.c[i])}`)}
+            ${cdLine(series.vma20, sv, 'cd-vma')}
+          </svg>
+          <div class="cd-vline" hidden></div>
+        </div>
+        ${cdAxis([vmax], sv, CD.H_VOL, fmtVolShort)}
+      </div></div>`;
+  }
+
+  // ── MACD: thang doi xung quanh 0 de cot am/duong so sanh duoc bang mat
+  let macdPane = '';
+  if (hasMacd) {
+    const m = Math.max(...[...series.dif, ...series.dea, ...series.macd].filter(isNum).map(Math.abs)) || 1;
+    const sm = cdScale(n, CD.H_MACD, -m, m);
+    macdPane = `<div class="cd-pane">
+      <div class="cd-readout" data-pane="macd"></div>
+      <div class="cd-plot" style="--h:${CD.H_MACD}px">
+        <div class="cd-area">
+          <svg class="cd-chart" viewBox="0 0 ${CD.W} ${CD.H_MACD}" preserveAspectRatio="none" role="img"
+               aria-label="MACD 12, 26, 9 trong ${n} phiên">
+            <line class="cd-grid" x1="0" x2="${CD.W}" y1="${sm.y(0).toFixed(1)}" y2="${sm.y(0).toFixed(1)}"/>
+            ${cdBars(series.macd, sm, 0, v => `cd-hist ${v >= 0 ? 'up' : 'down'}`, 0.5)}
+            ${cdLine(series.dea, sm, 'cd-ma cd-ma-slow')}${cdLine(series.dif, sm, 'cd-ma cd-ma-fast')}
+          </svg>
+          <div class="cd-vline" hidden></div>
+        </div>
+        ${cdAxis([m, 0, -m], sm, CD.H_MACD, v => (v === 0 ? '0' : fmtMacd(v)))}
+      </div></div>`;
+  }
+
+  const legacyNote = (!hasVol || !hasMacd || !hasMa7)
+    ? `<p class="cd-note">MA7/MA25, khối lượng và MACD sẽ có sau lượt quét hằng ngày tới — tệp nến hiện tại còn ở định dạng cũ.</p>`
+    : '';
+  const d0 = series.dates?.[0] || '', d1 = series.dates?.[n - 1] || '';
+  const chips = Object.entries(MA_PAIRS).map(([k, p]) => {
+    const disabled = k === 'ma7' && !hasMa7;
+    return `<button type="button" class="chip${k === pairKey ? ' active' : ''}" data-cd-pair="${k}"
+      aria-pressed="${k === pairKey}"${disabled ? ' disabled title="Chưa có dữ liệu MA7/MA25"' : ''}>${p.label}</button>`;
+  }).join('');
+
+  return `<div class="cd-wrap" data-cd-ticker="${escapeAttr(ticker)}">
+    <div class="cd-toolbar">
+      <div class="chip-row cd-pairs" role="group" aria-label="Cặp đường trung bình">${chips}</div>
+      <span class="cd-range">${escapeAttr(d0)} → ${escapeAttr(d1)} · ${n} phiên · ${fmtPriceUnit()}</span>
+    </div>
+    <div class="cd-pane">
+      <div class="cd-readout" data-pane="price"></div>
+      <div class="cd-plot" style="--h:${CD.H_PRICE}px" tabindex="0"
+           aria-label="Di chuột hoặc dùng phím mũi tên để xem từng phiên">
+        <div class="cd-area">${priceSvg}${marks}<div class="cd-vline" hidden></div></div>
+        ${cdAxis(gridP, sp, CD.H_PRICE, fmtQuote)}
+      </div>
+    </div>
+    ${volPane}${macdPane}${legacyNote}
+  </div>`;
+}
+
+/**
+ * Gan tuong tac sau khi HTML da vao DOM: crosshair doc chung cho ca ba tang,
+ * dong so lieu phia tren moi tang doi theo phien dang tro, va nut doi cap MA.
+ * Mac dinh (khong tro) hien phien cuoi — chinh la phien nguoi doc can nhat.
+ */
+function bindTechChart(box, series, ticker) {
+  const wrap = box.querySelector('.cd-wrap');
+  if (!wrap || !series?.c) return;
+  const n = series.c.length;
+  const P = MA_PAIRS[cdPairFor(series)];
+  const sc = cdScale(n, 1, 0, 1);
+  const out = sel => wrap.querySelector(`.cd-readout[data-pane="${sel}"]`);
+  const kv = (k, v, cls = '') => `<span class="cd-kv ${cls}"><b>${k}</b> ${v}</span>`;
+
+  const show = (i, hovering) => {
+    const o = series.o[i], c = series.c[i], prev = series.c[i - 1];
+    const chg = isNum(prev) && isNum(c) ? (c / prev - 1) * 100 : null;
+    const f = series[P.fast]?.[i], s = series[P.slow]?.[i];
+    const gap = isNum(f) && isNum(s) ? (f / s - 1) * 100 : null;
+    const dir = isNum(chg) ? (chg > 0 ? 'up' : chg < 0 ? 'down' : '') : '';
+    const p = out('price');
+    if (p) p.innerHTML = `<span class="cd-date">${escapeAttr(series.dates?.[i] || '')}</span>`
+      + kv('O', fmtQuote(o)) + kv('H', fmtQuote(series.h[i])) + kv('L', fmtQuote(series.l[i]))
+      + kv('C', fmtQuote(c) + (isNum(chg) ? ` (${chg >= 0 ? '+' : ''}${chg.toFixed(2).replace('.', ',')}%)` : ''), dir)
+      + kv(P.fast.toUpperCase(), fmtQuote(f), 'k-fast') + kv(P.slow.toUpperCase(), fmtQuote(s), 'k-slow')
+      + (isNum(gap) ? kv('Chênh', `${gap >= 0 ? '+' : ''}${gap.toFixed(2).replace('.', ',')}%`) : '');
+    const v = out('vol');
+    if (v) {
+      const r = isNum(series.v[i]) && isNum(series.vma20?.[i]) && series.vma20[i] > 0
+        ? ` · ${(series.v[i] / series.vma20[i]).toFixed(2).replace('.', ',')}× TB` : '';
+      v.innerHTML = kv('KL', fmtVolShort(series.v[i]) + r) + kv('MA20 KL', fmtVolShort(series.vma20?.[i]), 'k-vma');
+    }
+    const m = out('macd');
+    if (m) m.innerHTML = kv('DIF', fmtMacd(series.dif[i]), 'k-fast') + kv('DEA', fmtMacd(series.dea[i]), 'k-slow')
+      + kv('MACD', fmtMacd(series.macd[i]), isNum(series.macd[i]) ? (series.macd[i] >= 0 ? 'up' : 'down') : '');
+    wrap.querySelectorAll('.cd-vline').forEach(el => {
+      el.hidden = !hovering;
+      el.style.left = sc.pct(sc.x(i), CD.W);
     });
-    if (cur.length) segs.push(cur);
-    return segs.filter(g => g.length > 1)
-      .map(g => `<polyline class="cd-ma cd-${key}" points="${g.join(' ')}" fill="none"/>`).join('');
   };
 
-  const last = series.c[n - 1];
-  const gridVals = [hi, (hi + lo) / 2, lo];
-  const grid = gridVals.map(v => `<line class="cd-grid" x1="${PAD_L}" y1="${y(v).toFixed(1)}" x2="${(W - PAD_R).toFixed(1)}" y2="${y(v).toFixed(1)}"/>`
-    + `<text class="cd-axis" x="${(W - PAD_R + 4).toFixed(1)}" y="${(y(v) + 3.5).toFixed(1)}">${fmtQuote(v)}</text>`).join('');
+  let cur = n - 1;
+  show(cur, false);
 
-  const d0 = series.dates?.[0] || '', d1 = series.dates?.[n - 1] || '';
-  return `<div class="cd-wrap">
-    <svg class="cd-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img"
-         aria-label="Nến ${n} phiên của ${escapeAttr(ticker)}, từ ${escapeAttr(d0)} đến ${escapeAttr(d1)}">
-      ${grid}${maPath('ma20')}${maPath('ma50')}${candles}
-    </svg>
-    <div class="cd-legend">
-      <span class="cd-key cd-key-ma20">MA20 ${fmtQuote(series.ma20[n - 1])}</span>
-      <span class="cd-key cd-key-ma50">MA50 ${fmtQuote(series.ma50[n - 1])}</span>
-      <span class="cd-range">${escapeAttr(d0)} → ${escapeAttr(d1)} · ${n} phiên · đóng cửa ${fmtQuote(last)} ${fmtPriceUnit()}</span>
-    </div>
-  </div>`;
+  const idxAt = (plot, clientX) => {
+    // Do tren vung ve, khong tren ca .cd-plot: le phai la cot nhan truc.
+    const r = (plot.querySelector('.cd-area') || plot).getBoundingClientRect();
+    const xv = (clientX - r.left) / r.width * CD.W;
+    const plotW = CD.W - CD.PAD_L - CD.PAD_R;
+    return Math.max(0, Math.min(n - 1, Math.round((xv - CD.PAD_L) / plotW * (n - 1))));
+  };
+  wrap.querySelectorAll('.cd-plot').forEach(plot => {
+    plot.addEventListener('pointermove', e => { cur = idxAt(plot, e.clientX); show(cur, true); });
+    plot.addEventListener('pointerleave', () => { cur = n - 1; show(cur, false); });
+  });
+  const keyPlot = wrap.querySelector('.cd-plot[tabindex]');
+  keyPlot?.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    cur = Math.max(0, Math.min(n - 1, cur + (e.key === 'ArrowLeft' ? -1 : 1)));
+    show(cur, true);
+  });
+  keyPlot?.addEventListener('blur', () => { cur = n - 1; show(cur, false); });
+
+  wrap.querySelectorAll('[data-cd-pair]').forEach(btn => btn.addEventListener('click', () => {
+    if (btn.disabled) return;
+    prefSet('cd-pair', btn.dataset.cdPair);
+    box.querySelector('.cd-wrap').outerHTML = renderTechChart(series, ticker);
+    bindTechChart(box, series, ticker);
+  }));
 }
 
 const fmtQuote = v => (typeof v === 'number' ? v.toFixed(2).replace('.', ',') : '—');
@@ -2973,8 +3192,10 @@ async function fillDetailSections(ticker) {
     if (!stillHere()) return;
     const box = document.getElementById('analyzer-chart');
     if (!box) return;
-    box.innerHTML = `<div class="analyzer-section-title"><span class="section-icon">🕯️</span> Nến ${d?.sessions || 60} phiên + MA20/MA50</div>`
-      + renderCandles(d?.series?.[ticker], ticker);
+    const series = d?.series?.[ticker];
+    box.innerHTML = `<div class="analyzer-section-title"><span class="section-icon">🕯️</span> Nến ${d?.sessions || 60} phiên · MA · Khối lượng · MACD</div>`
+      + renderTechChart(series, ticker);
+    bindTechChart(box, series, ticker);
   });
 
   Promise.all([loadQuality(), loadValuation()]).then(([q, v]) => {
