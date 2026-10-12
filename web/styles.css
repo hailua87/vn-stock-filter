@@ -2965,10 +2965,15 @@ kbd {
 .cd-ma-fast { stroke: var(--text); }
 .cd-ma-slow { stroke: var(--text-mute); stroke-dasharray: 4 3; }
 .cd-vma { stroke: var(--text-dim); stroke-width: 1.2; }
-/* Cot KL/MACD nhat hon nen de duong trung binh nam tren van doc duoc. */
-.cd-vol.up, .cd-hist.up   { fill: var(--up); opacity: 0.55; }
-.cd-vol.down, .cd-hist.down { fill: var(--down); opacity: 0.55; }
+/* Cot KL to theo chieu nen cung phien (bien dong gia), nhat hon nen de
+   duong MA20 KL nam tren van doc duoc. */
+.cd-vol.up    { fill: var(--up); opacity: 0.55; }
+.cd-vol.down  { fill: var(--down); opacity: 0.55; }
 .cd-vol.ref   { fill: var(--text-mute); opacity: 0.55; }
+/* MACD khong phai gia: thang do sang. Am nhat hon duong — dau da nam o vi tri
+   tren/duoi truc 0, do sang chi nhan them. */
+.cd-hist.pos  { fill: var(--text-dim); opacity: 0.6; }
+.cd-hist.neg  { fill: var(--text-mute); opacity: 0.4; }
 .cd-grid { stroke: var(--border); stroke-width: 1; }
 .cd-tick {
   position: absolute; right: 0; width: calc(var(--cd-axis-w, 46px) - 4px); text-align: right;
@@ -2981,8 +2986,11 @@ kbd {
   position: absolute; transform: translate(-50%, 0); font-size: 10px; line-height: 1;
   pointer-events: auto; cursor: default;
 }
-.cd-mark.up   { color: var(--up); margin-top: 3px; }
-.cd-mark.down { color: var(--down); transform: translate(-50%, -100%); margin-top: -3px; }
+/* Tam giac giao cat la tin hieu, khong phai gia: --focus cho ca hai chieu,
+   huong do HINH (len/xuong) mang. */
+.cd-mark { color: var(--focus); }
+.cd-mark.up   { margin-top: 3px; }
+.cd-mark.down { transform: translate(-50%, -100%); margin-top: -3px; }
 .cd-vline {
   position: absolute; top: 0; bottom: 0; width: 1px; transform: translateX(-0.5px);
   background: var(--border-strong); pointer-events: none;

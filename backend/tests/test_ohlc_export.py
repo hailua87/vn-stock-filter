@@ -219,3 +219,15 @@ def test_crosses_ignore_warmup():
     s = OE.series_for(wavy(30), sessions=30)
     assert all(i >= 25 for i, _ in s['x7_25'])
     assert s['x20_50'] == []
+
+
+def test_macd_seed_matches_board_convention_early_in_series():
+    """Sau 200 phien moi cach seed EMA deu hoi tu, nen phep so o cuoi chuoi
+    khong phan biet duoc adjust=True/False. So o DAU chuoi, noi chung con khac:
+    bang dien (TradingView/Binance) dung EMA de quy, seed = gia dau."""
+    df = wavy(40)
+    s = OE.series_for(df, sessions=40)
+    c = df['Close'].tolist()
+    dif = [f - sl for f, sl in zip(_ema(c, 12), _ema(c, 26))]
+    for i in (25, 30, 39):
+        assert s['dif'][i] == pytest.approx(dif[i], abs=1e-4)

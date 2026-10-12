@@ -2610,9 +2610,14 @@ function renderValuationBlock(band, val) {
  * su (ohlc_export.py) roi moi cat 60 phien — tinh lai o day tu 60 phien se lech,
  * nhat la MACD.
  *
- * Mau: nen, cot KL va cot MACD la gia/xu huong nen dung --up/--down. Duong
- * MA va DIF/DEA thi khong: "nhanh = net lien, cham = net dut" la ngon ngu
- * chung cho ca ba cap, nen doc duoc ca khi khong phan biet mau.
+ * Mau (CLAUDE.md §9 — 5 mau trang thai gia CHI cho gia va bien dong gia):
+ *   - nen: gia -> --up/--down
+ *   - cot KL: to theo chieu nen CUNG phien, tuc la bien dong gia phien do
+ *   - cot MACD, tam giac giao cat, so MACD: KHONG phai gia -> thang do sang
+ *     va --focus. Dau cua MACD da nam o vi tri tren/duoi truc 0; chieu cat da
+ *     nam o hinh tam giac len/xuong — khong can mau de mang nghia.
+ * Duong MA va DIF/DEA: "nhanh = net lien, cham = net dut" la ngon ngu chung
+ * cho ca ba cap, nen doc duoc ca khi khong phan biet mau.
  *
  * Chu (truc, nhan) nam o HTML chu khong trong SVG: SVG dung
  * preserveAspectRatio="none" de gian theo be rong, chu trong do se bi keo meo.
@@ -2780,7 +2785,7 @@ function renderTechChart(series, ticker) {
           <svg class="cd-chart" viewBox="0 0 ${CD.W} ${CD.H_MACD}" preserveAspectRatio="none" role="img"
                aria-label="MACD 12, 26, 9 trong ${n} phiên">
             <line class="cd-grid" x1="0" x2="${CD.W}" y1="${sm.y(0).toFixed(1)}" y2="${sm.y(0).toFixed(1)}"/>
-            ${cdBars(series.macd, sm, 0, v => `cd-hist ${v >= 0 ? 'up' : 'down'}`, 0.5)}
+            ${cdBars(series.macd, sm, 0, v => `cd-hist ${v >= 0 ? 'pos' : 'neg'}`, 0.5)}
             ${cdLine(series.dea, sm, 'cd-ma cd-ma-slow')}${cdLine(series.dif, sm, 'cd-ma cd-ma-fast')}
           </svg>
           <div class="cd-vline" hidden></div>
@@ -2850,7 +2855,7 @@ function bindTechChart(box, series, ticker) {
     }
     const m = out('macd');
     if (m) m.innerHTML = kv('DIF', fmtMacd(series.dif[i]), 'k-fast') + kv('DEA', fmtMacd(series.dea[i]), 'k-slow')
-      + kv('MACD', fmtMacd(series.macd[i]), isNum(series.macd[i]) ? (series.macd[i] >= 0 ? 'up' : 'down') : '');
+      + kv('MACD', fmtMacd(series.macd[i]));
     wrap.querySelectorAll('.cd-vline').forEach(el => {
       el.hidden = !hovering;
       el.style.left = sc.pct(sc.x(i), CD.W);
