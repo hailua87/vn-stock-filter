@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-12T13:14:38.835022",
+  "generated_at": "2026-10-12T22:56:14.209462",
   "strategy": "golden_cross_long",
   "total": 2,
   "metadata": {
@@ -11,7 +11,7 @@
     ],
     "base_conditions": {
       "min_avg_value_20d": 10000000000.0,
-      "dropped_low_liquidity": 386,
+      "dropped_low_liquidity": 385,
       "universe_after": 114,
       "exchanges": [
         "HOSE",
@@ -19,7 +19,7 @@
         "UPCOM"
       ]
     },
-    "total_scanned": 500,
+    "total_scanned": 499,
     "market_context": {
       "available": true,
       "close": 1720.98,
@@ -34,22 +34,22 @@
       "label": "Thị trường bất lợi — phần lớn tín hiệu breakout thất bại trong giai đoạn này",
       "position_size_multiplier": 0.3,
       "breadth": {
-        "pct_above_ma50": 29.0,
-        "sample_size": 500
+        "pct_above_ma50": 29.1,
+        "sample_size": 499
       }
     },
     "session_date": "2026-10-12",
-    "written_at_ict": "2026-10-12 20:14:01+0700",
+    "written_at_ict": "2026-10-13 05:56:10+0700",
     "run_type": "eod",
     "session_complete": 0.77,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 20:14 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên 2026-10-12 đã đóng dứt khoát (hôm nay 2026-10-13)) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 20:14 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-10-12 đã đóng dứt khoát (hôm nay 2026-10-13)"
       },
       {
         "name": "gate_coverage",
@@ -60,11 +60,11 @@
     "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 1.0,
-    "fetch_elapsed_s": 998.4,
+    "fetch_coverage": 0.998,
+    "fetch_elapsed_s": 157.7,
     "intraday": false,
-    "run_time_ict": "20:20",
-    "run_date_ict": "2026-10-12"
+    "run_time_ict": "06:02",
+    "run_date_ict": "2026-10-13"
   },
   "signals": [
     {
