@@ -197,5 +197,85 @@ export async function runFunctional(page, isMobile, base) {
     rec('analyzer:khong-tran-mep', !!r && r.right <= r.vw + 1, r ? `right=${r.right} vw=${r.vw}` : 'loi');
   } catch (e) { rec('analyzer:input-khong-bi-che', false, String(e).slice(0, 70)); }
 
+  // ── 5. Mobile: chieu cao VO truoc hang du lieu dau tien ──
+  //
+  // Do that o 402x714 (iPhone, deviceScaleFactor 3) ngay 13/10/2026 TRUOC khi
+  // sua: hang du lieu dau tien o y=431 tren man 714px, tuc 60% man hinh la vo.
+  // Thanh phan: topbar 138 + market-context 161 + mobile-bar 51.
+  //
+  // Dieu bat ngo khi do: `.market-context` (161px) LON HON ca topbar (138px),
+  // trong khi tai lieu mobile-layout-out-of-scope.md muc 6 chi nham vao topbar.
+  //
+  // Sau khi sua: market-context 45px (gop mot dong, phan phu vao nut "chi
+  // tiet"), topbar 114px (bo TEN thuong hieu nen hai hang tren gop lai duoc).
+  // Hang dau len y=292, so hang thay duoc 8 -> 11.
+  //
+  // Nguong duoi day la CHAN TREN co bien, khong phai so do: 60px cho
+  // market-context (do 45) va 125px cho topbar (do 114). Bien de chiu khac
+  // biet font giua Windows va ubuntu — hai moc chuan rieng ton tai vi ly do do.
+  // Phinh lai hai dong thi market-context ~80px+ va phep kiem do.
+  if (drawerMode) {
+    await load();
+    const mc = await page.$eval('.market-context', el => {
+      const r = el.getBoundingClientRect();
+      const nut = el.querySelector('.mc-more');
+      const ct = el.querySelector('.mc-detail');
+      return { h: Math.round(r.height),
+               co_nut: !!nut && nut.offsetParent !== null,
+               ct_an: !ct || ct.offsetParent === null };
+    }).catch(() => null);
+    rec('mobile:market-context-gon', !!mc && mc.h <= 60,
+        mc ? `h=${mc.h} (nguong 60)` : 'khong tim thay', mc ? { h: mc.h } : null);
+    rec('mobile:market-context-co-nut-chi-tiet', !!mc && mc.co_nut && mc.ct_an,
+        mc ? `nut=${mc.co_nut} phan-phu-an=${mc.ct_an}` : 'loi');
+
+    // Nguong 60px o tren KHONG tach duoc mot dong (45px) voi HAI dong (~52px) —
+    // bien de chiu khac biet font da nuot mat chenh lech do. Lan pha thu nhat
+    // ("bo ellipsis cua .mc-label") da LOT qua vi dung ly do nay.
+    //
+    // Tinh chat that can canh la "nhan o MOT dong", va no do duoc khong phu
+    // thuoc font: so chieu cao nhan voi line-height cua chinh no. Day moi la
+    // thuoc do dung; nguong 60px giu lai lam chan tren tho.
+    const nhan = await page.$eval('.mc-label', el => {
+      const s = getComputedStyle(el);
+      const lh = parseFloat(s.lineHeight) ||
+                 parseFloat(s.fontSize) * 1.2;   // `normal` -> xap xi 1,2em
+      return { h: Math.round(el.getBoundingClientRect().height),
+               lh: Math.round(lh), cat: s.textOverflow === 'ellipsis' };
+    }).catch(() => null);
+    rec('mobile:nhan-boi-canh-mot-dong',
+        !!nhan && nhan.h <= nhan.lh * 1.6,
+        nhan ? `h=${nhan.h} line-height=${nhan.lh} cat=${nhan.cat}` : 'loi',
+        nhan ? { h: nhan.h } : null);
+
+    // Bam that: phan phu PHAI mo ra. Khong co phep kiem nay thi "gon" co the
+    // dat duoc bang cach VUT phan phu di, va khong ai biet.
+    const mo = await page.evaluate(async () => {
+      const el = document.querySelector('.market-context');
+      el.querySelector('.mc-more')?.click();
+      await new Promise(r => setTimeout(r, 250));
+      const ct = el.querySelector('.mc-detail');
+      return { hien: !!ct && ct.offsetParent !== null,
+               cao_hon: Math.round(el.getBoundingClientRect().height) };
+    }).catch(() => null);
+    rec('mobile:bam-chi-tiet-thi-mo-ra', !!mo && mo.hien && mo.cao_hon > 60,
+        mo ? `hien=${mo.hien} h=${mo.cao_hon}` : 'loi');
+
+    await load();
+    const tb = await page.$eval('.topbar', el => {
+      const vis = e => e && getComputedStyle(e).display !== 'none' && e.offsetParent !== null;
+      const con = [...el.children].filter(vis);
+      const y = con.map(c => Math.round(c.getBoundingClientRect().y));
+      return { h: Math.round(el.getBoundingClientRect().height),
+               so_khoi: con.length,
+               // So HANG = so nhom y khac nhau qua xa nhau. Hai khoi cung hang
+               // thi y chenh nhau duoi chieu cao mot hang (~44px).
+               so_hang: new Set(y.map(v => Math.round(v / 40))).size };
+    }).catch(() => null);
+    rec('mobile:topbar-khong-qua-125px', !!tb && tb.h <= 125,
+        tb ? `h=${tb.h} so_hang=${tb.so_hang} (nguong 125)` : 'loi',
+        tb ? { h: tb.h } : null);
+  }
+
   return out;
 }

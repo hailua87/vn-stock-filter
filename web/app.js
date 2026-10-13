@@ -3317,18 +3317,40 @@ function renderMarketContext(ctx, isIntraday) {
     ? '<span class="mc-intraday">Bản giữa phiên — khối lượng chưa đủ ngày</span>'
     : '';
 
+  // Phan PHU goi trong `.mc-detail`. O <=768px no bi an va chi mo khi bam
+  // `.mc-more` — xem `@media` trong styles.css.
+  //
+  // Do that o 402x714 (iPhone, deviceScaleFactor 3) ngay 13/10/2026: khoi nay
+  // cao 161px va xuong BON dong (icon 20 + nhan 36 + so lieu 36 + canh bao 22).
+  // No LON HON ca topbar (138px). Hang du lieu dau tien o y=431, tuc 60% man
+  // hinh la vo truoc khi thay mot dong du lieu nao.
+  //
+  // Desktop khong doi: `.mc-detail` la `display: contents` nen ba phan tu con
+  // van la flex item truc tiep cua `.market-context`, y nhu truoc.
   el.className = `market-context ${cls}`;
   el.innerHTML = `
     <span class="mc-icon">${icon}</span>
     <span class="mc-label">${ctx.label}</span>
-    <span class="mc-stats">
-      VN-Index ${Number(ctx.close).toLocaleString('vi-VN')}
-      · MA50 ${ctx.ma50 ? Number(ctx.ma50).toLocaleString('vi-VN') : '—'}
-      · 20 phiên ${ctx.change_20d_pct > 0 ? '+' : ''}${ctx.change_20d_pct}%
-      · ${breadth}
+    <button type="button" class="mc-more" aria-expanded="false"
+            aria-controls="mc-detail">chi tiết</button>
+    <span class="mc-detail" id="mc-detail">
+      <span class="mc-stats">
+        VN-Index ${Number(ctx.close).toLocaleString('vi-VN')}
+        · MA50 ${ctx.ma50 ? Number(ctx.ma50).toLocaleString('vi-VN') : '—'}
+        · 20 phiên ${ctx.change_20d_pct > 0 ? '+' : ''}${ctx.change_20d_pct}%
+        · ${breadth}
+      </span>
+      ${sizing}
+      ${intradayTag}
     </span>
-    ${sizing}
-    ${intradayTag}
   `;
+  const nut = el.querySelector('.mc-more');
+  if (nut) {
+    nut.addEventListener('click', () => {
+      const mo = el.classList.toggle('mc-mo');
+      nut.setAttribute('aria-expanded', String(mo));
+      nut.textContent = mo ? 'ẩn' : 'chi tiết';
+    });
+  }
   el.style.display = 'flex';
 }
