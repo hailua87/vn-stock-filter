@@ -170,6 +170,7 @@ so hai lượt với nhau trước khi đổ cho thay đổi của mình.
 | Backtest ngưỡng chất lượng | `docs/threshold-backtest.md` |
 | Bố cục mobile | `docs/mobile-layout-out-of-scope.md` |
 | Hợp đồng sổ theo dõi kết quả | `docs/outcomes-contract.md` |
+| Làm beta có ý nghĩa cho mã thanh khoản thấp | `docs/beta-weak-regression.md` |
 
 Ngày 24/09 có một kết luận **sai** là "không nguồn nào có NPL ngân hàng". Nó
 sống sót vì không ai ghi lại đã hỏi ở đâu. Dữ liệu nằm ngay trong section `NOTE`
@@ -193,3 +194,30 @@ chuyển động thị trường.
 **Khoảng chứa 0 = chưa đủ dữ liệu để nói**, không phải "chiến lược vô dụng" cũng
 không phải "có tác dụng". Tính đến 03/10/2026, **không chiến lược nào** trong
 bốn cái chứng minh được là khác chọn bừa.
+
+---
+
+## 12. Đọc `beta_coverage` cho đúng — BA ô, không phải hai
+
+`real` nghĩa là "tính được **và** khác 1,0 có ý nghĩa thống kê (khoảng 95%)",
+không phải "tính được". Ô `weak` là tính được mà khoảng tin cậy chứa 1,0 — đã
+rơi về 1,0, và bị trừ độ tin cậy **y như** `fallback`.
+
+Lượt 11/10/2026 báo `real: 84, fallback: 0` và nghe như xong việc. Đo lại bằng
+phép kiểm ý nghĩa: **45% rổ** không phân biệt được với 1,0. Đừng đọc `real`
+tách khỏi `median_r_squared` — R² trung vị ~0,14 nói rõ hơn nhiều.
+
+Hai bẫy khi sửa chỗ này:
+
+- Phép kiểm chạy trên `beta_raw`, **không** trên beta đã điều chỉnh Blume.
+  Blume (`0,67·raw + 0,33·1,0`) vốn đã co ước lượng về 1,0; kiểm trên giá trị
+  đã co thì gần như mã nào cũng "yếu".
+- `std_error` phải lưu **4 chữ số**. Ba chữ số thì chênh lệch do bậc tự do
+  (`n−2` so với `n`, ~1%) bị làm tròn nuốt mất, và không ai kiểm lại được công
+  thức bằng chính đầu ra nữa.
+
+Thiếu khoá `weak` thì đếm vào ô **yếu** — mặc định bi quan ở cả ba chỗ
+(`methods_pb_roe`, `_beta_info`, `_tong_hop_beta`). Mặc định ngược lại nghĩa là
+một nguồn beta mới quên gắn cờ sẽ lặng lẽ làm đẹp số liệu.
+
+Chi tiết và phần đã khảo: `docs/beta-weak-regression.md`.

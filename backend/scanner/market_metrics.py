@@ -101,6 +101,8 @@ def calculate_beta(ticker: str, lookback_days: int = 730,
         'beta_raw': 1.0,
         'beta_adjusted': 1.0,
         'r_squared': 0.0,
+        'std_error': None,
+        'weak': True,
         'observations': 0,
         'lookback_days': lookback_days,
         'method': 'default_no_data',
@@ -178,14 +180,53 @@ def calculate_beta(ticker: str, lookback_days: int = 730,
     if beta_adjusted > 2.5:
         beta_adjusted = 2.5
 
+    # ── Ước lượng này có PHÂN BIỆT ĐƯỢC với tiên nghiệm 1,0 không? ────────
+    #
+    # Đo ngày 13/10/2026 trên rổ 84 mã: R² trung vị 0,162, thấp nhất 0,008.
+    # Thị trường giải thích ~16% biến động của mã trung vị — hồi quy yếu, nên
+    # hệ số dốc có sai số lớn.
+    #
+    #     SE(β) = |β| × sqrt((1 − R²) / (R² × (n − 2)))
+    #
+    # Với β=0,83, R²=0,175, n=96 (DGC, số thật): SE = 0,186 và khoảng 95% là
+    # [0,47 ; 1,20] — CHỨA 1,0. Hồi quy không cho lý do nào để tin 0,83 hơn tin
+    # 1,0. **35/84 mã (42%) rơi vào trường hợp này.**
+    #
+    # Dùng điểm ước lượng khi đó là giả vờ biết thứ mình không biết: một con số
+    # trông tự tin mà không có cơ sở. Beta quyết định WACC trong DCF, nên cái
+    # giả vờ đó đi thẳng vào fair value.
+    #
+    # Ngưỡng ở đây KHÔNG phải số áp đặt — nó là phép kiểm ý nghĩa thống kê
+    # chuẩn trên chính dữ liệu đã có (R², n). Không có hằng số nào phải chọn.
+    #
+    # `weak` tách riêng khỏi `fallback`: "không tính được" và "tính được nhưng
+    # vô nghĩa" là hai chuyện khác nhau và phải đếm riêng được.
+    std_error = None
+    yeu = False
+    if r_squared > 0 and len(x_clean) > 2:
+        std_error = abs(beta_raw) * math.sqrt(
+            (1 - r_squared) / (r_squared * (len(x_clean) - 2)))
+        lo, hi = beta_raw - 1.96 * std_error, beta_raw + 1.96 * std_error
+        yeu = lo <= 1.0 <= hi
+    else:
+        yeu = True                      # R²=0 thì không có gì để tin
+
     return {
-        'beta': round(beta_adjusted, 3),
+        # Yếu thì trả về đúng tiên nghiệm 1,0 — thành thật hơn một con số
+        # trông chính xác mà khoảng tin cậy của nó phủ cả 1,0.
+        'beta': 1.0 if yeu else round(beta_adjusted, 3),
         'beta_raw': round(beta_raw, 3),
         'beta_adjusted': round(beta_adjusted, 3),
         'r_squared': round(r_squared, 3),
+        # 4 chu so, khong phai 3: SE cua beta co do lon ~0,15 nen lam tron
+        # 3 chu so NUOT mat chenh lech do bac tu do (n-2 so voi n, ~1%)
+        # — tuc khong ai kiem lai duoc cong thuc bang chinh dau ra nua.
+        'std_error': None if std_error is None else round(std_error, 4),
+        'weak': bool(yeu),
         'observations': len(x_clean),
         'lookback_days': lookback_days,
-        'method': 'weekly_log_returns_blume_adjusted',
+        'method': ('weak_regression_prior' if yeu
+                   else 'weekly_log_returns_blume_adjusted'),
         'fallback': False,
     }
 
