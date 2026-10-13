@@ -2607,8 +2607,19 @@ kbd {
 .market-context .mc-label { font-weight: 600; color: var(--text, #e6e9ef); }
 .market-context .mc-stats { color: var(--text-dim, #8b93a7); font-family: var(--font-mono); }
 
-.market-context.mc-on      { border-left: 3px solid #00c853; }
-.market-context.mc-neutral { border-left: 3px solid #ffb300; }
+/* Ba trang thai boi canh thi truong, lay token PHI GIA:
+     mc-on      --cat-trend  (#66bb6a, chu thich cua no ghi ro "category not price")
+     mc-neutral --system     (#78909c, xam trung tinh)
+     mc-off     --danger     (xem chu thich ngay duoi)
+
+   TRUOC 13/10/2026 hai dong dau ghi thang #00c853 va #ffb300. Hai van de:
+     1. #ffb300 la AMBER CON SOT sau #76/#78 — hai PR do da doi `--warning` va
+        `--cat-event` tu amber sang xam trung tinh, nhung bo qua cho nay.
+     2. #ffb300 gan nhu khong phan biet duoc voi `--limit-ref` (#ffca28, mau
+        GIA THAM CHIEU), nen vien trai banner doc ra nhu mot trang thai gia.
+        Luat o dau tokens.css: 5 mau trang thai gia chi dung cho gia. */
+.market-context.mc-on      { border-left: 3px solid var(--cat-trend); }
+.market-context.mc-neutral { border-left: 3px solid var(--system); }
 /* `--danger`, khong phai ma mau tran: #ef5350 DUNG BANG gia tri cua `--down`,
    nen viet thang la de vien trai banner "risk off" mang mau GIAM GIA. Hai
    token trung gia tri la co y (xem chu thich o `--danger`) — nhung phai goi
@@ -2616,16 +2627,23 @@ kbd {
    Cung cach da dung o `.recommendation.rec-avoid` va dong 2336. */
 .market-context.mc-off     { border-left: 3px solid var(--danger); }
 
+/* "Goi y giam ty trong con ~X% muc thuong" — mot loi canh bao, nen dung
+   `--warning`. Token do CO SAN va chinh la de cho viec nay; no da duoc doi tu
+   amber #ffa726 sang xam trung tinh o #76/#78, con cho nay bi bo qua.
+   Nen amber nay khong chi ghi thang ma con LAC chuan da chot. */
 .market-context .mc-warn {
-  color: #ffcc80;
-  background: rgba(255, 179, 0, .12);
+  color: var(--warning);
+  background: rgba(255, 255, 255, .06);
   padding: 2px 8px;
   border-radius: 3px;
 }
 
+/* "Ban giua phien — khoi luong chua du ngay" la THONG TIN, khong phai canh
+   bao. `--focus` (#4fc3f7) la token cho viec do. Cap mau/nen lay theo khuon
+   `.plan-pullback` da co trong cung tep. */
 .market-context .mc-intraday {
-  color: #90caf9;
-  background: rgba(33, 150, 243, .12);
+  color: var(--focus);
+  background: rgba(79, 195, 247, .16);
   padding: 2px 8px;
   border-radius: 3px;
 }
@@ -2848,11 +2866,13 @@ kbd {
 /* Kế hoạch R:R kém: làm mờ số liệu để mắt không bị hút vào một lệnh xấu */
 .rec-plan-rejected .rec-levels { opacity: .45; }
 
+/* Cung nhom amber con sot nhu `.mc-warn`: day la canh bao ("ke hoach R:R
+   kem") nen dung `--warning`. */
 .plan-reject {
   font-size: 11px; line-height: 1.5;
-  color: #ffcc80;
-  background: rgba(255,179,0,.10);
-  border-left: 3px solid #ffb300;
+  color: var(--warning);
+  background: rgba(255, 255, 255, .06);
+  border-left: 3px solid var(--warning);
   padding: 8px 10px; margin-bottom: 8px; border-radius: 0 3px 3px 0;
 }
 
