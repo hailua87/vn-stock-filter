@@ -163,10 +163,15 @@ export async function runFunctional(page, isMobile, base) {
   try {
     await page.click('.strat-tab[data-strategy="analyzer"]', { timeout: 4000 });
     await settle(page);
-    // .topbar-analyzer mac dinh `hidden`, CHI hien o tab "Phan tich ma". Do ma
-    // khong mo tab do truoc thi phan tu khong ton tai va phep kiem xanh gia.
-    const shown = await page.$eval('.topbar-analyzer', el => !el.hidden).catch(() => false);
-    rec('analyzer:o-nhap-hien-ra', shown, shown ? 'hidden=false' : 'van hidden — phep kiem duoi vo nghia');
+    // M1 (13/10/2026): o nhap KHONG con tren topbar. No nam dau than
+    // `#analyzer-view`, va khoi do duoc an/hien thay cho co `hidden` cu.
+    // Phep kiem phai hoi DIEU DUNG: o co HIEN RA that khong — `offsetParent`
+    // bat ca ba duong an (display:none cua chinh no, cua to tien, va [hidden]).
+    // Do ma khong mo tab do truoc thi o khong hien va phep kiem duoi xanh gia.
+    const shown = await page.$eval('.analyzer-searchbar',
+      el => el.offsetParent !== null && el.getBoundingClientRect().width > 0
+    ).catch(() => false);
+    rec('analyzer:o-nhap-hien-ra', shown, shown ? 'hien ra' : 'van an — phep kiem duoi vo nghia');
 
     const r = await page.$eval('#analyzer-search', el => {
       const b = el.getBoundingClientRect();
@@ -178,14 +183,17 @@ export async function runFunctional(page, isMobile, base) {
                boxW: Math.round(box.w || box.width), right: Math.round(b.right), vw: innerWidth };
     }).catch(() => null);
     rec('analyzer:input-khong-bi-che', !!r && r.self, r ? `w=${r.w} h=${r.h} hit=${r.hit}` : 'khong tim thay');
-    // NGUONG 200px LA CON SO AP DAT, khong buoc vao yeu cau nao — ghi ro de
-    // khong ai tuong no co co so. Do that: placeholder "Nhap ma, vd: FPT" rong
-    // 115px, lot tu 1340px tro len; chu go vao "FPT" chi 22px, lot o moi khung.
-    // Nen hai khung 1366 do (w=167, w=149) tuy KHONG co gi sai tren man hinh.
-    // Nguong dung nghia hon la "placeholder co lot khong". Chua doi vi doi luc
-    // nay la sua phep kiem cho no xanh, khong phai sua trang.
+    // NGUONG 141px, va day la lan dau no CO CO SO: do la be rong placeholder
+    // "Nhap ma, vd: FPT" (16 ky tu, JetBrains Mono 12px, padding+border 26px).
+    // Nguong cu la 200px va duoc ghi ro la CON SO AP DAT.
+    //
+    // Doi duoc nguong vi M1 doi BAN CHAT cua o nay: tren topbar no la thu bi
+    // flex ep co dau tien (tung tut 135 -> 63px khi them tab MA7x25), nen phai
+    // canh bang mot nguong rong de bat viec bi ep. O than trang no khai 320px
+    // va khong canh tranh cho voi ai — nen cau hoi dung la "placeholder co lot
+    // khong", chinh la dieu nguong cu muon hoi ma khong hoi duoc.
     // Xem docs/mobile-layout-out-of-scope.md muc 5.
-    rec('analyzer:o-nhap-du-rong', !!r && r.w >= 200, r ? `w=${r.w} (khai 280px)` : 'loi', r ? { w: Math.round(r.w) } : null);
+    rec('analyzer:o-nhap-du-rong', !!r && r.w >= 141, r ? `w=${r.w} (khai 320px, san 141 = be rong placeholder)` : 'loi', r ? { w: Math.round(r.w) } : null);
     rec('analyzer:khong-tran-mep', !!r && r.right <= r.vw + 1, r ? `right=${r.right} vw=${r.vw}` : 'loi');
   } catch (e) { rec('analyzer:input-khong-bi-che', false, String(e).slice(0, 70)); }
 

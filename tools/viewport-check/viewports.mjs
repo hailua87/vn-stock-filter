@@ -16,7 +16,14 @@
 // kich thuoc noi dung — chinh la nguyen nhan goc so 2. Baseline lan dau chi
 // bat coarse cho ba viewport mobile, nen 18 nguong ranh gioi deu KHONG di qua
 // duong dan do. Nay moi nguong chay HAI LAN: chuot va cam ung.
-const BOUNDARIES = [1441, 1439, 1281, 1279, 1101, 1099, 1025, 1023, 901, 899, 861, 859,
+// 1488/1486 bam quanh nguong @media MOI (1487px, dat o M1 13/10/2026).
+// 1487 la yeu cau o che do CAM UNG; o che do chuot chi can 1469 — xem chu
+// thich @media trong styles.css. Cap khung nay chay ca hai truc nen bat ca hai.
+// Giu lai 1441/1439 cung ly le nhu 1281/1279: khong con la ranh gioi @media
+// nhung la hai khung DA TUNG HONG — 1441 chinh la khung cho 18 muc trong
+// accepted.json. Mat dau vet dat hon chay them hai khung.
+const BOUNDARIES = [1488, 1486, 1441, 1439, 1281, 1279, 1101, 1099, 1025, 1023,
+                    901, 899, 861, 859,
                     769, 767, 701, 699, 601, 599, 421, 419];
 
 const list = [];

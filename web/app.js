@@ -294,7 +294,17 @@ function startClock() {
       hour: '2-digit', minute: '2-digit', second: '2-digit',
       timeZone: 'Asia/Ho_Chi_Minh',
     });
-    document.getElementById('clock').textContent = hhmm + ' ICT';
+    // M1 (13/10/2026): topbar scanner khong con dong ho — dien thoai va
+    // he dieu hanh nao cung co san mot cai, con "thi truong dang mo hay
+    // dong" thi khong. Cung ly le da ghi o `@media (max-width: 420px)`
+    // trong styles.css tu truoc, nay ap cho moi be rong.
+    //
+    // `hhmm` VAN duoc tinh: phan trang thai thi truong ngay duoi dung
+    // gio ICT. Dung `?.` vi `web/valuation/index.html` CON co #clock —
+    // trang do khong nap app.js, nhung de nhu vay thi mot lan nap cheo
+    // cung khong nem.
+    document.getElementById('clock')?.replaceChildren(
+      document.createTextNode(hhmm + ' ICT'));
 
     // Market state: 9:00-15:00 ICT Mon-Fri
     const vnTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
@@ -418,8 +428,13 @@ async function switchStrategy(strategy) {
   // cạnh ô "Tìm mã" trong sidebar — hai ô trông giống nhau nhưng hành vi khác
   // hẳn (một cái mở phân tích chi tiết, một cái lọc bảng), người dùng không
   // biết dùng cái nào. Nay ô Analyzer chỉ xuất hiện đúng lúc nó có tác dụng.
-  const analyzerBox = document.querySelector('.topbar-analyzer');
-  if (analyzerBox) analyzerBox.hidden = (strategy !== 'analyzer');
+  //
+  // M1 (13/10/2026): không còn phải tự bật/tắt ô này. Nó đã nằm TRONG
+  // `#analyzer-view`, và khối đó được ẩn/hiện ngay bên dưới — một nguồn sự
+  // thật thay vì hai. Nhân đó mất luôn cái bẫy `[hidden]`: `display: flex`
+  // của tác giả đè lên `[hidden] { display: none }` của trình duyệt, nên ô
+  // nhập từng HIỆN Ở MỌI TAB dù `el.hidden === true` (xác nhận trên Safari
+  // iPhone 16 Pro thật).
 
   if (strategy === 'today') {
     dashboard.classList.add('analyzer-mode');   // cung kieu chiem tron be ngang
@@ -3258,7 +3273,7 @@ function bindAnalyzerEvents() {
 
   // Click outside to close suggestions
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.topbar-analyzer')) {
+    if (!e.target.closest('.analyzer-searchbar')) {
       box.classList.remove('show');
     }
   });
