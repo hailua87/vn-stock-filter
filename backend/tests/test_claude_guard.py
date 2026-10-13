@@ -216,3 +216,62 @@ def test_cho_qua_khi_duong_dan_la_bien_shell(cmd):
     số, và `test_chan_luot_chay_ghi_de_production` vẫn canh chuyện đó.
     """
     assert quyet_dinh(cmd) != 'deny', cmd
+
+
+# ── Hai cho CHAN OAN da xay ra that (13/10/2026) ────────────────────────────
+
+@pytest.mark.parametrize('cmd', [
+    'git merge-base main origin/diag/vci-latency',
+    'git merge-tree main feat/abc',
+    'GOC=$(git merge-base main origin/x) && git diff --stat $GOC origin/x',
+])
+def test_cho_qua_merge_base_va_merge_tree(monkeypatch, cmd):
+    """
+    `git merge-base` va `git merge-tree` la lenh CHI DOC — khong merge gi.
+
+    Ban dau dung `\bgit\s+merge\b`, ma `\b` khop ca dau gach noi, nen
+    `git merge-base` bi chan nhu the dang merge vao main. Chan oan that khi
+    toi tra noi dung nhanh truoc khi xoa no.
+    """
+    monkeypatch.setattr(G, '_nhanh_hien_tai', lambda: 'main')
+    assert G.kiem(cmd) is None, cmd
+
+
+def test_van_chan_git_merge_that_khi_dung_tren_main(monkeypatch):
+    """Chot chan cho phep kiem tren: dung ra thi `\bgit merge\b` phai con chan."""
+    monkeypatch.setattr(G, '_nhanh_hien_tai', lambda: 'main')
+    assert G.kiem('git merge feat/abc') is not None
+    assert G.kiem('git merge --no-ff feat/abc') is not None
+
+
+@pytest.mark.parametrize('cmd', ['git merge --abort', 'git merge --quit'])
+def test_cho_qua_merge_abort(monkeypatch, cmd):
+    """
+    `--abort` la lenh de HUY mot lan merge dang do. Chan no la giam nguoi ta
+    trong trang thai merge do — con te hon chinh viec no dinh ngan.
+    """
+    monkeypatch.setattr(G, '_nhanh_hien_tai', lambda: 'main')
+    assert G.kiem(cmd) is None, cmd
+
+
+def test_cho_qua_chuyen_nhanh_roi_merge_main_trong_cung_mot_lenh(monkeypatch):
+    """
+    `git checkout X && git merge main` — dua main VAO nhanh lam viec, viec hang
+    ngay va duoc phep. Nhung hook doc nhanh hien tai TRUOC khi lenh chay, nen
+    no thay 'main' va tuong la chieu nguoc lai. Da chan oan that.
+    """
+    monkeypatch.setattr(G, '_nhanh_hien_tai', lambda: 'main')
+    assert G.kiem('git checkout feat/abc && git merge main') is None
+    assert G.kiem('git switch feat/abc && git merge main') is None
+    assert G.kiem('git checkout -b moi/abc && git merge main') is None
+
+
+def test_van_chan_khi_chuyen_VE_main_roi_merge(monkeypatch):
+    """
+    Chot chan: `git checkout main && git merge feat/abc` la DUNG cai bi cam.
+    Neu phan doc nhanh dich lam hong chieu nay thi luat mat tac dung.
+    """
+    monkeypatch.setattr(G, '_nhanh_hien_tai', lambda: 'feat/abc')
+    assert G.kiem('git checkout main && git merge feat/abc') is not None
+    monkeypatch.setattr(G, '_nhanh_hien_tai', lambda: 'main')
+    assert G.kiem('git checkout main && git merge feat/abc') is not None

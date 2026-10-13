@@ -117,6 +117,20 @@ def kiem(cmd: str) -> str | None:
 
     nhanh = _nhanh_hien_tai()
 
+    # `git checkout X && git merge main` trong MỘT lệnh: hook đọc nhánh hiện
+    # tại TRƯỚC khi lệnh chạy, nên thấy nhanh='main' và tưởng là đang merge
+    # vào main. Đã chặn oan thật ngày 13/10/2026. Nếu lệnh tự chuyển sang
+    # nhánh khác thì lúc `git merge` chạy, nhánh không còn là main — nên đọc
+    # nhánh đích từ chính lệnh. Chỉ nhận dạng `checkout <tên>` / `switch
+    # <tên>` đơn giản; dạng nào không đọc ra được thì GIỮ phán đoán cũ (chặn).
+    m_ck = re.search(r'\bgit\s+(?:checkout|switch)\s+(?:-b\s+)?([^\s;&|-][^\s;&|]*)', c)
+    if m_ck:
+        # Lay nhanh SAU khi chuyen, ca HAI chieu. Ban dau toi chi xu ly
+        # chieu main -> nhanh khac (de thoi chan oan), va `git checkout main
+        # && git merge feat/abc` — DUNG cai bi cam — lot qua. Chinh phep
+        # kiem chot chan bat duoc.
+        nhanh = m_ck.group(1)
+
     m = re.search(r'\bgit\s+push\b([^;&|]*)', c)
     if m:
         duoi = m.group(1)
@@ -127,10 +141,19 @@ def kiem(cmd: str) -> str | None:
                     f'kho duyệt. (Nhánh hiện tại: `{nhanh or "?"}`. '
                     f'CLAUDE.md mục 1.)')
 
-    if nhanh == 'main' and re.search(r'\bgit\s+merge\b', c):
-        return ('Luật đứng của kho: KHÔNG merge vào `main` khi chưa được chủ '
-                'kho duyệt. Dùng `gh pr merge` sau khi được duyệt. '
-                '(CLAUDE.md mục 1.)')
+    # `(?![-\\w])` chứ không phải `\\b`: `\\b` khớp cả `git merge-base` và
+    # `git merge-tree` — hai lệnh CHỈ ĐỌC, không merge gì. Ngày 13/10/2026 nó
+    # chặn oan `git merge-base main origin/diag/vci-latency`, một lệnh tra cứu.
+    #
+    # Cũng loại trừ `--abort` / `--continue` / `--quit`: đó là thao tác trên
+    # một lần merge ĐANG dở, và `--abort` chính là lệnh để HUỶ nó — chặn nó là
+    # giam người ta trong trạng thái merge dở.
+    co_merge = re.search(r'\bgit\s+merge(?![-\w])([^;&|]*)', c)
+    if nhanh == 'main' and co_merge:
+        if not re.search(r'--(abort|continue|quit)\b', co_merge.group(1)):
+            return ('Luật đứng của kho: KHÔNG merge vào `main` khi chưa được '
+                    'chủ kho duyệt. Dùng `gh pr merge` sau khi được duyệt. '
+                    '(CLAUDE.md mục 1.)')
 
     return None
 
