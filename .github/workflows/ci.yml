@@ -24,6 +24,14 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
           cache-dependency-path: backend/requirements.txt
+      # Node de `test_web_cu_phap_js.py` chay `node --check` tren web/*.js.
+      # Ghim ro thay vi dua vao node co san cua runner: phep kiem do KHONG
+      # duoc phep bo qua khi thieu node — "test bi skip la test xanh rong"
+      # (CLAUDE.md muc 6), nen no se DO, va do phai la loi that chu khong
+      # phai loi moi truong.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
       - name: Install
         run: |
           pip install --upgrade pip

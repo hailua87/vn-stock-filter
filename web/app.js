@@ -1543,6 +1543,10 @@ function renderRow(s, idx) {
   // ── Hàng cho chiến lược theo TÍN HIỆU (MA7 × MA25) ──
   // Mẫu riêng chứ không nhét tín hiệu vào ô điểm: bảng này không có điểm, và
   // số cột phải khớp với <thead> đã ẩn cột TIÊU CHÍ.
+  // O TUOI KHONG mang prio-*: <th> tuong ung la .th-rating (doi chu thanh
+  // "TUOI" luc chay) va khong co prio-*. Co prio-3 o day thi o bi an o <=860px
+  // trong khi cot tieu de VAN HIEN — do that tren Chromium 800px: 7 th hien,
+  // 6 o hien, cot TUOI trong rong. Canh boi backend/tests/test_web_cot_bang.py.
   if (currentConfig().signalBased) {
     const sg = s.signal || '';
     const tuoi = s.signal_age == null ? '—' : `${s.signal_age} phiên`;
@@ -1565,7 +1569,7 @@ function renderRow(s, idx) {
       <td class="num prio-4">${resCell}</td>
       <td class="num prio-4">${rrCell}</td>
       <td class="num"><span class="ma-signal ma-${sg}">${escapeAttr(s.signal_label || sg)}</span>${chan}</td>
-      <td class="prio-3">${tuoi}</td>
+      <td>${tuoi}</td>
     </tr>`;
   }
 
