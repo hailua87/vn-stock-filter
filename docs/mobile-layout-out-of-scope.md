@@ -102,7 +102,21 @@ nua ben phai.
 
 Van de thiet ke, khong phai loi bo cuc.
 
-## 5. O nhap ma bi co — DA DO, DA CAN NHAC, KHONG SUA
+## 5. O nhap ma bi co — DA SUA 13/10/2026
+
+> **DA SUA 13/10/2026.** O nhap ma khong con nam tren topbar: no xuong dau than
+> trang Phan tich ma (`.analyzer-searchbar`, khai 320px). Tren topbar no la thu
+> bi flex ep co dau tien; o than trang khong ai ep no.
+>
+> `accepted.json` nay RONG. Do: `bp-1441-mouse` va `bp-1441-touch` moi khung
+> DA SUA 9, CON LAI 0, MOI 0.
+>
+> Nhan day cung doi duoc nguong cua phep kiem `analyzer:o-nhap-du-rong` trong
+> `functional.mjs`: tu **200px (con so AP DAT, ghi ro la khong co co so)** xuong
+> **141px, la be rong placeholder "Nhap ma, vd: FPT"**. Doi duoc vi ban chat o
+> nay da doi — nguong 200 ton tai de bat viec BI EP CO, viec khong con xay ra;
+> cau hoi dung la "placeholder co lot khong", va 141 hoi dung cau do.
+
 
 > **Cap nhat 23/09/2026 — dai da DOI, van de thi chua het.** Them tab "Hom nay"
 > (tab thu sau) khien topbar mot hang can them ~100px, nen nguong dua dai tab
@@ -166,7 +180,16 @@ hang chip tran ra ngoai khung. **Bang mau trong ban mau KHONG ap dung**: du an
 nay da chot nam mau trang thai gia theo quy uoc san Viet Nam va thu tu nap
 `tokens.css` truoc `styles.css`. Chi lay Y TUONG BO CUC.
 
-### M1 — thanh dieu huong duoi
+### M1 — thanh dieu huong duoi — VAN CON MO
+
+> **Dinh chinh ten goi 13/10/2026.** `accepted.json` tung dung chu "M1" cho mot
+> viec KHAC: bo bot phan tu khoi topbar de chua loi be rong tren desktop. Viec
+> do da lam xong 13/10 (xem muc 5 va 7). M1 **o day** la thanh dieu huong duoi
+> cho mobile, nham vao CHIEU CAO topbar o 402x714, va chua lam.
+>
+> Phan "con 4 nhan vo dong o 1281px" ghi duoi day la so CU: dai do da sach tu
+> 23/09, va dai 1441-1486px da sach tu 13/10.
+
 
 Chuyen viec chuyen chien luoc xuong thanh co dinh o day man hinh. Dung ngon
 cai voi toi hon dai tab cuon ngang o tren cung.
@@ -198,7 +221,47 @@ Ban mau dat moi ma thanh mot the, hai the mot hang. Tu choi vi:
 - Bang hien tai da co `prio-*` de an cot theo do rong; the khong tan dung duoc.
 - Mat kha nang so sanh theo cot, von la muc dich chinh cua man loc.
 
-## 7. Bon nhan topbar vo dong — DAI DA DOI, CHUA HET
+## 7. Bon nhan topbar vo dong — DA SUA 13/10/2026
+
+> **DA SUA 13/10/2026** bang viec bo bot phan tu khoi topbar, cong nang nguong
+> @media. Hai thay doi:
+>
+>   1. O nhap ma (277px) xuong than trang — xem muc 5.
+>   2. Dong ho (84px) bo khoi topbar trang scanner. Ly le da co san trong
+>      `styles.css` tu truoc, o `@media (max-width: 420px)`: may nao cung co
+>      san mot dong ho, con "thi truong dang mo hay dong" thi khong. Nay ap cho
+>      moi be rong. `web/valuation/index.html` GIU dong ho — trang do khong
+>      chat, va no dung chung lop `.time` nen lop CSS phai o lai.
+>
+> Cong hai gap 24px, topbar bo duoc **409px**. Yeu cau tu ~1821px xuong:
+>
+> | che do | yeu cau |
+> |---|---|
+> | chuot | 1469px |
+> | **cam ung** | **1487px** |
+>
+> (Do tai 1600px, chu ghim vao truong hop rong nhat va DA GO `setInterval`
+> truoc khi ghim. Cam ung ton hon vi `@media (pointer: coarse)` dat
+> `min-width: 44px` cho `.icon-btn`, lam `topbar-right` no tu 252 len 270.)
+>
+> Nguong @media nang **1440 -> 1487** (lay so cam ung) de dong dai 1441-1486px.
+> Chot 1469 thi iPad ngang va man cam ung 1470-1486px van vo dong — bo do bat
+> dung viec do o khung `bp-1470-touch` khi toi thu nguong 1469 truoc.
+>
+> **Lap luan cu trong `accepted.json` — "khong the chua bang cach nang tiep
+> nguong ma khong bat MOI man desktop xuong hai hang" — da het hieu luc, va het
+> vi CON SO DOI, khong vi ai doi y.** Luc viet no, topbar can 1708px nen nguong
+> 1708 se bat moi man desktop xuong hai hang. Sau khi bo 409px thi nguong moi
+> chi anh huong dai **1441-1486px, rong 46px** thay vi 267px.
+>
+> Luu y: dai tab van xuong hang rieng tu 1486px tro xuong, y nhu truoc o 1440px
+> — do la co che da co va la THIET KE, khong phai he qua cua lan sua nay.
+>
+> **KHONG phai "M1" cua muc 6.** `accepted.json` goi viec bo phan tu khoi
+> topbar la M1; muc 6 duoi day goi M1 la *thanh dieu huong duoi cho mobile*.
+> Hai viec khac nhau: viec vua lam giai quyet BE RONG tren desktop, con M1 cua
+> muc 6 giai quyet CHIEU CAO topbar tren mobile 402x714 va VAN CON MO.
+
 
 > **Dinh chinh 24/09/2026.** Hom 23/09 toi ghi muc nay "DA SUA" sau khi nang
 > nguong dai tab tu 1280 len 1440. **Ket luan do SAI**, va sai vi phep do:

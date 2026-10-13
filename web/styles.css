@@ -1540,14 +1540,37 @@ kbd {
 /* ═══════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════ */
-/* Nguong nay VON LA 1280px. Nang len 1440px khi them tab "Hom nay" (tab thu
-   sau): do that o 1600px, mot hang tab can 779px, cong topbar-left 230 +
-   topbar-right 316 + padding 32 + gap 48 = 1405px — va o tab Phan tich ma,
-   o nhap 280px day con so len ~1550px. Tuc 1366 va 1440 khong con du cho.
+/* Nguong nay VON LA 1280px, roi 1440px, nay 1469px.
+   1280 -> 1440 khi them tab "Hom nay" (tab thu sau).
+   1440 -> 1487 la buoc cuoi cua M1 (13/10/2026).
+
+   DO THAT sau M1, chu ghim vao TRUONG HOP RONG NHAT ('GIỮA PHIÊN 01/01 00:00'
+   + 'ĐANG GIAO DỊCH') va da GO setInterval truoc khi ghim:
+     chuot    : 273 + 864 + 252 + 2 gap 24 + padding 32 = 1469px
+     CAM UNG  : 273 + 864 + 270 + 2 gap 24 + padding 32 = 1487px
+   O 1441px flex ep tong xuong dung 1441 va BA nhan vo dong (brand-name,
+   #live-text, #market-text).
+
+   LAY SO CAM UNG (1487), khong phai so chuot: `@media (pointer: coarse)` CAT
+   NGANG moi nguong be rong va dat min-width 44px cho .icon-btn/.strat-tab,
+   lam topbar-right no tu 252 len 270. Chot nguong 1469 thi iPad ngang va man
+   cam ung 1470-1486px van vo dong — bo do bat dung viec do o bp-1470-touch.
+   1487 khong phai so tron cho dep; no la ket qua do.
+
+   Vi sao nang nguong lan nay DUOC, trong khi accepted.json tung ghi la khong:
+   luc ay topbar can 1708px nen nang nguong len do se bat MOI man desktop
+   xuong hai hang. M1 (dua o nhap ma xuong than trang + bo dong ho) ha yeu cau
+   xuong 1469, nen nguong moi chi anh huong dai 1441-1468px — rong 28px, thay
+   vi 267px nhu truoc. Lap luan cu het hieu luc vi con so da doi.
+
    Giu nguyen co che da co (tab xuong hang rieng, tu cuon ngang) thay vi bop
    chu hay bo cot: bop chu chinh la loi topbar vo dong da ghi o
-   docs/mobile-layout-out-of-scope.md muc 7. */
-@media (max-width: 1440px) {
+   docs/mobile-layout-out-of-scope.md muc 7.
+
+   CHU Y khi sua: `tools/viewport-check/viewports.mjs` co cap khung
+   bp-1441/bp-1439 bam quanh nguong CU. Doi nguong thi phai doi cap do, neu
+   khong bo do canh sai cho. */
+@media (max-width: 1487px) {
   :root {
     --col-filter-w: 200px;
     --col-detail-w: 340px;
@@ -1892,40 +1915,30 @@ kbd {
   color: var(--bg-base);
 }
 
-/* Topbar analyzer search */
-.topbar-analyzer {
+/* O nhap ma cua tab Phan tich ma.
+   M1 (13/10/2026): truoc day la `.topbar-analyzer` NAM TREN TOPBAR. Topbar mot
+   hang o tab nay can ~1821px (do 13/10 tai 1800px: topbar-left 226 +
+   strategy-tabs 864 + o nhap 277 + topbar-right 313, cong 3 gap 24 va padding
+   32) — khong man hinh pho bien nao du rong. Dua o nhap xuong than trang bo
+   409px cung voi dong ho, con 1469px (truoc: ~1821px).
+
+   Hai rang buoc cu KHONG con can o cho moi, va day la ly do xoa chung chu
+   khong phai quen:
+     · `min-width: 141px` — san chong flex ep co. Than trang khong ep co.
+     · `.topbar-analyzer[hidden] { display: none }` — go bay `display` cua tac
+       gia de len `[hidden]` cua trinh duyet. Khong con dung `hidden`: o nhap
+       nam trong `#analyzer-view`, khoi do tu an/hien.
+
+   Be rong 320px chu khong 100%: PLACEHOLDER van la rang buoc duy nhat
+   ("Nhap ma, vd: FPT" = 141px), va mot o nhap trai het be ngang trang cho mot
+   ma 3 ky tu thi vua xau vua kho nham. */
+.analyzer-searchbar {
   position: relative;
-  margin-left: 16px;
-  width: 280px;
-  /* SAN 141px, khong phai so tron cho dep: do la be rong cua placeholder
-     "Nhap ma, vd: FPT" (16 ky tu, JetBrains Mono 12px, padding+border 26px) —
-     con so do chinh chu thich cua .analyzer-input ghi lai tu 29/08/2026.
-     Placeholder la rang buoc be rong DUY NHAT cua o nay.
-
-     Can san nay vi topbar la flex va o nhap la thu bi ep co dau tien. Them tab
-     MA7x25 lam no tut tu 135px xuong 63px o 1441px (cam ung: 117 -> 45), tuc
-     placeholder khong con lot. Cong `kiem` bat duoc nho canh gac "muc da chap
-     nhan khong duoc te them" trong accepted.json.
-
-     Phan tran ra se day sang viec dai tab vo dong — do la muc DA CHAP NHAN va
-     da co ho so (docs/mobile-layout-out-of-scope.md muc 5, 7), con o nhap
-     khong doc duoc thi khong. */
-  min-width: 141px;
+  width: 320px;
+  max-width: 100%;
+  margin: 0 0 16px;
   display: flex;
   align-items: center;
-}
-/* `display` cua tac gia DE LEN `[hidden] { display: none }` cua trinh duyet.
-   index.html khai <div class="topbar-analyzer" hidden>, app.js:335 dat
-   analyzerBox.hidden = (strategy !== 'analyzer') — ca hai deu dung. Nhung
-   `display: flex` o tren thang, nen o nhap ma HIEN O MOI TAB:
-     el.hidden = true, computed display = flex, w = 210px.
-   Da xac nhan tren Safari iPhone 16 Pro that: dang o tab "Pre-Breakout"
-   ma o nhap van hien.
-   Hop 280px luon chiem cho con ep .topbar-left / .topbar-right vo dong.
-   Do: an hop di thi so nhan vo dong o 1366/1440/1600px tu 4 xuong 0.
-   (#help-modal khong dinh loi nay vi no dat ca style.display noi tuyen.) */
-.topbar-analyzer[hidden] {
-  display: none;
 }
 .analyzer-input {
   /* PLACEHOLDER LA RANG BUOC BE RONG DUY NHAT cua o nay.
