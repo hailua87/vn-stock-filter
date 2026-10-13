@@ -389,8 +389,15 @@ def calculate_pb_roe_valuation(data: Dict[str, Any]) -> ValuationResult:
         confidence -= 0.15
     if not pb_5y_median:
         confidence -= 0.10
-    if market.get('beta_fallback', True):
-        confidence -= 0.05      # beta mặc định 1.0, không phải regression thật
+    # Phat CA HAI: khong tinh duoc beta, VA tinh duoc nhung vo nghia thong ke.
+    #
+    # Ban cu chi phat `fallback`. Tuc no PHAT SU TRUNG THUC va THUONG CHO NHIEU:
+    # mot beta 1,0 vi khong co du lieu bi tru 5%, con mot beta 0,22 voi R²=0,008
+    # — gan nhu nhieu thuan — thi khong bi tru gi, va di thang vao WACC nhu the
+    # no dang tin. Do tren ro 84 ma ngay 13/10/2026: 35 ma (42%) co khoang tin
+    # cay 95% chua 1,0.
+    if market.get('beta_fallback', True) or market.get('beta_weak', True):
+        confidence -= 0.05
     if abs(roe_ttm - sustainable_roe) / max(sustainable_roe, 1e-6) > 0.30:
         confidence -= 0.10      # ROE lệch mạnh so với trung bình chu kỳ
 

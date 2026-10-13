@@ -376,11 +376,15 @@ def _publish_guard(verdict: str, industry: ValuationIndustry,
 def _beta_info(market: Dict[str, Any]) -> Dict[str, Any]:
     """Beta đã dùng cho lượt này, kèm việc nó là thật hay giá trị dự phòng."""
     rs = market.get('beta_r_squared')
+    se = market.get('beta_std_error')
     return {
         'value': round(float(market.get('beta_2y', 1.0)), 3),
         'fallback': bool(market.get('beta_fallback', True)),
+        # `weak`: tinh duoc nhung khoang 95% chua 1,0 -> da tra ve 1,0.
+        'weak': bool(market.get('beta_weak', True)),
         'method': market.get('beta_method'),
         'r_squared': None if rs is None else round(float(rs), 3),
+        'std_error': None if se is None else round(float(se), 4),
     }
 
 

@@ -200,3 +200,19 @@ def test_than_heredoc_khong_dau_nhay_cung_duoc_go():
            "python backend/run_daily.py\n"
            "EOF")
     assert quyet_dinh(cmd) != 'deny'
+
+
+@pytest.mark.parametrize('cmd', [
+    'python backend/run_daily.py --web-data-dir "$SP/wd"',
+    'python backend/run_valuation.py --web-data-dir ${TMPDIR}/wd',
+    'python backend/run_quality.py --web-data-dir "$(mktemp -d)"',
+])
+def test_cho_qua_khi_duong_dan_la_bien_shell(cmd):
+    """
+    Biến shell không đoán được tĩnh. Chặn nó là chặn oan — và đã chặn oan thật:
+    `--web-data-dir "$SP/wdbeta"` trỏ ra thư mục scratch ngoài kho.
+
+    Fail-open, cùng lý lẽ với phần còn lại: lỗi thật cần chặn là QUÊN HẲN tham
+    số, và `test_chan_luot_chay_ghi_de_production` vẫn canh chuyện đó.
+    """
+    assert quyet_dinh(cmd) != 'deny', cmd

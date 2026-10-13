@@ -104,14 +104,36 @@ log = logging.getLogger('valuation')
 
 
 def _tong_hop_beta(signals) -> dict:
-    """Bao nhiêu mã dùng beta thật, bao nhiêu rơi về giá trị dự phòng 1.0."""
+    """
+    BA trạng thái, không phải hai.
+
+    Bản cũ chỉ chia "thật / dự phòng", nên lượt 11/10/2026 báo **84/84 beta
+    thật, 0 dự phòng** — đúng theo nghĩa hẹp mà gây nhầm nặng: R² trung vị chỉ
+    0,162 và **35 mã (42%) có khoảng tin cậy 95% chứa 1,0**, tức hồi quy không
+    cho lý do nào để tin con số ước lượng hơn tin tiên nghiệm. Gộp chúng vào ô
+    "thật" làm người đọc tin là đã xong việc.
+
+      real     — tính được VÀ khác 1,0 có ý nghĩa thống kê
+      weak     — tính được nhưng khoảng 95% chứa 1,0 → đã rơi về 1,0
+      fallback — không tính được (thiếu cache, quá ít tuần)
+    """
     co = [s.get('beta') for s in signals if s.get('beta')]
-    that = [b for b in co if not b.get('fallback')]
-    rs = [b['r_squared'] for b in that if b.get('r_squared') is not None]
+    du_phong = [b for b in co if b.get('fallback')]
+    # `.get('weak', True)` — thiếu khoá thì coi như YẾU, cùng chiều bi quan
+    # với `methods_pb_roe` và `_beta_info`. Mặc định ngược lại nghĩa là một
+    # nguồn beta mới quên gắn cờ sẽ được đếm vào ô "thật" — đúng kiểu báo
+    # cáo sai đang được sửa ở đây, và lần này sẽ không ai thấy.
+    yeu = [b for b in co if not b.get('fallback') and b.get('weak', True)]
+    that = [b for b in co
+            if not b.get('fallback') and not b.get('weak', True)]
+    # R² lấy trên MỌI hồi quy chạy được (kể cả yếu) — đó mới là thước đo chất
+    # lượng nguồn. Lọc bỏ phần yếu thì con số trông đẹp lên một cách giả tạo.
+    rs = [b['r_squared'] for b in (that + yeu) if b.get('r_squared') is not None]
     return {
         'n': len(co),
         'real': len(that),
-        'fallback': len(co) - len(that),
+        'weak': len(yeu),
+        'fallback': len(du_phong),
         'median_r_squared': (None if not rs
                              else round(sorted(rs)[len(rs) // 2], 3)),
     }

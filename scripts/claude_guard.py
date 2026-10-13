@@ -46,6 +46,14 @@ def _trong_kho(duong_dan: str) -> bool:
     d = duong_dan.strip().strip('"\'').replace('\\', '/').rstrip('/')
     if not d:
         return True
+    # Có biến shell hoặc thay thế lệnh -> KHÔNG đoán được tĩnh. Cho qua.
+    #
+    # Fail-open, cùng lý lẽ với phần còn lại của tệp này: lỗi thật cần chặn là
+    # QUÊN HẲN tham số, và trường hợp đó vẫn bị bắt. Người đã gõ
+    # `--web-data-dir "$SP/wd"` là người đã nghĩ tới chuyện này rồi. Chặn họ chỉ
+    # khiến cổng chặn bị tắt đi.
+    if '$' in d or '`' in d:
+        return False
     # Tương đối mà không bắt đầu bằng .. -> nằm trong kho
     if not re.match(r'^([A-Za-z]:|/|~)', d):
         return not d.startswith('..')

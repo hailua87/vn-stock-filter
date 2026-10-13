@@ -23,6 +23,7 @@ from run_valuation import _tong_hop_beta
 from test_valuation_quality_fixes import _raw, no_dispersion  # noqa: F401 (fixture)
 
 THAT = {'beta': 1.3, 'fallback': False, 'r_squared': 0.42,
+        'weak': False, 'std_error': 0.09,
         'method': 'weekly_log_returns_blume_adjusted'}
 
 
@@ -43,9 +44,9 @@ def _dinh_gia(beta_info=None, price=66_400.0, shares=1_000_000_000):
 
 def test_the_report_records_the_beta_it_used(no_dispersion):
     d = _dinh_gia(THAT).to_dict()
-    assert d['beta'] == {'value': 1.3, 'fallback': False,
+    assert d['beta'] == {'value': 1.3, 'fallback': False, 'weak': False,
                          'method': 'weekly_log_returns_blume_adjusted',
-                         'r_squared': 0.42}
+                         'r_squared': 0.42, 'std_error': 0.09}
 
 
 def test_a_fallback_beta_says_so_instead_of_looking_real(no_dispersion):
@@ -61,18 +62,25 @@ def test_a_fallback_beta_says_so_instead_of_looking_real(no_dispersion):
 
 
 def test_the_rollup_separates_real_from_fallback():
+    """
+    Từ 13/10/2026 bản tổng hợp có BA ô, không phải hai: xem
+    `test_beta_weak.py`. "Tính được" và "tính được mà khác 1,0 có ý nghĩa" là
+    hai chuyện khác nhau, và gộp lại thì lượt 11/10 báo "84/84 beta thật"
+    trong khi 35 mã không phân biệt được với 1,0.
+    """
     tong = _tong_hop_beta([
-        {'beta': {'value': 1.2, 'fallback': False, 'r_squared': 0.4}},
-        {'beta': {'value': 0.9, 'fallback': False, 'r_squared': 0.6}},
-        {'beta': {'value': 1.0, 'fallback': True, 'r_squared': None}},
+        {'beta': {'value': 1.2, 'fallback': False, 'weak': False, 'r_squared': 0.4}},
+        {'beta': {'value': 0.9, 'fallback': False, 'weak': False, 'r_squared': 0.6}},
+        {'beta': {'value': 1.0, 'fallback': True, 'weak': True, 'r_squared': None}},
         {'beta': None},
     ])
-    assert tong == {'n': 3, 'real': 2, 'fallback': 1, 'median_r_squared': 0.6}
+    assert tong == {'n': 3, 'real': 2, 'weak': 0, 'fallback': 1,
+                    'median_r_squared': 0.6}
 
 
 def test_the_rollup_survives_a_run_with_no_beta_at_all():
     assert _tong_hop_beta([{'beta': None}, {}]) == {
-        'n': 0, 'real': 0, 'fallback': 0, 'median_r_squared': None}
+        'n': 0, 'real': 0, 'weak': 0, 'fallback': 0, 'median_r_squared': None}
 
 
 def test_the_exported_beta_is_the_one_that_actually_drove_the_numbers(no_dispersion):
