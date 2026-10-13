@@ -235,3 +235,72 @@ def test_tokens_css_khong_dat_selector_nao_ngoai_root():
     s = _bo_chu_thich(TOKENS.read_text(encoding='utf-8'))
     la = [sel for sel, _, _ in _tach_khoi(s) if not sel.startswith(':root')]
     assert not la, f'selector ngoài :root trong tokens.css: {la}'
+
+
+# ── Mọi màu phải lấy từ token ───────────────────────────────────────────────
+
+# Mã màu ghi thẳng ngoài `:root` mà đã cân nhắc và chấp nhận, kèm lý do.
+# Dạng `var(--token, #fallback)` KHÔNG tính — đó là giá trị dự phòng hợp lệ.
+#
+# Đo 13/10/2026: trước khi dọn có 11 chỗ, sau khi dọn còn 5. Năm chỗ này không
+# nằm trong phạm vi lần dọn đó nên được ghi vào sổ thay vì sửa lặng lẽ.
+HEX_DA_CHAP_NHAN = {
+    '.strat-badge-pb': 'bảng màu badge chiến lược, song song với --cat-* nhưng chưa di cư',
+    '.strat-badge-gcl': 'cùng nhóm badge chiến lược',
+    '.strat-badge-gcs': 'cùng nhóm badge chiến lược',
+    '.strat-badge-ich': 'cùng nhóm badge chiến lược',
+    '.skip-link': 'nền tối cho liên kết bỏ qua — cần tương phản tuyệt đối với --focus',
+}
+
+
+def _hex_ghi_thang():
+    """[(selector, dòng, mã)] cho mã màu ghi thẳng ngoài :root."""
+    s = _bo_chu_thich(CSS.read_text(encoding='utf-8'))
+    ra = []
+    for sel, than, dong in _tach_khoi(s):
+        if sel.startswith(':root'):
+            continue
+        # Bỏ dạng `var(--token, #fallback)` — giá trị dự phòng là hợp lệ.
+        sach = re.sub(r'var\(\s*--[\w-]+\s*,\s*#[0-9a-fA-F]{3,8}\s*\)', '', than)
+        for ma in re.findall(r'#[0-9a-fA-F]{3,8}\b', sach):
+            ra.append((sel, dong, ma))
+    return ra
+
+
+def test_khong_them_mau_ghi_thang_ngoai_so_dang_ky():
+    """
+    Mỗi mã màu ghi thẳng là một chỗ KHÔNG đổi được bằng cách sửa token — tức
+    một chỗ sẽ âm thầm lệch khi bảng màu đổi. `.mc-neutral` giữ amber `#ffb300`
+    suốt từ #76/#78 đúng vì không có gì canh: hai PR đó đổi `--warning` và
+    `--cat-event` sang xám trung tính mà bỏ qua chỗ này.
+    """
+    la = [(s, d, m) for s, d, m in _hex_ghi_thang() if s not in HEX_DA_CHAP_NHAN]
+    assert not la, (
+        'Mã màu ghi thẳng chưa có trong sổ:\n' +
+        '\n'.join(f'  styles.css:{d}  {s}  {m}' for s, d, m in la) +
+        '\n\nDùng token có sẵn (--system, --focus, --warning, --cat-*, --danger, '
+        'hoặc thang --text → --text-dim → --text-mute).\nNếu thật sự phải ghi '
+        'thẳng: thêm vào HEX_DA_CHAP_NHAN kèm lý do.')
+
+
+def test_so_hex_khong_co_muc_chet():
+    """Mục trỏ tới selector không còn ghi thẳng màu nào thì sổ mục rữa."""
+    con = {s for s, _, _ in _hex_ghi_thang()}
+    chet = sorted(set(HEX_DA_CHAP_NHAN) - con)
+    assert not chet, f'mục trong sổ không còn mã màu ghi thẳng: {chet}'
+
+
+def test_het_amber_trong_bang_mau_toi():
+    """
+    #76 và #78 quyết định bỏ amber khỏi bảng màu tối (`--warning` và
+    `--cat-event` đổi sang xám trung tính). Nhưng amber còn sót ở 4 chỗ ghi
+    thẳng tới 13/10/2026: `.mc-neutral`, `.mc-warn`, `.plan-reject` (hai mã).
+
+    Amber còn nguy ở chỗ khác: `#ffb300` gần như không phân biệt được với
+    `--limit-ref` (#ffca28, màu GIÁ THAM CHIẾU), nên nó đọc ra như một trạng
+    thái giá.
+    """
+    s = _bo_chu_thich(CSS.read_text(encoding='utf-8'))
+    AMBER = ('#ffb300', '#ffa726', '#ffcc80', '#ffc107', '#ff9800')
+    thay = [(a, s.lower().count(a)) for a in AMBER if a in s.lower()]
+    assert not thay, f'amber còn trong styles.css: {thay}'

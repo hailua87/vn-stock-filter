@@ -20,7 +20,10 @@
    chỉnh tề, nhưng đo tương phản ở chế độ sáng còn 4 chỗ hỏng:
      ·  2,93:1  button.strat-tab   màu chữ #EEF0F2 = đúng màu nền
      ·  2,93:1  button.chip        cùng lỗi
-     ·  1,33:1  span.mc-warn       #ffcc80 trên nền sáng
+     ·  ~1,6:1  span.mc-warn       nay lấy màu từ --warning (13/10/2026;
+                                   trước là #ffcc80 ghi thẳng, 1,33:1).
+                                   Vẫn hỏng — chỉ là hỏng theo token, nên
+                                   sửa --warning là sửa luôn chỗ này.
      ·  1,67:1  span.fib-label     #b0bec5, cỡ chữ 8px
    Ba lỗi đầu là dấu hiệu token mới di cư được một nửa: các lớp đó
    còn lấy màu chữ từ token đã đổi nghĩa khi lật nền.
