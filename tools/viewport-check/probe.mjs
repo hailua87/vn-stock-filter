@@ -58,6 +58,17 @@ export const PROBE = () => {
     // Bo qua hop INLINE: clientWidth cua chung luon = 0 theo spec, nen phep so
     // "chu rong hon hop" vo nghia — 208 cai <span> bao nham o lan chay dau.
     if (el.clientWidth === 0) continue;
+    // Bo qua chu AN-NHUNG-DOC-DUOC (kieu `.sr-only`): hop 1x1px voi
+    // `overflow: hidden` + `clip`. Chu "tran" 62px khoi hop 1px la DUNG Y DO —
+    // chu o day de trinh doc man hinh lay ten truy cap, khong de nhin.
+    //
+    // Cung ly le voi hai miễn trừ o tren (ellipsis co chu dich, hop inline):
+    // kich thuoc hop khong phai mot rang buoc that nen phep so vo nghia.
+    //
+    // 13/10/2026: `.sr-only` co trong styles.css tu truoc nhung KHONG duoc
+    // dung o HTML nao, nen loi gia nay chua tung lo. Lan dung dau tien
+    // (`.tb-chu`, thu nhan VALUATION tren mobile) lam no bao 2 muc x 13 khung.
+    if (el.clientWidth <= 1 && el.clientHeight <= 1) continue;
     const rg = document.createRange();
     rg.selectNodeContents(el);
     const tw = rg.getBoundingClientRect().width;
