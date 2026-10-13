@@ -2188,7 +2188,12 @@ kbd {
   margin-right: 8px;
 }
 .rec-position .rec-position-pct {
-  color: var(--up);
+  /* Co vi the (%NAV) KHONG phai gia va khong phai bien dong gia. Dong nay sot
+     khoi luot quet ~40 cho cua #78: no giu `var(--up)` — xanh TANG GIA — cho
+     mot con so ve quan ly von. Nay dung bac sang nhat cua chinh thang khoi
+     khuyen nghi, giong `.rec-stars` ngay ben canh (xem chu thich o
+     `.recommendation.rec-*`: thang nay co y khong muon sac gia). */
+  color: var(--text);
   font-size: 16px;
 }
 
@@ -2591,7 +2596,12 @@ kbd {
 
 .market-context.mc-on      { border-left: 3px solid #00c853; }
 .market-context.mc-neutral { border-left: 3px solid #ffb300; }
-.market-context.mc-off     { border-left: 3px solid #ef5350; }
+/* `--danger`, khong phai ma mau tran: #ef5350 DUNG BANG gia tri cua `--down`,
+   nen viet thang la de vien trai banner "risk off" mang mau GIAM GIA. Hai
+   token trung gia tri la co y (xem chu thich o `--danger`) — nhung phai goi
+   dung ten, neu khong doi mau giam gia se am tham doi ca cho nay.
+   Cung cach da dung o `.recommendation.rec-avoid` va dong 2336. */
+.market-context.mc-off     { border-left: 3px solid var(--danger); }
 
 .market-context .mc-warn {
   color: #ffcc80;
