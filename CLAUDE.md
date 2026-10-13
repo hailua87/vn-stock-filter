@@ -106,6 +106,19 @@ Thiếu `save` thì mọi thứ lượt chạy ghi vào đó đều bị vứt �
 - Trước khi kết luận, **đo trước và sau** bằng cùng một thước. Và kiểm chính
   thước đo: đã có lần thước báo ba lỗi giả `1:1` vì bỏ kênh alpha khi trộn màu
   nền, và một lần khác kết luận sai vì quên `deviceScaleFactor: 3`.
+- **Đo lại trang web sau khi sửa: phải đổi CỔNG, không phải nạp lại.**
+  `index.html?v=123` không giải quyết gì — thẻ `<script src="app.js">` giữ
+  nguyên URL nên trình duyệt dùng lại bản trong cache. Ngày 13/10/2026 việc này
+  làm tôi kết luận sai **hai lần liên tiếp** trên cùng một bản sửa: lần đầu
+  "bản sửa không có tác dụng" (trang đang chạy mã cũ), lần sau "trang vẫn chạy
+  bình thường" (trong khi `app.js` đã lỗi cú pháp và cả trang chết — cache che
+  mất). Đổi cổng là đổi origin, tức đổi cache. Kiểm chứng rẻ nhất:
+  `fetch('/app.js?x='+Date.now())` rồi so với `renderRow.toString()` của trang
+  đang chạy — lệch nhau nghĩa là đang đo bản cũ.
+- **`node --check web/*.js` trước khi tin bộ test Python.** Toàn bộ 1312 phép
+  kiểm từng xanh trong khi trang web chết hoàn toàn vì một dấu backtick trong
+  template literal. Nay `backend/tests/test_web_cu_phap_js.py` canh, và ci.yml
+  ghim `actions/setup-node@v4` để phép kiểm đó không phải bỏ qua.
 
 Có skill `analysis-guard` cho việc này.
 
