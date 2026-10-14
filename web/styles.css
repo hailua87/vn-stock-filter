@@ -3075,8 +3075,27 @@ kbd {
    Nến LÀ giá, nên dùng đúng bảng màu giá (§11.3). Hai đường MA thì không:
    chúng là trung bình trượt, không phải giá một phiên. */
 .analyzer-chart { margin: 16px 0 20px; }
-.cd-wrap { background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: 4px; padding: 8px 8px 6px; }
-.cd-chart { width: 100%; height: 240px; display: block; }
+.cd-wrap {
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: 4px;
+  padding: 8px 8px 6px;
+}
+.cd-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.cd-toolbar .cd-pairs { flex: 0 1 auto; }
+.cd-pane { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+/* Ba tang cung be rong vung ve va cung cot nhan truc CO DINH ben phai, nen
+   phien thu i nam dung mot cot doc o ca ba tang. Cot truc phai co be rong co
+   dinh: de tu co theo chu thi ba tang lech nhau vi nhan dai ngan khac nhau. */
+.cd-plot {
+  position: relative; height: var(--h, 240px); min-width: 0;
+  padding-right: var(--cd-axis-w, 46px);
+  /* Vuot ngang de do tung phien, vuot doc van cuon trang. */
+  touch-action: pan-y; outline: none;
+}
+.cd-plot:focus-visible { box-shadow: 0 0 0 1px var(--focus); border-radius: 2px; }
+.cd-area { position: relative; height: 100%; }
+.cd-chart { width: 100%; height: 100%; display: block; }
+.cd-svg-price { height: 100%; }
 .cd-body.up   { fill: var(--up); }
 .cd-body.down { fill: var(--down); }
 /* Nến tham chiếu (mở = đóng): KHÔNG dùng --limit-ref — đó là mực tối dành cho
@@ -3090,16 +3109,58 @@ kbd {
 .cd-wick.up   { stroke: var(--up); }
 .cd-wick.down { stroke: var(--down); }
 .cd-wick.ref  { stroke: var(--text-dim); }
-.cd-ma { stroke-width: 1.2; }
-.cd-ma20 { stroke: var(--text); }
-.cd-ma50 { stroke: var(--text-mute); stroke-dasharray: 4 3; }
+/* Nhanh = net lien sang, cham = net dut nhat: cung mot quy uoc cho MA7/MA25,
+   MA20/MA50 va DIF/DEA, nen khong can mau de phan biet. */
+.cd-ma { stroke-width: 1.4; }
+.cd-ma-fast { stroke: var(--text); }
+.cd-ma-slow { stroke: var(--text-mute); stroke-dasharray: 4 3; }
+.cd-vma { stroke: var(--text-dim); stroke-width: 1.2; }
+/* Cot KL to theo chieu nen cung phien (bien dong gia), nhat hon nen de
+   duong MA20 KL nam tren van doc duoc. */
+.cd-vol.up    { fill: var(--up); opacity: 0.55; }
+.cd-vol.down  { fill: var(--down); opacity: 0.55; }
+.cd-vol.ref   { fill: var(--text-mute); opacity: 0.55; }
+/* MACD khong phai gia: thang do sang. Am nhat hon duong — dau da nam o vi tri
+   tren/duoi truc 0, do sang chi nhan them. */
+.cd-hist.pos  { fill: var(--text-dim); opacity: 0.6; }
+.cd-hist.neg  { fill: var(--text-mute); opacity: 0.4; }
 .cd-grid { stroke: var(--border); stroke-width: 1; }
-.cd-axis { fill: var(--text-mute); font-family: var(--font-mono); font-size: 10px; }
-.cd-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--text-mute); }
-.cd-key { font-family: var(--font-mono); }
-.cd-key-ma20::before { content: '—'; color: var(--text); margin-right: 4px; }
-.cd-key-ma50::before { content: '- -'; color: var(--text-mute); margin-right: 4px; }
-.cd-range { margin-left: auto; }
+.cd-tick {
+  position: absolute; right: 0; width: calc(var(--cd-axis-w, 46px) - 4px); text-align: right;
+  transform: translateY(-50%);
+  font-family: var(--font-mono); font-size: 10px; line-height: 1; color: var(--text-mute);
+  pointer-events: none; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.cd-mark {
+  position: absolute; transform: translate(-50%, 0); font-size: 10px; line-height: 1;
+  pointer-events: auto; cursor: default;
+}
+/* Tam giac giao cat la tin hieu, khong phai gia: --focus cho ca hai chieu,
+   huong do HINH (len/xuong) mang. */
+.cd-mark { color: var(--focus); }
+.cd-mark.up   { margin-top: 3px; }
+.cd-mark.down { transform: translate(-50%, -100%); margin-top: -3px; }
+.cd-vline {
+  position: absolute; top: 0; bottom: 0; width: 1px; transform: translateX(-0.5px);
+  background: var(--border-strong); pointer-events: none;
+}
+.cd-readout {
+  display: flex; flex-wrap: wrap; gap: 2px 10px; min-height: 16px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.cd-readout b { font-weight: 600; color: var(--text-mute); margin-right: 2px; }
+.cd-date { color: var(--text); }
+.cd-kv.up   { color: var(--up); }
+.cd-kv.down { color: var(--down); }
+.cd-kv.k-fast b::before { content: '—'; color: var(--text); margin-right: 3px; }
+.cd-kv.k-slow b::before { content: '- -'; color: var(--text-mute); margin-right: 3px; }
+.cd-kv.k-vma b::before  { content: '—'; color: var(--text-dim); margin-right: 3px; }
+.cd-pairs .chip:disabled { opacity: 0.4; cursor: not-allowed; }
+.cd-pairs .chip:disabled:hover { background: transparent; color: var(--text-dim); }
+.cd-note { margin: 0; font-size: 11px; color: var(--text-mute); }
+.cd-range { margin-left: auto; font-size: 11px; color: var(--text-mute); }
 
 /* ─── Lưu ý T+2 và miễn trừ ─── */
 .detail-t2 {

@@ -79,6 +79,20 @@ SO_DANG_KY = {
     '.ich-val.up': 'giá so với mây Ichimoku',
     '.ich-val.down': 'giá so với mây Ichimoku',
 
+    # Biểu đồ ba tầng ở màn Chi tiết mã (#84). Bốn mục dưới đây được GHI VÀO SỔ
+    # chứ không sửa, và lý do phải viết ra — đó là điểm của sổ đăng ký:
+    #
+    #   `.cd-vol` tô cột khối lượng THEO CHIỀU NẾN CÙNG PHIÊN. Chiều cao cột
+    #   mang khối lượng, còn MÀU mang biến động giá — nên màu đang nói đúng
+    #   việc của nó. (Phiên tham chiếu dùng `--text-mute`, không phải màu giá.)
+    #
+    #   `.cd-kv.up/.down` tô ô giá đóng cửa kèm % thay đổi trong dòng số liệu
+    #   theo phiên đang trỏ. Đó là giá và biến động giá, đúng nghĩa hẹp nhất.
+    '.cd-vol.up': 'cột khối lượng tô theo chiều nến — màu mang biến động giá',
+    '.cd-vol.down': 'cột khối lượng tô theo chiều nến — màu mang biến động giá',
+    '.cd-kv.up': 'ô giá đóng cửa + % thay đổi trong dòng số liệu',
+    '.cd-kv.down': 'ô giá đóng cửa + % thay đổi trong dòng số liệu',
+
     '.cd-body.up': 'thân nến — giá',
     '.cd-body.down': 'thân nến — giá',
     '.cd-wick.up': 'bóng nến — giá',
