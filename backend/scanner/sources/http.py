@@ -72,6 +72,28 @@ MIN_INTERVAL = float(os.environ.get('SOURCE_MIN_INTERVAL', '1.0'))
 _BROWSER_UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
                '(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36')
 
+# ĐỪNG đổi bộ header này cho "giống vnstock" — đã đo và nó TỆ HƠN NHIỀU.
+#
+# Đo trên runner GitHub 26/09/2026 (bài đo tạm, nhánh diag/vci-latency đã xoá;
+# nhật ký lượt chạy CI 36240525756). Hai bộ header gọi XEN KẼ nhau trên cùng
+# danh sách mã và cùng khoảng thời gian (`i % 2`), nên chênh lệch không phải do
+# nguồn chập chờn theo đợt:
+#
+#     bộ này (BASE_HEADERS)       n=44  lỗi= 3  trung vị 0,33 s  p90  1,79 s
+#     bộ kiểu vnstock (13 header) n=44  lỗi=18  trung vị 2,07 s  p90 16,07 s
+#
+# Bộ kiểu vnstock thêm Connection, Cache-Control, Pragma, DNT, ba header
+# Sec-Fetch-*, và Accept-Language đặt en-US trước vi-VN.
+#
+# ĐỌC CON SỐ CHO ĐÚNG: 18 lỗi kia KHÔNG rải đều. Nhìn theo thứ tự lượt gọi thì
+# từ lượt ~45 trở đi, GẦN NHƯ MỌI lượt của bộ vnstock đều ReadTimeout (~16 s)
+# trong khi bộ này vẫn chạy bình thường. Tức dấu hiệu nghiêng về "máy chủ bắt
+# đầu từ chối bộ header đó" hơn là "bộ header đó chậm đều". Kết luận an toàn
+# rút ra được: bộ header hiện tại đi qua được, bộ kia thì không — chưa đủ cơ sở
+# nói vì sao.
+#
+# Một lượt đo, n=44 mỗi bộ. Muốn chắc hơn thì đo lại, nhưng đừng đổi header
+# TRƯỚC khi đo.
 BASE_HEADERS = {
     'Accept': 'application/json, text/plain, */*',
     'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',

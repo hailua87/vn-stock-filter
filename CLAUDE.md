@@ -106,6 +106,19 @@ Thiếu `save` thì mọi thứ lượt chạy ghi vào đó đều bị vứt �
 - Trước khi kết luận, **đo trước và sau** bằng cùng một thước. Và kiểm chính
   thước đo: đã có lần thước báo ba lỗi giả `1:1` vì bỏ kênh alpha khi trộn màu
   nền, và một lần khác kết luận sai vì quên `deviceScaleFactor: 3`.
+- **Đo lại trang web sau khi sửa: phải đổi CỔNG, không phải nạp lại.**
+  `index.html?v=123` không giải quyết gì — thẻ `<script src="app.js">` giữ
+  nguyên URL nên trình duyệt dùng lại bản trong cache. Ngày 13/10/2026 việc này
+  làm tôi kết luận sai **hai lần liên tiếp** trên cùng một bản sửa: lần đầu
+  "bản sửa không có tác dụng" (trang đang chạy mã cũ), lần sau "trang vẫn chạy
+  bình thường" (trong khi `app.js` đã lỗi cú pháp và cả trang chết — cache che
+  mất). Đổi cổng là đổi origin, tức đổi cache. Kiểm chứng rẻ nhất:
+  `fetch('/app.js?x='+Date.now())` rồi so với `renderRow.toString()` của trang
+  đang chạy — lệch nhau nghĩa là đang đo bản cũ.
+- **`node --check web/*.js` trước khi tin bộ test Python.** Toàn bộ 1312 phép
+  kiểm từng xanh trong khi trang web chết hoàn toàn vì một dấu backtick trong
+  template literal. Nay `backend/tests/test_web_cu_phap_js.py` canh, và ci.yml
+  ghim `actions/setup-node@v4` để phép kiểm đó không phải bỏ qua.
 
 Có skill `analysis-guard` cho việc này.
 
@@ -135,11 +148,40 @@ chấp nhận luôn cái đang hỏng.
 `accepted.json` độc lập với mốc chuẩn: mục đã cân nhắc không sửa vẫn phải được
 in ra mỗi lượt.
 
-Bộ đo từng không tất định (báo lỗi khác nhau giữa hai lượt cùng mã nguồn). Bốn
+Bộ đo từng không tất định (báo lỗi khác nhau giữa hai lượt cùng mã nguồn). **Năm**
 nguồn đã gỡ: ngưỡng dải nhìn thấy quá lỏng, mẫu ổn định chỉ lấy lớp của trang
-scanner, đọc `document.fonts.status` thay vì đợi `fonts.ready`, và ghim chữ động
-**sau** khi ổn định rồi đo ngay. Nếu thấy nó đỏ bất thường, chạy lại hai lượt và
-so hai lượt với nhau trước khi đổ cho thay đổi của mình.
+scanner, đọc `document.fonts.status` thay vì đợi `fonts.ready`, ghim chữ động
+**sau** khi ổn định rồi đo ngay, và — nguồn thứ năm, 14/10/2026 — **font web
+không tải được mà bộ đo vẫn đo**.
+
+Nguồn thứ năm đáng đọc kỹ vì nó qua được cả hai cách kiểm font đầu tiên:
+
+- `fonts.ready` và `fonts.status === 'loaded'` **vẫn thoả mãn** khi bảng kiểu
+  Google Fonts không về được — không có `@font-face` nào thì không có gì đang
+  chờ, nên `ready` giải quyết ngay và cả trang render bằng **phông dự phòng**.
+- `document.fonts.check('12px Inter')` **cũng trả `true`**, vì nó hỏi "render
+  được không" chứ không hỏi "font này có đang dùng không": danh sách font luôn
+  kết thúc bằng một phông dự phòng sẵn có.
+
+Phông dự phòng rộng hơn Inter **~10%**, nên mọi số đo bố cục đều lệch. Đo thật,
+hai lượt CI trên **cùng** mã nguồn (PR #92 lần đầu và lần chạy lại):
+
+```
+đỏ  : tabsScrollWidth 934   tabWidths [112,124,107,121,95,90,113,143]
+xanh: tabsScrollWidth 848   tabWidths [103,113,96,109,86,82,103,127]
+```
+
+Dải tab nở 86px, topbar tràn, bốn nhãn vỡ dòng. Cổng báo lỗi về **trang**, trong
+khi lỗi ở **mạng**.
+
+Nay `check.mjs` hỏi đúng câu — trong `FontFaceSet` có `@font-face` nào của họ
+font đó **đã tải xong** không — và nếu hết 10s vẫn không có thì ghi `thieuFont`,
+còn `diff.mjs` **từ chối so sánh** và thoát mã 2. Một lượt đo bằng phông dự
+phòng không được phép thành "phát sinh lỗi mới", cũng không được phép thành
+"sạch": nó không nói gì về trang cả.
+
+Nếu thấy nó đỏ bất thường, chạy lại hai lượt và **so hai lượt với nhau** trước
+khi đổ cho thay đổi của mình — đó chính là cách tìm ra nguồn thứ năm.
 
 ---
 
@@ -170,6 +212,7 @@ so hai lượt với nhau trước khi đổ cho thay đổi của mình.
 | Backtest ngưỡng chất lượng | `docs/threshold-backtest.md` |
 | Bố cục mobile | `docs/mobile-layout-out-of-scope.md` |
 | Hợp đồng sổ theo dõi kết quả | `docs/outcomes-contract.md` |
+| Làm beta có ý nghĩa cho mã thanh khoản thấp | `docs/beta-weak-regression.md` |
 
 Ngày 24/09 có một kết luận **sai** là "không nguồn nào có NPL ngân hàng". Nó
 sống sót vì không ai ghi lại đã hỏi ở đâu. Dữ liệu nằm ngay trong section `NOTE`
@@ -193,3 +236,30 @@ chuyển động thị trường.
 **Khoảng chứa 0 = chưa đủ dữ liệu để nói**, không phải "chiến lược vô dụng" cũng
 không phải "có tác dụng". Tính đến 03/10/2026, **không chiến lược nào** trong
 bốn cái chứng minh được là khác chọn bừa.
+
+---
+
+## 12. Đọc `beta_coverage` cho đúng — BA ô, không phải hai
+
+`real` nghĩa là "tính được **và** khác 1,0 có ý nghĩa thống kê (khoảng 95%)",
+không phải "tính được". Ô `weak` là tính được mà khoảng tin cậy chứa 1,0 — đã
+rơi về 1,0, và bị trừ độ tin cậy **y như** `fallback`.
+
+Lượt 11/10/2026 báo `real: 84, fallback: 0` và nghe như xong việc. Đo lại bằng
+phép kiểm ý nghĩa: **45% rổ** không phân biệt được với 1,0. Đừng đọc `real`
+tách khỏi `median_r_squared` — R² trung vị ~0,14 nói rõ hơn nhiều.
+
+Hai bẫy khi sửa chỗ này:
+
+- Phép kiểm chạy trên `beta_raw`, **không** trên beta đã điều chỉnh Blume.
+  Blume (`0,67·raw + 0,33·1,0`) vốn đã co ước lượng về 1,0; kiểm trên giá trị
+  đã co thì gần như mã nào cũng "yếu".
+- `std_error` phải lưu **4 chữ số**. Ba chữ số thì chênh lệch do bậc tự do
+  (`n−2` so với `n`, ~1%) bị làm tròn nuốt mất, và không ai kiểm lại được công
+  thức bằng chính đầu ra nữa.
+
+Thiếu khoá `weak` thì đếm vào ô **yếu** — mặc định bi quan ở cả ba chỗ
+(`methods_pb_roe`, `_beta_info`, `_tong_hop_beta`). Mặc định ngược lại nghĩa là
+một nguồn beta mới quên gắn cờ sẽ lặng lẽ làm đẹp số liệu.
+
+Chi tiết và phần đã khảo: `docs/beta-weak-regression.md`.

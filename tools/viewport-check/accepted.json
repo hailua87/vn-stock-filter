@@ -1,32 +1,5 @@
 {
   "_doc": "Muc DA DO, DA CAN NHAC, QUYET DINH KHONG SUA. KHAC 'nhieu': nhieu la bo do sai va phai vut bo do di; day la muc co that ma ta chon song chung. diff.mjs khong tinh la loi nhung VAN IN RA moi lan chay, va van canh gac. Hai kieu canh gac: 'san' (tri so khong duoc tut duoi muc hom nay) va 'soToiDa'+'khung' (so muc khong duoc tang, va khong duoc lan sang khung khac).",
-  "muc": [
-    {
-      "khoa": "fn|analyzer:o-nhap-du-rong",
-      "khung": [
-        "bp-1441-mouse",
-        "bp-1441-touch"
-      ],
-      "lyDo": "O nhap bi flex co o dai 1441-1707px. Truoc 23/09/2026 dai nay la 1281-1365px; nang nguong dua dai tab xuong hang rieng tu 1280 len 1440 (them tab Hom nay) da don sach dai cu va day van de len tren. Topbar mot hang o tab Phan tich ma can 1708px (do that o 1800px: 230 + 778 + 280 + 316 + padding 32 + gap 72) — khong man hinh pho bien nao du rong, nen khong the chua bang cach nang tiep nguong ma khong bat MOI man desktop xuong hai hang. Chuc nang khong hong: o 1441 vung chu con 135px, ma co phieu VN dai 3 ky tu ('FPT' = 22px) lot thoai mai; chi phan goi y bi cat. Rong hon han 82px cua dai cu.",
-      "taiLieu": "docs/mobile-layout-out-of-scope.md muc 5",
-      "san": {
-        "truong": "w",
-        "toiThieu": {
-          "bp-1441-mouse": 135,
-          "bp-1441-touch": 117
-        }
-      }
-    },
-    {
-      "khoaMau": "^(top|scrolled)\\|voDong\\|span(\\.brand-name|#live-text|#market-text|#clock\\.time)\\|",
-      "khung": [
-        "bp-1441-mouse",
-        "bp-1441-touch"
-      ],
-      "soToiDa": 16,
-      "lyDo": "Bon nhan topbar vo dong o dai 1441-1707px, VA CHI TRONG GIO GIAO DICH. Do 23/09 bao dai nay sach, nhung do sai: luc ay thi truong dong nen #market-text la 'NGOÀI GIỜ' (9 ky tu). Trong gio giao dich no la 'ĐANG GIAO DỊCH' (14 ky tu) va topbar chen. Tu 24/09 bo do dong bang chu dong vao TRUONG HOP RONG NHAT nen bat duoc. Cung goc voi muc 5: topbar mot hang o tab Phan tich ma can 1708px. Cach sua that la bo bot phan tu khoi topbar, tuc M1 — sua vat o day se phai go ra khi lam M1. 16 = 4 nhan x 2 khung x 2 luot do.",
-      "taiLieu": "docs/mobile-layout-out-of-scope.md muc 7"
-    }
-  ],
-  "_lichSu": "23/09/2026: muc 'bon nhan topbar vo dong o 1281-1299px' (muc 7) HET han — nang nguong dai tab tu 1280 len 1440 da don sach. Muc 'o nhap bi co' khong het ma CHUYEN DAI, tu 1281-1365px len 1441-1707px."
+  "muc": [],
+  "_lichSu": "13/10/2026 — M1: CA HAI muc HET han, accepted.json nay RONG. Muc 'o nhap bi flex ep co' het vi o nhap khong con tren topbar (dua xuong than trang Phan tich ma), nen khong con ai ep co no. Muc 'bon nhan topbar vo dong' het vi topbar chi con can 1469px (chuot) / 1487px (cam ung) thay vi ~1821px: bo o nhap 277px va dong ho 84px, cong hai gap 24px. Nguong @media nang 1440 -> 1487 (so CAM UNG) de dong dai 1441-1486px. Do: bp-1441-mouse va bp-1441-touch moi khung DA SUA 9, CON LAI 0, MOI 0. Chinh lap luan cu trong muc nay — 'khong the chua bang cach nang tiep nguong ma khong bat MOI man desktop xuong hai hang' — da het hieu luc vi M1 ha con so tu 1708 xuong 1487. Ghi lai de lan sau khong ai tuong nguong la bat kha xam pham. || 23/09/2026: muc 'bon nhan topbar vo dong o 1281-1299px' (muc 7) HET han — nang nguong dai tab tu 1280 len 1440 da don sach. Muc 'o nhap bi co' khong het ma CHUYEN DAI, tu 1281-1365px len 1441-1707px."
 }

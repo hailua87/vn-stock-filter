@@ -1540,14 +1540,37 @@ kbd {
 /* ═══════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════ */
-/* Nguong nay VON LA 1280px. Nang len 1440px khi them tab "Hom nay" (tab thu
-   sau): do that o 1600px, mot hang tab can 779px, cong topbar-left 230 +
-   topbar-right 316 + padding 32 + gap 48 = 1405px — va o tab Phan tich ma,
-   o nhap 280px day con so len ~1550px. Tuc 1366 va 1440 khong con du cho.
+/* Nguong nay VON LA 1280px, roi 1440px, nay 1469px.
+   1280 -> 1440 khi them tab "Hom nay" (tab thu sau).
+   1440 -> 1487 la buoc cuoi cua M1 (13/10/2026).
+
+   DO THAT sau M1, chu ghim vao TRUONG HOP RONG NHAT ('GIỮA PHIÊN 01/01 00:00'
+   + 'ĐANG GIAO DỊCH') va da GO setInterval truoc khi ghim:
+     chuot    : 273 + 864 + 252 + 2 gap 24 + padding 32 = 1469px
+     CAM UNG  : 273 + 864 + 270 + 2 gap 24 + padding 32 = 1487px
+   O 1441px flex ep tong xuong dung 1441 va BA nhan vo dong (brand-name,
+   #live-text, #market-text).
+
+   LAY SO CAM UNG (1487), khong phai so chuot: `@media (pointer: coarse)` CAT
+   NGANG moi nguong be rong va dat min-width 44px cho .icon-btn/.strat-tab,
+   lam topbar-right no tu 252 len 270. Chot nguong 1469 thi iPad ngang va man
+   cam ung 1470-1486px van vo dong — bo do bat dung viec do o bp-1470-touch.
+   1487 khong phai so tron cho dep; no la ket qua do.
+
+   Vi sao nang nguong lan nay DUOC, trong khi accepted.json tung ghi la khong:
+   luc ay topbar can 1708px nen nang nguong len do se bat MOI man desktop
+   xuong hai hang. M1 (dua o nhap ma xuong than trang + bo dong ho) ha yeu cau
+   xuong 1469, nen nguong moi chi anh huong dai 1441-1468px — rong 28px, thay
+   vi 267px nhu truoc. Lap luan cu het hieu luc vi con so da doi.
+
    Giu nguyen co che da co (tab xuong hang rieng, tu cuon ngang) thay vi bop
    chu hay bo cot: bop chu chinh la loi topbar vo dong da ghi o
-   docs/mobile-layout-out-of-scope.md muc 7. */
-@media (max-width: 1440px) {
+   docs/mobile-layout-out-of-scope.md muc 7.
+
+   CHU Y khi sua: `tools/viewport-check/viewports.mjs` co cap khung
+   bp-1441/bp-1439 bam quanh nguong CU. Doi nguong thi phai doi cap do, neu
+   khong bo do canh sai cho. */
+@media (max-width: 1487px) {
   :root {
     --col-filter-w: 200px;
     --col-detail-w: 340px;
@@ -1892,40 +1915,30 @@ kbd {
   color: var(--bg-base);
 }
 
-/* Topbar analyzer search */
-.topbar-analyzer {
+/* O nhap ma cua tab Phan tich ma.
+   M1 (13/10/2026): truoc day la `.topbar-analyzer` NAM TREN TOPBAR. Topbar mot
+   hang o tab nay can ~1821px (do 13/10 tai 1800px: topbar-left 226 +
+   strategy-tabs 864 + o nhap 277 + topbar-right 313, cong 3 gap 24 va padding
+   32) — khong man hinh pho bien nao du rong. Dua o nhap xuong than trang bo
+   409px cung voi dong ho, con 1469px (truoc: ~1821px).
+
+   Hai rang buoc cu KHONG con can o cho moi, va day la ly do xoa chung chu
+   khong phai quen:
+     · `min-width: 141px` — san chong flex ep co. Than trang khong ep co.
+     · `.topbar-analyzer[hidden] { display: none }` — go bay `display` cua tac
+       gia de len `[hidden]` cua trinh duyet. Khong con dung `hidden`: o nhap
+       nam trong `#analyzer-view`, khoi do tu an/hien.
+
+   Be rong 320px chu khong 100%: PLACEHOLDER van la rang buoc duy nhat
+   ("Nhap ma, vd: FPT" = 141px), va mot o nhap trai het be ngang trang cho mot
+   ma 3 ky tu thi vua xau vua kho nham. */
+.analyzer-searchbar {
   position: relative;
-  margin-left: 16px;
-  width: 280px;
-  /* SAN 141px, khong phai so tron cho dep: do la be rong cua placeholder
-     "Nhap ma, vd: FPT" (16 ky tu, JetBrains Mono 12px, padding+border 26px) —
-     con so do chinh chu thich cua .analyzer-input ghi lai tu 29/08/2026.
-     Placeholder la rang buoc be rong DUY NHAT cua o nay.
-
-     Can san nay vi topbar la flex va o nhap la thu bi ep co dau tien. Them tab
-     MA7x25 lam no tut tu 135px xuong 63px o 1441px (cam ung: 117 -> 45), tuc
-     placeholder khong con lot. Cong `kiem` bat duoc nho canh gac "muc da chap
-     nhan khong duoc te them" trong accepted.json.
-
-     Phan tran ra se day sang viec dai tab vo dong — do la muc DA CHAP NHAN va
-     da co ho so (docs/mobile-layout-out-of-scope.md muc 5, 7), con o nhap
-     khong doc duoc thi khong. */
-  min-width: 141px;
+  width: 320px;
+  max-width: 100%;
+  margin: 0 0 16px;
   display: flex;
   align-items: center;
-}
-/* `display` cua tac gia DE LEN `[hidden] { display: none }` cua trinh duyet.
-   index.html khai <div class="topbar-analyzer" hidden>, app.js:335 dat
-   analyzerBox.hidden = (strategy !== 'analyzer') — ca hai deu dung. Nhung
-   `display: flex` o tren thang, nen o nhap ma HIEN O MOI TAB:
-     el.hidden = true, computed display = flex, w = 210px.
-   Da xac nhan tren Safari iPhone 16 Pro that: dang o tab "Pre-Breakout"
-   ma o nhap van hien.
-   Hop 280px luon chiem cho con ep .topbar-left / .topbar-right vo dong.
-   Do: an hop di thi so nhan vo dong o 1366/1440/1600px tu 4 xuong 0.
-   (#help-modal khong dinh loi nay vi no dat ca style.display noi tuyen.) */
-.topbar-analyzer[hidden] {
-  display: none;
 }
 .analyzer-input {
   /* PLACEHOLDER LA RANG BUOC BE RONG DUY NHAT cua o nay.
@@ -2188,7 +2201,12 @@ kbd {
   margin-right: 8px;
 }
 .rec-position .rec-position-pct {
-  color: var(--up);
+  /* Co vi the (%NAV) KHONG phai gia va khong phai bien dong gia. Dong nay sot
+     khoi luot quet ~40 cho cua #78: no giu `var(--up)` — xanh TANG GIA — cho
+     mot con so ve quan ly von. Nay dung bac sang nhat cua chinh thang khoi
+     khuyen nghi, giong `.rec-stars` ngay ben canh (xem chu thich o
+     `.recommendation.rec-*`: thang nay co y khong muon sac gia). */
+  color: var(--text);
   font-size: 16px;
 }
 
@@ -2585,26 +2603,156 @@ kbd {
   background: var(--bg-elev-1, #1f242e);
 }
 
+/* `display: contents` de DESKTOP KHONG DOI: ba phan tu trong `.mc-detail`
+   van la flex item truc tiep cua `.market-context`, y nhu truoc khi co boc.
+   Thieu dong nay thi ca ba gop thanh MOT flex item va bo cuc desktop lech. */
+.market-context .mc-detail { display: contents; }
+/* Nut "chi tiet" chi co nghia o mobile — xem @media duoi cung. */
+.market-context .mc-more { display: none; }
+
 .market-context .mc-icon { font-size: 13px; }
 .market-context .mc-label { font-weight: 600; color: var(--text, #e6e9ef); }
 .market-context .mc-stats { color: var(--text-dim, #8b93a7); font-family: var(--font-mono); }
 
-.market-context.mc-on      { border-left: 3px solid #00c853; }
-.market-context.mc-neutral { border-left: 3px solid #ffb300; }
-.market-context.mc-off     { border-left: 3px solid #ef5350; }
+/* Ba trang thai boi canh thi truong, lay token PHI GIA:
+     mc-on      --cat-trend  (#66bb6a, chu thich cua no ghi ro "category not price")
+     mc-neutral --system     (#78909c, xam trung tinh)
+     mc-off     --danger     (xem chu thich ngay duoi)
 
+   TRUOC 13/10/2026 hai dong dau ghi thang #00c853 va #ffb300. Hai van de:
+     1. #ffb300 la AMBER CON SOT sau #76/#78 — hai PR do da doi `--warning` va
+        `--cat-event` tu amber sang xam trung tinh, nhung bo qua cho nay.
+     2. #ffb300 gan nhu khong phan biet duoc voi `--limit-ref` (#ffca28, mau
+        GIA THAM CHIEU), nen vien trai banner doc ra nhu mot trang thai gia.
+        Luat o dau tokens.css: 5 mau trang thai gia chi dung cho gia. */
+.market-context.mc-on      { border-left: 3px solid var(--cat-trend); }
+.market-context.mc-neutral { border-left: 3px solid var(--system); }
+/* `--danger`, khong phai ma mau tran: #ef5350 DUNG BANG gia tri cua `--down`,
+   nen viet thang la de vien trai banner "risk off" mang mau GIAM GIA. Hai
+   token trung gia tri la co y (xem chu thich o `--danger`) — nhung phai goi
+   dung ten, neu khong doi mau giam gia se am tham doi ca cho nay.
+   Cung cach da dung o `.recommendation.rec-avoid` va dong 2336. */
+.market-context.mc-off     { border-left: 3px solid var(--danger); }
+
+/* "Goi y giam ty trong con ~X% muc thuong" — mot loi canh bao, nen dung
+   `--warning`. Token do CO SAN va chinh la de cho viec nay; no da duoc doi tu
+   amber #ffa726 sang xam trung tinh o #76/#78, con cho nay bi bo qua.
+   Nen amber nay khong chi ghi thang ma con LAC chuan da chot. */
 .market-context .mc-warn {
-  color: #ffcc80;
-  background: rgba(255, 179, 0, .12);
+  color: var(--warning);
+  background: rgba(255, 255, 255, .06);
   padding: 2px 8px;
   border-radius: 3px;
 }
 
+/* "Ban giua phien — khoi luong chua du ngay" la THONG TIN, khong phai canh
+   bao. `--focus` (#4fc3f7) la token cho viec do. Cap mau/nen lay theo khuon
+   `.plan-pullback` da co trong cung tep. */
 .market-context .mc-intraday {
-  color: #90caf9;
-  background: rgba(33, 150, 243, .12);
+  color: var(--focus);
+  background: rgba(79, 195, 247, .16);
   padding: 2px 8px;
   border-radius: 3px;
+}
+
+/* ── B: gop hai hang tren cua topbar o mobile ─────────────────────────────
+   Do that o 402x714: topbar cao 138px va xuong BA hang:
+       topbar-left   18px  (rong 226 = brand 106 + status-live 104)
+       topbar-right  44px  (rong 237 = VALUATION 96 + "?" 44 + NGOAI GIO 66)
+       strategy-tabs 50px
+   Hai hang dau cong lai 226 + 237 + gap 6 = 469 > 386 (402 tru padding 16),
+   nen chung phai xuong hai hang — du hang dau CHI CAO 18px.
+
+   Bo TEN thuong hieu (giu dau `●`): 106 -> 14, con 377 < 386, vua MOT hang.
+   Chon bo cai nay vi no it tin nhat trong bon khoi: `status-live` noi do tuoi
+   du lieu ("EOD 13/10 06:02"), `market-state` noi cho dong hay mo, `?` la loi
+   vao huong dan. Nguoi dung biet minh dang mo app gi.
+
+   `.brand` la <div>, khong phai lien ket, nen `display: none` khong lam mat
+   ten truy cap cua phan tu nao. */
+@media (max-width: 768px) {
+  .brand-name { display: none; }
+  /* Thu `VALUATION` ve con icon: 96 -> 44px.
+     Bo TEN thuong hieu mot minh du cho 402px (369 <= 386) nhung KHONG du cho
+     375px (369 > 359), va bo do bat dung cho do: khung m-375x667 bao topbar
+     con 135px / 3 hang. Thieu buoc nay thi may 375px — iPhone SE, va la khung
+     NHO NHAT trong bo do — khong duoc gi ca.
+
+     `.sr-only` chu khong `display: none`: the <a> nay lay ten truy cap TU CHU
+     ben trong, con icon thi `aria-hidden`. An bang `display: none` se de lien
+     ket KHONG CO TEN — trinh doc man hinh chi doc ra "link". */
+  .text-btn .tb-chu {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+/* ── Boi canh thi truong tren mobile: GOP ve mot dong ──────────────────────
+   Do that o 402x714 (iPhone, deviceScaleFactor 3) 13/10/2026: khoi nay cao
+   161px, xuong BON dong, va LON HON ca topbar (138px). Hang du lieu dau tien
+   o y=431 — 60% man hinh la vo.
+
+   Giu lai o dong dau: icon + nhan trang thai ("Thi truong bat loi — ..."), tuc
+   phan DOI HANH VI. Thu vao nut "chi tiet": so lieu VN-Index/MA50/do rong, goi
+   y ty trong, va nhan ban giua phien — phan tham khao.
+
+   Nguong 768px la nguong drawer da co san, khong phai nguong moi. */
+@media (max-width: 768px) {
+  .market-context .mc-more {
+    display: inline-block;
+    background: none;
+    border: 1px solid var(--border-strong);
+    border-radius: 3px;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: inherit;
+    padding: 2px 8px;
+    cursor: pointer;
+    /* `pointer: coarse` dat min-height 44px cho nut — o day KHONG muon vay vi
+       ca muc dich la giam chieu cao. 28px van qua nguong 24px cua WCAG 2.2
+       Target Size (Minimum), va nut nay nam canh mot vung trong rong nen khong
+       vi pham khoang cach. */
+    min-height: 28px;
+  }
+  /* Nhan ve MOT dong, cat bang dau ba cham. Khong lam vay thi no van vo hai
+     dong ("Thi truong bat loi — phan lon ma duoi MA50" khong lot 402px tru
+     icon va nut), va ca khoi chi tut 161 -> 121px. Cat roi thi ~46px.
+
+     Phan bi cat la phan GIAI THICH; phan quan trong ("Thi truong bat loi") o
+     dau chuoi nen van doc duoc. Bam "chi tiet" thi hien du.
+
+     `min-width: 0` la BAT BUOC: flex item mac dinh co min-width auto = kich
+     thuoc noi dung nho nhat, nen khong co dong nay thi nhan khong chiu co va
+     ellipsis khong bao gio xuat hien.
+
+     Bo do KHONG bao day la loi: probe.mjs bo qua phan tu co
+     `text-overflow: ellipsis` kem `overflow` khac `visible` — cat chu co chu
+     dich la thiet ke. Tien le: <summary> cua dong mien tru trach nhiem. */
+  .market-context .mc-label {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .market-context.mc-mo .mc-label {
+    white-space: normal;
+    overflow: visible;
+  }
+  /* `display: none` de len `display: contents`, nen phai ghi lai o day. */
+  .market-context .mc-detail { display: none; }
+  .market-context.mc-mo .mc-detail {
+    display: flex;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -2825,11 +2973,13 @@ kbd {
 /* Kế hoạch R:R kém: làm mờ số liệu để mắt không bị hút vào một lệnh xấu */
 .rec-plan-rejected .rec-levels { opacity: .45; }
 
+/* Cung nhom amber con sot nhu `.mc-warn`: day la canh bao ("ke hoach R:R
+   kem") nen dung `--warning`. */
 .plan-reject {
   font-size: 11px; line-height: 1.5;
-  color: #ffcc80;
-  background: rgba(255,179,0,.10);
-  border-left: 3px solid #ffb300;
+  color: var(--warning);
+  background: rgba(255, 255, 255, .06);
+  border-left: 3px solid var(--warning);
   padding: 8px 10px; margin-bottom: 8px; border-radius: 0 3px 3px 0;
 }
 

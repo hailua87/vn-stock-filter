@@ -178,6 +178,10 @@ class ValuationReport:
     guard_reason: Optional[str] = None
     # Beta thực hay giá trị dự phòng 1.0. Xem chú thích ở to_dict().
     beta: Dict[str, Any] = field(default_factory=dict)
+    # Phương pháp bị loại khỏi phép trộn vì lạc quá xa trung vị các phương
+    # pháp còn lại: {tên: tỷ lệ}. PHẢI ghi ra đầu ra — bỏ lặng lẽ một phương
+    # pháp là thay đổi fair value mà không để lại dấu vết.
+    methods_excluded: Dict[str, float] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         """Chuyển thành dict JSON-serializable, tương thích web frontend pattern."""
@@ -198,6 +202,11 @@ class ValuationReport:
             # json.dump(default=str) ghi thành chuỗi "True"/"False"
             'methods_conflict': bool(self.method_dispersion > MAX_METHOD_DISPERSION),
             'methods_used': self.methods_used,
+            # Phuong phap bi loai vi lac qua xa, kem ty le so voi trung vi cac
+            # cai con lai. Bo lang le thi khong ai kiem lai duoc fair value.
+            'methods_excluded': ({k: round(v, 2)
+                                  for k, v in self.methods_excluded.items()}
+                                 or None),
             # Beta quyết định WACC trong DCF, và `methods_pb_roe` còn trừ 5% độ
             # tin cậy khi beta là giá trị dự phòng 1.0 — tức nó ĐỔI KẾT QUẢ.
             # Trước 04/10/2026 nó không được ghi ra đâu cả: không ai, kể cả
@@ -376,12 +385,102 @@ def _publish_guard(verdict: str, industry: ValuationIndustry,
 def _beta_info(market: Dict[str, Any]) -> Dict[str, Any]:
     """Beta đã dùng cho lượt này, kèm việc nó là thật hay giá trị dự phòng."""
     rs = market.get('beta_r_squared')
+    se = market.get('beta_std_error')
     return {
         'value': round(float(market.get('beta_2y', 1.0)), 3),
         'fallback': bool(market.get('beta_fallback', True)),
+        # `weak`: tinh duoc nhung khoang 95% chua 1,0 -> da tra ve 1,0.
+        'weak': bool(market.get('beta_weak', True)),
         'method': market.get('beta_method'),
         'r_squared': None if rs is None else round(float(rs), 3),
+        'std_error': None if se is None else round(float(se), 4),
     }
+
+
+# Nguong loai mot phuong phap lac khoi phep tron: ty le fair value cua no so
+# voi TRUNG VI CUA TAT CA cac phuong phap.
+#
+# 3,0 KHONG phai so chon cho dep — do tren ro that 13/10/2026, 503 cap
+# (ma x phuong phap) tu hai luot chay 200 ma, do lac = max(ty, 1/ty):
+#
+#     p50=1,15  p75=1,37  p90=1,81  p95=2,38  p99=3,51  max=4,39
+#
+# 3,0 nam khoang phan vi 98: no bo 9/503 cap (1,8%, 6 ma). Hai nguong khac deu
+# te hon, va day la ly do KHONG chon chung:
+#   · 2,0 (p95) loai 8,2% — an vao bat dong y thong thuong. P/E lech EV/EBITDA
+#     hai lan la hai y kien, khong phai mo hinh hong.
+#   · 3,5 (p99) BO SOT chinh PVT (3,49x) — ca da gay ra ban sua nay.
+#
+# Nhung ca bi bo o nguong 3,0, tat ca deu la mo hinh chay ngoai mien cua no:
+#   GEX/ANV  P/B-ROE   4,39x / 4,02x THAP  (ROE bi ep san 3% cho ma cyclical)
+#   HDG/CTG  DDM       3,89x / 3,51x THAP
+#   PVT      DCF FCFF  3,49x CAO           (94.998 so voi trung vi 27.207)
+#   HSG      EV/EBITDA 3,18x CAO
+#
+# Doi nguong nay la doi ket luan. Phai DO LAI, khong chinh cho dep so lieu.
+NGUONG_LAC = 3.0
+
+# Can it nhat 3 phuong phap moi loai duoc: voi 2 phuong phap thi "trung vi cac
+# phuong phap con lai" chinh la phuong phap kia, nen phep so thanh doi xung va
+# viec chon bo cai nao la TUY Y.
+TOI_THIEU_DE_LOAI = 3
+
+
+def _do_lac(fv_theo_pp: Dict[str, float]) -> Dict[str, float]:
+    """
+    Ty le fair value cua tung phuong phap so voi TRUNG VI CUA TAT CA.
+
+    Ban dau toi dung "trung vi CAC CAI CON LAI" (bo chinh no ra). Nghe hop ly
+    hon, nhung SAI voi bo chia doi: voi {100, 110, 400, 420} thi trung vi cac
+    cai con lai cua 100 la trung vi{110,400,420} = 400, nen 100 bi coi la lac
+    4 lan. Thuat toan loai tung cai se bo 100 roi bo 110 — tuc GIU HAI GIA TRI
+    LAC va VUT PHAN LOI. Phep kiem
+    `test_khong_loai_gi_khi_chia_doi_khong_co_da_so` bat duoc viec nay.
+
+    Trung vi toan bo khong co loi do: voi {100,110,400,420} trung vi la 255,
+    khong cai nao vuot 3 lan, nen KHONG loai gi — dung la cau tra loi thanh
+    that cho mot bo chia doi khong co da so.
+    """
+    duong = sorted(v for v in fv_theo_pp.values() if v and v > 0)
+    if not duong:
+        return {}
+    n = len(duong)
+    tv = duong[n // 2] if n % 2 else (duong[n // 2 - 1] + duong[n // 2]) / 2
+    if tv <= 0:
+        return {}
+    return {ten: fv / tv for ten, fv in fv_theo_pp.items() if fv and fv > 0}
+
+
+def _loai_phuong_phap_lac(fv_theo_pp: Dict[str, float]):
+    """
+    Loai phuong phap co fair value lac qua xa trung vi CAC PHUONG PHAP CON LAI.
+
+    Vi sao phai loai TRUOC khi tron, chu khong chi do phan tan sau khi tron:
+    engine von da tinh `method_dispersion` va chia doi do tin cay khi no vuot
+    40%. Nhung do la bat HAU QUA, khong chan NGUYEN NHAN — va phan tan khong
+    bat het. PVT ngay 13/10/2026 co DCF FCFF 94.998 (4,69x trung vi cac phuong
+    phap con lai) van duoc tron voi trong so 20%, day fair value tong hop len
+    +54,4%, va no KHONG rung khoi ban cong bo.
+
+    Tra `(giu, bi_loai)`, `bi_loai` la {ten: ty_le}.
+
+    Loai TUNG CAI theo thu tu lac nhieu nhat, tinh lai trung vi sau moi lan.
+    Loai mot lot theo ty le tinh MOT LAN la sai: bo mot gia tri lac di thi trung
+    vi dich ve phia phan loi, nen cai lac thu hai moi lo ra.
+    """
+    giu = {k: v for k, v in fv_theo_pp.items() if v and v > 0}
+    bi_loai = {}
+    while len(giu) >= TOI_THIEU_DE_LOAI:
+        lac = _do_lac(giu)
+        if not lac:
+            break
+        xau_nhat = max(lac, key=lambda t: max(lac[t], 1 / lac[t]))
+        ty = lac[xau_nhat]
+        if max(ty, 1 / ty) < NGUONG_LAC:
+            break
+        bi_loai[xau_nhat] = ty
+        del giu[xau_nhat]
+    return giu, bi_loai
 
 
 def _method_dispersion(fair_values: List[float]) -> float:
@@ -535,9 +634,23 @@ def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
     all_fair_values = []
     used_methods = []
 
+    # Loai phuong phap LAC TRUOC KHI TRON. Engine von chi do phan tan SAU khi
+    # tron roi chia doi do tin cay — tuc bat hau qua, khong chan nguyen nhan.
+    # PVT ngay 13/10/2026: DCF FCFF 94.998 (4,69x trung vi cac phuong phap con
+    # lai) van duoc tron voi trong so 20%, day fair value len +54,4%.
+    du_dieu_kien = {ten: r.fair_value_per_share for ten, r in results.items()
+                    if r.fair_value_per_share > 0 and r.confidence >= 0.15}
+    _, bi_loai = _loai_phuong_phap_lac(du_dieu_kien)
+
     for method_name, result in results.items():
         if result.fair_value_per_share <= 0 or result.confidence < 0.15:
             continue  # Skip không tin cậy
+        if method_name in bi_loai:
+            rec_notes.append(
+                f"⊘ {method_name} bị loại khỏi phép trộn: fair value "
+                f"{result.fair_value_per_share:,.0f} lệch {bi_loai[method_name]:.2f}× "
+                f"trung vị các phương pháp còn lại (ngưỡng {NGUONG_LAC:.0f}×)")
+            continue
         base_weight = method_weights[method_name]
         # Adjust weight bởi confidence của method này
         effective_weight = base_weight * result.confidence
@@ -575,7 +688,18 @@ def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
     current_price = data["market"]["current_price"]
     upside = (fair_value - current_price) / current_price
 
-    dispersion = _method_dispersion(all_fair_values)
+    # Phan tan tinh tren MOI phuong phap du dieu kien, KE CA cai bi loai.
+    #
+    # Day la cho de sai nhat cua ca ban sua nay: neu chi tinh tren phan da giu
+    # thi loai gia tri lac lam phan tan tut xuong, nguong 40% khong con no, do
+    # tin cay KHONG bi chia doi — tuc viec mo hinh hong lai lam ket qua trong
+    # DANG TIN HON. Do dung la bay "phat su trung thuong, thuong cho nhieu" da
+    # gap o beta (xem docs/beta-weak-regression.md).
+    #
+    # Giai phap khong them hang so moi: fair value tron tu phan da giu (sach),
+    # con phan tan doc tren TOAN BO (that). Loai gia tri lac lam fair value
+    # dung hon ma khong lam no trong chac chan hon.
+    dispersion = _method_dispersion(list(du_dieu_kien.values()))
     verdict = _determine_verdict(upside, dispersion)
 
     # Collect warnings
@@ -618,6 +742,7 @@ def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
         method_results=results,
         method_weights={m: method_weights[m] for m in used_methods},
         beta=_beta_info(data['market']),
+        methods_excluded=bi_loai,
         warnings=all_warnings,
         recommendation_notes=rec_notes,
         guard_reason=guard_warning,

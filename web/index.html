@@ -69,21 +69,13 @@
     <button class="strat-tab strat-tab-analyzer" data-strategy="analyzer" title="Phân tích chi tiết 1 mã qua mọi chiến lược"><span aria-hidden="true">🔍</span> Phân tích mã</button>
   </nav>
 
-  <div class="topbar-analyzer" hidden>
-    <input type="text" id="analyzer-search" class="analyzer-input"
-           placeholder="Nhập mã, vd: FPT"
-           maxlength="10" autocomplete="off">
-    <div class="analyzer-suggestions" id="analyzer-suggestions"></div>
-  </div>
-
   <div class="topbar-right">
-    <a href="valuation/index.html" class="text-btn" title="Định giá cổ phiếu"><span aria-hidden="true">💰</span> VALUATION</a>
+    <a href="valuation/index.html" class="text-btn" title="Định giá cổ phiếu"><span aria-hidden="true">💰</span> <span class="tb-chu">VALUATION</span></a>
     <button class="icon-btn" id="help-btn" title="Hướng dẫn" aria-label="Mở hướng dẫn sử dụng">?</button>
     <span class="market-state">
       <span class="market-dot"></span>
       <span id="market-text">NGOÀI GIỜ</span>
     </span>
-    <span class="time" id="clock">—</span>
   </div>
 </header>
 
@@ -278,7 +270,7 @@
           </tr>
         </thead>
         <tbody id="signal-rows">
-          <tr><td colspan="15" class="empty">Đang tải...</td></tr>
+          <tr><td colspan="18" class="empty">Đang tải...</td></tr>
         </tbody>
       </table>
     </div>
@@ -316,6 +308,17 @@
        TAB 6: TICKER ANALYZER (full-width takeover)
        ════════════════════════════════════════════════════════════ -->
   <section class="analyzer-view" id="analyzer-view" style="display: none;">
+    <!-- O nhap ma: TRUOC M1 no nam tren topbar. Topbar mot hang o tab nay can
+         ~1821px (do that 13/10/2026 tai 1800px: 226 + 864 + 277 + 313, cong 3
+         gap 24px va padding 32px) — khong man hinh pho bien nao du rong, nen
+         18 muc "nhan vo dong" phai song chung trong accepted.json. O nhap chi
+         co tac dung o DUNG tab nay, nen cho cua no la than trang. -->
+    <div class="analyzer-searchbar">
+      <input type="text" id="analyzer-search" class="analyzer-input"
+             placeholder="Nhập mã, vd: FPT"
+             maxlength="10" autocomplete="off">
+      <div class="analyzer-suggestions" id="analyzer-suggestions"></div>
+    </div>
     <div class="analyzer-empty" id="analyzer-empty">
       <div class="analyzer-empty-icon">🔍</div>
       <div class="analyzer-empty-title">Phân tích đa chiều theo mã</div>

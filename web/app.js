@@ -294,7 +294,17 @@ function startClock() {
       hour: '2-digit', minute: '2-digit', second: '2-digit',
       timeZone: 'Asia/Ho_Chi_Minh',
     });
-    document.getElementById('clock').textContent = hhmm + ' ICT';
+    // M1 (13/10/2026): topbar scanner khong con dong ho — dien thoai va
+    // he dieu hanh nao cung co san mot cai, con "thi truong dang mo hay
+    // dong" thi khong. Cung ly le da ghi o `@media (max-width: 420px)`
+    // trong styles.css tu truoc, nay ap cho moi be rong.
+    //
+    // `hhmm` VAN duoc tinh: phan trang thai thi truong ngay duoi dung
+    // gio ICT. Dung `?.` vi `web/valuation/index.html` CON co #clock —
+    // trang do khong nap app.js, nhung de nhu vay thi mot lan nap cheo
+    // cung khong nem.
+    document.getElementById('clock')?.replaceChildren(
+      document.createTextNode(hhmm + ' ICT'));
 
     // Market state: 9:00-15:00 ICT Mon-Fri
     const vnTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
@@ -418,8 +428,13 @@ async function switchStrategy(strategy) {
   // cạnh ô "Tìm mã" trong sidebar — hai ô trông giống nhau nhưng hành vi khác
   // hẳn (một cái mở phân tích chi tiết, một cái lọc bảng), người dùng không
   // biết dùng cái nào. Nay ô Analyzer chỉ xuất hiện đúng lúc nó có tác dụng.
-  const analyzerBox = document.querySelector('.topbar-analyzer');
-  if (analyzerBox) analyzerBox.hidden = (strategy !== 'analyzer');
+  //
+  // M1 (13/10/2026): không còn phải tự bật/tắt ô này. Nó đã nằm TRONG
+  // `#analyzer-view`, và khối đó được ẩn/hiện ngay bên dưới — một nguồn sự
+  // thật thay vì hai. Nhân đó mất luôn cái bẫy `[hidden]`: `display: flex`
+  // của tác giả đè lên `[hidden] { display: none }` của trình duyệt, nên ô
+  // nhập từng HIỆN Ở MỌI TAB dù `el.hidden === true` (xác nhận trên Safari
+  // iPhone 16 Pro thật).
 
   if (strategy === 'today') {
     dashboard.classList.add('analyzer-mode');   // cung kieu chiem tron be ngang
@@ -1543,6 +1558,10 @@ function renderRow(s, idx) {
   // ── Hàng cho chiến lược theo TÍN HIỆU (MA7 × MA25) ──
   // Mẫu riêng chứ không nhét tín hiệu vào ô điểm: bảng này không có điểm, và
   // số cột phải khớp với <thead> đã ẩn cột TIÊU CHÍ.
+  // O TUOI KHONG mang prio-*: <th> tuong ung la .th-rating (doi chu thanh
+  // "TUOI" luc chay) va khong co prio-*. Co prio-3 o day thi o bi an o <=860px
+  // trong khi cot tieu de VAN HIEN — do that tren Chromium 800px: 7 th hien,
+  // 6 o hien, cot TUOI trong rong. Canh boi backend/tests/test_web_cot_bang.py.
   if (currentConfig().signalBased) {
     const sg = s.signal || '';
     const tuoi = s.signal_age == null ? '—' : `${s.signal_age} phiên`;
@@ -1565,7 +1584,7 @@ function renderRow(s, idx) {
       <td class="num prio-4">${resCell}</td>
       <td class="num prio-4">${rrCell}</td>
       <td class="num"><span class="ma-signal ma-${sg}">${escapeAttr(s.signal_label || sg)}</span>${chan}</td>
-      <td class="prio-3">${tuoi}</td>
+      <td>${tuoi}</td>
     </tr>`;
   }
 
@@ -3480,7 +3499,7 @@ function bindAnalyzerEvents() {
 
   // Click outside to close suggestions
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.topbar-analyzer')) {
+    if (!e.target.closest('.analyzer-searchbar')) {
       box.classList.remove('show');
     }
   });
@@ -3524,18 +3543,40 @@ function renderMarketContext(ctx, isIntraday) {
     ? '<span class="mc-intraday">Bản giữa phiên — khối lượng chưa đủ ngày</span>'
     : '';
 
+  // Phan PHU goi trong `.mc-detail`. O <=768px no bi an va chi mo khi bam
+  // `.mc-more` — xem `@media` trong styles.css.
+  //
+  // Do that o 402x714 (iPhone, deviceScaleFactor 3) ngay 13/10/2026: khoi nay
+  // cao 161px va xuong BON dong (icon 20 + nhan 36 + so lieu 36 + canh bao 22).
+  // No LON HON ca topbar (138px). Hang du lieu dau tien o y=431, tuc 60% man
+  // hinh la vo truoc khi thay mot dong du lieu nao.
+  //
+  // Desktop khong doi: `.mc-detail` la `display: contents` nen ba phan tu con
+  // van la flex item truc tiep cua `.market-context`, y nhu truoc.
   el.className = `market-context ${cls}`;
   el.innerHTML = `
     <span class="mc-icon">${icon}</span>
     <span class="mc-label">${ctx.label}</span>
-    <span class="mc-stats">
-      VN-Index ${Number(ctx.close).toLocaleString('vi-VN')}
-      · MA50 ${ctx.ma50 ? Number(ctx.ma50).toLocaleString('vi-VN') : '—'}
-      · 20 phiên ${ctx.change_20d_pct > 0 ? '+' : ''}${ctx.change_20d_pct}%
-      · ${breadth}
+    <button type="button" class="mc-more" aria-expanded="false"
+            aria-controls="mc-detail">chi tiết</button>
+    <span class="mc-detail" id="mc-detail">
+      <span class="mc-stats">
+        VN-Index ${Number(ctx.close).toLocaleString('vi-VN')}
+        · MA50 ${ctx.ma50 ? Number(ctx.ma50).toLocaleString('vi-VN') : '—'}
+        · 20 phiên ${ctx.change_20d_pct > 0 ? '+' : ''}${ctx.change_20d_pct}%
+        · ${breadth}
+      </span>
+      ${sizing}
+      ${intradayTag}
     </span>
-    ${sizing}
-    ${intradayTag}
   `;
+  const nut = el.querySelector('.mc-more');
+  if (nut) {
+    nut.addEventListener('click', () => {
+      const mo = el.classList.toggle('mc-mo');
+      nut.setAttribute('aria-expanded', String(mo));
+      nut.textContent = mo ? 'ẩn' : 'chi tiết';
+    });
+  }
   el.style.display = 'flex';
 }

@@ -415,6 +415,12 @@ def normalize_fundamentals(raw: Dict[str, Any]) -> Dict[str, Any]:
         'beta_r_squared': beta_info.get('r_squared') if beta_info else None,
         'beta_method': beta_info.get('method') if beta_info else 'default',
         'beta_fallback': beta_info.get('fallback', True) if beta_info else True,
+        # `weak`: tinh duoc beta nhung khoang tin cay 95% cua no CHUA 1,0, tuc
+        # hoi quy khong cho ly do nao de tin uoc luong hon tin tien nghiem.
+        # Tach rieng khoi `fallback` ("khong tinh duoc") vi hai chuyen khac nhau
+        # va phai dem rieng duoc.
+        'beta_weak': beta_info.get('weak', True) if beta_info else True,
+        'beta_std_error': beta_info.get('std_error') if beta_info else None,
     }
 
     # === Asset quality (cho banking) ===
