@@ -148,11 +148,40 @@ chấp nhận luôn cái đang hỏng.
 `accepted.json` độc lập với mốc chuẩn: mục đã cân nhắc không sửa vẫn phải được
 in ra mỗi lượt.
 
-Bộ đo từng không tất định (báo lỗi khác nhau giữa hai lượt cùng mã nguồn). Bốn
+Bộ đo từng không tất định (báo lỗi khác nhau giữa hai lượt cùng mã nguồn). **Năm**
 nguồn đã gỡ: ngưỡng dải nhìn thấy quá lỏng, mẫu ổn định chỉ lấy lớp của trang
-scanner, đọc `document.fonts.status` thay vì đợi `fonts.ready`, và ghim chữ động
-**sau** khi ổn định rồi đo ngay. Nếu thấy nó đỏ bất thường, chạy lại hai lượt và
-so hai lượt với nhau trước khi đổ cho thay đổi của mình.
+scanner, đọc `document.fonts.status` thay vì đợi `fonts.ready`, ghim chữ động
+**sau** khi ổn định rồi đo ngay, và — nguồn thứ năm, 14/10/2026 — **font web
+không tải được mà bộ đo vẫn đo**.
+
+Nguồn thứ năm đáng đọc kỹ vì nó qua được cả hai cách kiểm font đầu tiên:
+
+- `fonts.ready` và `fonts.status === 'loaded'` **vẫn thoả mãn** khi bảng kiểu
+  Google Fonts không về được — không có `@font-face` nào thì không có gì đang
+  chờ, nên `ready` giải quyết ngay và cả trang render bằng **phông dự phòng**.
+- `document.fonts.check('12px Inter')` **cũng trả `true`**, vì nó hỏi "render
+  được không" chứ không hỏi "font này có đang dùng không": danh sách font luôn
+  kết thúc bằng một phông dự phòng sẵn có.
+
+Phông dự phòng rộng hơn Inter **~10%**, nên mọi số đo bố cục đều lệch. Đo thật,
+hai lượt CI trên **cùng** mã nguồn (PR #92 lần đầu và lần chạy lại):
+
+```
+đỏ  : tabsScrollWidth 934   tabWidths [112,124,107,121,95,90,113,143]
+xanh: tabsScrollWidth 848   tabWidths [103,113,96,109,86,82,103,127]
+```
+
+Dải tab nở 86px, topbar tràn, bốn nhãn vỡ dòng. Cổng báo lỗi về **trang**, trong
+khi lỗi ở **mạng**.
+
+Nay `check.mjs` hỏi đúng câu — trong `FontFaceSet` có `@font-face` nào của họ
+font đó **đã tải xong** không — và nếu hết 10s vẫn không có thì ghi `thieuFont`,
+còn `diff.mjs` **từ chối so sánh** và thoát mã 2. Một lượt đo bằng phông dự
+phòng không được phép thành "phát sinh lỗi mới", cũng không được phép thành
+"sạch": nó không nói gì về trang cả.
+
+Nếu thấy nó đỏ bất thường, chạy lại hai lượt và **so hai lượt với nhau** trước
+khi đổ cho thay đổi của mình — đó chính là cách tìm ra nguồn thứ năm.
 
 ---
 

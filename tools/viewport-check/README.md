@@ -337,6 +337,40 @@ moi khoa deu "da sua" hoac "moi phat sinh" ma khong noi len dieu gi.
 la chu y: muc da can nhac khong sua van phai duoc in ra va canh gac du moc
 chuan co doi.
 
+## FONT CHUA AP MA VAN DO — nguon bat dinh thu 5 (14/10/2026)
+
+Tim ra bang cach so HAI LUOT CI tren CUNG mot ma nguon: PR #92 do, chay lai thi
+xanh. Khong phai thay doi cua PR do — artifact cua hai lan thu noi ro:
+
+```
+do  : tabsScrollWidth 934   tabWidths [112,124,107,121,95,90,113,143]
+xanh: tabsScrollWidth 848   tabWidths [103,113,96,109,86,82,103,127]
+```
+
+Rong hon 10% DEU o moi tab = phong du phong, khong phai Inter. Dai tab no 86px,
+topbar tran, bon nhan vo dong.
+
+**Hai cach kiem font dau tien deu KHONG bat duoc:**
+
+| cach | vi sao qua duoc |
+| --- | --- |
+| `fonts.ready` / `fonts.status` | Bang kieu khong ve duoc thi khong co `@font-face` nao, khong co gi dang cho, `ready` giai quyet NGAY |
+| `document.fonts.check('12px Inter')` | No hoi "render duoc khong", khong hoi "font NAY co dang dung khong" — danh sach font luon ket thuc bang phong du phong san co |
+
+**Cach dung:** hoi trong `FontFaceSet` co `@font-face` nao cua ho font do DA TAI
+XONG khong.
+
+```js
+[...document.fonts].some(f => /Inter/i.test(f.family) && f.status === 'loaded')
+```
+
+Het 10s van khong co thi `check.mjs` ghi `thieuFont: true` vao khung do, va
+`diff.mjs` TU CHOI SO SANH (thoat ma 2). Mot luot do bang phong du phong khong
+duoc phep thanh "phat sinh loi moi" — do la do oan, va no DA do oan that —
+cung khong duoc phep thanh "sach", vi no khong noi gi ve trang.
+
+Thoat ma 2 chu khong 1 la co y: phan biet "trang co loi" voi "khong do duoc".
+
 ## SETTLE() — hai bai hoc, cai thu hai sac hon
 
 ### 1. Phai lay mau CHINH phan tu co transition
