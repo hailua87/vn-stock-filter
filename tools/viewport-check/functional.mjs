@@ -277,5 +277,77 @@ export async function runFunctional(page, isMobile, base) {
         tb ? { h: tb.h } : null);
   }
 
+  // ── 6. Bieu do ba tang o man Chi tiet ma ──
+  //
+  // TRUOC khi co phan nay, bo do KHONG BAO GIO ve bieu do: `functional.mjs`
+  // mo tab Phan tich ma nhung khong phan tich ma nao, nen `#analyzer-chart`
+  // van rong. Do that 14/10/2026 tren ket qua cua ca hai schema: 0 dau vet
+  // cua moi phan tu `cd-*`. Tuc hai lan "0 moi phat sinh" khong noi gi ve
+  // bieu do — dung bay "test khong di qua entrypoint" (CLAUDE.md muc 6).
+  //
+  // Chi chay o hai dai BIEN (rong nhat va hep nhat): phan tich mot ma ton
+  // ~4s, nhan voi 77 khung se gap doi thoi gian chay ca bo do. Bieu do dung
+  // mot bo cuc cho moi be rong nen hai dau la du de bat tran ngang.
+  if (vpw >= 1400 || vpw <= 430) {
+    await load();
+    try {
+      await page.click('.strat-tab[data-strategy="analyzer"]', { timeout: 4000 });
+      await page.waitForTimeout(1200);
+      await page.click('.analyzer-quick-btn[data-ticker="FPT"]', { timeout: 4000 });
+      await page.waitForSelector('#analyzer-chart .cd-wrap', { timeout: 15000 });
+      await settle(page);
+
+      const bd = await page.$eval('#analyzer-chart', el => {
+        const box = el.querySelector('.cd-wrap');
+        // HIEN RA, khong chi ton tai. Dem `querySelectorAll` khong thi
+        // `display: none` van qua — da pha thu va no XANH RONG.
+        const q = sel => [...el.querySelectorAll(sel)]
+          .filter(e => e.offsetParent !== null).length;
+        const r = box.getBoundingClientRect();
+        return {
+          nen: q('.cd-body'),
+          vol: q('.cd-vol'),
+          macd: q('.cd-hist, [class*="cd-macd"]'),
+          ma: q('.cd-ma'),
+          doc: q('.cd-readout'),
+          // Tran ngang: dung ca hai thuoc. `scrollWidth` bat noi dung vuot hop;
+          // `right > innerWidth` bat chinh hop vuot khung nhin.
+          tran_trong: box.scrollWidth > box.clientWidth + 1,
+          tran_khung: Math.round(r.right) > innerWidth + 1,
+          rong: Math.round(r.width), vw: innerWidth,
+          // Du lieu schema 1 thi khong co khoi luong/MACD — phai co ghi chu
+          // thay the, neu khong nguoi dung chi thay bieu do thieu tang ma
+          // khong biet vi sao.
+          //
+          // Kiem NOI DUNG, khong chi su ton tai: pha thu bang cach doi chu
+          // ghi chu thanh mot cau vo nghia thi phep kiem "co phan tu .muted"
+          // VAN XANH. Doi hoi ghi chu nhac ten tang bi thieu — "MACD" la tu
+          // on dinh nhat, nguoi viet lai cau van se giu no.
+          ghi_chu: [...el.querySelectorAll('.muted, .cd-note')]
+            .filter(e => e.offsetParent !== null)
+            .some(e => /MACD/i.test(e.textContent || '')),
+        };
+      }).catch(() => null);
+
+      // Chot chan TRUOC moi phep kiem duoi: khong co nen thi khong do gi ca.
+      rec('chart:ve-duoc', !!bd && bd.nen > 0,
+          bd ? `nen=${bd.nen} ma=${bd.ma} doc=${bd.doc}` : 'khong tim thay .cd-wrap');
+
+      if (bd && bd.nen > 0) {
+        rec('chart:khong-tran-ngang', !bd.tran_trong && !bd.tran_khung,
+            `trong=${bd.tran_trong} khung=${bd.tran_khung} rong=${bd.rong} vw=${bd.vw}`,
+            { rong: bd.rong });
+        rec('chart:co-dong-so-lieu', bd.doc >= 1, `so dong doc=${bd.doc}`);
+        // Hoac du ba tang (schema 2), hoac co ghi chu giai thich (schema 1).
+        const ba_tang = bd.vol > 0 && bd.macd > 0;
+        rec('chart:du-ba-tang-hoac-co-ghi-chu', ba_tang || bd.ghi_chu,
+            ba_tang ? `ba tang: vol=${bd.vol} macd=${bd.macd}`
+                    : `thieu tang (vol=${bd.vol} macd=${bd.macd}) nhung CO ghi chu=${bd.ghi_chu}`);
+      }
+    } catch (e) {
+      rec('chart:ve-duoc', false, String(e).slice(0, 70));
+    }
+  }
+
   return out;
 }
