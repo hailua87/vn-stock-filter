@@ -87,6 +87,43 @@ async function choOnDinh(page) {
   // kieu chuyen sang `all` roi moi keo font. Doi promise `ready` thay vi doc
   // trang thai tuc thoi.
   await page.evaluate(() => document.fonts.ready);
+
+  // NGUON BAT DINH THU 5 (tim ra 14/10/2026).
+  //
+  // `fonts.ready` va `fonts.status === 'loaded'` VAN THOA MAN khi bang kieu
+  // Google Fonts khong ve duoc: khong co @font-face nao thi khong co gi dang
+  // cho, `ready` giai quyet ngay, va ca trang render bang PHONG DU PHONG.
+  // Phong du phong rong hon Inter ~10%, nen moi so do bo cuc deu lech.
+  //
+  // Do that, hai luot CI tren CUNG mot ma (PR #92, lan thu 1 va lan chay lai):
+  //     do  : tabsScrollWidth 934, tabWidths [112,124,107,121,95,90,113,143]
+  //     xanh: tabsScrollWidth 848, tabWidths [103,113,96,109,86,82,103,127]
+  // Dai tab no 86px o luot do, topbar tran, bon nhan vo dong. Khung bp-1488
+  // bao 3 muc "vo dong" — nhung do la loi cua MANG, khong phai cua trang.
+  //
+  // `document.fonts.check()` hoi dung cau: font nay co DUNG DUOC khong. Cho
+  // rieng no mot ngan sach, va neu het thi BAO RA de `diff.mjs` tu choi so
+  // sanh — mot ket qua do bang phong du phong khong duoc phep thanh "phat
+  // sinh loi moi", cung khong duoc phep thanh "sach".
+  // KHONG dung `document.fonts.check()`: no tra TRUE ca khi khong co
+  // @font-face nao, vi no hoi "render duoc khong" chu khong hoi "font NAY co
+  // dang dung khong" — danh sach font luon ket thuc bang mot phong du phong
+  // san co. Da thu: chan bang kieu Google Fonts thi `check('12px Inter')` van
+  // tra true, va phep kiem nay xanh rong.
+  //
+  // Hoi dung cau: trong FontFaceSet co @font-face nao cua ho font do DA TAI
+  // XONG khong. Bang kieu khong ve duoc thi khong co entry nao ca.
+  const coFont = () => page.evaluate(() => {
+    const co = (ten) => [...document.fonts].some(
+      f => new RegExp(ten, 'i').test(f.family) && f.status === 'loaded');
+    return co('Inter') && co('JetBrains');
+  });
+  let fontOk = await coFont();
+  for (let i = 0; i < 40 && !fontOk; i++) {     // tran 40 x 250ms = 10s
+    await page.waitForTimeout(250);
+    fontOk = await coFont();
+  }
+  if (!fontOk) return 'THIEU_FONT';
   let truoc = await chup();
   for (let i = 0; i < 32; i++) {          // tran 32 x 250ms = 8s
     await page.waitForTimeout(250);
@@ -235,7 +272,17 @@ MAY CHU CHET giua chung tai ${khoa}. Dung ngay.`);
 
     try {
       const onDinh = await moTrang(page, trang);
-      if (!onDinh) entry.errors.push('BO CUC KHONG ON DINH sau 8s — so do khung nay dang ngo');
+      if (onDinh === 'THIEU_FONT') {
+        // Khac han "khong on dinh": day la loi MOI TRUONG, va moi so do o
+        // khung nay deu do bang phong du phong nen khong so sanh duoc.
+        entry.thieuFont = true;
+        entry.errors.push(
+          'THIEU FONT WEB sau 10s — Inter/JetBrains Mono khong dung duoc. ' +
+          'Phong du phong rong hon ~10% nen MOI so do bo cuc deu lech. ' +
+          'diff.mjs se tu choi so sanh.');
+      } else if (!onDinh) {
+        entry.errors.push('BO CUC KHONG ON DINH sau 8s — so do khung nay dang ngo');
+      }
 
       // Lan 1: dau trang
       entry.runs.top = await page.evaluate(PROBE);
