@@ -101,20 +101,35 @@ def calculate_pe_valuation(data: Dict[str, Any]) -> ValuationResult:
     else:
         sustainable_roe = ratios.get("roe_ttm", 0.15)
 
-    payout = ratios.get("payout_ratio", 0.30)
-    g = calculate_sustainable_growth(sustainable_roe, payout)
-    g_cap = MARKET_PARAMS["long_term_gdp_growth"]
-    g = min(g, g_cap)
-
+    # payout None = không suy được từ BCTC (lỗ, hoặc thiếu lưu chuyển tiền tệ).
+    # Gordon cần payout thật; thiếu thì LOẠI cấu phần này và để blend tự chuẩn
+    # hoá trọng số — đúng khuôn historical multiple ngay dưới. Mặc định 0,30 cũ
+    # ở đây chưa bao giờ chạy (normalizer luôn gán sẵn khoá) và nếu chạy thì
+    # cũng chỉ là bịa chính sách cổ tức.
+    payout = ratios.get("payout_ratio")
     beta = market.get("beta_2y", 1.0)
     coe = calculate_cost_of_equity(beta)["cost_of_equity"]
 
-    if coe - g < 0.015:
-        g = coe - 0.020
-        warnings.append("CoE - g quá nhỏ, ép g về CoE - 2%")
+    if payout is None:
+        justified_pe = None
+        # Không có payout thì không có g bền vững. Lưới an toàn của forward-PEG
+        # (bước 5) lấy 0 — "không giả định tăng trưởng" — chứ không lấy ROE,
+        # vì giữ lại 100% lợi nhuận là giả định do THIẾU dữ liệu sinh ra, không
+        # phải do BCTC nói.
+        g_for_fallback = 0.0
+        notes.append("Không suy được payout từ BCTC → loại cấu phần justified P/E khỏi blend")
+    else:
+        g = calculate_sustainable_growth(sustainable_roe, payout)
+        g_cap = MARKET_PARAMS["long_term_gdp_growth"]
+        g = min(g, g_cap)
 
-    justified_pe = payout / (coe - g)
-    notes.append(f"Justified P/E = {payout:.0%} / ({coe:.1%} - {g:.1%}) = {justified_pe:.1f}x")
+        if coe - g < 0.015:
+            g = coe - 0.020
+            warnings.append("CoE - g quá nhỏ, ép g về CoE - 2%")
+
+        justified_pe = payout / (coe - g)
+        g_for_fallback = g
+        notes.append(f"Justified P/E = {payout:.0%} / ({coe:.1%} - {g:.1%}) = {justified_pe:.1f}x")
 
     # --- 3. Historical P/E ---
     # Có thể là None: normalizer KHÔNG còn suy historical median từ pe_ttm nữa
@@ -168,7 +183,14 @@ def calculate_pe_valuation(data: Dict[str, Any]) -> ValuationResult:
         notes.append(f"Peer P/E (VN-Index fallback {market_pe:.1f}x): quality {quality_factor:.2f} → {peer_pe:.1f}x")
 
     # --- 5. Forward P/E (PEG approach) ---
-    growth_fwd = growth.get("eps_growth_consensus_fwd", g)
+    # `g` chỉ tồn tại khi suy được payout (xem bước 2), nên KHÔNG dùng nó làm
+    # default của .get() — Python tính default ngay cả khi khoá có mặt, nên
+    # viết `get(..., g)` làm cả hàm nổ UnboundLocalError ở mọi mã thiếu payout.
+    # `eps_growth_consensus_fwd` vốn luôn được normalizer gán, nên nhánh thiếu
+    # chỉ là lưới an toàn.
+    growth_fwd = growth.get("eps_growth_consensus_fwd")
+    if growth_fwd is None:
+        growth_fwd = g_for_fallback
     # PEG = 1.0 cho doanh nghiệp tăng trưởng bình thường, cao hơn cho premium growth
     if growth_fwd > 0.20:
         peg_target = 1.2

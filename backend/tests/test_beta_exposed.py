@@ -135,17 +135,35 @@ def test_beta_qua_cao_lam_DCF_lac_ra_thi_no_bi_LOAI_va_duoc_GHI_RA(no_dispersion
     """
     Mat sau cua phep kiem tren, va la hanh vi moi tu 13/10/2026.
 
-    Beta 2,3 (ngoai han dai thuc te — beta_raw cao nhat do duoc vao khoang 1,4)
-    keo DCF xuong 0,33x trung vi cac phuong phap. Tron mot con so nhu vay vao
+    Beta 2,7 (ngoai han dai thuc te — beta_raw cao nhat do duoc vao khoang 1,4)
+    keo DCF xuong 0,26x trung vi cac phuong phap. Tron mot con so nhu vay vao
     voi trong so 20% la lay mot mo hinh chay ngoai mien cua no lam y kien. Nay
     no bi loai — nhung PHAI de lai dau vet, neu khong thi fair value doi ma
     khong ai kiem lai duoc.
 
-    Dung 2,3 chu khong 1,9: o 1,9 do lac chi la 2,2x, DUOI nguong 3,0. Tuc tren
+    Dung 2,7 chu khong 1,9: o 1,9 do lac chi la 2,2x, DUOI nguong 3,0. Tuc tren
     ro that, beta MOT MINH khong du de day DCF qua nguong — ca PVT (3,49x) lac
     vi ly do khac, beta chi lam DCF XUAT HIEN tro lai.
+
+    CON SO DOI 2,3 -> 2,7 NGAY 15/10/2026. O 2,3 ty le DCF/trung vi roi DUNG
+    tren bien nguong (0,333x) nen phep kiem can bang tren dau dao, va HAI thu
+    doc lap nhau deu du suc lam no do:
+
+      1. Sua loi payout_ratio (xem test_payout_ratio.py). Payout = 0,0 o moi ma
+         lam justified_pe = 0 va bi loai khoi blend P/E; sua xong P/E cua FPT
+         tu 185.654 ve 119.039 (thap hon 36%), trung vi tut theo, DCF len
+         0,34x — het lac.
+      2. Chi can ton tai file backend/data/peer_multiples.json. No bi gitignore
+         nen CI khong co, nhung mot luot chay pipeline tai may se tao ra, va
+         tu do ba phep kiem nay DO tren cay sach. Do la mot manh vun doc lap
+         voi PR nay, chua sua.
+
+    2,7 cho 0,26x — cach bien 22%, du cho ca hai nguyen nhan tren.
+
+    Moc chuan o day la con so DAN XUAT, khong phai hang so tu nhien: doi nguong
+    loai lac hay bat ky cau phan nao cua blend P/E deu phai do lai ty le nay.
     """
-    r = _dinh_gia({**THAT, 'beta': 2.3})
+    r = _dinh_gia({**THAT, 'beta': 2.7})
     assert 'DCF FCFF' in r.methods_excluded, r.methods_excluded
     assert r.methods_excluded['DCF FCFF'] < 1 / 3, 'phai lac ve phia THAP'
     assert 'DCF FCFF' not in r.methods_used
