@@ -1612,6 +1612,41 @@ kbd {
   }
   .strat-tab { white-space: nowrap; }
 
+  /* TIN HIEU MEP cho dai tab cuon ngang (muc 4 cua
+     docs/mobile-layout-out-of-scope.md, mo tu commit ef88f16).
+     Do lai 15/10/2026 — TE HON tai lieu ghi, vi hai tab duoc them sau:
+         402px: scrollWidth 696 / clientWidth 386  -> an 310px
+         375px: scrollWidth 718 / clientWidth 359  -> an DUNG MOT NUA
+     (tai lieu ghi 542/386 hoi con 6 tab.)
+     Nguoi dung khong co cach nao biet con tab ben phai.
+
+     Dung `mask-image` lam MO DAN CHINH CAC TAB, khong dat phan tu phu len
+     tren. Ly do: bo do co phep kiem `tab:cuoi-toi-duoc-sau-khi-cuon` dung
+     `elementFromPoint` — mot lop phu se chan diem do va bien mot tin hieu
+     thi giac thanh loi chuc nang. Mask khong nhan su kien con tro, khong doi
+     bo cuc, khong doi vung cuon.
+
+     Hai lop do JS bat/tat theo `scrollLeft` (xem `capNhatVienCuon`). Bat cung
+     luc ca hai khi dang o giua. KHONG tô cố định mot ben: lam mo ben phai khi
+     da cuon het la noi doi — con tin hieu sai thi te hon khong co.
+
+     `-webkit-mask-image` cho Safari cu; khung `safari-ios-thuc-402x714` cua
+     bo do chay qua duong nay. */
+  .strategy-tabs.co-cuon-phai {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  }
+  .strategy-tabs.co-cuon-trai {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 28px);
+    mask-image: linear-gradient(to right, transparent, #000 28px);
+  }
+  .strategy-tabs.co-cuon-trai.co-cuon-phai {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 28px,
+                                        #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 28px,
+                                #000 calc(100% - 28px), transparent);
+  }
+
   /* .chip-row thanh LUOI 2 COT o cot hep.
      Voi flex-wrap (6afe5bf) bon nut khong con bi cat, nhung khi xuong hang thi
      MOI HANG chia rieng: hang duoi chi con "UPCOM" (hoac "B") va no gian rong

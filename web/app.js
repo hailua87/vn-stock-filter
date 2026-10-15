@@ -390,6 +390,33 @@ function updateDataFreshness() {
 }
 
 // ──────────── Strategy tabs ────────────
+
+/**
+ * Bat/tat tin hieu mep cua dai tab cuon ngang (muc 4 cua
+ * docs/mobile-layout-out-of-scope.md).
+ *
+ * O 375px dai tab an DUNG MOT NUA so tab (scrollWidth 718 / clientWidth 359,
+ * do 15/10/2026) ma khong co dau hieu nao. Hai lop duoi day bat mo dan o mep
+ * con noi dung; CSS lo phan ve.
+ *
+ * Tinh theo `scrollLeft` that chu khong to co dinh mot ben: lam mo ben phai
+ * khi da cuon het la NOI DOI, va mot tin hieu sai con te hon khong co tin
+ * hieu. Bien 1px de khoi nhay lop vi so le lam tron cua be rong phan doi.
+ */
+function capNhatVienCuon() {
+  const t = document.querySelector('.strategy-tabs');
+  if (!t) return;
+  const max = t.scrollWidth - t.clientWidth;
+  // KHONG can co them dieu kien "co cuon duoc khong". Trinh duyet KEP
+  // `scrollLeft` trong [0, max], nen khi max = 0 thi scrollLeft = 0 va ca hai
+  // bieu thuc duoi day deu false (`0 > 1` sai, `0 < -1` sai). Ban dau toi co
+  // mot bien `co = max > 1` cho ro y, nhung pha thu cho thay bo no di thi
+  // KHONG phep kiem nao do — vi no khong bao gio doi ket qua. Giu lai la giu
+  // mot dong khong the kiem duoc.
+  t.classList.toggle('co-cuon-trai', t.scrollLeft > 1);
+  t.classList.toggle('co-cuon-phai', t.scrollLeft < max - 1);
+}
+
 function bindStrategyTabs() {
   document.querySelectorAll('.strat-tab').forEach(tab => {
     tab.addEventListener('click', async () => {
@@ -398,6 +425,16 @@ function bindStrategyTabs() {
       await switchStrategy(strategy);
     });
   });
+
+  const dai = document.querySelector('.strategy-tabs');
+  if (dai) {
+    // `passive`: trinh xu ly chi doc va doi lop, khong goi preventDefault —
+    // noi ro de trinh duyet khong phai cho truoc khi cuon.
+    dai.addEventListener('scroll', capNhatVienCuon, { passive: true });
+  }
+  // `resize` vi dai tab chi cuon duoi 1487px: qua nguong thi phai tat het lop.
+  window.addEventListener('resize', capNhatVienCuon);
+  capNhatVienCuon();
 }
 
 async function switchStrategy(strategy) {
@@ -413,6 +450,9 @@ async function switchStrategy(strategy) {
   document.querySelectorAll('.strat-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.strategy === strategy);
   });
+  // Tab 'active' co the rong hon tab thuong, nen be rong phan doi doi theo —
+  // tinh lai tin hieu mep, neu khong no se lech sau moi lan doi tab.
+  capNhatVienCuon();
   state.sort = { column: null, direction: null };
   state.selectedTicker = null;
   state.filters.ich_special = '';
