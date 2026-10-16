@@ -341,3 +341,34 @@ chưa": nó lẫn hai chiều, nhánh đi sau `main` cũng hiện ra "dòng thê
 `scripts/kiem-nhanh-da-vao-main.sh` — nó hợp cây thử và chỉ báo sạch khi cây
 không đổi; xung đột thì **từ chối kết luận** (thoát 2) thay vì đoán, cùng kiểu
 `diff.mjs` từ chối so sánh khi thiếu font (mục 8).
+
+**CI xanh là xanh cho MỘT commit — hỏi xanh cho commit NÀO.** Luật "chỉ checkout
+chính được merge" không tự lo được chuyện này. Lượt merge #103 (16/10/2026): PR
+mở ra, CI xanh 4 cổng, nhưng trong lúc chờ thì `#100` vào `main`, nên nhánh lùi
+1 commit và **4 cổng xanh kia là xanh trên nền chưa có `#100`**. Đưa `main` vào
+nhánh rồi chạy lại: 1471 → **1479** phép kiểm. Vì vậy trước mỗi lần merge:
+`git fetch`, rồi `git rev-list --count <nhánh>..origin/main` phải ra **0**;
+không ra 0 thì `git merge main` và chờ CI chạy lại.
+
+**Và đừng tin con số CI mà không hỏi nó thuộc commit nào.** Cùng lượt đó,
+`mcp__ccd_pr__get_status` của ứng dụng vẫn báo `4 passing / 0 pending` **sau
+khi** commit hợp nhất đã được đẩy lên — nó đọc từ bộ đệm, còn `gh pr checks`
+báo đúng là `test` và `sources-live` đang chạy lại. Tin con số đệm đó là merge
+một nhánh chưa ai kiểm trên nền thật. Kiểm chứng rẻ nhất, cùng tinh thần với
+mẹo `fetch('/app.js?x='+Date.now())` ở mục 6:
+
+```
+gh pr view <số> --json headRefOid --jq '.headRefOid[0:7]'   # so với
+git rev-parse --short HEAD
+```
+
+Lệch nhau nghĩa là đang đọc trạng thái của commit khác.
+
+**Cổng vắng mặt chưa chắc là cổng bị bỏ.** `kiem` (`viewport-check.yml`) lọc
+`paths: web/**`, nên PR không đụng `web/**` thì nó **không xuất hiện trong danh
+sách checks** — khác hẳn với "đã chạy và bỏ qua". Trước khi kết luận một cổng
+không chạy, đọc `paths`/`paths-ignore` của **chính** workflow đó, và đọc đúng
+**sự kiện**: trong `ci.yml`, `**/*.md` chỉ bị bỏ qua ở `push`, **không** ở
+`pull_request` — nên một PR chỉ sửa tài liệu vẫn chạy `test` và `sources-live`.
+Tôi vừa viết ngược điều này vào đây rồi phải sửa: hai khối `paths-ignore` của
+hai sự kiện **không giống nhau**, đừng đọc một khối rồi suy ra khối kia.
