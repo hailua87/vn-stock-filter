@@ -349,5 +349,91 @@ export async function runFunctional(page, isMobile, base) {
     }
   }
 
+  // ── 7. Tin hieu mep cua dai tab cuon ngang ──
+  //
+  // Muc 4 cua docs/mobile-layout-out-of-scope.md, mo tu commit ef88f16, sua
+  // 15/10/2026. Do truoc khi sua: o 375px dai tab an DUNG MOT NUA so tab
+  // (scrollWidth 718 / clientWidth 359) ma khong co bong mo, mui ten hay thanh
+  // cuon nao — nguoi dung khong co cach nao biet con tab ben phai.
+  //
+  // Chay o MOI khung, vi hai nhanh deu phai dung:
+  //   · cuon duoc  -> phai co tin hieu, va tin hieu phai THEO vi tri cuon
+  //   · khong cuon -> KHONG duoc mo gi (desktop >= 1487px)
+  // Khong gate theo be rong: lam vay thi nhanh "khong cuon" khong ai kiem.
+  await load();
+  try {
+    const d = await page.$eval('.strategy-tabs', el => {
+      const cs = getComputedStyle(el);
+      return { max: el.scrollWidth - el.clientWidth,
+               sl: Math.round(el.scrollLeft),
+               trai: el.classList.contains('co-cuon-trai'),
+               phai: el.classList.contains('co-cuon-phai'),
+               mask: cs.maskImage || cs.webkitMaskImage || 'none' };
+    }).catch(() => null);
+
+    if (!d) {
+      rec('tab:tin-hieu-mep', false, 'khong tim thay .strategy-tabs');
+    } else if (d.max <= 1) {
+      // Khong cuon duoc: mo tin hieu la NOI DOI.
+      rec('tab:khong-cuon-thi-khong-tin-hieu', !d.trai && !d.phai,
+          `max=${d.max} trai=${d.trai} phai=${d.phai}`);
+    } else {
+      // O dau dai: phai bao "con ben phai", va KHONG bao "con ben trai".
+      rec('tab:tin-hieu-mep-o-dau-dai', d.phai && !d.trai && d.mask !== 'none',
+          `max=${d.max} sl=${d.sl} trai=${d.trai} phai=${d.phai} mask=${d.mask !== 'none'}`,
+          { max: d.max });
+
+      // Cuon het sang phai: phai TAT tin hieu ben phai. Day la nua de sai
+      // nhat — to co dinh mot ben thi phep kiem tren van xanh.
+      const cuoi = await page.evaluate(async () => {
+        const el = document.querySelector('.strategy-tabs');
+        el.scrollLeft = el.scrollWidth;
+        el.dispatchEvent(new Event('scroll'));
+        await new Promise(r => setTimeout(r, 250));
+        return { sl: Math.round(el.scrollLeft),
+                 trai: el.classList.contains('co-cuon-trai'),
+                 phai: el.classList.contains('co-cuon-phai') };
+      }).catch(() => null);
+      rec('tab:cuon-het-thi-tat-tin-hieu-phai',
+          !!cuoi && cuoi.trai && !cuoi.phai,
+          cuoi ? `sl=${cuoi.sl} trai=${cuoi.trai} phai=${cuoi.phai}` : 'loi');
+
+      // Lop KHONG duoc CU khi be rong noi dung doi ma khong co `resize` hay
+      // `scroll` nao.
+      //
+      // Loi that: cong `kiem` cua PR #96 bao `bp-767 max=0 phai=true`. Luc nap
+      // trang, phong du phong rong hon Inter ~10% nen dai tab tran -> bat lop;
+      // Inter nap xong, chu hep lai, het tran — nhung khong su kien nao no.
+      // Phep kiem `tab:khong-cuon-thi-khong-tin-hieu` o tren bat duoc ca do,
+      // NHUNG chi vi khung 767px tinh co nam sat nguong tran. Phep kiem duoi
+      // day ep buoc chuyen do xay ra, nen no TAT DINH o moi khung co cuon.
+      const sau = await page.evaluate(async () => {
+        const el = document.querySelector('.strategy-tabs');
+        el.scrollLeft = 0;
+        el.dispatchEvent(new Event('scroll'));
+        await new Promise(r => setTimeout(r, 150));
+        // Thu nho tab de HET tran, y nhu font nap xong lam chu hep lai.
+        // KHONG resize cua so, KHONG cuon.
+        const st = document.createElement('style');
+        st.id = 'bo-do-thu-nho-tab';
+        st.textContent = '.strat-tab{font-size:6px !important;' +
+                         'padding:1px 2px !important;min-width:0 !important}';
+        document.head.appendChild(st);
+        await new Promise(r => setTimeout(r, 600));
+        const ra = { max: el.scrollWidth - el.clientWidth,
+                     trai: el.classList.contains('co-cuon-trai'),
+                     phai: el.classList.contains('co-cuon-phai') };
+        st.remove();                       // tra trang ve nguyen
+        return ra;
+      }).catch(() => null);
+      rec('tab:lop-khong-bi-cu-khi-noi-dung-hep-lai',
+          !!sau && sau.max <= 1 && !sau.trai && !sau.phai,
+          sau ? `sau khi thu nho: max=${sau.max} trai=${sau.trai} phai=${sau.phai}`
+              : 'loi');
+    }
+  } catch (e) {
+    rec('tab:tin-hieu-mep', false, String(e).slice(0, 70));
+  }
+
   return out;
 }

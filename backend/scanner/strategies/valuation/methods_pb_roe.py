@@ -259,12 +259,27 @@ def calculate_pb_roe_valuation(data: Dict[str, Any]) -> ValuationResult:
         )
 
     # --- 2. Sustainable growth ---
-    payout = ratios.get("payout_ratio", 0.30)
-    g_sustainable = calculate_sustainable_growth(sustainable_roe, payout)
-    g_historical = growth.get("book_value_growth_3y", g_sustainable)
+    # payout None = normalizer không suy được từ BCTC. Khác với P/E và DDM,
+    # mô hình 2-stage ở đây KHÔNG loại được cấu phần cổ tức — nó là cấu trúc
+    # của chính công thức. Nhưng cũng không cần mặc định 0,30: đẳng thức
+    # g = ROE × (1 - payout) cho payout ngụ ý từ g và ROE (xem Stage 1 dưới),
+    # cả hai đều là dữ liệu thật. Nên khi thiếu payout:
+    #   - g bỏ nhánh sustainable, chỉ lấy tăng trưởng book value lịch sử
+    #   - payout dùng trong mô hình = payout ngụ ý, suy từ g đã cap
+    payout = ratios.get("payout_ratio")
+    g_sustainable = (None if payout is None
+                     else calculate_sustainable_growth(sustainable_roe, payout))
+    g_historical = growth.get("book_value_growth_3y")
 
-    # Lấy min(g_sustainable, g_historical) để bảo thủ
-    g = min(g_sustainable, g_historical)
+    # Lấy min(g_sustainable, g_historical) để bảo thủ; thiếu vế nào thì lấy vế
+    # còn lại chứ không bịa số cho vế thiếu.
+    g_candidates = [x for x in (g_sustainable, g_historical) if x is not None]
+    if g_candidates:
+        g = min(g_candidates)
+    else:
+        g = calculate_sustainable_growth(sustainable_roe, 0.0)
+        notes.append("Thiếu cả payout và tăng trưởng book value → g = ROE (giữ lại toàn bộ), "
+                     "sẽ bị cap về GDP ngay dưới")
     # Cap g về long-term GDP growth (terminal growth của nền kinh tế)
     # Banking không thể tăng trưởng nhanh hơn GDP mãi mãi
     g_cap = MARKET_PARAMS["long_term_gdp_growth"]  # ~6% cho VN
@@ -272,7 +287,9 @@ def calculate_pb_roe_valuation(data: Dict[str, Any]) -> ValuationResult:
         notes.append(f"g raw = {g:.1%} → cap về long-term GDP growth {g_cap:.1%}")
         g = g_cap
     else:
-        notes.append(f"g = min(sustainable={g_sustainable:.1%}, historical={g_historical:.1%}) = {g:.1%}")
+        _fmt = lambda x: 'n/a' if x is None else f"{x:.1%}"
+        notes.append(f"g = min(sustainable={_fmt(g_sustainable)}, "
+                     f"historical={_fmt(g_historical)}) = {g:.1%}")
 
     # --- 3. Cost of Equity ---
     beta = market.get("beta_2y", 1.0)
@@ -301,7 +318,6 @@ def calculate_pb_roe_valuation(data: Dict[str, Any]) -> ValuationResult:
 
     high_growth_years = 8
     g1 = g  # đã được cap về GDP dài hạn ở bước 2
-    roe_terminal = min(sustainable_roe, MARKET_PARAMS["long_term_gdp_growth"] / (1 - payout) + 0.08)
     # roe_terminal max ~ 14-15% (fade về DM-bank levels)
     g2 = MARKET_PARAMS["long_term_gdp_growth"] * 0.7  # ~4.2% terminal growth
 
@@ -317,9 +333,33 @@ def calculate_pb_roe_valuation(data: Dict[str, Any]) -> ValuationResult:
     # chính g1 để giữ đồng nhất kế toán: g = ROE × (1 - payout) ⇒
     # payout_implied = 1 - g1/ROE. Nếu g1 bị cap xuống thì phần lợi nhuận không
     # dùng để tăng trưởng phải được trả về cổ đông.
+    #
+    # payout None thì CHỈ dùng đẳng thức, không max() với một ẩn số. Payout ngụ
+    # ý luôn có kể cả khi BCTC không cho payout, nên dòng cổ tức của Stage 1
+    # không bao giờ phải dựa vào một mặc định bịa ra.
     payout_implied = payout
     if sustainable_roe > 0:
-        payout_implied = max(payout, min(1.0, 1 - g1 / sustainable_roe))
+        identity = min(1.0, 1 - g1 / sustainable_roe)
+        payout_implied = identity if payout is None else max(payout, identity)
+    elif payout is None:
+        # ROE <= 0: đẳng thức không cho gì, mà mô hình vẫn cần một số. Giữ
+        # nguyên tắc bảo thủ: không trả cổ tức nào.
+        payout_implied = 0.0
+
+    # Trần ROE terminal. Công thức giữ NGUYÊN như cũ và vẫn đọc `payout`; chỉ
+    # khi payout None thì mới mượn `payout_implied` để có một số có thật.
+    #
+    # ĐÁNG CHÚ Ý cho chủ kho: chú thích cũ "roe_terminal max ~ 14-15%" đúng
+    # bằng gdp/(1-0)+0.08 = 14%, tức nó được hiệu chỉnh theo payout = 0 — chính
+    # giá trị do lỗi này sinh ra. Khi payout thật về (VNM 120%, FPT 49%), trần
+    # này nới lên và không còn khớp "DM-bank levels" như lời chú thích. Đây là
+    # tham số định giá, không phải lỗi, nên KHÔNG tự chỉnh ở PR này.
+    _payout_for_ceiling = payout_implied if payout is None else payout
+    roe_terminal = min(
+        sustainable_roe,
+        (MARKET_PARAMS["long_term_gdp_growth"] / (1 - _payout_for_ceiling) + 0.08)
+        if _payout_for_ceiling < 1.0 else sustainable_roe,
+    )
 
     pv_dividends = 0
     bv_factor = 1.0  # BV(t) / BV(0)
