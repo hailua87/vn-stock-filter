@@ -36,6 +36,49 @@ def _clamp(x: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, x))
 
 
+def quality_factor_roe(sustainable_roe, benchmark_roe):
+    """Hệ số chất lượng cho P/E peer = căn(ROE / ROE tham chiếu), hoặc None.
+
+    None nghĩa là "không tính được" → bên gọi phải LOẠI cấu phần peer khỏi
+    blend rồi chuẩn hoá lại trọng số, chứ không thay bằng một con số bịa.
+
+    Vì sao phải có hàm này thay vì viết thẳng `(a / b) ** 0.5` tại chỗ:
+
+      - ROE ÂM: `(-2.0) ** 0.5` trong Python KHÔNG raise — nó trả về SỐ PHỨC
+        (`1.41j`). Số phức đi tiếp vào `peer_pe` rồi nổ ở bước blend với
+        `TypeError: '>' not supported between instances of 'complex' and
+        'int'`, mà `engine.value_ticker` bọc try/except quanh TỪNG method, nên
+        hậu quả thật không phải một lượt chạy đỏ: cấu phần P/E bị bỏ LẶNG LẼ,
+        để lại một dòng `✗ P/E Multiple failed` lẫn trong tối đa 8 `notes`.
+        Đo ngày 16/10/2026, 200 mã: 5 mã nổ (VDL, WSS, DQC, DTL, DRH).
+      - ROE ÂM mà ngành KHÔNG có peer ROE median: nhánh `else` cũ cho
+        `quality = 1.0`, tức định giá doanh nghiệp đang lỗ bằng đúng P/E trung
+        vị ngành — "chất lượng ngang trung bình ngành". Không nổ, chỉ ra số
+        sai, nên không ai thấy. Cùng lượt đo: 3 mã (VHL, HAS, HID — ngành
+        Construction, peer ROE median là None).
+
+    Vì sao None, chứ không phải các cách khác:
+      - `abs()`: biến ROE −20% thành chất lượng y như ROE +20%. Sai hẳn.
+      - kẹp về 0: `peer_pe = 0` rồi bị bộ lọc `v > 0` của blend loại — ra ĐÚNG
+        kết quả, nhưng qua một "P/E mục tiêu 0x" ghi vào `notes` và
+        `key_outputs`, nên người đọc không phân biệt được "không tính được"
+        với "tính ra bằng 0".
+      - floor 3% như `methods_pb_roe`: ở đó floor là để tránh chia cho ~0 trong
+        công thức P/B hai giai đoạn; ở đây nó bịa ra hệ số căn(0,03/0,15) =
+        0,45 không đọc được từ dữ liệu nào.
+      - None: đúng khuôn kho này đã dùng cho historical multiple — thiếu dữ
+        liệu đáng tin thì loại cấu phần, không bịa số.
+
+    `benchmark_roe` thiếu/âm mà ROE doanh nghiệp dương thì trả 1.0: không có
+    mốc để so, nên không điều chỉnh (giữ nguyên hành vi cũ).
+    """
+    if sustainable_roe is None or sustainable_roe <= 0:
+        return None
+    if not benchmark_roe or benchmark_roe <= 0:
+        return 1.0
+    return (sustainable_roe / benchmark_roe) ** 0.5
+
+
 def calculate_eps_stability(eps_history: List[float]) -> Dict[str, float]:
     """Đo độ ổn định của EPS - kiểm tra xem P/E có phù hợp không.
 
@@ -135,37 +178,46 @@ def calculate_pe_valuation(data: Dict[str, Any]) -> ValuationResult:
     # Ưu tiên peer database thực, fallback VN-Index nếu chưa có
     peer_pe = None
     peer_backed = False
-    try:
-        from ...peer_database import get_peer_band
-        industry = data.get('_industry')
-        if industry:
-            peer_band = get_peer_band(industry, 'pe')
-            if peer_band and peer_band.get('median'):
-                peer_median = peer_band['median']
-                # Quality adjustment dựa trên ROE vs peer ROE
-                peer_roe_band = get_peer_band(industry, 'roe')
-                peer_roe = (peer_roe_band.get('median') if peer_roe_band
-                            else sustainable_roe)
-                if peer_roe and peer_roe > 0:
-                    quality_factor = (sustainable_roe / peer_roe) ** 0.5
-                else:
-                    quality_factor = 1.0
-                peer_pe = peer_median * quality_factor
-                peer_backed = True
-                notes.append(
-                    f"Peer P/E (ngành {industry}, n={peer_band.get('n', '?')}): "
-                    f"median={peer_median:.1f}x, quality={quality_factor:.2f} → {peer_pe:.1f}x"
-                )
-    except Exception:
-        pass  # Fall back to VN-Index
+    # ROE <= 0 → không có "chất lượng hơn/kém ngành bao nhiêu" nào đọc được từ
+    # dữ liệu, nên CẢ HAI nhánh dưới đều không dùng được. Chốt ở đây, trước khi
+    # tra peer DB, để nhánh VN-Index không chạy lại đúng phép tính đó.
+    # Xem `quality_factor_roe` cho lý do đầy đủ.
+    roe_dung_duoc = sustainable_roe is not None and sustainable_roe > 0
+    if roe_dung_duoc:
+        try:
+            from ...peer_database import get_peer_band
+            industry = data.get('_industry')
+            if industry:
+                peer_band = get_peer_band(industry, 'pe')
+                if peer_band and peer_band.get('median'):
+                    peer_median = peer_band['median']
+                    # Quality adjustment dựa trên ROE vs peer ROE
+                    peer_roe_band = get_peer_band(industry, 'roe')
+                    peer_roe = (peer_roe_band.get('median') if peer_roe_band
+                                else sustainable_roe)
+                    quality_factor = quality_factor_roe(sustainable_roe, peer_roe)
+                    if quality_factor is not None:
+                        peer_pe = peer_median * quality_factor
+                        peer_backed = True
+                        notes.append(
+                            f"Peer P/E (ngành {industry}, n={peer_band.get('n', '?')}): "
+                            f"median={peer_median:.1f}x, quality={quality_factor:.2f} → {peer_pe:.1f}x"
+                        )
+        except Exception:
+            pass  # Fall back to VN-Index
 
-    if peer_pe is None:
+    if peer_pe is None and roe_dung_duoc:
         # Fallback: VN-Index proxy
         market_pe = MARKET_PARAMS["vnindex_pe_current"]
         market_roe = 0.15
-        quality_factor = (sustainable_roe / market_roe) ** 0.5
+        quality_factor = quality_factor_roe(sustainable_roe, market_roe)
         peer_pe = market_pe * quality_factor
         notes.append(f"Peer P/E (VN-Index fallback {market_pe:.1f}x): quality {quality_factor:.2f} → {peer_pe:.1f}x")
+    elif peer_pe is None:
+        notes.append(f"Sustainable ROE = {sustainable_roe:.1%} <= 0 → không có hệ số "
+                     f"chất lượng → loại cấu phần peer khỏi blend")
+        warnings.append("Sustainable ROE <= 0 (doanh nghiệp lỗ) → loại cấu phần peer "
+                        "P/E khỏi blend; P/E không phù hợp với doanh nghiệp thua lỗ")
 
     # --- 5. Forward P/E (PEG approach) ---
     growth_fwd = growth.get("eps_growth_consensus_fwd", g)
