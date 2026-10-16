@@ -329,12 +329,21 @@ def calculate_ddm(data: Dict[str, Any], forecast_years: int = 8) -> ValuationRes
     current_price = market['current_price']
     dps_ttm = per_share.get('dps_ttm', 0)
 
-    # Nếu không có DPS, ước tính từ payout × EPS
+    # Nếu không có DPS, ước tính từ payout × EPS.
+    #
+    # payout None = normalizer không suy được từ BCTC → KHÔNG thay bằng 0,30.
+    # Mặc định đó bịa ra một dòng cổ tức không có trong báo cáo, và DDM thì
+    # định giá CHÍNH dòng tiền ấy: một con số bịa ở đây thành "fair value"
+    # chứ không thành cảnh báo. Thiếu thì để dps = 0 và DDM tự loại mình ngay
+    # dưới, đúng như khi mã thật sự không trả cổ tức.
     if dps_ttm <= 0:
         eps = per_share.get('eps_ttm', 0)
-        payout = ratios.get('payout_ratio', 0.30)
-        dps_ttm = eps * payout
-        notes.append(f"DPS TTM ước tính = EPS ({eps:.0f}) × payout ({payout:.0%}) = {dps_ttm:.0f}")
+        payout = ratios.get('payout_ratio')
+        if payout is None:
+            notes.append("Không suy được payout từ BCTC → không ước tính DPS, loại DDM")
+        else:
+            dps_ttm = eps * payout
+            notes.append(f"DPS TTM ước tính = EPS ({eps:.0f}) × payout ({payout:.0%}) = {dps_ttm:.0f}")
 
     if dps_ttm <= 0:
         return ValuationResult(
@@ -396,7 +405,9 @@ def calculate_ddm(data: Dict[str, Any], forecast_years: int = 8) -> ValuationRes
 
     # Confidence
     confidence = 0.65  # DDM base lower than DCF (chỉ dùng được cho stable divider)
-    if ratios.get('payout_ratio', 0) > 0.40:
+    # `or 0`: payout None (không suy được) không được so sánh với số — và cũng
+    # không đáng được cộng điểm tin cậy.
+    if (ratios.get('payout_ratio') or 0) > 0.40:
         confidence += 0.10  # high payout → DDM phù hợp hơn
     if ratios.get('dividend_yield', 0) > 0.03:
         confidence += 0.05

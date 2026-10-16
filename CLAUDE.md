@@ -115,6 +115,18 @@ Thiếu `save` thì mọi thứ lượt chạy ghi vào đó đều bị vứt �
   mất). Đổi cổng là đổi origin, tức đổi cache. Kiểm chứng rẻ nhất:
   `fetch('/app.js?x='+Date.now())` rồi so với `renderRow.toString()` của trang
   đang chạy — lệch nhau nghĩa là đang đo bản cũ.
+- **Một tệp bị `.gitignore` vẫn đổi được kết luận của bộ test.** Lượt chạy
+  `run_valuation.py` tại máy ghi ra `backend/data/peer_multiples.json`, và
+  `methods_pe.py` với `methods_ev_ebitda.py` đọc nó **trong lúc chạy test**. CI
+  không bao giờ có tệp đó, nên bộ test đỏ **chỉ ở máy người phát triển, trên mã
+  nguồn hoàn toàn sạch** — người gặp phải sẽ đi tìm lỗi trong thay đổi của
+  mình. Đo 16/10/2026: quét 75 nội dung peer DB, **18 nội dung** làm ba phép
+  kiểm định giá đỏ. Nay fixture `autouse` `_co_lap_peer_db` ở
+  `backend/conftest.py` trỏ `PEER_DB_PATH` sang `tmp_path` cho mọi phép kiểm,
+  và `backend/tests/test_peer_db_co_lap.py` canh nó. Thêm đường dẫn cứng nào
+  vào `backend/data/` thì hỏi ngay hai câu: **CI có tệp này không**, và **test
+  có đọc nó không**. Nới ngưỡng cho tới khi xanh không gỡ được chuyện này —
+  beta 2,7 chỉ hạ từ 18/75 xuống 1/75.
 - **`node --check web/*.js` trước khi tin bộ test Python.** Toàn bộ 1312 phép
   kiểm từng xanh trong khi trang web chết hoàn toàn vì một dấu backtick trong
   template literal. Nay `backend/tests/test_web_cu_phap_js.py` canh, và ci.yml

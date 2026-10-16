@@ -199,8 +199,13 @@ def test_loai_gia_tri_lac_KHONG_lam_do_tin_cay_TANG():
     from scanner.strategies.valuation import value_ticker
     beta = {'fallback': False, 'weak': False, 'std_error': 0.09,
             'r_squared': 0.42, 'method': 'weekly_log_returns_blume_adjusted'}
+    # beta 2,7 chu khong 2,3 — xem chu thich day du cung ngay o
+    # test_beta_exposed.test_beta_qua_cao_lam_DCF_lac_ra...: o 2,3 ty le
+    # DCF/trung vi roi dung tren bien nguong (0,333x), va ca viec sua loi
+    # payout_ratio lan viec chi ton tai backend/data/peer_multiples.json deu
+    # du suc lam phep kiem nay do.
     r = value_ticker('FPT', raw_fundamentals=_bo_du_lieu(
-        beta_info={**beta, 'beta': 2.3}), enrich_market_metrics=False)
+        beta_info={**beta, 'beta': 2.7}), enrich_market_metrics=False)
 
     assert r.methods_excluded, 'cấu hình này phải có phương pháp bị loại'
     # Phân tán phải còn phản ánh ĐỘ LỆCH THẬT, tức vẫn tính cả cái bị loại.
@@ -215,8 +220,9 @@ def test_loai_gia_tri_lac_KHONG_lam_do_tin_cay_TANG():
 def test_phuong_phap_bi_loai_duoc_ghi_ra_dau_ra():
     """Bỏ lặng lẽ một phương pháp là đổi fair value mà không để lại dấu vết."""
     from scanner.strategies.valuation import value_ticker
+    # beta 2,7: cung ly do nhu phep kiem ngay tren.
     r = value_ticker('FPT', raw_fundamentals=_bo_du_lieu(
-        beta_info={'beta': 2.3, 'fallback': False, 'weak': False,
+        beta_info={'beta': 2.7, 'fallback': False, 'weak': False,
                    'std_error': 0.09, 'r_squared': 0.42,
                    'method': 'weekly_log_returns_blume_adjusted'}),
         enrich_market_metrics=False)

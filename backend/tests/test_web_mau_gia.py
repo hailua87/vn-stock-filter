@@ -264,6 +264,14 @@ HEX_DA_CHAP_NHAN = {
     '.strat-badge-gcs': 'cùng nhóm badge chiến lược',
     '.strat-badge-ich': 'cùng nhóm badge chiến lược',
     '.skip-link': 'nền tối cho liên kết bỏ qua — cần tương phản tuyệt đối với --focus',
+    # Ba mục dưới đây KHÔNG phải quyết định màu. `mask-image` chỉ dùng KÊNH
+    # ALPHA của gradient — `#000` nghĩa là "giữ", `transparent` nghĩa là "mờ
+    # hẳn". Đổi `#000` thành bất kỳ màu đục nào cũng cho kết quả y hệt, nên
+    # không có gì để lấy từ token. Phép kiểm này không phân biệt được "màu"
+    # với "alpha", nên phải ghi ra đây.
+    '.strategy-tabs.co-cuon-phai': 'mask alpha, không phải màu',
+    '.strategy-tabs.co-cuon-trai': 'mask alpha, không phải màu',
+    '.strategy-tabs.co-cuon-trai.co-cuon-phai': 'mask alpha, không phải màu',
 }
 
 
