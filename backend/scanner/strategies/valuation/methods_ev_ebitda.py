@@ -77,28 +77,56 @@ def calculate_ev_ebitda_valuation(data: Dict[str, Any], is_cyclical: bool = Fals
     ebitda_5y_avg = cash_flow.get("ebitda_5y_avg", ebitda_ttm)
 
     if is_cyclical:
-        # Mid-cycle EBITDA cho cyclical: dùng cách thận trọng hơn
-        # Lấy max giữa: trung bình 5y, và (revenue TTM × normalized EBITDA margin)
-        revenue_ttm = data.get("income", {}).get("revenue", 0)
-        # Normalized EBITDA margin = trung bình margin các năm "bình thường"
-        # Heuristic: 10% revenue cho hầu hết cyclicals (có thể tùy chỉnh theo ngành)
-        normalized_margin = data.get("cyclical_info", {}).get("normalized_ebitda_margin", 0.10)
-        ebitda_from_revenue = revenue_ttm * normalized_margin
-
-        # Lấy max của 3 approaches để tránh deflate
-        ebitda_candidates = {
-            "5y_avg": ebitda_5y_avg,
-            "ttm_blended": 0.50 * ebitda_5y_avg + 0.50 * ebitda_ttm,
-            "revenue_normalized": ebitda_from_revenue,
-        }
-        ebitda_used = max(ebitda_candidates.values())
-        chosen = max(ebitda_candidates, key=ebitda_candidates.get)
+        # EBITDA mid-cycle = TRỘN 50/50 giữa trung bình chu kỳ và kỳ gần nhất.
+        #
+        # KHÔNG lấy max của nhiều ước lượng. Bản cũ lấy `max` của ba ứng viên
+        # (`5y_avg`, trộn 50/50, và `revenue × 0,10`) với lý do ghi trong mã là
+        # "để tránh deflate". Nhưng ba ứng viên đó là ba ước lượng của CÙNG một
+        # đại lượng, nên kỳ vọng của max cao hơn cả ba — càng thêm ứng viên càng
+        # lệch lên, và lệch về đúng một chiều.
+        #
+        # Ứng viên thứ ba là chỗ vỡ. `cyclical_info` KHÔNG module nào gán (chỉ
+        # có chỗ đọc: engine.py, methods_pb_roe.py, và hai chỗ trong tệp này),
+        # nên `normalized_ebitda_margin` luôn là hằng số 0,10 cho mọi ngành —
+        # tức ứng viên đó là `doanh thu × 10%`, không phải một ước lượng EBITDA.
+        #
+        # Đo trên rổ cache 16/10/2026, 35 mã cyclical (xem PR):
+        #   - 19/35 mã lấy `revenue × 10%` làm `ebitda_used`
+        #   - và 19 mã đó TRÙNG KHỚP HOÀN TOÀN với 19 mã có biên EBITDA thật
+        #     (`ebitda_ttm / revenue`) DƯỚI 10%
+        # Hằng số 0,10 vì vậy không phải "biên chuẩn hoá": nó là bộ chọn nhả
+        # đúng vào các mã biên mỏng, rồi viết lại EBITDA của chúng thành 10%
+        # doanh thu. Biên thật càng mỏng, phóng càng mạnh:
+        #   DHM 0,45% → 22,45x   PLX 1,90% → 5,27x   TTF 2,91% → 3,44x
+        # Trung vị biên thật của rổ là 8,8%, tức DƯỚI mức 10% áp cứng.
+        #
+        # Nặng hơn: hai mã EBITDA ÂM (ABS −513,6 tỷ; DTL −79,3 tỷ) được ứng viên
+        # doanh thu kéo lên dương (17,0 và 186,3), nên vượt được cổng
+        # `ebitda_used <= 0` ở dưới và vẫn ra một mức giá hợp lý. Trộn 50/50 giữ
+        # dấu âm, nên nay hai mã đó bị từ chối định giá — đúng như ý cổng đó.
+        #
+        # Trộn 50/50 là tổ hợp lồi của hai ước lượng từ BCTC, nên nó luôn nằm
+        # giữa chúng và không lệch một chiều. Vẫn là mid-cycle: mã đáy chu kỳ
+        # được tính một nửa theo trung bình 5 năm, không bị ép về kỳ xấu nhất.
+        #
+        # ĐÃ CÂN NHẮC VÀ KHÔNG CHỌN (đừng khảo lại):
+        #   - Trung vị/trung bình của ba ứng viên: vẫn giữ `doanh thu × hằng số`
+        #     trong công thức. Với ba ứng viên thì trung vị gần như luôn ra đúng
+        #     bản trộn, nên nó chỉ là bản trộn kèm một nhánh không ai kiểm được.
+        #   - Kẹp `ebitda_used` trong một dải quanh `ebitda_ttm`: vá hậu quả chứ
+        #     không chạm cơ chế, và lại thêm một hằng số phải tự biện minh.
+        #   - Đòi biên theo từng ngành: không nguồn nào trong kho có
+        #     `normalized_ebitda_margin` thật (đã hỏi: `cyclical_info` không có
+        #     chỗ gán, `normalizer.py` không dựng khoá này, `peer_database` chỉ
+        #     giữ bội số chứ không giữ biên). Thêm hằng số theo ngành tự đặt chỉ
+        #     là đổi một con số bịa thành mười tám con số bịa.
+        # Khoá `normalized_ebitda_margin` bị bỏ hẳn thay vì giữ làm móc treo:
+        # chính một móc treo không ai gán đã để hằng số 0,10 sống im lặng.
+        ebitda_used = 0.50 * ebitda_5y_avg + 0.50 * ebitda_ttm
         notes.append(
-            f"CYCLICAL → EBITDA candidates: 5y_avg={ebitda_5y_avg:,.0f}, "
-            f"ttm_blend={ebitda_candidates['ttm_blended']:,.0f}, "
-            f"rev×margin={ebitda_from_revenue:,.0f}"
+            f"CYCLICAL → EBITDA mid-cycle = 50% × 5y_avg ({ebitda_5y_avg:,.0f}) "
+            f"+ 50% × kỳ gần nhất ({ebitda_ttm:,.0f}) = {ebitda_used:,.0f} tỷ"
         )
-        notes.append(f"Chọn max → {chosen}: {ebitda_used:,.0f} tỷ")
 
         # Guard chia 0: EBITDA 5y avg = 0 từng làm method ném ZeroDivisionError,
         # bị engine nuốt lặng và biến mất khỏi báo cáo mà user không biết.
