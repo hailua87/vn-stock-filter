@@ -431,9 +431,57 @@ function bindStrategyTabs() {
     // `passive`: trinh xu ly chi doc va doi lop, khong goi preventDefault —
     // noi ro de trinh duyet khong phai cho truoc khi cuon.
     dai.addEventListener('scroll', capNhatVienCuon, { passive: true });
+
+    // BA nguon lam `scrollWidth`/`clientWidth` doi, va `scroll` chi phu MOT.
+    // Thieu hai cai duoi thi lop bi CU: con bat trong khi khong con tran.
+    //
+    // Loi that da xay ra: cong `kiem` cua PR #96 do o khung bp-767 bao
+    // `max=0 phai=true`. Luc nap trang, phong du phong rong hon Inter ~10%
+    // nen dai tab TRAN -> bat lop; Inter nap xong, chu hep lai, HET tran —
+    // nhung khong `resize` cung khong `scroll` nao no, nen lop o lai.
+    // O 767px dai tab vua dung sat nguong tran nen no lo ra o day truoc.
+    //
+    // Tai hien duoc khong phu thuoc font: nap o 600px (tran, max=134, lop
+    // bat), roi thu nho `.strat-tab` bang mot the <style> — `max` ve 0 ma lop
+    // van bat.
+    //
+    //   1. ResizeObserver tren CHINH dai tab: bat moi thay doi hop cua no,
+    //      ke ca do cua so doi — nen no thay luon `window.resize`.
+    //   2. `document.fonts.ready`: font nap xong lam BE RONG NOI DUNG doi
+    //      trong khi hop cua dai tab (flex-basis: 100%) KHONG doi, nen
+    //      ResizeObserver co the khong no. Day la ca da gay loi that.
+    if (typeof ResizeObserver === 'function') {
+      const ro = new ResizeObserver(capNhatVienCuon);
+      ro.observe(dai);
+      // PHAI quan sat CA TUNG TAB, khong chi dai tab. Hop cua dai tab khong
+      // doi khi noi dung hep lai: be rong bi `flex-basis: 100%` ghim, va
+      // chieu cao bi `min-height: 44px` cua `@media (pointer: coarse)` ghim.
+      // Do that o 402px cam ung: chu tu 13px xuong 6px, `max` tu 310 ve 0, ma
+      // chieu cao dai tab GIU NGUYEN 50px — nen ResizeObserver chi quan sat
+      // dai tab KHONG NO mot lan nao.
+      //
+      // Ban dau toi chi quan sat dai tab va thu o 600px khong-cam-ung thi
+      // thay dat — vi o do khong co `min-height: 44px` nen chieu cao doi
+      // duoc. Xanh nho dung khung do la xanh gia.
+      dai.querySelectorAll('.strat-tab').forEach(t => ro.observe(t));
+    } else {
+      window.addEventListener('resize', capNhatVienCuon);
+    }
+    // `.catch`: `fonts.ready` khong bao gio reject theo dac ta, nhung neu
+    // mot trinh duyet cu khong co `document.fonts` thi dung de no nem len.
+    try {
+      document.fonts?.ready.then(capNhatVienCuon).catch(() => {});
+    } catch { /* khong co FontFaceSet: da co ResizeObserver lo phan con lai */ }
   }
-  // `resize` vi dai tab chi cuon duoi 1487px: qua nguong thi phai tat het lop.
-  window.addEventListener('resize', capNhatVienCuon);
+  // Goi lan dau. O trinh duyet CO ResizeObserver dong nay la DU — `observe()`
+  // tu phat mot lan quan sat ngay khi goi. Pha thu bang cach xoa no thi KHONG
+  // phep kiem nao do, dung vi ly do do.
+  //
+  // Nhung no GANH VIEC o nhanh `else` (khong co ResizeObserver): o do chi co
+  // `window.resize`, nen thieu dong nay thi lop khong bao gio duoc dat luc
+  // nap trang. Bo do chay Chromium nen khong bao gio di qua nhanh ay — giu
+  // lai la giu mot dong duoc bien minh boi duong ma bo do khong cham toi,
+  // chu khong phai mot dong vo nghia.
   capNhatVienCuon();
 }
 

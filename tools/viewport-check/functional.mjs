@@ -397,6 +397,39 @@ export async function runFunctional(page, isMobile, base) {
       rec('tab:cuon-het-thi-tat-tin-hieu-phai',
           !!cuoi && cuoi.trai && !cuoi.phai,
           cuoi ? `sl=${cuoi.sl} trai=${cuoi.trai} phai=${cuoi.phai}` : 'loi');
+
+      // Lop KHONG duoc CU khi be rong noi dung doi ma khong co `resize` hay
+      // `scroll` nao.
+      //
+      // Loi that: cong `kiem` cua PR #96 bao `bp-767 max=0 phai=true`. Luc nap
+      // trang, phong du phong rong hon Inter ~10% nen dai tab tran -> bat lop;
+      // Inter nap xong, chu hep lai, het tran — nhung khong su kien nao no.
+      // Phep kiem `tab:khong-cuon-thi-khong-tin-hieu` o tren bat duoc ca do,
+      // NHUNG chi vi khung 767px tinh co nam sat nguong tran. Phep kiem duoi
+      // day ep buoc chuyen do xay ra, nen no TAT DINH o moi khung co cuon.
+      const sau = await page.evaluate(async () => {
+        const el = document.querySelector('.strategy-tabs');
+        el.scrollLeft = 0;
+        el.dispatchEvent(new Event('scroll'));
+        await new Promise(r => setTimeout(r, 150));
+        // Thu nho tab de HET tran, y nhu font nap xong lam chu hep lai.
+        // KHONG resize cua so, KHONG cuon.
+        const st = document.createElement('style');
+        st.id = 'bo-do-thu-nho-tab';
+        st.textContent = '.strat-tab{font-size:6px !important;' +
+                         'padding:1px 2px !important;min-width:0 !important}';
+        document.head.appendChild(st);
+        await new Promise(r => setTimeout(r, 600));
+        const ra = { max: el.scrollWidth - el.clientWidth,
+                     trai: el.classList.contains('co-cuon-trai'),
+                     phai: el.classList.contains('co-cuon-phai') };
+        st.remove();                       // tra trang ve nguyen
+        return ra;
+      }).catch(() => null);
+      rec('tab:lop-khong-bi-cu-khi-noi-dung-hep-lai',
+          !!sau && sau.max <= 1 && !sau.trai && !sau.phai,
+          sau ? `sau khi thu nho: max=${sau.max} trai=${sau.trai} phai=${sau.phai}`
+              : 'loi');
     }
   } catch (e) {
     rec('tab:tin-hieu-mep', false, String(e).slice(0, 70));
