@@ -189,7 +189,9 @@ def calculate_ev_ebitda_valuation(data: Dict[str, Any], is_cyclical: bool = Fals
     # ngành Technology có n=4 (FPT 8,0x · CMG 9,2x · VTC 46,8x · UNI 2.723,9x)
     # ⇒ trung vị 28,0x, cao hơn bội số của CẢ HAI mã lành. FPT nhận bội số mục
     # tiêu 28,0x với độ tin cậy 0,75 (cao nhất trong ba phương pháp) ⇒ fair
-    # value 226.134đ trên giá 58.000đ, và +170% đi thẳng vào latest.json.
+    # value 226.134đ trên giá 58.000đ, và fair value tổng hợp +170,5% — QUA được
+    # cả hai cổng công bố (upside <= +200%, confidence >= 0,30), nên lượt chạy
+    # kế tiếp đọc tệp peer DB đó sẽ mang con số này lên trang.
     peer_du_mau = peer_median is not None and (peer_n or 0) >= 3
     peer_hoi_tu = peer_spread is not None and peer_spread <= MAX_PEER_SPREAD
 

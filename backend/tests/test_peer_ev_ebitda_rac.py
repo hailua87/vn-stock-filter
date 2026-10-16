@@ -6,8 +6,14 @@ Lỗi thật đã xảy ra (lượt 200 mã 13/10/2026): ngành Technology có �
 FPT 8,0x · CMG 9,2x · VTC 46,8x · UNI 2.723,9x (UNI: EV 351 tỷ / EBITDA
 0,13 tỷ). Trung vị rổ = 28,0x, CAO HƠN bội số của cả hai mã lành. FPT nhận
 bội số mục tiêu 28,0x với độ tin cậy 0,75 (cao nhất trong ba phương pháp),
-fair value 226.134đ trên giá 58.000đ (+290%), và fair value tổng hợp +170%
-đi thẳng vào latest.json (dưới trần công bố +200%).
+fair value 226.134đ trên giá 58.000đ (+290%), và fair value tổng hợp +170,5%
+QUA được cả hai cổng công bố (upside <= +200%, confidence >= 0,30).
+
+Cẩn thận đọc cho đúng: FPT/CMG KHÔNG nằm trong `web/data/valuation/latest.json`
+đang phục vụ (lượt 11/10/2026, 84/200 mã qua được bộ lọc). Tệp peer DB của lượt
+đó đã bị ghi đè nên không dựng lại được để biết hai mã này nhận bội số nào. Điều
+đo được là: bội số 28,0x nằm trong tệp peer DB production HIỆN TẠI (13/10), và
+với tệp đó thì FPT/CMG qua cổng công bố.
 
 Không phải lỗi đơn vị: EV và EBITDA đều tỷ đồng, đã soát riêng. Mẫu số thật
 sự gần 0 (doanh thu UNI 4,5 tỷ trên vốn góp 426 tỷ).
