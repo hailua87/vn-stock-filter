@@ -53,6 +53,43 @@ INDUSTRY_DEFAULT_EV_EBITDA = {
 }
 
 
+# Rổ peer chỉ được làm bội số MỤC TIÊU khi nó hội tụ. Thước đo: p75/p25 —
+# không đơn vị, và không bị một giá trị cực đoan lôi đi như mean hay max.
+#
+# 4,0 đo trên rổ thật 200 mã (13/10/2026). Độ phân tán p75/p25 của 13 ngành
+# dùng EV/EBITDA:
+#
+#     Industrial_Manufacturing 1,06   Chemicals 1,46   Oil_Gas 1,49
+#     Steel_Metals 1,49   Utilities 1,67   Consumer_Discretionary 1,77
+#     Consumer_Staples 1,92   Logistics_Transport 1,93   Agriculture 2,17
+#     Healthcare 2,77   Diversified_Holding 2,90   Construction 3,02
+#     ─────────────────────────────────────────────────────────────────
+#     Technology 80,19   ← rổ 4 mã, hai mã có EBITDA gần 0
+#
+# Khe giữa 3,02 và 80,19 rộng 26 lần. 4,0 nằm TRÊN mọi rổ còn lành, nên cổng
+# này tự nó KHÔNG đổi câu trả lời nào của lượt 13/10 — nó là dây bẫy cho rổ đã
+# vỡ về cấu trúc, không phải núm xoay cho số liệu đẹp. Hạ xuống 3,0 sẽ loại cả
+# Construction (n=25, trung vị 8,58x hoàn toàn hợp lý) — đó là chỉnh hằng số,
+# không phải sửa lỗi.
+MAX_PEER_SPREAD = 4.0
+
+
+def do_phan_tan_ro_peer(peer_band: Dict[str, Any] | None) -> float | None:
+    """p75/p25 của rổ peer. None khi KHÔNG ĐO ĐƯỢC (thiếu khoá, p25 <= 0).
+
+    None nghĩa là "không biết", và chỗ gọi phải coi đó là KHÔNG DÙNG ĐƯỢC —
+    mặc định bi quan. Mặc định ngược lại nghĩa là một nguồn peer mới quên ghi
+    p25/p75 sẽ lặng lẽ đi qua cổng này.
+    """
+    if not peer_band:
+        return None
+    p25 = peer_band.get('p25')
+    p75 = peer_band.get('p75')
+    if not p25 or not p75 or p25 <= 0:
+        return None
+    return p75 / p25
+
+
 def calculate_ev_ebitda_valuation(data: Dict[str, Any], is_cyclical: bool = False) -> ValuationResult:
     """Định giá theo EV/EBITDA.
 
@@ -165,28 +202,52 @@ def calculate_ev_ebitda_valuation(data: Dict[str, Any], is_cyclical: bool = Fals
 
     peer_median = None
     peer_n = None
+    peer_spread = None
     try:
         from ...peer_database import get_peer_band
         peer_band = get_peer_band(industry, 'ev_ebitda')
         if peer_band and peer_band.get('median'):
             peer_median = peer_band['median']
             peer_n = peer_band.get('n')
+            peer_spread = do_phan_tan_ro_peer(peer_band)
     except Exception:
         pass
 
-    if peer_median is not None and (peer_n or 0) >= 3:
+    # Đủ mã KHÔNG có nghĩa là rổ nói được một con số. Lượt thật 13/10/2026:
+    # ngành Technology có n=4 (FPT 8,0x · CMG 9,2x · VTC 46,8x · UNI 2.723,9x)
+    # ⇒ trung vị 28,0x, cao hơn bội số của CẢ HAI mã lành. FPT nhận bội số mục
+    # tiêu 28,0x với độ tin cậy 0,75 (cao nhất trong ba phương pháp) ⇒ fair
+    # value 226.134đ trên giá 58.000đ, và fair value tổng hợp +170,5% — QUA được
+    # cả hai cổng công bố (upside <= +200%, confidence >= 0,30), nên lượt chạy
+    # kế tiếp đọc tệp peer DB đó sẽ mang con số này lên trang.
+    peer_du_mau = peer_median is not None and (peer_n or 0) >= 3
+    peer_hoi_tu = peer_spread is not None and peer_spread <= MAX_PEER_SPREAD
+
+    if peer_du_mau and peer_hoi_tu:
         base_multiple = peer_median
-        base_source = f"peer median ngành {industry} (n={peer_n})"
+        base_source = (f"peer median ngành {industry} "
+                       f"(n={peer_n}, p75/p25={peer_spread:.2f})")
         peer_backed = True
     else:
         base_multiple = INDUSTRY_DEFAULT_EV_EBITDA.get(
             industry, INDUSTRY_DEFAULT_EV_EBITDA['Unknown'])
-        base_source = f"mặc định ngành {industry} (chưa đủ peer)"
         peer_backed = False
-        warnings.append(
-            f"Chưa có peer EV/EBITDA cho ngành {industry} (cần >= 3 mã) — "
-            f"dùng bội số mặc định {base_multiple:.1f}x, độ tin cậy thấp hơn"
-        )
+        if peer_du_mau:
+            do_phan_tan = ('không đo được'
+                           if peer_spread is None else f"{peer_spread:.1f}×")
+            base_source = f"mặc định ngành {industry} (rổ peer quá phân tán)"
+            warnings.append(
+                f"Rổ peer EV/EBITDA ngành {industry} phân tán quá mức "
+                f"(p75/p25 = {do_phan_tan}, trần {MAX_PEER_SPREAD:.1f}×) — "
+                f"trung vị {peer_median:.1f}x không dùng làm mục tiêu được, "
+                f"dùng bội số mặc định {base_multiple:.1f}x"
+            )
+        else:
+            base_source = f"mặc định ngành {industry} (chưa đủ peer)"
+            warnings.append(
+                f"Chưa có peer EV/EBITDA cho ngành {industry} (cần >= 3 mã) — "
+                f"dùng bội số mặc định {base_multiple:.1f}x, độ tin cậy thấp hơn"
+            )
 
     notes.append(f"Bội số cơ sở = {base_multiple:.1f}x ({base_source})")
     if current_multiple:
