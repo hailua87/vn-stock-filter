@@ -64,8 +64,56 @@ INDUSTRY_RELEVANT_METRICS = {
 }
 
 
+# Trần "có nghĩa" cho MỘT quan sát EV/EBITDA trước khi nó được đếm vào rổ peer.
+#
+# 60,0 KHÔNG phải số chọn cho đẹp. EV/EBITDA là EV chia cho một mẫu số có thể
+# tiến về 0: khi EBITDA ≈ 0 thì tỷ lệ nói về MẪU SỐ BỊ HỎNG, không nói gì về
+# giá thị trường trả cho mỗi đồng EBITDA. Đo trên rổ thật 200 mã (13/10/2026,
+# 196 quan sát), phân vị của toàn bộ quan sát:
+#
+#     p50=9,7  p75=20,5  p90=35,9  p95=48,5  p97=55,4  p98=126,7  p99=308,8
+#     max=2.723,9  (UNI: EV 351 tỷ / EBITDA 0,13 tỷ)
+#
+# Đuôi vỡ ở đâu thì đọc được bằng mắt trên dãy đã xếp: ... 48,3  49,0  49,4
+# 49,5  53,0 │ 69,3  117,2  212,3  307,8  328,0  2.723,9. Dưới 53x là một dải
+# liên tục; từ 69x trở lên là các mã có EBITDA/EV < 1,5% — tức EBITDA gần 0.
+# 60,0 nằm trong khe đó (tương đương đòi EBITDA/EV >= 1,67%) và bỏ 6/196 quan
+# sát = 3,1%. Hai ngưỡng khác đều tệ hơn, và đây là lý do KHÔNG chọn chúng:
+#   · 40x bỏ 19/196 = 9,7% — cắt vào giữa dải liên tục, nơi không có khe nào.
+#     Nó đổi bội số mục tiêu của 8/13 ngành, tức đổi kết luận bằng một hằng số.
+#   · 100x bỏ 5/196 = 2,6% — vẫn để VC9 (117x, EBITDA 1,14 tỷ) vào rổ.
+#
+# Đổi ngưỡng này là đổi kết luận. Phải ĐO LẠI trên rổ thật, không chỉnh cho đẹp.
+MAX_MEANINGFUL_EV_EBITDA = 60.0
+
+# Trần theo từng metric. Chỉ ev_ebitda có mẫu số tiến về 0; pe đã bị chặn bởi
+# `v > 0` trong _compute_stats (lỗ EPS → pe <= 0 → loại), pb/roe/npl_ratio
+# không có dạng vỡ này.
+METRIC_MAX_MEANINGFUL = {
+    'ev_ebitda': MAX_MEANINGFUL_EV_EBITDA,
+}
+
+
+def loc_quan_sat_co_nghia(metric: str, values: List[float]) -> List[float]:
+    """Bỏ các quan sát mà bản thân con số là tạo tác của phép chia, không phải
+    một bội số thị trường. Trả về nguyên list với metric không có trần."""
+    tran = METRIC_MAX_MEANINGFUL.get(metric)
+    if tran is None:
+        return list(values)
+    return [v for v in values if v is not None and v <= tran]
+
+
 def _trim_outliers(values: List[float], q_low: float = 0.10, q_high: float = 0.90) -> List[float]:
-    """Loại bỏ top/bottom 10% để giảm noise (cyclical extremes, data errors)."""
+    """Loại bỏ top/bottom 10% để giảm noise (cyclical extremes, data errors).
+
+    LƯU Ý ĐÃ ĐO: hàm này KHÔNG cứu được rổ nhỏ, và nới `len < 5` cũng không.
+    Rổ Technology thật [8,0 · 9,2 · 46,8 · 2.723,9] cắt 10/90 ở n=4 chỉ còn
+    [9,2 · 46,8] — rơi xuống dưới min_count nên nhánh `trimmed = cleaned` dưới
+    đây trả lại nguyên rổ chưa cắt, và trung vị vẫn là 28,0. Trung vị của rổ 4
+    mã nằm GIỮA hai giá trị giữa, nên nó không bị "một giá trị rác kéo đi" —
+    nó bị rác ĐẨY THỨ HẠNG. Vì vậy bản sửa nằm ở `loc_quan_sat_co_nghia`
+    (lọc trước khi đếm), không ở đây.
+    """
     if len(values) < 5:
         return values
     arr = np.array(values)
@@ -128,6 +176,9 @@ def build_peer_database(valuation_inputs: List[Dict[str, Any]]) -> Dict[str, Any
                 industry_data[metric] = None
                 continue
             values = [r.get(metric) for r in records if r.get(metric) is not None]
+            # Lọc TRƯỚC khi đếm: một quan sát rác không chỉ kéo mean/p75, nó
+            # chiếm một suất trong rổ và đẩy thứ hạng của trung vị.
+            values = loc_quan_sat_co_nghia(metric, values)
             stats = _compute_stats(values)
             industry_data[metric] = stats
 
