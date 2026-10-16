@@ -11,6 +11,7 @@ chúng được thư viện thử lại 3 lần, bỏ đi thì một lỗi lẻ 
 from __future__ import annotations
 
 import os
+import tempfile
 import threading
 import time
 from typing import Any, Callable, Dict, Optional, TypeVar
@@ -123,11 +124,119 @@ def _session() -> requests.Session:
     return s
 
 
+# Nhịp gọi LIÊN TIẾN TRÌNH.
+#
+# `_lock` ở trên là `threading.Lock` — nó chỉ điều tiết trong MỘT tiến trình.
+# Ngày 16/10/2026 có năm phiên làm việc song song trên kho này, mỗi phiên một
+# worktree và một bộ tiến trình riêng, nên trần thật không còn là 1 lượt/giây
+# mà là 1 lượt/giây × số phiên. Cache cũng không dùng chung giữa các worktree
+# (nó bị `.gitignore` nên worktree mới sinh ra là rỗng) — đo được 591 / 200 /
+# 1 / 1 / 0 tệp, tức cùng một dữ liệu bị tải lại nhiều lần.
+#
+# CLAUDE.md mục 3 dặn đừng NỚI `MIN_INTERVAL`, vì nó là mức cố ý chọn để không
+# đập vào máy chủ của bên thứ ba. Chỗ này đi theo đúng lời dặn đó: khoá tệp làm
+# cho năm tiến trình cộng lại vẫn là 1 lượt/giây, chứ không phải năm.
+#
+# Vì sao khoá TỆP mà không phải tệp PID: khoá tệp do hệ điều hành giữ, tiến
+# trình chết thì nó tự nhả. Tệp PID thì để lại khoá mồ và phải tự dò chết/sống
+# — một cơ chế an toàn mà có thể TREO cả lượt chạy là tệ hơn không có.
+#
+# Thời gian ghi trong tệp là thời gian TƯỜNG (`time.time`), không phải
+# `monotonic`: monotonic của hai tiến trình khác nhau không so được với nhau.
+# Bù lại phải chặn trên: đồng hồ nhảy lùi thì không được chờ quá MIN_INTERVAL.
+def _bat_nhip_lien_tien_trinh(moi=None) -> bool:
+    """
+    Đọc cờ bật/tắt. Tách thành hàm để bộ test kiểm được mà KHÔNG phải
+    `importlib.reload` module này.
+
+    `reload` ở đây là thuốc độc: nó tạo lại `_lock`, `_session`, `_stats_lock`,
+    còn các module đã `from .http import request_json` thì vẫn giữ tham chiếu
+    cũ. Phép kiểm cờ bật/tắt bản đầu dùng `reload` và nó làm **4 phép kiểm
+    trong `test_sources.py` đỏ** — nhưng chỉ khi chạy cả bộ, còn chạy riêng thì
+    xanh. Đúng loại lỗi khó tìm nhất.
+    """
+    moi = os.environ if moi is None else moi
+    return moi.get('SOURCE_CROSS_PROCESS_PACE', '1') != '0'
+
+
+NHIP_LIEN_TIEN_TRINH = _bat_nhip_lien_tien_trinh()
+
+# Dùng chung CẢ MÁY là cố ý: năm worktree phải cùng một mốc, nếu mỗi worktree
+# một tệp thì khoá không chặn được gì. `SOURCE_PACE_LOCK` để bộ test trỏ ra
+# `tmp_path` — bộ test chạy song song giữa các worktree mà dùng chung tệp thật
+# thì chính nó lại đụng nhau, đúng cái lỗi đang vá.
+_TEP_NHIP = (os.environ.get('SOURCE_PACE_LOCK')
+             or os.path.join(tempfile.gettempdir(), 'vn-stock-filter-nhip.lock'))
+
+
+def _khoa_doc_quyen(f) -> bool:
+    """Giữ khoá độc quyền trên tệp đang mở. False nếu hệ này không làm được."""
+    try:
+        if os.name == 'nt':
+            import msvcrt
+            f.seek(0)
+            msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        return True
+    except Exception:
+        return False
+
+
+def _nha_khoa(f) -> None:
+    try:
+        if os.name == 'nt':
+            import msvcrt
+            f.seek(0)
+            msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+    except Exception:
+        pass
+
+
+def _nhip_lien_tien_trinh() -> bool:
+    """
+    Điều tiết theo mốc dùng chung giữa các tiến trình.
+
+    True = đã điều tiết xong. False = không làm được, hãy dùng đường trong
+    tiến trình (fail-open: thà gọi hơi dồn còn hơn đứng hẳn).
+    """
+    try:
+        with open(_TEP_NHIP, 'a+') as f:
+            if not _khoa_doc_quyen(f):
+                return False
+            try:
+                f.seek(0)
+                raw = f.read(64).strip()
+                truoc = float(raw) if raw else 0.0
+                cho = min(truoc + MIN_INTERVAL - time.time(), MIN_INTERVAL)
+                if cho > 0:
+                    time.sleep(cho)
+                f.seek(0)
+                f.truncate()
+                f.write(repr(time.time()))
+                f.flush()
+            finally:
+                _nha_khoa(f)
+        return True
+    except Exception:
+        return False
+
+
 def _throttle() -> None:
     global _last_call
     if MIN_INTERVAL <= 0:
         return
     with _lock:
+        if NHIP_LIEN_TIEN_TRINH and _nhip_lien_tien_trinh():
+            # Vẫn cập nhật mốc trong tiến trình: nếu đường liên tiến trình hỏng
+            # giữa lượt chạy, đường dự phòng phải biết lượt gọi vừa rồi là lúc
+            # nào, không thì nó cho gọi ngay lập tức.
+            _last_call = time.monotonic()
+            return
         wait = _last_call + MIN_INTERVAL - time.monotonic()
         if wait > 0:
             time.sleep(wait)

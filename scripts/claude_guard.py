@@ -60,6 +60,89 @@ def _trong_kho(duong_dan: str) -> bool:
     return False
 
 
+def _trong_worktree_phu() -> bool:
+    """
+    Đang ở worktree phụ, hay ở checkout chính?
+
+    Không dò theo đường dẫn `.claude/worktrees/` — đó là quy ước của ứng dụng,
+    đổi lúc nào không biết. Dò bằng chính git: trong worktree phụ thì `--git-dir`
+    trỏ vào `.git/worktrees/<tên>` còn `--git-common-dir` trỏ về `.git` gốc;
+    ở checkout chính hai cái TRÙNG nhau.
+
+    `--path-format=absolute` là BẮT BUỘC, không phải cho đẹp. Bản đầu dùng
+    `--absolute-git-dir` cặp với `--git-common-dir`, mà cái thứ hai trả đường
+    TƯƠNG ĐỐI (`.git`) — hai chuỗi không bao giờ bằng nhau, nên checkout chính
+    cũng bị coi là worktree phụ và luật chặn đúng cái phiên được phép merge.
+    Phép kiểm cũ `test_cho_qua_lenh_binh_thuong[gh pr merge 42 --squash]` bắt
+    được; phép kiểm mới KHÔNG, vì nó giả lập chính hàm này.
+    """
+    try:
+        r = subprocess.run(['git', 'rev-parse', '--path-format=absolute',
+                            '--git-dir', '--git-common-dir'],
+                           capture_output=True, text=True, timeout=5)
+        dong = [d.strip() for d in r.stdout.splitlines() if d.strip()]
+        if len(dong) != 2:
+            return False          # không đọc được -> fail-open
+        rieng, chung = (d.replace('\\', '/').rstrip('/') for d in dong)
+        return rieng != chung
+    except Exception:
+        return False
+
+
+def _cong_trong_lenh(c: str) -> int | None:
+    """
+    Cổng mà `python -m http.server` trong lệnh này sẽ chiếm, hoặc None.
+
+    Cổng có thể đứng trước hoặc sau các tham số (`http.server 8801 --bind ...`
+    và `http.server --bind 127.0.0.1 8801` đều hợp lệ), nên phải quét token chứ
+    không khớp một khuôn cố định. Không có số nào thì `http.server` dùng 8000 —
+    và đó chính là cổng hay đụng nhau nhất.
+    """
+    m = re.search(r'\bpython[0-9.]*\s+-m\s+http\.server\b', c)
+    if not m:
+        return None
+    duoi = re.split(r'[;&|]', c[m.end():])[0].split()
+    i = 0
+    while i < len(duoi):
+        t = duoi[i]
+        if t.startswith('-'):
+            # `--bind X` / `-b X` / `-d X` ăn thêm một token; `--foo=X` thì không.
+            if '=' not in t and i + 1 < len(duoi) and not duoi[i + 1].startswith('-'):
+                i += 1
+        elif t.isdigit():
+            return int(t)
+        i += 1
+    return 8000
+
+
+def _cong_dang_bi_giu(cong: int) -> bool:
+    """
+    Có tiến trình nào đang giữ cổng này chưa?
+
+    Thử BUỘC vào cổng, không đọc `netstat`: netstat phải phân tích chuỗi, khác
+    nhau giữa Windows và ubuntu, và từng là nguồn kết luận sai ở kho này. Buộc
+    được thì cổng trống.
+
+    Không đặt `SO_REUSEADDR`, nhưng ĐỪNG tin rằng đặt vào thì hỏng — tôi từng
+    viết thế vào đây mà chưa đo. Đo ngày 16/10/2026 trên Windows, cổng đang
+    LISTEN: không đặt thì bị từ chối (WSAEADDRINUSE 10048), đặt vào cũng bị từ
+    chối (errno 13). `SO_REUSEADDR` chỉ cho dùng lại cổng ở TIME_WAIT, không
+    cho chen vào cổng đang nghe — trên ubuntu cũng vậy. Thứ thật sự làm mất khả
+    năng phát hiện là `SO_REUSEPORT` (chỉ có trên Linux), nên đừng thêm nó.
+    """
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.bind(('127.0.0.1', cong))
+        return False
+    except OSError:
+        return True
+    except Exception:
+        return False              # fail-open
+    finally:
+        s.close()
+
+
 def bo_heredoc(cmd: str) -> str:
     """
     Gỡ phần THÂN của mọi heredoc. Thân heredoc là DỮ LIỆU, không phải lệnh.
@@ -154,6 +237,35 @@ def kiem(cmd: str) -> str | None:
             return ('Luật đứng của kho: KHÔNG merge vào `main` khi chưa được '
                     'chủ kho duyệt. Dùng `gh pr merge` sau khi được duyệt. '
                     '(CLAUDE.md mục 1.)')
+
+    # --- 3. Chỉ checkout chính được merge PR -------------------------------
+    #
+    # Ngày 16/10/2026 có NĂM phiên chạy song song trên kho này, mỗi phiên một
+    # worktree, và chúng tự sinh ra nhau. `main` nhảy 5 lần trong một buổi
+    # (#96 → #97 → #98 → commit dữ liệu → #100). Hệ quả không phải xung đột
+    # tệp — worktree cô lập chuyện đó — mà là: CI xanh trên `main` CŨ không nói
+    # gì về `main` MỚI, và chính tôi đã so các nhánh với `main` cục bộ đã lùi
+    # 1 commit rồi rút ra bộ số vô nghĩa.
+    #
+    # Dồn quyền merge về một chỗ thì `main` chỉ nhảy ở nơi biết nó đang nhảy.
+    # Chặn `gh pr merge`, KHÔNG chặn `gh pr create/view/checks` — các phiên phụ
+    # vẫn mở PR và đọc cổng bình thường.
+    if re.search(r'\bgh\s+pr\s+merge\b', c) and _trong_worktree_phu():
+        return ('Chỉ checkout CHÍNH được merge PR — đây là worktree phụ. Mở PR '
+                'ở đây thì được, còn merge thì để phiên ở checkout chính làm, '
+                'sau khi `git fetch` và kiểm nhánh có đứng trên `origin/main` '
+                'hiện tại. (CLAUDE.md mục 1.)')
+
+    # --- 4. Hai máy chủ cùng một cổng --------------------------------------
+    #
+    # CLAUDE.md mục 7: hai `python -m http.server` cùng cổng trên Windows chia
+    # yêu cầu BẤT ĐỊNH và làm treo bộ đo bố cục. Với nhiều phiên song song thì
+    # mặc định 8000 gần như chắc chắn đụng.
+    cong = _cong_trong_lenh(c)
+    if cong is not None and _cong_dang_bi_giu(cong):
+        return (f'Cổng {cong} đã có tiến trình khác giữ. Hai `http.server` cùng '
+                f'cổng chia yêu cầu bất định và làm TREO bộ đo bố cục — chọn '
+                f'cổng khác, hoặc dừng tiến trình đang giữ. (CLAUDE.md mục 7.)')
 
     return None
 
