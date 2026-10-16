@@ -92,7 +92,41 @@ Do hoi quy o moi viewport, ca hai che do cua `.chip-row` (flex >1280px, grid
 thiet bi cam ung. Khong phai loi tran, nhung khong ai chu y — `.icon-btn` duoc
 thiet ke la o vuong.
 
-## 4. Dai tab cuon ngang khong co tin hieu bao con tab ben phai
+## 4. Dai tab cuon ngang khong co tin hieu bao con tab ben phai — DA SUA 15/10/2026
+
+> **DA SUA 15/10/2026.** Mep dai tab mo dan bang `mask-image`, hai lop
+> `co-cuon-trai` / `co-cuon-phai` do `capNhatVienCuon()` bat/tat theo
+> `scrollLeft` that.
+>
+> **Do lai truoc khi sua thi TE HON con so ghi duoi day**, vi hai tab duoc
+> them sau (Hom nay, MA7x25):
+>
+> | khung | scrollWidth | clientWidth | bi an |
+> |---|---|---|---|
+> | 402px | 696 | 386 | 310px |
+> | 375px | 718 | 359 | **dung mot nua** |
+>
+> (Ghi chep goc noi 542/386, hoi con 6 tab.) Cung dang so lieu mục trong tai
+> lieu nay bi trôi nhu con so 1708px o muc 7 — **do lai truoc khi tin**.
+>
+> **Vi sao `mask-image` chu khong phai lop phu, mui ten, hay thanh cuon:**
+> bo do co phep kiem `tab:cuoi-toi-duoc-sau-khi-cuon` dung
+> `elementFromPoint`. Mot lop phu hay mot nut mui ten se CHAN diem do va bien
+> mot tin hieu thi giac thanh loi chuc nang. Mask khong nhan su kien con tro,
+> khong doi bo cuc, khong doi vung cuon.
+>
+> **Tin hieu phai THEO vi tri cuon, khong duoc to co dinh.** Lam mo ben phai
+> khi da cuon het la noi doi, va mot tin hieu sai con te hon khong co tin
+> hieu. Ba phep kiem hanh vi moi trong `functional.mjs` canh dung chuyen do,
+> va chung chay o MOI khung — nhanh "khong cuon duoc thi khong mo gi" (desktop
+> tu 1487px) cung duoc kiem, neu khong thi nhanh do khong ai canh.
+>
+> Da pha cho do 5/5 cach pha. Mot "lo hong" o luot dau hoa ra la MA CUA TOI
+> DU, khong phai phep kiem yeu: trinh duyet kep `scrollLeft` trong `[0, max]`
+> nen hai dieu kien bien da tu phu truong hop khong cuon duoc, va bien
+> `co = max > 1` khong bao gio doi ket qua. Da bo.
+
+### Ghi chep goc (truoc 15/10/2026)
 
 Phat sinh tu commit 2 (`ef88f16`). Truoc do tab bi bop cho vua man hinh nen
 nguoi dung thay het (du chu dinh vao nhau). Nay dai tab cuon dung cach —
