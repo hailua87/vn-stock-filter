@@ -37,8 +37,25 @@ from scanner import peer_database  # noqa: E402
 TEP_THAT = (Path(peer_database.__file__).resolve().parent.parent
             / 'data' / 'peer_multiples.json')
 
-# Nội dung đã ĐO ĐƯỢC là lật kết luận của `test_valuation_loai_lac.py` ở beta
-# 2,3: tỷ lệ DCF/trung vị nhảy từ 0,3327 (bị loại) lên 1,0000 (không loại gì).
+# Beta dùng cho fixture FPT ở đây. PHẢI khớp với `test_valuation_loai_lac.py`
+# và `test_beta_exposed.py`: cả ba chốt vào cùng một ngưỡng loại lạc, nên để
+# lệch nhau là tự tạo ba mốc chuẩn khác nhau cho cùng một hiện tượng.
+#
+# 2,3 → 2,7 ngày 16/10/2026, khi PR #99 gặp PR #97 (sửa lỗi payout_ratio).
+# Ở 2,3 tỷ lệ DCF/trung vị nằm ngay trên biên ngưỡng 1/3 và bản sửa payout đẩy
+# nó qua — đo được, không có peer DB:
+#
+#       beta 2,3: DCF 39.825 / trung vị 118.248 = 0,3368  → KHÔNG loại gì
+#       beta 2,7: DCF 30.394 / trung vị 116.178 = 0,2616  → DCF bị loại
+#
+# Đúng cái mà docstring của `test_noi_dung_peer_DB_la_don_bay_that` đã lường:
+# "fixture FPT đã dịch xa biên đến mức nội dung không lật nổi". Nửa thứ hai vẫn
+# lật được ở 2,7 (đo: 2,5 / 2,7 / 3,0 / 3,3 đều giữ đúng cả hai nửa), nên lớp
+# cô lập vẫn là thứ chịu lực — chỉ mốc chuẩn dịch.
+BETA_LOAI_LAC = 2.7
+
+# Nội dung đã ĐO ĐƯỢC là lật kết luận của `test_valuation_loai_lac.py`: tỷ lệ
+# DCF/trung vị nhảy từ 0,2616 (bị loại) lên 1,0000 (không loại gì).
 # Technology vì fixture FPT thuộc ngành đó ('Computer Services' → Technology).
 NOI_DUNG_LAT_KET_LUAN = {
     'updated_at': '2026-10-16T00:00:00',
@@ -59,7 +76,7 @@ NOI_DUNG_LAT_KET_LUAN = {
 }
 
 
-def _co_loai_phuong_phap_nao(beta: float = 2.3) -> bool:
+def _co_loai_phuong_phap_nao(beta: float = BETA_LOAI_LAC) -> bool:
     """Chạy engine trên đúng fixture FPT của `test_valuation_loai_lac.py`."""
     from scanner.strategies.valuation import value_ticker
     from test_valuation_loai_lac import _bo_du_lieu
@@ -125,10 +142,10 @@ def test_noi_dung_peer_DB_la_don_bay_that(tmp_path, monkeypatch):
     trong kho.
     """
     assert _co_loai_phuong_phap_nao() is True, (
-        'không có peer DB thì fixture FPT ở beta 2,3 phải có phương pháp bị '
-        'loại — đo được tỷ lệ DCF/trung vị = 0,3327 so với ngưỡng 0,3333. '
-        'Beta 2,3 là con số của phép kiểm NÀY, không đọc từ tệp khác, nên nó '
-        'không đổi theo beta mà test_valuation_loai_lac.py dùng.')
+        f'không có peer DB thì fixture FPT ở beta {BETA_LOAI_LAC} phải có '
+        f'phương pháp bị loại — đo được tỷ lệ DCF/trung vị = 0,2616 so với '
+        f'ngưỡng 0,3333. Xem chú thích của BETA_LOAI_LAC: ở 2,3 tỷ lệ nằm '
+        f'ngay trên biên và bản sửa payout_ratio (PR #97) đẩy nó qua.')
 
     tep = tmp_path / 'peer_multiples.json'
     tep.write_text(json.dumps(NOI_DUNG_LAT_KET_LUAN, ensure_ascii=False),

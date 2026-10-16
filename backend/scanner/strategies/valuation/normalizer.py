@@ -115,6 +115,13 @@ def _safe_float(v, default=0.0) -> float:
         return default
 
 
+# Cổ tức tiền mặt đã trả trên báo cáo lưu chuyển tiền tệ (TỶ ĐỒNG, dấu âm =
+# tiền ra). Dùng ở HAI chỗ — suy `payout_ratio` và suy `dps_ttm` — nên để một
+# chỗ duy nhất, đừng chép lại danh sách.
+DIVIDENDS_PAID_ALIASES = [
+    'dividends_paid', 'dividend_paid', 'payment_of_dividends', 'co_tuc_da_tra',
+]
+
 # Mệnh giá cổ phiếu niêm yết tại Việt Nam (Luật Chứng khoán): 10.000 VND/cp
 PAR_VALUE_VND = 10_000
 PAID_IN_CAPITAL_ALIASES = ['paid_in_capital', 'common_shares', 'charter_capital', 'von_gop']
@@ -266,8 +273,86 @@ def normalize_fundamentals(raw: Dict[str, Any]) -> Dict[str, Any]:
     if ratios.get('roe_ttm', 0) == 0 and roe_5y:
         ratios['roe_ttm'] = roe_5y[0]
 
-    # Default values nếu missing
-    ratios.setdefault('payout_ratio', 0.30)
+    # === payout_ratio: suy từ BCTC, KHÔNG lấy mặc định 0,30 ===
+    #
+    # Dòng cũ ở đây là `ratios.setdefault('payout_ratio', 0.30)` — MÃ CHẾT.
+    # Vòng lặp ratio ngay trên đã gán khoá này cho MỌI mã (thiếu dữ liệu thì
+    # `_safe_float` trả 0.0), nên `setdefault` không bao giờ có hiệu lực. Và từ
+    # 26/09/2026 bảng `ratio` của VCI không còn được lấy nữa (xem docstring của
+    # `fetch_financial_statements`), nên `r0` LUÔN rỗng và payout_ratio là 0.0
+    # cho 100% rổ. Đo ngày 15/10/2026 trên 200 mã: 0,0 ở tất cả. Hệ quả:
+    #   - `justified_pe = payout/(coe-g) = 0` → bị loại khỏi blend ở MỌI mã,
+    #     mất 30% trọng số mà không ai thấy (methods_pe.py)
+    #   - `g = ROE × (1 - 0)` = TOÀN BỘ ROE → luôn đụng trần GDP growth
+    #   - `dps_ttm = eps × 0 = 0` khi lưu chuyển tiền tệ không có cổ tức → DDM
+    #     trả 0 và bị loại
+    #
+    # 0,30 KHÔNG phải mặc định đúng. Áp một chính sách cổ tức 30% cho mọi mã là
+    # bịa số, và kho này đã bác đúng khuôn đó hai lần: historical multiples
+    # thiếu thì để None cho method tự loại cấu phần (ngay dưới), còn DPS thì
+    # "không suy từ giá" (xem FIX CIRCULARITY ở khối per_share).
+    #
+    # Thú vị và đáng ghi: trung vị payout 5 năm đo được là 0,287 — gần đúng
+    # 0,30. Nên 0,30 là một ước lượng TRUNG TÂM tử tế, và đó chính là lý do lỗi
+    # này sống sót lâu: con số không bao giờ trông vô lý. Nhưng áp trung vị cho
+    # mọi mã thì xoá sạch khác biệt giữa các mã, mà khác biệt đó mới là thứ
+    # định giá tương đối cần. VCB trả 11% và VNM trả 120% không thể cùng 30%.
+    #
+    # Cổ tức THẬT nằm ngay trong báo cáo lưu chuyển tiền tệ mà pipeline vốn đã
+    # lấy, nên suy từ đó:
+    #
+    #     payout = tổng cổ tức tiền mặt đã trả / tổng lợi nhuận cổ đông mẹ
+    #
+    # Cả hai đều TỶ ĐỒNG (CLAUDE.md §2) nên tỷ số không đơn vị — và với một năm
+    # thì bằng đúng `dps_ttm / eps_ttm` vì hai vế cùng chia cho số cổ phiếu.
+    #
+    # Số 0 ở đây là số THẬT, không phải thiếu dữ liệu: bảng lưu chuyển tiền tệ
+    # luôn materialize dòng `dividends_paid` (ô trống = 0), nên mã không trả cổ
+    # tức TIỀN MẶT cho 0 đúng nghĩa — đo 15/10/2026: KDH, STB, VRE, HDB, PDR,
+    # NVL đều 0 và đều đúng (bốn mã đầu trả cổ tức bằng cổ phiếu).
+    #
+    # Chỉ khi KHÔNG tính được thì để None: lỗ (payout vô nghĩa khi mẫu số âm)
+    # hoặc không có bảng lưu chuyển tiền tệ. None ≠ 0 — các method phải tự loại
+    # cấu phần, và `payout_source` để kiểm lại được từ chính đầu ra.
+    #
+    # LẤY NHIỀU NĂM, không lấy một năm. Đo 15/10/2026 trên 200 mã cho thấy
+    # payout một năm nổ ra vô nghĩa khi lợi nhuận sụt mà cổ tức vẫn trả từ lợi
+    # nhuận giữ lại các năm trước:
+    #
+    #            payout 1 năm      payout 5 năm
+    #   HAX         23,18             0,394
+    #   NTL          7,00             0,652
+    #   CTF          5,25             0,206
+    #   số mã > 1,0    20                10
+    #   số mã > 2,0     8                 1
+    #   lớn nhất     23,18              2,10
+    #
+    # HAX payout 2.317% kéo justified_pe lên 207x — một con số như vậy vào blend
+    # với 30% trọng số còn tệ hơn việc bị loại. Tổng nhiều năm là ước lượng
+    # chuẩn cho tỷ lệ chi trả BỀN VỮNG, và Gordon vốn là mô hình vĩnh viễn nên
+    # nó cần đúng con số bền vững ấy, không phải ảnh của một năm xấu.
+    payout_reported = _get_field(r0, RATIO_ALIASES['payout_ratio'])
+    if payout_reported is not None:
+        ratios['payout_source'] = 'reported'
+    else:
+        div_5y = _extract_history(cf_records, DIVIDENDS_PAID_ALIASES)
+        profit_5y = income['net_profit_parent_5y']
+        n = min(len(div_5y), len(profit_5y))
+        tong_co_tuc = sum(abs(x) for x in div_5y[:n])
+        tong_loi_nhuan = sum(profit_5y[:n])
+        if n and tong_loi_nhuan > 0:
+            tho = tong_co_tuc / tong_loi_nhuan
+            # Trần 1,0: payout > 100% KHÔNG duy trì được vĩnh viễn (phải rút
+            # vốn chủ), nên với mô hình vĩnh viễn nó là 100%. Vẫn còn 10 mã
+            # vượt 1,0 sau khi tính 5 năm, cao nhất 2,10 — trần giữ
+            # justified_pe trong dải lành mạnh (1,0/CoE ≈ 9x thay vì 207x).
+            # Ghi vào `payout_source` để trần không bao giờ tàng hình.
+            ratios['payout_ratio'] = min(tho, 1.0)
+            ratios['payout_source'] = 'cash_flow_5y_capped' if tho > 1.0 else 'cash_flow_5y'
+        else:
+            ratios['payout_ratio'] = None
+            ratios['payout_source'] = 'unavailable'
+
     if ratios.get('pe_ttm', 0) == 0 and current_price and shares > 0 and net_profit_parent > 0:
         eps_calc = (net_profit_parent * 1_000_000_000) / shares
         ratios['pe_ttm'] = current_price / eps_calc
@@ -322,19 +407,24 @@ def normalize_fundamentals(raw: Dict[str, Any]) -> Dict[str, Any]:
     dps_ttm = _safe_float(_get_field(r0, [
         'dps', 'dividend_per_share', 'cash_dividend_per_share', 'co_tuc_tien_mat',
     ]))
-    dps_source = 'reported'
+    # 'reported' chỉ khi bảng ratio THẬT có DPS. Trước đây biến này khởi tạo
+    # bằng 'reported' nên mã không qua được bậc nào vẫn mang nhãn "công bố" với
+    # dps = 0 — nhãn nguồn sai làm bộ đếm `dps_source` nói ngược sự thật.
+    dps_source = 'reported' if dps_ttm > 0 else 'unavailable'
 
     if dps_ttm <= 0:
-        dividends_paid = abs(_safe_float(_get_field(cf0, [
-            'dividends_paid', 'dividend_paid', 'payment_of_dividends',
-            'co_tuc_da_tra',
-        ])))
+        dividends_paid = abs(_safe_float(_get_field(cf0, DIVIDENDS_PAID_ALIASES)))
         if dividends_paid > 0 and shares > 0:
             dps_ttm = (dividends_paid * 1_000_000_000) / shares
             dps_source = 'cash_flow'
 
-    if dps_ttm <= 0 and eps_ttm > 0:
-        dps_ttm = eps_ttm * ratios.get('payout_ratio', 0.30)
+    # Bậc 3 chỉ còn ý nghĩa khi payout đến từ bảng ratio ('reported'): nếu payout
+    # được suy từ chính `dividends_paid` ở trên thì bậc 2 đã dùng hết dữ liệu đó,
+    # và eps × payout chỉ dựng lại đúng con số vừa ra 0. payout None thì bỏ hẳn
+    # bậc này — nhân với 0,30 bịa ra một mức cổ tức không có trong BCTC.
+    payout_for_dps = ratios.get('payout_ratio')
+    if dps_ttm <= 0 and eps_ttm > 0 and payout_for_dps:
+        dps_ttm = eps_ttm * payout_for_dps
         dps_source = 'eps_x_payout'
 
     per_share = {
