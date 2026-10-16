@@ -275,3 +275,145 @@ def test_van_chan_khi_chuyen_VE_main_roi_merge(monkeypatch):
     assert G.kiem('git checkout main && git merge feat/abc') is not None
     monkeypatch.setattr(G, '_nhanh_hien_tai', lambda: 'main')
     assert G.kiem('git checkout main && git merge feat/abc') is not None
+
+
+# ── Chỉ checkout chính được merge PR ───────────────────────────────────────
+#
+# Ngày 16/10/2026 đo được NĂM phiên làm việc song song trên kho này, mỗi phiên
+# một worktree, và chúng tự sinh ra nhau. `main` nhảy 5 lần trong một buổi.
+# Worktree cô lập tệp nên không xung đột nội dung — cái đụng nhau là `main`:
+# CI xanh trên `main` CŨ không nói gì về `main` MỚI.
+
+@pytest.mark.parametrize('cmd', [
+    'gh pr merge 96 --squash',
+    'gh pr merge --squash --delete-branch=false 101',
+    'cd backend && gh pr merge 99 --merge',
+])
+def test_chan_merge_PR_tu_worktree_phu(monkeypatch, cmd):
+    monkeypatch.setattr(G, '_trong_worktree_phu', lambda: True)
+    monkeypatch.setattr(G, '_cong_dang_bi_giu', lambda c: False)
+    assert G.kiem(cmd) is not None
+
+
+def test_cho_qua_merge_PR_o_checkout_chinh(monkeypatch):
+    monkeypatch.setattr(G, '_trong_worktree_phu', lambda: False)
+    monkeypatch.setattr(G, '_cong_dang_bi_giu', lambda c: False)
+    assert G.kiem('gh pr merge 96 --squash') is None
+
+
+@pytest.mark.parametrize('cmd', [
+    'gh pr create --fill',
+    'gh pr view 96 --json state',
+    'gh pr checks 96 --watch',
+    'gh pr list --state open',
+    'gh pr comment 96 --body "xong"',
+])
+def test_worktree_phu_van_mo_va_doc_PR_binh_thuong(monkeypatch, cmd):
+    """
+    Luật là "chỉ chặn MERGE", không phải "chặn gh". Phiên phụ vẫn phải mở được
+    PR và đọc được cổng, nếu không thì cách làm việc nhiều phiên đứng hẳn — và
+    một cổng chặn làm người ta không làm được việc sẽ bị tắt đi.
+    """
+    monkeypatch.setattr(G, '_trong_worktree_phu', lambda: True)
+    monkeypatch.setattr(G, '_cong_dang_bi_giu', lambda c: False)
+    assert G.kiem(cmd) is None
+
+
+def test_khong_doc_duoc_git_thi_cho_qua(monkeypatch):
+    """Fail-open: `git rev-parse` hỏng thì không được chặn oan."""
+    def hong(*a, **k):
+        raise OSError('git không có ở đây')
+    monkeypatch.setattr(G.subprocess, 'run', hong)
+    assert G._trong_worktree_phu() is False
+
+
+# ── Hai máy chủ cùng một cổng ──────────────────────────────────────────────
+#
+# CLAUDE.md mục 7: hai `python -m http.server` cùng cổng trên Windows chia yêu
+# cầu BẤT ĐỊNH và làm treo bộ đo bố cục.
+
+@pytest.mark.parametrize('cmd,mong_doi', [
+    ('python -m http.server 8801', 8801),
+    ('python -m http.server 8801 --bind 127.0.0.1', 8801),
+    ('python -m http.server --bind 127.0.0.1 8801', 8801),
+    ('python -m http.server --directory web 8801', 8801),
+    # Ca DUY NHAT lam phan bo qua gia tri tham so co tac dung: gia tri cua
+    # tham so la toan CHU SO. Khong co ca nay thi doan do la ma chet — pha no
+    # di ma moi phep kiem van xanh, da do 16/10/2026.
+    ('python -m http.server --directory 2026 8801', 8801),
+    ('python -m http.server --bind 127.0.0.1 --directory 2026 8801', 8801),
+    ('python3 -m http.server', 8000),
+    ('python -m http.server --bind 127.0.0.1', 8000),
+    ('cd web && python -m http.server 9000 & sleep 1', 9000),
+    ('ls -la', None),
+    ('grep -n "http.server" docs/*.md', None),
+])
+def test_doc_dung_cong_trong_lenh(cmd, mong_doi):
+    """
+    Cổng đứng TRƯỚC hay SAU tham số đều hợp lệ, và không có số thì
+    `http.server` dùng 8000 — đúng cái cổng hay đụng nhau nhất.
+    """
+    assert G._cong_trong_lenh(cmd) == mong_doi
+
+
+def test_chan_khi_cong_da_co_nguoi_giu_do_THAT(monkeypatch):
+    """
+    Buộc một cổng thật rồi hỏi cổng chặn, không giả lập: `_cong_dang_bi_giu`
+    dựa vào hành vi của socket, mà hành vi đó khác nhau giữa Windows và ubuntu
+    (`SO_REUSEADDR`, buộc theo giao diện). Giả lập thì không đo được chỗ đó.
+    """
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('127.0.0.1', 0))
+    s.listen(1)
+    cong = s.getsockname()[1]
+    try:
+        assert G._cong_dang_bi_giu(cong) is True
+        monkeypatch.setattr(G, '_trong_worktree_phu', lambda: False)
+        ly_do = G.kiem(f'python -m http.server {cong}')
+        assert ly_do is not None and str(cong) in ly_do
+    finally:
+        s.close()
+    # Nhả ra thì phải cho qua ngay — nếu không, cổng chặn sẽ chặn vĩnh viễn.
+    assert G._cong_dang_bi_giu(cong) is False
+
+
+def test_cho_qua_khi_cong_con_trong(monkeypatch):
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('127.0.0.1', 0))
+    cong = s.getsockname()[1]
+    s.close()
+    monkeypatch.setattr(G, '_trong_worktree_phu', lambda: False)
+    assert G.kiem(f'python -m http.server {cong}') is None
+
+
+def test_nhan_biet_worktree_tren_kho_THAT(tmp_path, monkeypatch):
+    """
+    Dựng kho git thật + worktree thật, không giả lập `_trong_worktree_phu`.
+
+    Mọi phép kiểm ở trên đều monkeypatch chính hàm này, nên chúng KHÔNG thấy
+    được bản đầu của nó hỏng: nó cặp `--absolute-git-dir` (đường tuyệt đối) với
+    `--git-common-dir` (đường TƯƠNG ĐỐI), hai chuỗi không bao giờ bằng nhau,
+    nên checkout chính cũng bị coi là worktree phụ — tức luật chặn đúng cái
+    phiên được phép merge. Đây là phép kiểm duy nhất ở đây bắt được chuyện đó.
+    """
+    kho = tmp_path / 'kho'
+    kho.mkdir()
+    def g(*a, cwd=kho):
+        subprocess.run(['git', *a], cwd=cwd, check=True,
+                       capture_output=True, text=True)
+    g('init', '-q')
+    g('-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-q',
+      '--allow-empty', '-m', 'dau')
+
+    monkeypatch.chdir(kho)
+    assert G._trong_worktree_phu() is False, (
+        'checkout chính bị coi là worktree phụ — luật sẽ chặn đúng phiên được '
+        'phép merge')
+
+    phu = tmp_path / 'phu'
+    g('worktree', 'add', '-q', '-b', 'nhanh/phu', str(phu))
+    monkeypatch.chdir(phu)
+    assert G._trong_worktree_phu() is True, (
+        'worktree phụ không được nhận ra — luật mất tác dụng hoàn toàn')

@@ -19,7 +19,10 @@ tiếng Việt. Giữ như vậy.
   của phiên, không phải `tools/` hay `backend/`.
 - Nhánh đã merge thì xoá cả local lẫn origin. Vì dự án dùng **squash merge**,
   `git branch --merged` sẽ **không** nhận ra nhánh — phải kiểm bằng **nội dung**
-  (diff với `main` rỗng) trước khi xoá.
+  trước khi xoá. Dùng `scripts/kiem-nhanh-da-vao-main.sh <nhánh>`, **đừng tự
+  đọc `git diff main <nhánh>`**: diff lẫn hai chiều (xem mục 13).
+- **Chỉ checkout chính được `gh pr merge`.** Phiên ở worktree phụ mở PR thì
+  được, merge thì không — `scripts/claude_guard.py` chặn. Lý do ở mục 13.
 
 ---
 
@@ -55,6 +58,14 @@ Vietcap và KBS qua `backend/scanner/sources/`. Đừng thêm lại hai gói đ�
 khi đang giữ khoá, nên **song song hoá vô ích** — đã đo hai lần (cục bộ và trên
 runner), cả hai ra **0,99×**. Nới nó ra nghĩa là đập vào máy chủ của bên thứ ba
 mạnh hơn mức mã này cố ý cho phép. Đừng "tối ưu" chỗ này.
+
+Nhịp đó tính **chung cho cả máy**, không riêng từng tiến trình: `threading.Lock`
+chỉ điều tiết trong một tiến trình, nên nhiều phiên song song từng biến trần
+thành 1 lượt/giây **nhân** số phiên (mục 13). Nay có thêm khoá tệp ở
+`%TEMP%/vn-stock-filter-nhip.lock`. Tắt bằng `SOURCE_CROSS_PROCESS_PACE=0` — chỉ
+để **đo lại hành vi cũ bằng cùng một thước**, không phải để chạy nhanh hơn.
+Khoá **tệp** chứ không phải tệp PID là cố ý: hệ điều hành nhả khoá khi tiến
+trình chết, nên không có khoá mồ nào treo được lượt chạy.
 
 Nguồn **không chậm đều** — nó chập chờn theo đợt. Một nhóm mã "chết" có thể chạy
 ngon trong 2 giây ở lượt sau. Trước khi kết luận "nguồn chậm", hãy đo.
@@ -103,6 +114,15 @@ Thiếu `save` thì mọi thứ lượt chạy ghi vào đó đều bị vứt �
   chú thích của chính mình và xanh giả.
 - **Lấy số từ payload, không lấy từ metadata** khi hai bên lệch nhau.
 - **Test bị `skip` là test xanh rỗng** — nó không chứng minh gì.
+- **Test bị TREO cũng không phải test đỏ.** Phá bỏ chặn trên
+  `min(..., MIN_INTERVAL)` ở nhịp gọi nguồn làm hàm ngủ 86.400 giây: phép kiểm
+  không đỏ, nó đứng — và trên CI thì nó đốt trọn `timeout-minutes` rồi báo một
+  lỗi không liên quan tới nguyên nhân. Phép kiểm nào có thể chờ vô hạn thì phải
+  chạy trong **tiến trình con có trần thời gian**, và coi hết giờ là **đỏ**.
+- **Đo khoảng cách giữa các lượt, đừng đo tổng thời gian tiến trình.** Khởi động
+  Python trên Windows mất ~2 giây (phải nạp `requests`); đo nhịp 0,25 giây bằng
+  tổng thời gian tiến trình thì thước gần như chỉ đo khởi động. Hai phép kiểm
+  nhịp đã đỏ oan vì chuyện này.
 - Trước khi kết luận, **đo trước và sau** bằng cùng một thước. Và kiểm chính
   thước đo: đã có lần thước báo ba lỗi giả `1:1` vì bỏ kênh alpha khi trộn màu
   nền, và một lần khác kết luận sai vì quên `deviceScaleFactor: 3`.
@@ -275,3 +295,49 @@ Thiếu khoá `weak` thì đếm vào ô **yếu** — mặc định bi quan ở
 một nguồn beta mới quên gắn cờ sẽ lặng lẽ làm đẹp số liệu.
 
 Chi tiết và phần đã khảo: `docs/beta-weak-regression.md`.
+
+---
+
+## 13. Nhiều phiên chạy song song — chỗ đụng KHÔNG phải tệp
+
+Ngày 16/10/2026 đo được **năm phiên** làm việc cùng lúc trên kho này, bốn còn
+chạy, và chúng **tự sinh ra nhau** theo chuỗi (`#97` → `#98` + `#99` → `#100` →
+…). Không ai quyết định là có năm.
+
+Mỗi phiên nằm trong **worktree riêng**, nên những thứ tưởng sẽ đụng thì không:
+
+| Tài nguyên | Vì sao an toàn |
+|---|---|
+| Cây làm việc, index, `git checkout` | worktree riêng, không chạm nhau |
+| `backend/data/cache`, `peer_multiples.json` | bị `.gitignore` nên **không** được sao sang worktree mới — đo được 591 / 200 / 1 / 1 / 0 tệp, tức năm bản riêng |
+| `web/data/` khi chạy thử pipeline | mỗi worktree một bản |
+
+Cái đụng nhau thật:
+
+1. **`main` chạy dưới chân.** Nó nhảy **5 lần** trong một buổi. `main` cục bộ
+   lùi 1 commit **hai lần trong mười phút** — và một lần tôi so các nhánh với
+   `main` cũ rồi rút ra bộ số vô nghĩa. Hệ quả nặng hơn: **CI xanh trên `main`
+   cũ không nói gì về `main` mới.** Vì vậy chỉ checkout chính được merge, và
+   phải `git fetch` trước khi kết luận bất cứ điều gì về nhánh.
+2. **Nhịp gọi nguồn.** `MIN_INTERVAL` do `threading.Lock` giữ, tức **mỗi tiến
+   trình một trần**. Bốn phiên là 4 lượt/giây vào Vietcap/KBS, gấp bốn mức mục 3
+   cố ý chọn. Và vì cache không dùng chung, mỗi worktree tải lại từ đầu — bản
+   591 tệp với bản 200 tệp là hai lần tải riêng cùng một dữ liệu. Nay có khoá
+   liên tiến trình (mục 3).
+3. **Cổng `http.server` là cấp máy**, không phải cấp worktree — mục 7. Cổng
+   chặn nay thử buộc vào cổng trước khi cho chạy. Đừng thêm `SO_REUSEADDR` vào
+   phép thử đó, và **cũng đừng tin** rằng thêm vào thì hỏng: đã đo 16/10/2026,
+   cổng đang LISTEN từ chối cả hai cách (10048 và errno 13). Thứ thật sự làm mất
+   khả năng phát hiện là `SO_REUSEPORT`.
+4. **Hai PR đụng cùng một tệp.** `#99` tạo `test_peer_db_co_lap.py`, `#97` sửa
+   chính tệp đó; `merge-tree` giữa `main` và nhánh `#99` **vẫn báo xung đột** sau
+   khi cả hai đã merge. Không mất gì (bản `main` mới hơn), nhưng thứ tự merge
+   ngược lại thì một bên bị ghi đè lặng lẽ.
+5. **Thư mục memory dùng chung** cho mọi phiên của kho này — hai phiên ghi cùng
+   một tệp thì người ghi sau thắng, không cảnh báo gì.
+
+**`git diff main <nhánh>` là thước SAI** cho câu hỏi "nhánh đã vào `main`
+chưa": nó lẫn hai chiều, nhánh đi sau `main` cũng hiện ra "dòng thêm". Dùng
+`scripts/kiem-nhanh-da-vao-main.sh` — nó hợp cây thử và chỉ báo sạch khi cây
+không đổi; xung đột thì **từ chối kết luận** (thoát 2) thay vì đoán, cùng kiểu
+`diff.mjs` từ chối so sánh khi thiếu font (mục 8).
