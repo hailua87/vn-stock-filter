@@ -30,12 +30,21 @@ sys.path.insert(0, str(GUARD.parent))
 import claude_guard as G  # noqa: E402
 
 
-def quyet_dinh(cmd: str):
-    """Chạy cổng chặn ĐÚNG như Claude Code chạy nó: JSON vào stdin, JSON ra."""
+def quyet_dinh(cmd: str, cwd=None):
+    """
+    Chạy cổng chặn ĐÚNG như Claude Code chạy nó: JSON vào stdin, JSON ra.
+
+    `cwd` là tham số BẮT BUỘC PHẢI NGHĨ TỚI với mọi luật đọc trạng thái git:
+    cổng chặn chạy `git rev-parse` trong thư mục làm việc của nó, nên cùng một
+    lệnh ra quyết định khác nhau ở checkout chính và ở worktree phụ. Bỏ trống
+    thì nó thừa hưởng thư mục của bộ test — tiện cho các luật thuần cú pháp,
+    nhưng với luật phụ thuộc git thì phải truyền tường minh.
+    """
     r = subprocess.run([sys.executable, str(GUARD)],
                        input=json.dumps({'tool_name': 'Bash',
                                          'tool_input': {'command': cmd}}),
-                       capture_output=True, text=True, encoding='utf-8')
+                       capture_output=True, text=True, encoding='utf-8',
+                       cwd=None if cwd is None else str(cwd))
     assert r.returncode == 0, f'cổng chặn phải luôn thoát 0, stderr: {r.stderr[:200]}'
     out = json.loads(r.stdout or '{}')
     return (out.get('hookSpecificOutput') or {}).get('permissionDecision')
@@ -111,7 +120,9 @@ def test_cho_qua_merge_main_vao_nhanh_lam_viec(monkeypatch):
 
 @pytest.mark.parametrize('cmd', [
     'git pull --ff-only', 'git status', 'git log --oneline -5',
-    'pytest backend -q', 'ls web/data', 'gh pr merge 42 --squash',
+    'pytest backend -q', 'ls web/data',
+    # `gh pr merge` KHONG nam o day nua: quyet dinh cua no phu thuoc NOI CHAY,
+    # xem test_merge_PR_cho_qua_o_chinh_va_chan_o_worktree_phu ngay duoi.
 ])
 def test_cho_qua_lenh_binh_thuong(cmd):
     assert quyet_dinh(cmd) != 'deny', cmd
@@ -417,3 +428,62 @@ def test_nhan_biet_worktree_tren_kho_THAT(tmp_path, monkeypatch):
     monkeypatch.chdir(phu)
     assert G._trong_worktree_phu() is True, (
         'worktree phụ không được nhận ra — luật mất tác dụng hoàn toàn')
+
+
+def test_merge_PR_cho_qua_o_chinh_va_chan_o_worktree_phu(tmp_path):
+    """
+    Quyết định cho `gh pr merge` phụ thuộc NƠI CHẠY, nên phép kiểm phải nói rõ
+    nơi chạy.
+
+    Ca `gh pr merge 42 --squash` từng nằm trong danh sách "phải cho qua" ở trên
+    mà không truyền `cwd`, nên nó thừa hưởng thư mục của bộ test: **xanh ở
+    checkout chính, ĐỎ trong mọi worktree phụ** — bộ test đỏ tuỳ nơi chạy, trên
+    mã nguồn hoàn toàn sạch. Mọi phiên làm việc trong worktree đều gặp, và đúng
+    lớp lỗi với `peer_multiples.json` ở CLAUDE.md mục 6. Do PR #103 gây ra; đo
+    được ngày 16/10/2026 khi chạy bộ test trong một worktree tạm.
+
+    Hai nửa dưới đây đi qua subprocess thật, trên kho git thật, và **tất định**
+    ở bất cứ đâu bộ test chạy.
+    """
+    kho = tmp_path / 'kho'
+    kho.mkdir()
+
+    def g(*a, cwd=kho):
+        subprocess.run(['git', '-c', 'user.email=t@t', '-c', 'user.name=t', *a],
+                       cwd=cwd, check=True, capture_output=True, text=True)
+
+    g('init', '-q')
+    g('commit', '-q', '--allow-empty', '-m', 'dau')
+
+    assert quyet_dinh('gh pr merge 42 --squash', cwd=kho) != 'deny', (
+        'checkout CHÍNH phải merge được — chặn ở đây là chặn đúng phiên được '
+        'phép merge')
+
+    phu = tmp_path / 'phu'
+    g('worktree', 'add', '-q', '-b', 'nhanh/phu', str(phu))
+    assert quyet_dinh('gh pr merge 42 --squash', cwd=phu) == 'deny', (
+        'worktree PHỤ phải bị chặn — nếu không thì luật mục 13 mất tác dụng')
+
+
+@pytest.mark.parametrize('cmd', [
+    'gh pr create --fill', 'gh pr view 42', 'gh pr checks 42 --watch',
+])
+def test_worktree_phu_van_mo_duoc_PR_do_tren_kho_THAT(tmp_path, cmd):
+    """
+    Mặt còn lại: chặn MERGE chứ không chặn `gh`. Đo trên worktree thật, không
+    giả lập hàm nhận biết — các phép kiểm giả lập ở trên không thấy được một
+    luật quá rộng chạy trong môi trường thật.
+    """
+    kho = tmp_path / 'kho'
+    kho.mkdir()
+
+    def g(*a, cwd=kho):
+        subprocess.run(['git', '-c', 'user.email=t@t', '-c', 'user.name=t', *a],
+                       cwd=cwd, check=True, capture_output=True, text=True)
+
+    g('init', '-q')
+    g('commit', '-q', '--allow-empty', '-m', 'dau')
+    phu = tmp_path / 'phu'
+    g('worktree', 'add', '-q', '-b', 'nhanh/phu', str(phu))
+
+    assert quyet_dinh(cmd, cwd=phu) != 'deny', cmd
