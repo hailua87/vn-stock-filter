@@ -417,3 +417,159 @@ def test_nhan_biet_worktree_tren_kho_THAT(tmp_path, monkeypatch):
     monkeypatch.chdir(phu)
     assert G._trong_worktree_phu() is True, (
         'worktree phụ không được nhận ra — luật mất tác dụng hoàn toàn')
+
+
+# ── Cổng chặn phải đọc git ở NƠI LỆNH SẼ CHẠY, không phải nơi hook chạy ────
+#
+# Hook khai trong `.claude/settings.json` chạy bằng
+# `python "$CLAUDE_PROJECT_DIR/scripts/claude_guard.py"`, và `$CLAUDE_PROJECT_DIR`
+# ĐỨNG YÊN ở gốc dự án — tức CHECKOUT CHÍNH — trong khi `cwd` của payload đi
+# theo Claude (vào worktree, hay sau `cd`). Nên trong mọi worktree phụ, cổng
+# chặn hỏi git ở checkout chính và nhận về nhánh của NGƯỜI KHÁC.
+#
+# Đo được 16/10/2026 ở PR #102: checkout chính đứng ở `main`, phiên làm việc ở
+# worktree trên `claude/focused-yalow-414838`, và `git merge origin/main` —
+# ĐÚNG việc CLAUDE.md mục 1 dặn phải làm — bị chặn hai lần liên tiếp với lý do
+# "KHÔNG merge vào `main`".
+#
+# Mọi phép kiểm ở trên KHÔNG thấy được chuyện này: chúng hoặc giả lập
+# `_nhanh_hien_tai`, hoặc cho tiến trình cổng chặn đứng đúng chỗ cần đọc — tức
+# đã giả định sẵn cái đang hỏng. Phải tách HAI thư mục ra mới đo được.
+
+
+def quyet_dinh_nhu_hook(cmd: str, *, noi_hook, noi_lenh):
+    """
+    Chạy cổng chặn ĐÚNG như Claude Code chạy nó trong một worktree: tiến trình
+    đứng ở `noi_hook` (checkout chính, nơi `$CLAUDE_PROJECT_DIR` trỏ tới), còn
+    payload mang `cwd` = `noi_lenh` (worktree mà lệnh sẽ thật sự chạy).
+
+    `noi_lenh=None` nghĩa là payload KHÔNG có khoá `cwd` — dạng cũ, dùng để
+    canh phần dự phòng.
+    """
+    payload = {'tool_name': 'Bash', 'tool_input': {'command': cmd}}
+    if noi_lenh is not None:
+        payload['cwd'] = str(noi_lenh)
+    r = subprocess.run([sys.executable, str(GUARD)],
+                       input=json.dumps(payload),
+                       capture_output=True, text=True, encoding='utf-8',
+                       cwd=str(noi_hook))
+    assert r.returncode == 0, f'cổng chặn phải luôn thoát 0, stderr: {r.stderr[:300]}'
+    return (json.loads(r.stdout or '{}').get('hookSpecificOutput')
+            or {}).get('permissionDecision')
+
+
+@pytest.fixture
+def kho_va_phu(tmp_path):
+    """Checkout chính đứng ở `main`, cạnh nó một worktree phụ ở nhánh khác."""
+    kho = tmp_path / 'kho'
+    kho.mkdir()
+
+    def g(*a, cwd=kho):
+        subprocess.run(['git', '-c', 'user.email=t@t', '-c', 'user.name=t', *a],
+                       cwd=cwd, check=True, capture_output=True, text=True)
+
+    g('init', '-q', '-b', 'main')
+    g('commit', '-q', '--allow-empty', '-m', 'dau')
+    phu = tmp_path / 'phu'
+    g('worktree', 'add', '-q', '-b', 'nhanh/phu', str(phu))
+
+    # Chốt chặn cho chính đồ dựng: nếu hai thư mục không đứng ở hai nhánh khác
+    # nhau thì mọi phép kiểm dưới đây xanh rỗng.
+    def nhanh(d):
+        return subprocess.run(['git', 'branch', '--show-current'], cwd=d,
+                              capture_output=True, text=True).stdout.strip()
+    assert nhanh(kho) == 'main' and nhanh(phu) == 'nhanh/phu', (
+        f'đồ dựng hỏng: {nhanh(kho)!r} / {nhanh(phu)!r}')
+    return kho, phu
+
+
+@pytest.mark.parametrize('cmd', [
+    'git merge main',
+    'git merge origin/main',
+    'git merge --no-ff main',
+])
+def test_merge_main_vao_nhanh_lam_viec_trong_worktree_KHONG_bi_chan(kho_va_phu, cmd):
+    """
+    Chính cái lỗi: lệnh chạy ở worktree (nhánh `nhanh/phu`), hook đứng ở
+    checkout chính (nhánh `main`). Đưa `main` VÀO nhánh làm việc là việc
+    CLAUDE.md mục 1 dặn phải làm — chặn nó là chặn đúng việc được phép.
+    """
+    kho, phu = kho_va_phu
+    assert quyet_dinh_nhu_hook(cmd, noi_hook=kho, noi_lenh=phu) != 'deny', cmd
+
+
+@pytest.mark.parametrize('cmd', [
+    'git merge nhanh/phu',
+    'git merge --no-ff nhanh/phu',
+])
+def test_VAN_chan_merge_vao_main_khi_lenh_chay_o_checkout_chinh(kho_va_phu, cmd):
+    """
+    Chốt chặn cho phép kiểm trên, và nó phải ĐỔI CHIỀU được: lần này hook đứng
+    ở worktree còn lệnh chạy ở checkout chính (`main`). Nếu bản sửa chỉ "thôi
+    đọc nhánh" hay luôn cho qua trong worktree thì luật mất tác dụng mà phép
+    kiểm kia vẫn xanh.
+    """
+    kho, phu = kho_va_phu
+    assert quyet_dinh_nhu_hook(cmd, noi_hook=phu, noi_lenh=kho) == 'deny', cmd
+
+
+def test_push_tran_doc_nhanh_o_noi_lenh_chay(kho_va_phu):
+    """`git push` trần không nói đích — phải tra nhánh ở ĐÚNG thư mục lệnh chạy."""
+    kho, phu = kho_va_phu
+    assert quyet_dinh_nhu_hook('git push', noi_hook=kho, noi_lenh=phu) != 'deny', (
+        'đứng ở nhánh làm việc mà bị chặn push — chặn oan')
+    assert quyet_dinh_nhu_hook('git push', noi_hook=phu, noi_lenh=kho) == 'deny', (
+        'đứng ở `main` mà push lọt — mất chốt bảo vệ `main`')
+
+
+def test_quyen_merge_PR_cung_doc_o_noi_lenh_chay(kho_va_phu):
+    """
+    Cùng một gốc lỗi, luật mục 13 hỏng theo chiều NGƯỢC lại: hỏi checkout chính
+    thì `_trong_worktree_phu()` trả False, nên `gh pr merge` trong worktree phụ
+    KHÔNG bị chặn gì cả — luật mất tác dụng ở đúng nơi nó cần có.
+    """
+    kho, phu = kho_va_phu
+    assert quyet_dinh_nhu_hook('gh pr merge 42 --squash',
+                               noi_hook=kho, noi_lenh=phu) == 'deny', (
+        'worktree phụ merge được PR — luật mục 13 mất tác dụng')
+    assert quyet_dinh_nhu_hook('gh pr merge 42 --squash',
+                               noi_hook=phu, noi_lenh=kho) != 'deny', (
+        'checkout chính bị chặn — chặn đúng phiên được phép merge')
+
+
+@pytest.mark.parametrize('cmd', [
+    'git merge-base main origin/x',
+    'git merge-tree main nhanh/phu',
+    'git merge --abort',
+    'git merge --continue',
+])
+def test_cac_chot_chan_cu_van_dung_khi_lenh_chay_tren_main(kho_va_phu, cmd):
+    """
+    Hai chỗ đã chặn oan thật (13/10/2026) phải vẫn lọt, kể cả khi nhánh đọc
+    được là `main`. Đo lại ở đây vì bản sửa động vào đúng đường đi đó.
+    """
+    kho, phu = kho_va_phu
+    assert quyet_dinh_nhu_hook(cmd, noi_hook=phu, noi_lenh=kho) != 'deny', cmd
+
+
+def test_khong_co_khoa_cwd_thi_quay_ve_thu_muc_tien_trinh(kho_va_phu):
+    """
+    Phần dự phòng. Payload không có `cwd` (phiên bản Claude Code cũ, hay phép
+    kiểm gọi thẳng) thì phải giữ nguyên hành vi cũ: đọc ở thư mục tiến trình.
+    Thiếu chốt này thì một bản sửa "chỉ đọc payload" sẽ âm thầm thôi đọc git.
+    """
+    kho, phu = kho_va_phu
+    assert quyet_dinh_nhu_hook('git merge nhanh/phu',
+                               noi_hook=kho, noi_lenh=None) == 'deny'
+    assert quyet_dinh_nhu_hook('git merge main',
+                               noi_hook=phu, noi_lenh=None) != 'deny'
+
+
+def test_cwd_tro_vao_thu_muc_khong_ton_tai_thi_cho_qua(kho_va_phu, tmp_path):
+    """
+    Fail-open, cùng lý lẽ với phần còn lại của cổng chặn: `cwd` hỏng thì hook
+    không được chết, cũng không được chặn oan.
+    """
+    kho, _ = kho_va_phu
+    mat = tmp_path / 'khong-ton-tai'
+    assert quyet_dinh_nhu_hook('git status', noi_hook=kho, noi_lenh=mat) != 'deny'
