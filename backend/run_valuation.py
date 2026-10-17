@@ -293,6 +293,7 @@ def main(argv=None, clock=monotonic):
 
     reports = []
     outliers = []
+    khong_co_dinh_gia = []
     for i, ticker in enumerate(cached_raw.keys(), 1):
         if i % 20 == 0:
             log.info(f"  Pass 2 progress: {i}/{len(cached_raw)} (valid={len(reports)})")
@@ -300,6 +301,12 @@ def main(argv=None, clock=monotonic):
         try:
             report = value_ticker(ticker, raw_fundamentals=cached_raw[ticker])
             if report is None:
+                # Engine từ chối kết luận — gần như luôn vì không cấu phần nào
+                # vừa có fair value > 0 vừa đủ độ tin cậy (engine.py, nhánh
+                # `total_effective_weight == 0`); cũng có thể vì normalize thất
+                # bại. Phải ghi ra: một mã lặng lẽ biến mất khỏi đầu ra thì
+                # không ai nói được là nó bị chặn hay bị bỏ sót.
+                khong_co_dinh_gia.append(ticker)
                 continue
 
             # Apply filters
@@ -318,6 +325,9 @@ def main(argv=None, clock=monotonic):
             log.warning(f"  {ticker} pass-2 failed: {type(e).__name__}: {str(e)[:100]}")
 
     log.info(f"  Pass 2 complete: {len(reports)} valid signals after filters")
+    if khong_co_dinh_gia:
+        log.warning(f"  Engine không kết luận được {len(khong_co_dinh_gia)} mã: "
+                    + ", ".join(khong_co_dinh_gia))
     if outliers:
         log.warning(f"  Excluded {len(outliers)} outliers: " + ", ".join(o['ticker'] for o in outliers))
 
@@ -368,6 +378,11 @@ def main(argv=None, clock=monotonic):
             'verdict_counts': verdict_counts,
             'band_counts': band_counts,
             'excluded_outliers': outliers,
+            # Mã engine từ chối kết luận (không cấu phần nào đủ ngưỡng). Trước
+            # 17/10/2026 engine lấy trung bình các cấu phần nó vừa loại, hoặc
+            # lấy chính giá làm fair value — nên nhóm này không tồn tại và chỗ
+            # hỏng không để lại dấu vết nào trong đầu ra.
+            'khong_co_dinh_gia': khong_co_dinh_gia,
         },
         'signals': signals_out,
     }
