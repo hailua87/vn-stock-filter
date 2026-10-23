@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-23T10:15:12.390811",
+  "generated_at": "2026-10-23T20:32:14.644985",
   "strategy": "golden_cross_short",
   "total": 31,
   "metadata": {
@@ -11,7 +11,7 @@
     ],
     "base_conditions": {
       "min_avg_value_20d": 10000000000.0,
-      "dropped_low_liquidity": 383,
+      "dropped_low_liquidity": 371,
       "universe_after": 117,
       "exchanges": [
         "HOSE",
@@ -19,52 +19,44 @@
         "UPCOM"
       ]
     },
-    "total_scanned": 500,
+    "total_scanned": 488,
     "market_context": {
-      "available": true,
-      "close": 1774.15,
-      "ma50": 1772.22,
-      "ma200": 1796.65,
-      "above_ma50": true,
-      "above_ma200": false,
-      "ma50_rising": false,
-      "change_20d_pct": -0.61,
-      "drawdown_from_high_pct": -7.98,
-      "regime": "risk_off",
-      "label": "Thị trường bất lợi — phần lớn tín hiệu breakout thất bại trong giai đoạn này",
-      "position_size_multiplier": 0.3,
+      "available": false,
+      "regime": "unknown",
+      "label": "Không lấy được VN-Index — không đánh giá được bối cảnh thị trường",
+      "position_size_multiplier": 1.0,
       "breadth": {
-        "pct_above_ma50": 38.2,
-        "sample_size": 500
+        "pct_above_ma50": 38.9,
+        "sample_size": 488
       }
     },
     "session_date": "2026-10-23",
-    "written_at_ict": "2026-10-23 17:11:16+0700",
+    "written_at_ict": "2026-10-24 03:06:07+0700",
     "run_type": "eod",
     "session_complete": 1.146,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 17:11 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên 2026-10-23 đã đóng dứt khoát (hôm nay 2026-10-24)) | gate_coverage: pass (98% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 17:11 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-10-23 đã đóng dứt khoát (hôm nay 2026-10-24)"
       },
       {
         "name": "gate_coverage",
         "passed": true,
-        "detail": "100% >= 80%, vòng fetch chạy trọn"
+        "detail": "98% >= 80%, vòng fetch chạy trọn"
       }
     ],
     "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 1.0,
-    "fetch_elapsed_s": 1060.1,
+    "fetch_coverage": 0.976,
+    "fetch_elapsed_s": 600.0,
     "intraday": false,
-    "run_time_ict": "17:22",
-    "run_date_ict": "2026-10-23"
+    "run_time_ict": "03:38",
+    "run_date_ict": "2026-10-24"
   },
   "signals": [
     {
@@ -141,9 +133,6 @@
         "direction": "up",
         "range": 7.05
       },
-      "m_rs_score": 8.5,
-      "m_rs_rank": 90,
-      "m_rs_63d": 12.52,
       "m_stop": 33.54,
       "m_target": 35.2,
       "m_rr": 1.52,
@@ -194,7 +183,7 @@
       "m_preset_name": "MA10×MA20",
       "m_cross_days_ago": 0,
       "m_fast_ma": 12.1,
-      "m_slow_ma": 12.0,
+      "m_slow_ma": 12.01,
       "m_slow_spread_pct": 0.79,
       "m_change_5d_pct": 8.33,
       "m_vol_ratio": 2.5,
@@ -263,9 +252,6 @@
         "direction": "down",
         "range": 3.8
       },
-      "m_rs_score": -5.82,
-      "m_rs_rank": 46,
-      "m_rs_63d": -11.54,
       "m_stop": 12.7,
       "m_target": 13.15,
       "m_rr": 0.5,
@@ -369,9 +355,6 @@
         "direction": "down",
         "range": 3.55
       },
-      "m_rs_score": -0.83,
-      "m_rs_rank": 72,
-      "m_rs_63d": 1.57,
       "m_stop": 15.04,
       "m_target": 15.8,
       "m_rr": 11.67,
@@ -483,9 +466,6 @@
         "direction": "down",
         "range": 3.85
       },
-      "m_rs_score": -3.55,
-      "m_rs_rank": 59,
-      "m_rs_63d": -6.16,
       "m_stop": 13.73,
       "m_target": 14.38,
       "m_rr": 1.95,
@@ -605,9 +585,6 @@
         "direction": "down",
         "range": 2.85
       },
-      "m_rs_score": -6.78,
-      "m_rs_rank": 42,
-      "m_rs_63d": -5.35,
       "m_stop": 10.39,
       "m_target": 10.73,
       "m_rr": 4.67,
@@ -719,9 +696,6 @@
         "direction": "down",
         "range": 2.9
       },
-      "m_rs_score": -2.03,
-      "m_rs_rank": 67,
-      "m_rs_63d": -3.27,
       "m_stop": 17.54,
       "m_target": 18.03,
       "m_rr": 0.58,
@@ -833,9 +807,6 @@
         "direction": "down",
         "range": 5.8
       },
-      "m_rs_score": -14.02,
-      "m_rs_rank": 16,
-      "m_rs_63d": -20.51,
       "m_stop": 14.37,
       "m_target": 15.22,
       "m_rr": 0.16,
@@ -947,9 +918,6 @@
         "direction": "down",
         "range": 2.4
       },
-      "m_rs_score": -4.19,
-      "m_rs_rank": 55,
-      "m_rs_63d": -3.99,
       "m_stop": 12.03,
       "m_target": 12.44,
       "m_rr": 2.42,
@@ -1069,9 +1037,6 @@
         "direction": "down",
         "range": 2.34
       },
-      "m_rs_score": -8.27,
-      "m_rs_rank": 36,
-      "m_rs_63d": -10.42,
       "m_stop": 9.88,
       "m_target": 10.16,
       "m_rr": 0.04,
@@ -1191,9 +1156,6 @@
         "direction": "up",
         "range": 5.55
       },
-      "m_rs_score": -1.64,
-      "m_rs_rank": 68,
-      "m_rs_63d": 2.48,
       "m_stop": 23.18,
       "m_target": 23.83,
       "m_rr": 4.42,
@@ -1313,9 +1275,6 @@
         "direction": "down",
         "range": 4.8
       },
-      "m_rs_score": -5.16,
-      "m_rs_rank": 50,
-      "m_rs_63d": -7.1,
       "m_stop": 26.55,
       "m_target": 27.12,
       "m_rr": 0.27,
@@ -1435,9 +1394,6 @@
         "direction": "down",
         "range": 5.2
       },
-      "m_rs_score": -5.26,
-      "m_rs_rank": 49,
-      "m_rs_63d": -7.92,
       "m_stop": 21.4,
       "m_target": 22.01,
       "m_rr": 0.11,
@@ -1557,9 +1513,6 @@
         "direction": "down",
         "range": 2.85
       },
-      "m_rs_score": -4.94,
-      "m_rs_rank": 50,
-      "m_rs_63d": -2.23,
       "m_stop": 16.32,
       "m_target": 16.66,
       "m_rr": 1.62,
@@ -1671,9 +1624,6 @@
         "direction": "down",
         "range": 1.29
       },
-      "m_rs_score": 1.47,
-      "m_rs_rank": 79,
-      "m_rs_63d": -0.55,
       "m_stop": 10.61,
       "m_target": 10.82,
       "m_rr": 0.11,
@@ -1777,9 +1727,6 @@
         "direction": "down",
         "range": 6.45
       },
-      "m_rs_score": 1.55,
-      "m_rs_rank": 80,
-      "m_rs_63d": 8.84,
       "m_stop": 30.77,
       "m_target": 32.15,
       "m_rr": 45.0,
@@ -1899,9 +1846,6 @@
         "direction": "down",
         "range": 3.05
       },
-      "m_rs_score": -4.06,
-      "m_rs_rank": 56,
-      "m_rs_63d": -3.68,
       "m_stop": 20.77,
       "m_target": 21.12,
       "m_rr": 0.94,
@@ -2021,9 +1965,6 @@
         "direction": "down",
         "range": 4.15
       },
-      "m_rs_score": 0.12,
-      "m_rs_rank": 75,
-      "m_rs_63d": 2.14,
       "m_stop": 30.93,
       "m_target": 31.41,
       "m_rr": 23.0,
@@ -2127,9 +2068,6 @@
         "direction": "up",
         "range": 5.65
       },
-      "m_rs_score": 2.99,
-      "m_rs_rank": 83,
-      "m_rs_63d": 15.13,
       "m_stop": 34.57,
       "m_target": 35.9,
       "m_rr": 0.43,
@@ -2249,9 +2187,6 @@
         "direction": "down",
         "range": 4.1
       },
-      "m_rs_score": -9.66,
-      "m_rs_rank": 29,
-      "m_rs_63d": -7.76,
       "m_stop": 11.17,
       "m_target": 11.65,
       "m_rr": 0.45,
@@ -2355,9 +2290,6 @@
         "direction": "up",
         "range": 2.64
       },
-      "m_rs_score": -4.69,
-      "m_rs_rank": 52,
-      "m_rs_63d": -3.56,
       "m_stop": 11.97,
       "m_target": 12.59,
       "m_rr": 19.67,
@@ -2477,9 +2409,6 @@
         "direction": "down",
         "range": 1.94
       },
-      "m_rs_score": -5.29,
-      "m_rs_rank": 49,
-      "m_rs_63d": -8.28,
       "m_stop": 9.53,
       "m_target": 9.76,
       "m_rr": 0.77,
@@ -2599,9 +2528,6 @@
         "direction": "up",
         "range": 12.5
       },
-      "m_rs_score": -2.89,
-      "m_rs_rank": 63,
-      "m_rs_63d": 4.06,
       "m_stop": 40.75,
       "m_target": 42.23,
       "m_rr": 0.64,
@@ -2705,9 +2631,6 @@
         "direction": "down",
         "range": 5.1
       },
-      "m_rs_score": -1.78,
-      "m_rs_rank": 68,
-      "m_rs_63d": -6.49,
       "m_stop": 20.0,
       "m_target": 21.2,
       "m_rr": 0.14,
@@ -2827,9 +2750,6 @@
         "direction": "down",
         "range": 3.65
       },
-      "m_rs_score": -5.77,
-      "m_rs_rank": 47,
-      "m_rs_63d": -1.06,
       "m_stop": 12.39,
       "m_target": 12.82,
       "m_rr": 0.39,
@@ -2949,9 +2869,6 @@
         "direction": "up",
         "range": 2.92
       },
-      "m_rs_score": -3.88,
-      "m_rs_rank": 57,
-      "m_rs_63d": 3.38,
       "m_stop": 19.74,
       "m_target": 20.08,
       "m_rr": 4.67,
@@ -3063,9 +2980,6 @@
         "direction": "down",
         "range": 5.5
       },
-      "m_rs_score": -15.72,
-      "m_rs_rank": 13,
-      "m_rs_63d": -24.9,
       "m_stop": 12.1,
       "m_target": 12.9,
       "m_rr": 0.14,
@@ -3177,9 +3091,6 @@
         "direction": "down",
         "range": 4.85
       },
-      "m_rs_score": -7.76,
-      "m_rs_rank": 37,
-      "m_rs_63d": -11.91,
       "m_stop": 23.64,
       "m_target": 24.35,
       "m_rr": 0.97,
@@ -3299,9 +3210,6 @@
         "direction": "down",
         "range": 5.8
       },
-      "m_rs_score": -1.45,
-      "m_rs_rank": 69,
-      "m_rs_63d": -7.25,
       "m_stop": 27.12,
       "m_target": 27.8,
       "m_rr": 2.78,
@@ -3405,9 +3313,6 @@
         "direction": "down",
         "range": 5.05
       },
-      "m_rs_score": -2.9,
-      "m_rs_rank": 63,
-      "m_rs_63d": -6.15,
       "m_stop": 42.15,
       "m_target": 43.34,
       "m_rr": 0.13,
@@ -3527,9 +3432,6 @@
         "direction": "down",
         "range": 3.55
       },
-      "m_rs_score": -14.43,
-      "m_rs_rank": 16,
-      "m_rs_63d": -9.58,
       "m_stop": 15.51,
       "m_target": 15.93,
       "m_rr": 9.5,
@@ -3649,9 +3551,6 @@
         "direction": "down",
         "range": 2.75
       },
-      "m_rs_score": -8.97,
-      "m_rs_rank": 32,
-      "m_rs_63d": -8.34,
       "m_stop": 9.4,
       "m_target": 9.72,
       "m_rr": 1.67,
