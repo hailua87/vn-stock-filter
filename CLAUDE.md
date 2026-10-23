@@ -245,6 +245,7 @@ khi đổ cho thay đổi của mình — đó chính là cách tìm ra nguồn 
 | Bố cục mobile | `docs/mobile-layout-out-of-scope.md` |
 | Hợp đồng sổ theo dõi kết quả | `docs/outcomes-contract.md` |
 | Làm beta có ý nghĩa cho mã thanh khoản thấp | `docs/beta-weak-regression.md` |
+| Chặn `confidence` của P/E khi `sustainable_roe <= 0` | `docs/pe-roe-am-khong-chan-confidence.md` |
 
 Ngày 24/09 có một kết luận **sai** là "không nguồn nào có NPL ngân hàng". Nó
 sống sót vì không ai ghi lại đã hỏi ở đâu. Dữ liệu nằm ngay trong section `NOTE`
