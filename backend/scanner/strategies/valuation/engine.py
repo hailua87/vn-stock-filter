@@ -12,6 +12,7 @@ QUY TRÌNH:
   5. Aggregate weighted fair value + verdict
 """
 
+import logging
 from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional, Tuple
 
@@ -291,6 +292,17 @@ STRONG_SELL_THRESHOLD = -0.35
 # Nếu các phương pháp lệch nhau quá mức này, fair value tổng hợp không còn ý
 # nghĩa — báo mâu thuẫn thay vì đưa ra một con số duy nhất.
 MAX_METHOD_DISPERSION = 0.40
+
+# Độ tin cậy tối thiểu để một cấu phần được vào phép trộn.
+#
+# Trước 17/10/2026 con số này nằm viết cứng ở ĐÚNG HAI chỗ trong `value_ticker`
+# (chọn ứng viên, và vòng trộn) — và nhánh dự phòng ngay dưới chúng **bỏ qua
+# nó hoàn toàn**, nên ngưỡng mà engine vừa áp ở trên lại bị chính engine lách
+# ở dưới. Rút thành hằng số có tên để cả ba chỗ đọc cùng một giá trị, và để
+# phép kiểm nói được "nhánh dự phòng tôn trọng ngưỡng nào".
+NGUONG_CONF_CAU_PHAN = 0.15
+
+_log = logging.getLogger(__name__)
 
 # Nhóm tài chính chưa đủ căn cứ để kết luận định giá. Fair value và upside vẫn
 # hiển thị; chỉ verdict bị hạ về HOLD.
@@ -639,11 +651,13 @@ def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
     # PVT ngay 13/10/2026: DCF FCFF 94.998 (4,69x trung vi cac phuong phap con
     # lai) van duoc tron voi trong so 20%, day fair value len +54,4%.
     du_dieu_kien = {ten: r.fair_value_per_share for ten, r in results.items()
-                    if r.fair_value_per_share > 0 and r.confidence >= 0.15}
+                    if r.fair_value_per_share > 0
+                    and r.confidence >= NGUONG_CONF_CAU_PHAN}
     _, bi_loai = _loai_phuong_phap_lac(du_dieu_kien)
 
     for method_name, result in results.items():
-        if result.fair_value_per_share <= 0 or result.confidence < 0.15:
+        if (result.fair_value_per_share <= 0
+                or result.confidence < NGUONG_CONF_CAU_PHAN):
             continue  # Skip không tin cậy
         if method_name in bi_loai:
             rec_notes.append(
@@ -659,14 +673,48 @@ def value_ticker(ticker: str, raw_fundamentals: Optional[Dict] = None,
         all_fair_values.append(result.fair_value_per_share)
         used_methods.append(method_name)
 
+    # Khong cau phan nao du dieu kien -> TU CHOI ket luan, khong doan.
+    #
+    # `total_effective_weight == 0` tuong duong `du_dieu_kien` rong: moi trong
+    # so goc deu > 0 (methods_to_run da loc w > 0) va moi confidence duoc giu
+    # deu >= NGUONG_CONF_CAU_PHAN > 0, nen tong chi bang 0 khi khong con ung
+    # vien nao. Tuc: khong cau phan nao vua co fair value > 0 vua du do tin cay.
+    #
+    # Nhanh du phong cu o day lam HAI viec, va ca hai deu bo qua chinh nguong
+    # 0,15 ma hai dong ngay tren vua ap:
+    #
+    #   1. Lay trung binh don thuan moi cau phan co `fair_value > 0`, KHONG doc
+    #      `confidence`. WSS 16/10/2026: cau phan P/E `confidence = 0,05` —
+    #      engine vua loai no vi duoi nguong — van thanh fair value cong bo
+    #      22.671 (+284%), chi bi chan boi cong `MAX_PUBLISHED_UPSIDE`.
+    #   2. Khi khong con cau phan nao `fair_value > 0` thi lay luon
+    #      `current_price` LAM fair value, voi `confidence = 0,20`. UNI
+    #      16/10/2026 la ca that: bon cau phan ra 0 / -1.577 / -1.611 / 0, va
+    #      engine cong bo `fair_value = 6.700 = dung gia, upside 0,0%`.
+    #
+    # Ca thu hai nguy hiem hon ca thu nhat, va day la ly do khong giu nhanh du
+    # phong co kem co: `upside 0,0%` LOT ca hai cong cua run_valuation
+    # (`MIN/MAX_PUBLISHED_UPSIDE` chi chan < -80% va > +200%), nen mot dong
+    # trong y nhu dinh gia ma that ra khong co dinh gia nao la trang thai DUOC
+    # CONG BO, khong phai bi chan. Do chinh la con so #98 vua go cho WSS va
+    # #100 vua go cho VMC — cua truoc dong, cua sau mo.
+    #
+    # Nen o day tra `None`: khong co dinh gia thi khong cong bo con so nao. Cung
+    # tinh than `diff.mjs` tu choi so sanh khi thieu font (CLAUDE.md §8) va
+    # `kiem-nhanh-da-vao-main.sh` thoat ma 2 khi xung dot (§13) — tu choi ket
+    # luan la mot ket qua, doan thi khong. `run_valuation.py` da coi `None` la
+    # "khong co dinh gia" tu truoc (`:302`), nay ghi ca vao metadata.
+    #
+    # Khao sat day du: docs/engine-nhanh-du-phong-bo-nguong.md
     if total_effective_weight == 0:
-        # Fallback: trung bình đơn thuần các fair values > 0
-        valid_fvs = [r.fair_value_per_share for r in results.values() if r.fair_value_per_share > 0]
-        fair_value = sum(valid_fvs) / len(valid_fvs) if valid_fvs else data["market"]["current_price"]
-        overall_confidence = 0.20
-    else:
-        fair_value = weighted_sum / total_effective_weight
-        overall_confidence = total_effective_weight / sum(method_weights[m] for m in used_methods)
+        _log.warning(
+            "%s: khong cau phan nao vua co fair value > 0 vua co confidence "
+            ">= %.2f (%d cau phan da chay) → khong cong bo dinh gia",
+            ticker, NGUONG_CONF_CAU_PHAN, len(results))
+        return None
+
+    fair_value = weighted_sum / total_effective_weight
+    overall_confidence = total_effective_weight / sum(method_weights[m] for m in used_methods)
 
     # Adjust confidence theo industry classification confidence
     overall_confidence *= classification.confidence
