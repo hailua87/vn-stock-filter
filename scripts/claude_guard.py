@@ -25,6 +25,7 @@ người ta tắt đi, và khi đó nó không chặn được gì nữa.
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -292,6 +293,36 @@ def main() -> int:
         # Fail-open: hook hỏng thì cho lệnh chạy, đừng chặn oan.
         print(json.dumps({}))
         return 0
+
+    # Dời tiến trình về ĐÚNG THƯ MỤC LỆNH SẼ CHẠY trước khi hỏi git.
+    #
+    # `_nhanh_hien_tai()` và `_trong_worktree_phu()` chạy `git` trong thư mục
+    # làm việc của tiến trình này. Hook khai trong `.claude/settings.json` là
+    # `python "$CLAUDE_PROJECT_DIR/scripts/claude_guard.py"`, và
+    # `$CLAUDE_PROJECT_DIR` ĐỨNG YÊN ở gốc dự án — tức CHECKOUT CHÍNH — còn
+    # `cwd` của payload đi theo Claude (vào worktree, hay sau `cd`). Nên trong
+    # mọi worktree phụ, cổng chặn đọc trạng thái git của NGƯỜI KHÁC.
+    #
+    # Hỏng cả hai chiều, và đo được cả hai ngày 16/10/2026:
+    #
+    #   - Chặn oan. Checkout chính đứng ở `main`, phiên làm việc ở worktree
+    #     trên `claude/focused-yalow-414838` (PR #102): `git merge origin/main`
+    #     — ĐÚNG việc CLAUDE.md mục 1 dặn phải làm — bị chặn hai lần liên tiếp
+    #     với lý do "KHÔNG merge vào `main`". Lách được bằng `git checkout
+    #     <nhánh> && git merge <ref>`, nhưng đó là lách, không phải sửa.
+    #   - Để lọt. `_trong_worktree_phu()` hỏi checkout chính, thấy "không phải
+    #     worktree phụ", nên `gh pr merge` trong worktree phụ KHÔNG bị chặn gì
+    #     cả — luật mục 13 mất tác dụng ở đúng nơi nó cần có.
+    #
+    # Dời cả tiến trình thay vì truyền tham số xuống từng hàm: hook sống vài
+    # chục mili giây, và cách này không bỏ sót chỗ đọc git nào — kể cả chỗ
+    # thêm vào sau này. Không có khoá `cwd` thì giữ nguyên hành vi cũ.
+    noi_chay = data.get('cwd')
+    if noi_chay:
+        try:
+            os.chdir(noi_chay)
+        except Exception:
+            pass          # fail-open: không dời được thì đo bằng thước cũ
 
     ly_do = None
     try:
