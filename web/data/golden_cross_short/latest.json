@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-11-05T21:58:08.098628",
+  "generated_at": "2026-11-06T13:06:15.157848",
   "strategy": "golden_cross_short",
-  "total": 3,
+  "total": 2,
   "metadata": {
     "min_score": 2,
     "exchanges": [
@@ -11,7 +11,7 @@
     ],
     "base_conditions": {
       "min_avg_value_20d": 10000000000.0,
-      "dropped_low_liquidity": 376,
+      "dropped_low_liquidity": 379,
       "universe_after": 121,
       "exchanges": [
         "HOSE",
@@ -19,60 +19,60 @@
         "UPCOM"
       ]
     },
-    "total_scanned": 497,
+    "total_scanned": 500,
     "market_context": {
       "available": true,
-      "close": 1740.73,
-      "ma50": 1770.38,
-      "ma200": 1791.77,
+      "close": 1725.36,
+      "ma50": 1769.06,
+      "ma200": 1791.07,
       "above_ma50": false,
       "above_ma200": false,
       "ma50_rising": false,
-      "change_20d_pct": 0.1,
-      "drawdown_from_high_pct": -9.71,
+      "change_20d_pct": -0.56,
+      "drawdown_from_high_pct": -10.51,
       "regime": "risk_off",
       "label": "Thị trường bất lợi — phần lớn tín hiệu breakout thất bại trong giai đoạn này",
       "position_size_multiplier": 0.3,
       "breadth": {
-        "pct_above_ma50": 31.0,
-        "sample_size": 497
+        "pct_above_ma50": 30.8,
+        "sample_size": 500
       }
     },
-    "session_date": "2026-11-05",
-    "written_at_ict": "2026-11-06 04:57:50+0700",
+    "session_date": "2026-11-06",
+    "written_at_ict": "2026-11-06 20:05:59+0700",
     "run_type": "eod",
-    "session_complete": 1.117,
+    "session_complete": 1.126,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên 2026-11-05 đã đóng dứt khoát (hôm nay 2026-11-06)) | gate_coverage: pass (99% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên hôm nay, 20:05 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên 2026-11-05 đã đóng dứt khoát (hôm nay 2026-11-06)"
+        "detail": "phiên hôm nay, 20:05 ICT >= 15:15 — khối lượng đã chốt"
       },
       {
         "name": "gate_coverage",
         "passed": true,
-        "detail": "99% >= 80%, vòng fetch chạy trọn"
+        "detail": "100% >= 80%, vòng fetch chạy trọn"
       }
     ],
     "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 0.994,
-    "fetch_elapsed_s": 144.8,
+    "fetch_coverage": 1.0,
+    "fetch_elapsed_s": 998.4,
     "intraday": false,
-    "run_time_ict": "05:03",
+    "run_time_ict": "20:12",
     "run_date_ict": "2026-11-06"
   },
   "signals": [
     {
-      "ticker": "VPI",
+      "ticker": "STB",
       "exchange": "HOSE",
-      "date": "2026-11-05T00:00:00",
-      "close": 61.7,
-      "volume": 2767600,
+      "date": "2026-11-06T00:00:00",
+      "close": 70.0,
+      "volume": 4067200,
       "preset": "short",
       "total_score": 4,
       "rating": "A",
@@ -81,238 +81,18 @@
       "gc_ma_stacking": 1,
       "gc_slow_rising": 1,
       "gc_volume_confirm": 0,
-      "m_change_1d_pct": 0.82,
+      "m_change_1d_pct": 1.16,
       "m_limit_status": "normal",
       "m_limit_locked": false,
       "m_tradable_warning": null,
       "m_preset_name": "MA10×MA20",
       "m_cross_days_ago": 4,
-      "m_fast_ma": 58.45,
-      "m_slow_ma": 55.31,
-      "m_slow_spread_pct": 5.69,
-      "m_change_5d_pct": 6.56,
-      "m_vol_ratio": 1.34,
-      "m_rsi14": 65.8,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 60.03,
-          "label": "78.6%",
-          "ratio": 0.786,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 2.71
-        },
-        {
-          "price": 57.38,
-          "label": "61.8%",
-          "ratio": 0.618,
-          "is_golden": true,
-          "type": "fibo",
-          "distance_pct": 7.0
-        },
-        {
-          "price": 55.52,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 10.02
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 63.4,
-          "label": "100%",
-          "ratio": 1.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 2.76
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 63.4,
-        "high_date": "2026-09-17",
-        "high_idx": 24,
-        "low": 47.65,
-        "low_date": "2026-10-19",
-        "low_idx": 46,
-        "direction": "down",
-        "range": 15.75
-      },
-      "m_rs_score": 7.75,
-      "m_rs_rank": 89,
-      "m_rs_63d": 6.43,
-      "m_stop": 60.03,
-      "m_target": 63.4,
-      "m_rr": 1.02,
-      "m_levels_note": null,
-      "m_suppress_signal": false,
-      "m_avg_value20": 114142539500.0,
-      "m_spark20": [
-        55.5,
-        54.6,
-        52.0,
-        50.6,
-        49.4,
-        48.1,
-        50.2,
-        51.3,
-        54.1,
-        55.8,
-        57.4,
-        56.8,
-        56.8,
-        58.1,
-        57.9,
-        57.5,
-        57.9,
-        59.2,
-        61.2,
-        61.7
-      ]
-    },
-    {
-      "ticker": "VC3",
-      "exchange": "HNX",
-      "date": "2026-11-05T00:00:00",
-      "close": 23.5,
-      "volume": 979900,
-      "preset": "short",
-      "total_score": 4,
-      "rating": "A",
-      "gc_recent_cross": 1,
-      "gc_price_above_fast": 1,
-      "gc_ma_stacking": 1,
-      "gc_slow_rising": 1,
-      "gc_volume_confirm": 0,
-      "m_change_1d_pct": -0.84,
-      "m_limit_status": "normal",
-      "m_limit_locked": false,
-      "m_tradable_warning": null,
-      "m_preset_name": "MA10×MA20",
-      "m_cross_days_ago": 1,
-      "m_fast_ma": 23.27,
-      "m_slow_ma": 23.22,
-      "m_slow_spread_pct": 0.22,
-      "m_change_5d_pct": 0.43,
-      "m_vol_ratio": 0.5,
-      "m_rsi14": 53.8,
-      "m_suspicious_data": false,
-      "m_upcoming_event": null,
-      "m_supports": [
-        {
-          "price": 23.02,
-          "label": "61.8%",
-          "ratio": 0.618,
-          "is_golden": true,
-          "type": "fibo",
-          "distance_pct": 2.04
-        },
-        {
-          "price": 22.65,
-          "label": "50%",
-          "ratio": 0.5,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 3.62
-        },
-        {
-          "price": 22.28,
-          "label": "38.2%",
-          "ratio": 0.382,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 5.19
-        }
-      ],
-      "m_resistances": [
-        {
-          "price": 23.54,
-          "label": "78.6%",
-          "ratio": 0.786,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 0.17
-        },
-        {
-          "price": 24.2,
-          "label": "100%",
-          "ratio": 1.0,
-          "is_golden": false,
-          "type": "fibo",
-          "distance_pct": 2.98
-        }
-      ],
-      "m_fibo_swing": {
-        "high": 24.2,
-        "high_date": "2026-09-18",
-        "high_idx": 25,
-        "low": 21.1,
-        "low_date": "2026-10-12",
-        "low_idx": 41,
-        "direction": "down",
-        "range": 3.1
-      },
-      "m_rs_score": 0.33,
-      "m_rs_rank": 66,
-      "m_rs_63d": 0.71,
-      "m_stop": 23.02,
-      "m_target": 23.54,
-      "m_rr": 0.08,
-      "m_levels_note": null,
-      "m_suppress_signal": false,
-      "m_avg_value20": 45496566000.0,
-      "m_spark20": [
-        23.4,
-        23.0,
-        23.2,
-        23.3,
-        23.1,
-        23.2,
-        23.2,
-        23.1,
-        23.2,
-        23.0,
-        23.0,
-        23.0,
-        23.3,
-        23.2,
-        23.4,
-        23.2,
-        23.0,
-        23.4,
-        23.7,
-        23.5
-      ]
-    },
-    {
-      "ticker": "STB",
-      "exchange": "HOSE",
-      "date": "2026-11-05T00:00:00",
-      "close": 69.2,
-      "volume": 4428300,
-      "preset": "short",
-      "total_score": 3,
-      "rating": "B",
-      "gc_recent_cross": 1,
-      "gc_price_above_fast": 1,
-      "gc_ma_stacking": 0,
-      "gc_slow_rising": 1,
-      "gc_volume_confirm": 0,
-      "m_change_1d_pct": 2.22,
-      "m_limit_status": "normal",
-      "m_limit_locked": false,
-      "m_tradable_warning": null,
-      "m_preset_name": "MA10×MA20",
-      "m_cross_days_ago": 3,
-      "m_fast_ma": 67.33,
-      "m_slow_ma": 65.73,
-      "m_slow_spread_pct": 2.43,
-      "m_change_5d_pct": 3.44,
-      "m_vol_ratio": 1.36,
-      "m_rsi14": 55.2,
+      "m_fast_ma": 67.48,
+      "m_slow_ma": 65.86,
+      "m_slow_spread_pct": 2.45,
+      "m_change_5d_pct": 5.58,
+      "m_vol_ratio": 1.22,
+      "m_rsi14": 57.6,
       "m_suspicious_data": false,
       "m_upcoming_event": null,
       "m_supports": [
@@ -322,7 +102,7 @@
           "ratio": 0.382,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 1.82
+          "distance_pct": 2.94
         },
         {
           "price": 65.32,
@@ -330,7 +110,7 @@
           "ratio": 0.236,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 5.61
+          "distance_pct": 6.69
         },
         {
           "price": 61.1,
@@ -338,7 +118,7 @@
           "ratio": 0.0,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 11.71
+          "distance_pct": 12.71
         }
       ],
       "m_resistances": [
@@ -348,7 +128,7 @@
           "ratio": 0.5,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 1.23
+          "distance_pct": 0.07
         },
         {
           "price": 72.16,
@@ -356,7 +136,7 @@
           "ratio": 0.618,
           "is_golden": true,
           "type": "fibo",
-          "distance_pct": 4.28
+          "distance_pct": 3.09
         },
         {
           "price": 75.17,
@@ -364,30 +144,29 @@
           "ratio": 0.786,
           "is_golden": false,
           "type": "fibo",
-          "distance_pct": 8.63
+          "distance_pct": 7.39
         }
       ],
       "m_fibo_swing": {
         "high": 79.0,
         "high_date": "2026-09-10",
-        "high_idx": 19,
+        "high_idx": 18,
         "low": 61.1,
         "low_date": "2026-10-20",
-        "low_idx": 47,
+        "low_idx": 46,
         "direction": "down",
         "range": 17.9
       },
-      "m_rs_score": 1.33,
-      "m_rs_rank": 71,
-      "m_rs_63d": -3.45,
+      "m_rs_score": 3.12,
+      "m_rs_rank": 77,
+      "m_rs_63d": -0.81,
       "m_stop": 67.94,
       "m_target": 70.05,
-      "m_rr": 0.67,
+      "m_rr": 0.02,
       "m_levels_note": null,
       "m_suppress_signal": false,
-      "m_avg_value20": 214312250000.0,
+      "m_avg_value20": 219539345000.0,
       "m_spark20": [
-        67.3,
         66.9,
         65.6,
         64.6,
@@ -406,7 +185,122 @@
         65.1,
         66.6,
         67.7,
-        69.2
+        69.2,
+        70.0
+      ]
+    },
+    {
+      "ticker": "VC3",
+      "exchange": "HNX",
+      "date": "2026-11-06T00:00:00",
+      "close": 23.3,
+      "volume": 1035600,
+      "preset": "short",
+      "total_score": 3,
+      "rating": "B",
+      "gc_recent_cross": 1,
+      "gc_price_above_fast": 0,
+      "gc_ma_stacking": 1,
+      "gc_slow_rising": 1,
+      "gc_volume_confirm": 0,
+      "m_change_1d_pct": -0.85,
+      "m_limit_status": "normal",
+      "m_limit_locked": false,
+      "m_tradable_warning": null,
+      "m_preset_name": "MA10×MA20",
+      "m_cross_days_ago": 2,
+      "m_fast_ma": 23.3,
+      "m_slow_ma": 23.21,
+      "m_slow_spread_pct": 0.37,
+      "m_change_5d_pct": 0.43,
+      "m_vol_ratio": 0.54,
+      "m_rsi14": 49.5,
+      "m_suspicious_data": false,
+      "m_upcoming_event": null,
+      "m_supports": [
+        {
+          "price": 23.02,
+          "label": "61.8%",
+          "ratio": 0.618,
+          "is_golden": true,
+          "type": "fibo",
+          "distance_pct": 1.2
+        },
+        {
+          "price": 22.65,
+          "label": "50%",
+          "ratio": 0.5,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 2.79
+        },
+        {
+          "price": 22.28,
+          "label": "38.2%",
+          "ratio": 0.382,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 4.38
+        }
+      ],
+      "m_resistances": [
+        {
+          "price": 23.54,
+          "label": "78.6%",
+          "ratio": 0.786,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 1.03
+        },
+        {
+          "price": 24.2,
+          "label": "100%",
+          "ratio": 1.0,
+          "is_golden": false,
+          "type": "fibo",
+          "distance_pct": 3.86
+        }
+      ],
+      "m_fibo_swing": {
+        "high": 24.2,
+        "high_date": "2026-09-18",
+        "high_idx": 24,
+        "low": 21.1,
+        "low_date": "2026-10-12",
+        "low_idx": 40,
+        "direction": "down",
+        "range": 3.1
+      },
+      "m_rs_score": -0.18,
+      "m_rs_rank": 62,
+      "m_rs_63d": 0.09,
+      "m_stop": 23.02,
+      "m_target": 23.54,
+      "m_rr": 0.86,
+      "m_levels_note": null,
+      "m_suppress_signal": false,
+      "m_avg_value20": 44168703000.0,
+      "m_spark20": [
+        23.0,
+        23.2,
+        23.3,
+        23.1,
+        23.2,
+        23.2,
+        23.1,
+        23.2,
+        23.0,
+        23.0,
+        23.0,
+        23.3,
+        23.2,
+        23.4,
+        23.2,
+        23.0,
+        23.4,
+        23.7,
+        23.5,
+        23.3
       ]
     }
   ]

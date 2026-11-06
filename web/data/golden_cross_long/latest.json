@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-05T21:58:07.814850",
+  "generated_at": "2026-11-06T13:06:14.789561",
   "strategy": "golden_cross_long",
   "total": 0,
   "metadata": {
@@ -11,7 +11,7 @@
     ],
     "base_conditions": {
       "min_avg_value_20d": 10000000000.0,
-      "dropped_low_liquidity": 376,
+      "dropped_low_liquidity": 379,
       "universe_after": 121,
       "exchanges": [
         "HOSE",
@@ -19,51 +19,51 @@
         "UPCOM"
       ]
     },
-    "total_scanned": 497,
+    "total_scanned": 500,
     "market_context": {
       "available": true,
-      "close": 1740.73,
-      "ma50": 1770.38,
-      "ma200": 1791.77,
+      "close": 1725.36,
+      "ma50": 1769.06,
+      "ma200": 1791.07,
       "above_ma50": false,
       "above_ma200": false,
       "ma50_rising": false,
-      "change_20d_pct": 0.1,
-      "drawdown_from_high_pct": -9.71,
+      "change_20d_pct": -0.56,
+      "drawdown_from_high_pct": -10.51,
       "regime": "risk_off",
       "label": "Thị trường bất lợi — phần lớn tín hiệu breakout thất bại trong giai đoạn này",
       "position_size_multiplier": 0.3,
       "breadth": {
-        "pct_above_ma50": 31.0,
-        "sample_size": 497
+        "pct_above_ma50": 30.8,
+        "sample_size": 500
       }
     },
-    "session_date": "2026-11-05",
-    "written_at_ict": "2026-11-06 04:57:50+0700",
+    "session_date": "2026-11-06",
+    "written_at_ict": "2026-11-06 20:05:59+0700",
     "run_type": "eod",
-    "session_complete": 1.117,
+    "session_complete": 1.126,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên 2026-11-05 đã đóng dứt khoát (hôm nay 2026-11-06)) | gate_coverage: pass (99% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên hôm nay, 20:05 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên 2026-11-05 đã đóng dứt khoát (hôm nay 2026-11-06)"
+        "detail": "phiên hôm nay, 20:05 ICT >= 15:15 — khối lượng đã chốt"
       },
       {
         "name": "gate_coverage",
         "passed": true,
-        "detail": "99% >= 80%, vòng fetch chạy trọn"
+        "detail": "100% >= 80%, vòng fetch chạy trọn"
       }
     ],
     "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 0.994,
-    "fetch_elapsed_s": 144.8,
+    "fetch_coverage": 1.0,
+    "fetch_elapsed_s": 998.4,
     "intraday": false,
-    "run_time_ict": "05:03",
+    "run_time_ict": "20:12",
     "run_date_ict": "2026-11-06"
   },
   "signals": []
