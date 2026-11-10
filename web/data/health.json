@@ -1,34 +1,34 @@
 {
   "schema": 1,
-  "generated_at": "2026-11-10T00:16:19",
+  "generated_at": "2026-11-10T13:43:46",
   "sources": {
     "daily_scan": {
       "label": "Scan hằng ngày",
-      "session_date": "2026-11-09",
-      "run_type": "intraday",
+      "session_date": "2026-11-10",
+      "run_type": "eod",
       "run_date_ict": "2026-11-10",
-      "run_time_ict": "07:11",
-      "universe": 499,
+      "run_time_ict": "20:40",
+      "universe": 500,
       "universe_after_base": 120,
-      "dropped_low_liquidity": 379,
+      "dropped_low_liquidity": 380,
       "fetch": {
-        "coverage": 0.998,
-        "succeeded": 499,
+        "coverage": 1.0,
+        "succeeded": 500,
         "skipped": 0,
-        "failed": 1,
+        "failed": 0,
         "stop_reason": null
       },
-      "stale_ratio": 0.146,
-      "session_completeness": 0.83,
+      "stale_ratio": 0.164,
+      "session_completeness": 1.085,
       "archive_written": true,
-      "archive_reason": "gate_time: pass (phiên 2026-11-09 đã đóng dứt khoát (hôm nay 2026-11-10)) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)"
+      "archive_reason": "gate_time: pass (phiên hôm nay, 20:40 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)"
     },
     "valuation": {
       "label": "Định giá",
       "available": true,
       "as_of": "2026-11-08",
       "generated_at": "2026-11-08T05:54:44.357357",
-      "age_days": 1,
+      "age_days": 2,
       "count": 79,
       "fetch_coverage": 1.0,
       "partial_reason": null,
@@ -43,7 +43,7 @@
       "available": true,
       "as_of": "2026-11-08",
       "generated_at": "2026-11-08T06:10:12",
-      "age_days": 1,
+      "age_days": 2,
       "count": 200,
       "fetch_coverage": 1.0,
       "partial_reason": null,
@@ -54,11 +54,5 @@
       }
     }
   },
-  "issues": [
-    {
-      "code": "fetch_failed",
-      "severity": "warn",
-      "message": "1 mã không lấy được dữ liệu, đã bỏ qua trong phiên này."
-    }
-  ]
+  "issues": []
 }
