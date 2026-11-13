@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-13T13:14:18.010870",
+  "generated_at": "2026-11-13T21:57:52.626235",
   "strategy": "golden_cross_short",
   "total": 7,
   "metadata": {
@@ -11,7 +11,7 @@
     ],
     "base_conditions": {
       "min_avg_value_20d": 10000000000.0,
-      "dropped_low_liquidity": 379,
+      "dropped_low_liquidity": 365,
       "universe_after": 121,
       "exchanges": [
         "HOSE",
@@ -19,7 +19,7 @@
         "UPCOM"
       ]
     },
-    "total_scanned": 500,
+    "total_scanned": 486,
     "market_context": {
       "available": true,
       "close": 1734.93,
@@ -34,37 +34,37 @@
       "label": "Thị trường bất lợi — phần lớn tín hiệu breakout thất bại trong giai đoạn này",
       "position_size_multiplier": 0.3,
       "breadth": {
-        "pct_above_ma50": 34.0,
-        "sample_size": 500
+        "pct_above_ma50": 34.6,
+        "sample_size": 486
       }
     },
     "session_date": "2026-11-13",
-    "written_at_ict": "2026-11-13 20:13:46+0700",
+    "written_at_ict": "2026-11-14 04:57:45+0700",
     "run_type": "eod",
     "session_complete": 0.786,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 20:13 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên 2026-11-13 đã đóng dứt khoát (hôm nay 2026-11-14)) | gate_coverage: pass (97% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 20:13 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-11-13 đã đóng dứt khoát (hôm nay 2026-11-14)"
       },
       {
         "name": "gate_coverage",
         "passed": true,
-        "detail": "100% >= 80%, vòng fetch chạy trọn"
+        "detail": "97% >= 80%, vòng fetch chạy trọn"
       }
     ],
     "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 1.0,
-    "fetch_elapsed_s": 998.6,
+    "fetch_coverage": 0.972,
+    "fetch_elapsed_s": 139.3,
     "intraday": false,
-    "run_time_ict": "20:20",
-    "run_date_ict": "2026-11-13"
+    "run_time_ict": "05:02",
+    "run_date_ict": "2026-11-14"
   },
   "signals": [
     {
@@ -158,7 +158,7 @@
         "range": 6.05
       },
       "m_rs_score": -3.87,
-      "m_rs_rank": 54,
+      "m_rs_rank": 53,
       "m_rs_63d": -9.81,
       "m_stop": 15.06,
       "m_target": 15.78,
@@ -386,7 +386,7 @@
         "range": 2.85
       },
       "m_rs_score": 1.27,
-      "m_rs_rank": 75,
+      "m_rs_rank": 74,
       "m_rs_63d": 4.04,
       "m_stop": 11.06,
       "m_target": 11.54,
@@ -614,7 +614,7 @@
         "range": 1.89
       },
       "m_rs_score": -4.32,
-      "m_rs_rank": 51,
+      "m_rs_rank": 50,
       "m_rs_63d": -3.78,
       "m_stop": 9.51,
       "m_target": 9.73,
@@ -728,7 +728,7 @@
         "range": 0.53
       },
       "m_rs_score": -1.55,
-      "m_rs_rank": 63,
+      "m_rs_rank": 62,
       "m_rs_63d": -2.43,
       "m_stop": 4.53,
       "m_target": 4.67,
@@ -779,7 +779,7 @@
       "m_tradable_warning": null,
       "m_preset_name": "MA10×MA20",
       "m_cross_days_ago": 0,
-      "m_fast_ma": 15.34,
+      "m_fast_ma": 15.35,
       "m_slow_ma": 15.34,
       "m_slow_spread_pct": 0.05,
       "m_change_5d_pct": -2.27,
@@ -850,7 +850,7 @@
         "range": 3.45
       },
       "m_rs_score": -6.23,
-      "m_rs_rank": 42,
+      "m_rs_rank": 41,
       "m_rs_63d": -2.69,
       "m_stop": 14.88,
       "m_target": 15.28,
