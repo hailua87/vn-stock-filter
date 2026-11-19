@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-19T14:31:38.561770",
+  "generated_at": "2026-11-19T23:03:28.810765",
   "strategy": "golden_cross_short",
   "total": 4,
   "metadata": {
@@ -11,7 +11,7 @@
     ],
     "base_conditions": {
       "min_avg_value_20d": 10000000000.0,
-      "dropped_low_liquidity": 383,
+      "dropped_low_liquidity": 381,
       "universe_after": 117,
       "exchanges": [
         "HOSE",
@@ -19,7 +19,7 @@
         "UPCOM"
       ]
     },
-    "total_scanned": 500,
+    "total_scanned": 498,
     "market_context": {
       "available": true,
       "close": 1689.62,
@@ -34,22 +34,22 @@
       "label": "Thị trường bất lợi — phần lớn tín hiệu breakout thất bại trong giai đoạn này",
       "position_size_multiplier": 0.3,
       "breadth": {
-        "pct_above_ma50": 24.4,
-        "sample_size": 500
+        "pct_above_ma50": 24.3,
+        "sample_size": 498
       }
     },
     "session_date": "2026-11-19",
-    "written_at_ict": "2026-11-19 21:31:36+0700",
+    "written_at_ict": "2026-11-20 06:03:02+0700",
     "run_type": "eod",
     "session_complete": 0.827,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 21:31 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên 2026-11-19 đã đóng dứt khoát (hôm nay 2026-11-20)) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 21:31 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-11-19 đã đóng dứt khoát (hôm nay 2026-11-20)"
       },
       {
         "name": "gate_coverage",
@@ -60,11 +60,11 @@
     "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 1.0,
-    "fetch_elapsed_s": 998.4,
+    "fetch_coverage": 0.996,
+    "fetch_elapsed_s": 166.7,
     "intraday": false,
-    "run_time_ict": "21:35",
-    "run_date_ict": "2026-11-19"
+    "run_time_ict": "06:08",
+    "run_date_ict": "2026-11-20"
   },
   "signals": [
     {
@@ -142,7 +142,7 @@
         "range": 1.75
       },
       "m_rs_score": 7.66,
-      "m_rs_rank": 89,
+      "m_rs_rank": 90,
       "m_rs_63d": 3.65,
       "m_stop": 13.28,
       "m_target": 13.65,
@@ -193,7 +193,7 @@
       "m_tradable_warning": null,
       "m_preset_name": "MA10×MA20",
       "m_cross_days_ago": 2,
-      "m_fast_ma": 16.3,
+      "m_fast_ma": 16.29,
       "m_slow_ma": 16.03,
       "m_slow_spread_pct": 1.65,
       "m_change_5d_pct": 4.69,
@@ -362,7 +362,7 @@
         "range": 27.3
       },
       "m_rs_score": 9.15,
-      "m_rs_rank": 91,
+      "m_rs_rank": 92,
       "m_rs_63d": 6.62,
       "m_stop": 148.36,
       "m_target": 154.8,
