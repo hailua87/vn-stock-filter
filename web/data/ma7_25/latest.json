@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-26T15:12:18.599277",
+  "generated_at": "2026-11-27T00:43:15.670379",
   "strategy": "ma7_25",
   "total": 66,
   "metadata": {
@@ -11,7 +11,7 @@
     ],
     "base_conditions": {
       "min_avg_value_20d": 10000000000.0,
-      "dropped_low_liquidity": 386,
+      "dropped_low_liquidity": 385,
       "universe_after": 114,
       "exchanges": [
         "HOSE",
@@ -19,37 +19,29 @@
         "UPCOM"
       ]
     },
-    "total_scanned": 500,
+    "total_scanned": 499,
     "market_context": {
-      "available": true,
-      "close": 1629.68,
-      "ma50": 1740.15,
-      "ma200": 1781.99,
-      "above_ma50": false,
-      "above_ma200": false,
-      "ma50_rising": false,
-      "change_20d_pct": -7.75,
-      "drawdown_from_high_pct": -15.47,
-      "regime": "risk_off",
-      "label": "Thị trường bất lợi — phần lớn tín hiệu breakout thất bại trong giai đoạn này",
-      "position_size_multiplier": 0.3,
+      "available": false,
+      "regime": "unknown",
+      "label": "Không lấy được VN-Index — không đánh giá được bối cảnh thị trường",
+      "position_size_multiplier": 1.0,
       "breadth": {
-        "pct_above_ma50": 17.2,
-        "sample_size": 500
+        "pct_above_ma50": 16.8,
+        "sample_size": 499
       }
     },
     "session_date": "2026-11-26",
-    "written_at_ict": "2026-11-26 22:12:10+0700",
-    "run_type": "eod",
+    "written_at_ict": "2026-11-27 07:40:04+0700",
+    "run_type": "intraday",
     "session_complete": 1.386,
     "archive_written": true,
     "archive_forced": false,
-    "archive_gate": "gate_time: pass (phiên hôm nay, 22:12 ICT >= 15:15 — khối lượng đã chốt) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
+    "archive_gate": "gate_time: pass (phiên 2026-11-26 đã đóng dứt khoát (hôm nay 2026-11-27)) | gate_coverage: pass (100% >= 80%, vòng fetch chạy trọn)",
     "archive_gates": [
       {
         "name": "gate_time",
         "passed": true,
-        "detail": "phiên hôm nay, 22:12 ICT >= 15:15 — khối lượng đã chốt"
+        "detail": "phiên 2026-11-26 đã đóng dứt khoát (hôm nay 2026-11-27)"
       },
       {
         "name": "gate_coverage",
@@ -60,11 +52,11 @@
     "archive_gates_failed": [],
     "fetch_truncated": false,
     "fetch_stop_reason": null,
-    "fetch_coverage": 1.0,
-    "fetch_elapsed_s": 998.4,
-    "intraday": false,
-    "run_time_ict": "22:17",
-    "run_date_ict": "2026-11-26"
+    "fetch_coverage": 0.998,
+    "fetch_elapsed_s": 588.6,
+    "intraday": true,
+    "run_time_ict": "07:49",
+    "run_date_ict": "2026-11-27"
   },
   "signals": [
     {
@@ -88,7 +80,7 @@
       "m_ma99": 8.9,
       "m_atr14": 0.441,
       "m_gap": -0.5,
-      "m_gap_p90": 1.76,
+      "m_gap_p90": 1.75,
       "m_gap_pct": -2.17,
       "m_vol_ratio": 0.61,
       "m_avg_value20_ty": 7.9,
@@ -98,7 +90,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "ABS",
@@ -121,7 +113,7 @@
       "m_ma99": 2.97,
       "m_atr14": 0.089,
       "m_gap": -0.0,
-      "m_gap_p90": 1.04,
+      "m_gap_p90": 1.01,
       "m_gap_pct": -0.01,
       "m_vol_ratio": 0.52,
       "m_avg_value20_ty": 0.4,
@@ -131,7 +123,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "AGP",
@@ -154,7 +146,7 @@
       "m_ma99": 29.96,
       "m_atr14": 0.835,
       "m_gap": -0.01,
-      "m_gap_p90": 0.62,
+      "m_gap_p90": 0.64,
       "m_gap_pct": -0.02,
       "m_vol_ratio": 0.1,
       "m_avg_value20_ty": 0.3,
@@ -164,7 +156,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "ALV",
@@ -187,7 +179,7 @@
       "m_ma99": 7.15,
       "m_atr14": 0.63,
       "m_gap": -0.24,
-      "m_gap_p90": 1.18,
+      "m_gap_p90": 1.2,
       "m_gap_pct": -1.82,
       "m_vol_ratio": 0.87,
       "m_avg_value20_ty": 0.1,
@@ -197,7 +189,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "AST",
@@ -220,7 +212,7 @@
       "m_ma99": 61.36,
       "m_atr14": 1.198,
       "m_gap": -0.03,
-      "m_gap_p90": 0.92,
+      "m_gap_p90": 0.91,
       "m_gap_pct": -0.07,
       "m_vol_ratio": 0.09,
       "m_avg_value20_ty": 0.2,
@@ -230,7 +222,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "BCC",
@@ -263,7 +255,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "CAG",
@@ -286,7 +278,7 @@
       "m_ma99": 6.05,
       "m_atr14": 0.37,
       "m_gap": -0.59,
-      "m_gap_p90": 0.62,
+      "m_gap_p90": 0.69,
       "m_gap_pct": -3.57,
       "m_vol_ratio": 0.25,
       "m_avg_value20_ty": 0.1,
@@ -296,7 +288,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "CEO",
@@ -319,7 +311,7 @@
       "m_ma99": 11.87,
       "m_atr14": 0.551,
       "m_gap": -0.33,
-      "m_gap_p90": 0.8,
+      "m_gap_p90": 0.81,
       "m_gap_pct": -1.57,
       "m_vol_ratio": 1.47,
       "m_avg_value20_ty": 100.1,
@@ -329,7 +321,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "CII",
@@ -352,7 +344,7 @@
       "m_ma99": 13.71,
       "m_atr14": 0.533,
       "m_gap": -0.41,
-      "m_gap_p90": 1.1,
+      "m_gap_p90": 1.11,
       "m_gap_pct": -1.62,
       "m_vol_ratio": 1.1,
       "m_avg_value20_ty": 154.7,
@@ -362,7 +354,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "CQN",
@@ -385,7 +377,7 @@
       "m_ma99": 30.54,
       "m_atr14": 0.862,
       "m_gap": -0.61,
-      "m_gap_p90": 0.97,
+      "m_gap_p90": 1.0,
       "m_gap_pct": -1.65,
       "m_vol_ratio": 1.39,
       "m_avg_value20_ty": 1.4,
@@ -395,7 +387,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "DIG",
@@ -418,7 +410,7 @@
       "m_ma99": 10.27,
       "m_atr14": 0.307,
       "m_gap": -0.28,
-      "m_gap_p90": 0.73,
+      "m_gap_p90": 0.74,
       "m_gap_pct": -0.86,
       "m_vol_ratio": 1.52,
       "m_avg_value20_ty": 63.3,
@@ -428,7 +420,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "DPG",
@@ -451,7 +443,7 @@
       "m_ma99": 29.49,
       "m_atr14": 1.244,
       "m_gap": -0.03,
-      "m_gap_p90": 1.64,
+      "m_gap_p90": 1.65,
       "m_gap_pct": -0.12,
       "m_vol_ratio": 1.04,
       "m_avg_value20_ty": 25.5,
@@ -461,7 +453,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "GIL",
@@ -484,7 +476,7 @@
       "m_ma99": 8.25,
       "m_atr14": 0.315,
       "m_gap": -0.84,
-      "m_gap_p90": 1.07,
+      "m_gap_p90": 1.09,
       "m_gap_pct": -2.96,
       "m_vol_ratio": 0.52,
       "m_avg_value20_ty": 1.4,
@@ -494,7 +486,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "HAS",
@@ -517,7 +509,7 @@
       "m_ma99": 8.8,
       "m_atr14": 0.577,
       "m_gap": -0.68,
-      "m_gap_p90": 1.02,
+      "m_gap_p90": 1.24,
       "m_gap_pct": -4.77,
       "m_vol_ratio": 3.16,
       "m_avg_value20_ty": 0.0,
@@ -527,7 +519,7 @@
       "m_tradable_warning": "Đang ở giá SÀN — nhiều khả năng không thoát được hàng",
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "HCD",
@@ -560,7 +552,7 @@
       "m_tradable_warning": "Sát giá trần — thanh khoản bên bán mỏng, khó khớp đủ khối lượng",
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "HHS",
@@ -583,7 +575,7 @@
       "m_ma99": 9.85,
       "m_atr14": 0.335,
       "m_gap": -0.26,
-      "m_gap_p90": 1.39,
+      "m_gap_p90": 1.41,
       "m_gap_pct": -0.91,
       "m_vol_ratio": 1.32,
       "m_avg_value20_ty": 14.1,
@@ -593,7 +585,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "HMR",
@@ -616,7 +608,7 @@
       "m_ma99": 9.3,
       "m_atr14": 0.532,
       "m_gap": -0.29,
-      "m_gap_p90": 0.43,
+      "m_gap_p90": 0.48,
       "m_gap_pct": -1.8,
       "m_vol_ratio": 0.64,
       "m_avg_value20_ty": 0.0,
@@ -626,7 +618,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "IDV",
@@ -649,7 +641,7 @@
       "m_ma99": 21.28,
       "m_atr14": 0.397,
       "m_gap": -0.16,
-      "m_gap_p90": 0.86,
+      "m_gap_p90": 0.87,
       "m_gap_pct": -0.3,
       "m_vol_ratio": 1.14,
       "m_avg_value20_ty": 0.2,
@@ -659,7 +651,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "KHG",
@@ -682,7 +674,7 @@
       "m_ma99": 4.68,
       "m_atr14": 0.112,
       "m_gap": -0.38,
-      "m_gap_p90": 0.25,
+      "m_gap_p90": 0.26,
       "m_gap_pct": -0.93,
       "m_vol_ratio": 0.51,
       "m_avg_value20_ty": 24.3,
@@ -692,7 +684,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "MBS",
@@ -715,7 +707,7 @@
       "m_ma99": 16.79,
       "m_atr14": 0.52,
       "m_gap": -0.53,
-      "m_gap_p90": 0.75,
+      "m_gap_p90": 0.76,
       "m_gap_pct": -1.77,
       "m_vol_ratio": 1.35,
       "m_avg_value20_ty": 60.0,
@@ -725,7 +717,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "NKG",
@@ -758,7 +750,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50"
+      "m_filters_failed": "khong_ro_vnindex"
     },
     {
       "ticker": "NRC",
@@ -781,7 +773,7 @@
       "m_ma99": 4.83,
       "m_atr14": 0.26,
       "m_gap": -0.7,
-      "m_gap_p90": 0.71,
+      "m_gap_p90": 0.72,
       "m_gap_pct": -3.97,
       "m_vol_ratio": 0.67,
       "m_avg_value20_ty": 3.8,
@@ -791,7 +783,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "NTL",
@@ -824,7 +816,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "NTP",
@@ -857,7 +849,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "OCB",
@@ -890,7 +882,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "POT",
@@ -913,7 +905,7 @@
       "m_ma99": 20.47,
       "m_atr14": 0.972,
       "m_gap": -0.19,
-      "m_gap_p90": 1.25,
+      "m_gap_p90": 1.21,
       "m_gap_pct": -0.91,
       "m_vol_ratio": 0.02,
       "m_avg_value20_ty": 0.1,
@@ -923,7 +915,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "PTC",
@@ -946,7 +938,7 @@
       "m_ma99": 5.56,
       "m_atr14": 0.307,
       "m_gap": -0.34,
-      "m_gap_p90": 0.83,
+      "m_gap_p90": 0.9,
       "m_gap_pct": -2.18,
       "m_vol_ratio": 0.44,
       "m_avg_value20_ty": 0.0,
@@ -956,7 +948,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "SAM",
@@ -979,7 +971,7 @@
       "m_ma99": 6.03,
       "m_atr14": 0.14,
       "m_gap": -0.12,
-      "m_gap_p90": 1.04,
+      "m_gap_p90": 1.01,
       "m_gap_pct": -0.27,
       "m_vol_ratio": 1.65,
       "m_avg_value20_ty": 0.8,
@@ -989,7 +981,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "SDT",
@@ -1012,7 +1004,7 @@
       "m_ma99": 3.9,
       "m_atr14": 0.063,
       "m_gap": -0.06,
-      "m_gap_p90": 0.74,
+      "m_gap_p90": 0.72,
       "m_gap_pct": -0.11,
       "m_vol_ratio": 0.69,
       "m_avg_value20_ty": 0.1,
@@ -1022,7 +1014,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "SED",
@@ -1045,7 +1037,7 @@
       "m_ma99": 15.55,
       "m_atr14": 0.318,
       "m_gap": -0.05,
-      "m_gap_p90": 0.36,
+      "m_gap_p90": 0.42,
       "m_gap_pct": -0.09,
       "m_vol_ratio": 0.81,
       "m_avg_value20_ty": 0.1,
@@ -1055,7 +1047,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "SGT",
@@ -1088,7 +1080,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "SIP",
@@ -1111,7 +1103,7 @@
       "m_ma99": 47.8,
       "m_atr14": 0.927,
       "m_gap": -1.2,
-      "m_gap_p90": 1.41,
+      "m_gap_p90": 1.34,
       "m_gap_pct": -2.5,
       "m_vol_ratio": 1.46,
       "m_avg_value20_ty": 6.6,
@@ -1121,7 +1113,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "SMN",
@@ -1144,7 +1136,7 @@
       "m_ma99": 6.69,
       "m_atr14": 0.364,
       "m_gap": -0.21,
-      "m_gap_p90": 0.13,
+      "m_gap_p90": 0.07,
       "m_gap_pct": -1.34,
       "m_vol_ratio": 0.55,
       "m_avg_value20_ty": 0.0,
@@ -1154,7 +1146,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "SZC",
@@ -1187,7 +1179,7 @@
       "m_tradable_warning": "Đang ở giá SÀN — nhiều khả năng không thoát được hàng",
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "TVD",
@@ -1210,7 +1202,7 @@
       "m_ma99": 8.86,
       "m_atr14": 0.225,
       "m_gap": -0.06,
-      "m_gap_p90": 0.84,
+      "m_gap_p90": 0.8,
       "m_gap_pct": -0.15,
       "m_vol_ratio": 1.04,
       "m_avg_value20_ty": 0.3,
@@ -1220,7 +1212,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "VC7",
@@ -1243,7 +1235,7 @@
       "m_ma99": 7.33,
       "m_atr14": 0.387,
       "m_gap": -0.73,
-      "m_gap_p90": 0.99,
+      "m_gap_p90": 1.02,
       "m_gap_pct": -3.62,
       "m_vol_ratio": 0.72,
       "m_avg_value20_ty": 2.0,
@@ -1253,7 +1245,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "VCA",
@@ -1276,7 +1268,7 @@
       "m_ma99": 6.43,
       "m_atr14": 0.237,
       "m_gap": -0.19,
-      "m_gap_p90": 0.34,
+      "m_gap_p90": 0.41,
       "m_gap_pct": -0.67,
       "m_vol_ratio": 0.1,
       "m_avg_value20_ty": 0.0,
@@ -1286,7 +1278,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "VCF",
@@ -1309,7 +1301,7 @@
       "m_ma99": 294.17,
       "m_atr14": 7.727,
       "m_gap": -0.1,
-      "m_gap_p90": 1.29,
+      "m_gap_p90": 1.02,
       "m_gap_pct": -0.26,
       "m_vol_ratio": 0.26,
       "m_avg_value20_ty": 0.1,
@@ -1319,7 +1311,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "VIX",
@@ -1352,7 +1344,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "VPH",
@@ -1375,7 +1367,7 @@
       "m_ma99": 2.89,
       "m_atr14": 0.123,
       "m_gap": -0.13,
-      "m_gap_p90": 0.48,
+      "m_gap_p90": 0.51,
       "m_gap_pct": -0.65,
       "m_vol_ratio": 1.29,
       "m_avg_value20_ty": 0.0,
@@ -1385,7 +1377,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "VSH",
@@ -1408,7 +1400,7 @@
       "m_ma99": 40.95,
       "m_atr14": 0.675,
       "m_gap": -0.64,
-      "m_gap_p90": 0.35,
+      "m_gap_p90": 0.32,
       "m_gap_pct": -1.09,
       "m_vol_ratio": 0.58,
       "m_avg_value20_ty": 1.0,
@@ -1418,7 +1410,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "CTD",
@@ -1456,7 +1448,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50"
+      "m_filters_failed": "khong_ro_vnindex"
     },
     {
       "ticker": "CTS",
@@ -1484,7 +1476,7 @@
       "m_ma99": 22.4,
       "m_atr14": 0.915,
       "m_gap": 0.58,
-      "m_gap_p90": 1.41,
+      "m_gap_p90": 1.42,
       "m_gap_pct": 2.36,
       "m_vol_ratio": 2.01,
       "m_avg_value20_ty": 57.9,
@@ -1494,7 +1486,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "DAH",
@@ -1522,7 +1514,7 @@
       "m_ma99": 2.44,
       "m_atr14": 0.131,
       "m_gap": 0.58,
-      "m_gap_p90": 1.04,
+      "m_gap_p90": 1.07,
       "m_gap_pct": 3.1,
       "m_vol_ratio": 21.07,
       "m_avg_value20_ty": 0.6,
@@ -1532,7 +1524,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "DBC",
@@ -1570,7 +1562,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "DNC",
@@ -1598,7 +1590,7 @@
       "m_ma99": 49.96,
       "m_atr14": 2.002,
       "m_gap": 0.22,
-      "m_gap_p90": 2.11,
+      "m_gap_p90": 2.96,
       "m_gap_pct": 0.96,
       "m_vol_ratio": 2.96,
       "m_avg_value20_ty": 0.0,
@@ -1608,7 +1600,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "HJS",
@@ -1636,7 +1628,7 @@
       "m_ma99": 26.87,
       "m_atr14": 1.29,
       "m_gap": 0.66,
-      "m_gap_p90": 0.99,
+      "m_gap_p90": 1.01,
       "m_gap_pct": 3.36,
       "m_vol_ratio": 17.55,
       "m_avg_value20_ty": 0.0,
@@ -1646,7 +1638,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "KDH",
@@ -1674,7 +1666,7 @@
       "m_ma99": 16.04,
       "m_atr14": 0.625,
       "m_gap": 0.77,
-      "m_gap_p90": 0.48,
+      "m_gap_p90": 0.43,
       "m_gap_pct": 3.22,
       "m_vol_ratio": 1.57,
       "m_avg_value20_ty": 181.7,
@@ -1684,7 +1676,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "NLG",
@@ -1712,7 +1704,7 @@
       "m_ma99": 23.08,
       "m_atr14": 0.877,
       "m_gap": 0.26,
-      "m_gap_p90": 1.18,
+      "m_gap_p90": 1.19,
       "m_gap_pct": 0.98,
       "m_vol_ratio": 2.45,
       "m_avg_value20_ty": 43.3,
@@ -1722,7 +1714,7 @@
       "m_tradable_warning": "Đang ở giá SÀN — nhiều khả năng không thoát được hàng",
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "NNC",
@@ -1750,7 +1742,7 @@
       "m_ma99": 42.39,
       "m_atr14": 1.522,
       "m_gap": 0.03,
-      "m_gap_p90": 2.21,
+      "m_gap_p90": 2.24,
       "m_gap_pct": 0.11,
       "m_vol_ratio": 0.99,
       "m_avg_value20_ty": 2.6,
@@ -1760,7 +1752,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "PGV",
@@ -1788,7 +1780,7 @@
       "m_ma99": 21.14,
       "m_atr14": 0.658,
       "m_gap": 0.09,
-      "m_gap_p90": 1.4,
+      "m_gap_p90": 1.42,
       "m_gap_pct": 0.29,
       "m_vol_ratio": 0.52,
       "m_avg_value20_ty": 0.8,
@@ -1798,7 +1790,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "REE",
@@ -1826,7 +1818,7 @@
       "m_ma99": 46.21,
       "m_atr14": 1.141,
       "m_gap": 0.2,
-      "m_gap_p90": 1.07,
+      "m_gap_p90": 1.01,
       "m_gap_pct": 0.49,
       "m_vol_ratio": 1.6,
       "m_avg_value20_ty": 37.7,
@@ -1836,7 +1828,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "SD5",
@@ -1867,7 +1859,7 @@
       "m_ma99": 6.86,
       "m_atr14": 0.153,
       "m_gap": 0.04,
-      "m_gap_p90": 0.47,
+      "m_gap_p90": 0.62,
       "m_gap_pct": 0.1,
       "m_vol_ratio": 1.79,
       "m_avg_value20_ty": 0.0,
@@ -1877,7 +1869,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "SHS",
@@ -1915,7 +1907,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "TCH",
@@ -1943,7 +1935,7 @@
       "m_ma99": 11.95,
       "m_atr14": 0.536,
       "m_gap": 0.69,
-      "m_gap_p90": 1.5,
+      "m_gap_p90": 1.51,
       "m_gap_pct": 2.89,
       "m_vol_ratio": 1.46,
       "m_avg_value20_ty": 138.3,
@@ -1953,7 +1945,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50"
+      "m_filters_failed": "khong_ro_vnindex"
     },
     {
       "ticker": "TCO",
@@ -1994,7 +1986,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "TV2",
@@ -2032,7 +2024,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "VHC",
@@ -2060,7 +2052,7 @@
       "m_ma99": 51.98,
       "m_atr14": 1.117,
       "m_gap": 0.09,
-      "m_gap_p90": 1.27,
+      "m_gap_p90": 1.29,
       "m_gap_pct": 0.19,
       "m_vol_ratio": 2.12,
       "m_avg_value20_ty": 13.9,
@@ -2070,7 +2062,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "VMD",
@@ -2098,7 +2090,7 @@
       "m_ma99": 13.39,
       "m_atr14": 0.245,
       "m_gap": 0.08,
-      "m_gap_p90": 0.64,
+      "m_gap_p90": 0.42,
       "m_gap_pct": 0.16,
       "m_vol_ratio": 0.9,
       "m_avg_value20_ty": 0.0,
@@ -2108,7 +2100,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "VND",
@@ -2146,7 +2138,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,duoi_ma99"
     },
     {
       "ticker": "DHA",
@@ -2184,7 +2176,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "DTA",
@@ -2222,7 +2214,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "DVN",
@@ -2260,7 +2252,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "FIR",
@@ -2298,7 +2290,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     },
     {
       "ticker": "TKU",
@@ -2326,7 +2318,7 @@
       "m_ma99": 12.02,
       "m_atr14": 0.813,
       "m_gap": 1.11,
-      "m_gap_p90": 0.76,
+      "m_gap_p90": 1.02,
       "m_gap_pct": 7.58,
       "m_vol_ratio": 2.16,
       "m_avg_value20_ty": 0.0,
@@ -2336,7 +2328,7 @@
       "m_tradable_warning": "Sát giá trần — thanh khoản bên bán mỏng, khó khớp đủ khối lượng",
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap"
     },
     {
       "ticker": "TTF",
@@ -2367,7 +2359,7 @@
       "m_ma99": 1.52,
       "m_atr14": 0.064,
       "m_gap": 0.61,
-      "m_gap_p90": 0.33,
+      "m_gap_p90": 0.2,
       "m_gap_pct": 3.52,
       "m_vol_ratio": 0.37,
       "m_avg_value20_ty": 0.6,
@@ -2377,7 +2369,7 @@
       "m_tradable_warning": null,
       "m_suspicious_data": false,
       "m_cat_lo_goi_y": null,
-      "m_filters_failed": "vnindex_duoi_ma50,thanh_khoan_thap,duoi_ma99"
+      "m_filters_failed": "khong_ro_vnindex,thanh_khoan_thap,duoi_ma99"
     }
   ]
 }
